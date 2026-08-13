@@ -25,7 +25,12 @@ interface HoraOpcion {
 
 @Component({
   selector: 'app-calendario',
-  imports: [CommonModule, FormsModule, CustomSelectComponent, MostrarerrorComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    CustomSelectComponent,
+    MostrarerrorComponent,
+  ],
   templateUrl: './calendario.component.html',
   styleUrls: ['./calendario.component.css'],
 })
@@ -357,12 +362,15 @@ export class CalendarioComponent {
   }
 
   private crearHoras(): HoraOpcion[] {
-    return Array.from({ length: MAXIMUM_END_TIME_MINUTES / MINIMUM_DURATION_MINUTES + 1 }, (_, indice) => {
-      const horas = Math.floor(indice / 2);
-      const minutos = (indice % 2) * MINIMUM_DURATION_MINUTES;
-      const valor = `${this.dosDigitos(horas)}:${this.dosDigitos(minutos)}`;
-      return { valor, label: valor };
-    });
+    return Array.from(
+      { length: MAXIMUM_END_TIME_MINUTES / MINIMUM_DURATION_MINUTES + 1 },
+      (_, indice) => {
+        const horas = Math.floor(indice / 2);
+        const minutos = (indice % 2) * MINIMUM_DURATION_MINUTES;
+        const valor = `${this.dosDigitos(horas)}:${this.dosDigitos(minutos)}`;
+        return { valor, label: valor };
+      },
+    );
   }
 
   private combinarDiaYHora(dia: Date, hora: Date): Date {
@@ -399,12 +407,7 @@ export class CalendarioComponent {
 
   private limiteDelDia(fecha: Date, minutosDelDia: number): Date {
     const limite = new Date(fecha);
-    limite.setHours(
-      Math.floor(minutosDelDia / 60),
-      minutosDelDia % 60,
-      0,
-      0,
-    );
+    limite.setHours(Math.floor(minutosDelDia / 60), minutosDelDia % 60, 0, 0);
     return limite;
   }
 
