@@ -142,8 +142,8 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
         Db.Equipos.Add(new Equipo { Id = EquipoId3, IdGrupoEquipo = GrupoId2, CodigoImt = 3, EstadoEquipo = EstadoEquipo.Operativo, FechaIngresoEquipo = DateOnly.FromDateTime(DateTime.Today), EstadoEliminado = false });
         await Db.SaveChangesAsync();
 
-        var fechaInicio = DateTime.Today;
-        var fechaFin = DateTime.Today;
+        var fechaInicio = DateTime.Today.AddHours(8);
+        var fechaFin = fechaInicio.AddMinutes(30);
         await SeedLoan(EstadoPrestamo.Activo, EquipoId, fechaInicio, fechaFin);
         var request = BuildRequest([GrupoId, GrupoId2], fechaInicio, fechaFin);
 
