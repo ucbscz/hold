@@ -8,7 +8,10 @@
   </div>
 
   <div class="availability-selector__planner">
-    <div class="availability-selector__calendar" aria-label="Calendario de reserva">
+    <div
+      class="availability-selector__calendar"
+      aria-label="Calendario de reserva"
+    >
       <div class="availability-selector__month-navigation">
         <button
           type="button"
@@ -31,8 +34,8 @@
       </div>
 
       <div class="availability-selector__weekdays" aria-hidden="true">
-        <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span><span>Vi</span
-        ><span>Sá</span><span>Do</span>
+        <span>Lu</span><span>Ma</span><span>Mi</span><span>Ju</span
+        ><span>Vi</span><span>Sá</span><span>Do</span>
       </div>
 
       <div class="availability-selector__days">
@@ -43,9 +46,15 @@
               class="availability-selector__day"
               [class.availability-selector__day--today]="esHoy(dia)"
               [class.availability-selector__day--range]="esDiaEnRango(dia)"
-              [class.availability-selector__day--selected]="esDiaSeleccionado(dia, campoActivo)"
-              [class.availability-selector__day--start]="esDiaSeleccionado(dia, 'inicio')"
-              [class.availability-selector__day--end]="esDiaSeleccionado(dia, 'fin')"
+              [class.availability-selector__day--selected]="
+                esDiaSeleccionado(dia, campoActivo)
+              "
+              [class.availability-selector__day--start]="
+                esDiaSeleccionado(dia, 'inicio')
+              "
+              [class.availability-selector__day--end]="
+                esDiaSeleccionado(dia, 'fin')
+              "
               [disabled]="esDiaDeshabilitado(dia)"
               [attr.aria-label]="formatearFecha(dia)"
               (click)="seleccionarDia(dia)"
@@ -53,7 +62,9 @@
               {{ dia.getDate() }}
             </button>
           } @else {
-            <span class="availability-selector__day availability-selector__day--empty"></span>
+            <span
+              class="availability-selector__day availability-selector__day--empty"
+            ></span>
           }
         }
       </div>
@@ -61,7 +72,11 @@
 
     <div class="availability-selector__schedule">
       <p class="availability-selector__schedule-label">Fecha a modificar</p>
-      <div class="availability-selector__field-switch" role="tablist" aria-label="Fecha a modificar">
+      <div
+        class="availability-selector__field-switch"
+        role="tablist"
+        aria-label="Fecha a modificar"
+      >
         <button
           type="button"
           role="tab"
@@ -87,21 +102,13 @@
       <label class="availability-selector__time-field">
         <span>Hora de {{ etiquetaCampoActivo }}</span>
         <div>
-          <select
-            [value]="horaSeleccionada(campoActivo)"
-            (change)="cambiarHora(campoActivo, $any($event.target).value)"
-            [attr.aria-label]="'Hora de ' + etiquetaCampoActivo"
-          >
-            @for (hora of horas; track hora.valor) {
-              <option
-                [value]="hora.valor"
-                [disabled]="horaDeshabilitada(campoActivo, hora.valor)"
-              >
-                {{ hora.etiqueta }}
-              </option>
-            }
-          </select>
-          <i class="fa-regular fa-clock" aria-hidden="true"></i>
+          <app-custom-select
+            [opciones]="horasDisponibles"
+            [ngModel]="horaSeleccionada(campoActivo)"
+            (ngModelChange)="cambiarHora(campoActivo, $event)"
+            placeholder="Selecciona una hora"
+            [searchThreshold]="100"
+          ></app-custom-select>
         </div>
       </label>
       <p class="availability-selector__hint">
@@ -111,7 +118,9 @@
   </div>
 
   @if (!rangoValido) {
-    <p class="availability-selector__message availability-selector__message--error">
+    <p
+      class="availability-selector__message availability-selector__message--error"
+    >
       Elige una devolución de al menos 30 minutos después del inicio.
     </p>
   } @else if (cargando) {
@@ -124,7 +133,9 @@
     >
       @if (hayDisponibilidad) {
         @if (disponibilidad.length === 1) {
-          {{ cantidadDisponible }} unidad{{ cantidadDisponible !== 1 ? "es" : "" }}
+          {{ cantidadDisponible }} unidad{{
+            cantidadDisponible !== 1 ? "es" : ""
+          }}
           disponible{{ cantidadDisponible !== 1 ? "s" : "" }} para este horario.
         } @else {
           Los equipos seleccionados están disponibles para este horario.
@@ -134,7 +145,11 @@
       }
     </p>
     @if (soloAvisoFechasOcupadas && !hayDisponibilidad) {
-      <button type="button" class="availability-selector__watch" (click)="solicitarAviso()">
+      <button
+        type="button"
+        class="availability-selector__watch"
+        (click)="solicitarAviso()"
+      >
         Avisarme cuando se libere
       </button>
     }

@@ -223,32 +223,6 @@
   font-weight: 800;
 }
 
-.availability-selector__time-field > div {
-  position: relative;
-}
-
-.availability-selector__time-field select {
-  width: 100%;
-  min-height: 2.5rem;
-  padding: 0 2.5rem 0 0.75rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  appearance: none;
-  color: var(--ink);
-  background: var(--surface);
-  font: 800 0.875rem var(--font);
-  cursor: pointer;
-}
-
-.availability-selector__time-field i {
-  position: absolute;
-  top: 50%;
-  right: 0.75rem;
-  color: var(--ink-secondary);
-  pointer-events: none;
-  transform: translateY(-50%);
-}
-
 .availability-selector__hint {
   margin-top: var(--sp-3);
   color: var(--ink-muted);
@@ -263,6 +237,7 @@
   font-size: 0.85rem;
   font-weight: 600;
   line-height: 1.45;
+  text-align: center;
 }
 
 .availability-selector__message--available {
@@ -290,7 +265,6 @@
 .availability-selector__month-button:focus-visible,
 .availability-selector__day:focus-visible,
 .availability-selector__field-switch button:focus-visible,
-.availability-selector__time-field select:focus-visible,
 .availability-selector__watch:focus-visible {
   outline: 2px solid var(--interactive-text);
   outline-offset: 2px;
@@ -304,7 +278,9 @@
     background: var(--interactive-subtle);
   }
 
-  .availability-selector__day:not(:disabled):hover:not(.availability-selector__day--selected) {
+  .availability-selector__day:not(:disabled):hover:not(
+      .availability-selector__day--selected
+    ) {
     border-color: var(--brand-hover);
     background: var(--interactive-subtle);
   }

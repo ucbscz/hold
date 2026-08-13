@@ -1,9 +1,5 @@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import {
-  Component,
-  signal,
-  WritableSignal,
-} from '@angular/core';
+import { Component, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import {

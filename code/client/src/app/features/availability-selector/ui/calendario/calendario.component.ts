@@ -7,23 +7,25 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { Disponibilidad, DisponibilidadService } from '@entities/availability';
 import { Carrito } from '@entities/cart';
 import { extractErrorMessage } from '@shared/lib/error';
-import { MostrarerrorComponent } from '@shared/ui';
+import { CustomSelectComponent, MostrarerrorComponent } from '@shared/ui';
 
 const MINIMUM_DURATION_MINUTES = 30;
 const MILLISECONDS_PER_MINUTE = 60 * 1000;
+const MAXIMUM_END_TIME_MINUTES = 20 * 60;
 type CampoFecha = 'inicio' | 'fin';
 
 interface HoraOpcion {
-  etiqueta: string;
+  label: string;
   valor: string;
 }
 
 @Component({
   selector: 'app-calendario',
-  imports: [CommonModule, MostrarerrorComponent],
+  imports: [CommonModule, FormsModule, CustomSelectComponent, MostrarerrorComponent],
   templateUrl: './calendario.component.html',
   styleUrls: ['./calendario.component.css'],
 })
@@ -119,6 +121,12 @@ export class CalendarioComponent {
     return this.disponibilidad[0].CantidadDisponible;
   }
 
+  get horasDisponibles(): HoraOpcion[] {
+    return this.horas.filter(
+      (hora) => !this.horaDeshabilitada(this.campoActivo, hora.valor),
+    );
+  }
+
   seleccionarCampo(campo: CampoFecha): void {
     this.campoActivo = campo;
     const fecha = this.obtenerFecha(campo);
@@ -132,7 +140,12 @@ export class CalendarioComponent {
       1,
     );
 
-    if (this.comparaSoloFecha(siguienteMes, this.inicioDelMes(this.minimoInicio)) < 0)
+    if (
+      this.comparaSoloFecha(
+        siguienteMes,
+        this.inicioDelMes(this.minimoInicio),
+      ) < 0
+    )
       return;
 
     this.mesVisible = siguienteMes;
@@ -150,7 +163,8 @@ export class CalendarioComponent {
   seleccionarDia(dia: Date): void {
     if (this.esDiaDeshabilitado(dia)) return;
 
-    const fechaActual = this.obtenerFecha(this.campoActivo) ?? this.minimoInicio;
+    const fechaActual =
+      this.obtenerFecha(this.campoActivo) ?? this.minimoInicio;
     const fechaSeleccionada = this.combinarDiaYHora(dia, fechaActual);
 
     if (this.campoActivo === 'inicio') {
@@ -159,7 +173,9 @@ export class CalendarioComponent {
 
       const fin = this.fechaFinSeleccionada();
       if (!fin || !this.esRangoValido(inicio, fin)) {
-        this.fechaFinSeleccionada.set(this.sumarMinutos(inicio, MINIMUM_DURATION_MINUTES));
+        this.fechaFinSeleccionada.set(
+          this.sumarMinutos(inicio, MINIMUM_DURATION_MINUTES),
+        );
       }
     } else {
       const inicio = this.fechaInicioSeleccionada() ?? this.minimoInicio;
@@ -186,7 +202,9 @@ export class CalendarioComponent {
 
       const fin = this.fechaFinSeleccionada();
       if (!fin || !this.esRangoValido(inicio, fin)) {
-        this.fechaFinSeleccionada.set(this.sumarMinutos(inicio, MINIMUM_DURATION_MINUTES));
+        this.fechaFinSeleccionada.set(
+          this.sumarMinutos(inicio, MINIMUM_DURATION_MINUTES),
+        );
       }
     } else {
       const inicio = this.fechaInicioSeleccionada() ?? this.minimoInicio;
@@ -236,6 +254,13 @@ export class CalendarioComponent {
 
   horaDeshabilitada(campo: CampoFecha, hora: string): boolean {
     const [horas, minutos] = hora.split(':').map(Number);
+    const minutosDelDia = horas * MINIMUM_DURATION_MINUTES * 2 + minutos;
+    const limite =
+      campo === 'inicio'
+        ? MAXIMUM_END_TIME_MINUTES - MINIMUM_DURATION_MINUTES
+        : MAXIMUM_END_TIME_MINUTES;
+    if (minutosDelDia > limite) return true;
+
     const fecha = new Date(this.obtenerFecha(campo) ?? this.minimoInicio);
     fecha.setHours(horas, minutos, 0, 0);
     const minimo =
@@ -267,7 +292,9 @@ export class CalendarioComponent {
 
     const inicio = this.minimoInicio;
     this.fechaInicioSeleccionada.set(inicio);
-    this.fechaFinSeleccionada.set(this.sumarMinutos(inicio, MINIMUM_DURATION_MINUTES));
+    this.fechaFinSeleccionada.set(
+      this.sumarMinutos(inicio, MINIMUM_DURATION_MINUTES),
+    );
   }
 
   private consultarDisponibilidad(): void {
@@ -308,21 +335,33 @@ export class CalendarioComponent {
   }
 
   private normalizarInicio(fecha: Date): Date {
-    return fecha.getTime() < this.minimoInicio.getTime()
-      ? new Date(this.minimoInicio)
-      : fecha;
+    const minimo = this.minimoInicio;
+    const normalizada =
+      fecha.getTime() < minimo.getTime() ? new Date(minimo) : new Date(fecha);
+    const limite = this.limiteDelDia(
+      normalizada,
+      MAXIMUM_END_TIME_MINUTES - MINIMUM_DURATION_MINUTES,
+    );
+
+    return normalizada.getTime() > limite.getTime()
+      ? this.inicioDelSiguienteDia(normalizada)
+      : normalizada;
   }
 
   private normalizarFin(fecha: Date, minimo: Date): Date {
-    return fecha.getTime() < minimo.getTime() ? minimo : fecha;
+    const normalizada =
+      fecha.getTime() < minimo.getTime() ? new Date(minimo) : new Date(fecha);
+    const limite = this.limiteDelDia(normalizada, MAXIMUM_END_TIME_MINUTES);
+
+    return normalizada.getTime() > limite.getTime() ? limite : normalizada;
   }
 
   private crearHoras(): HoraOpcion[] {
-    return Array.from({ length: 48 }, (_, indice) => {
+    return Array.from({ length: MAXIMUM_END_TIME_MINUTES / MINIMUM_DURATION_MINUTES + 1 }, (_, indice) => {
       const horas = Math.floor(indice / 2);
       const minutos = (indice % 2) * MINIMUM_DURATION_MINUTES;
       const valor = `${this.dosDigitos(horas)}:${this.dosDigitos(minutos)}`;
-      return { valor, etiqueta: valor };
+      return { valor, label: valor };
     });
   }
 
@@ -358,6 +397,24 @@ export class CalendarioComponent {
     return new Date(fecha.getTime() + minutos * MILLISECONDS_PER_MINUTE);
   }
 
+  private limiteDelDia(fecha: Date, minutosDelDia: number): Date {
+    const limite = new Date(fecha);
+    limite.setHours(
+      Math.floor(minutosDelDia / 60),
+      minutosDelDia % 60,
+      0,
+      0,
+    );
+    return limite;
+  }
+
+  private inicioDelSiguienteDia(fecha: Date): Date {
+    const siguienteDia = new Date(fecha);
+    siguienteDia.setDate(siguienteDia.getDate() + 1);
+    siguienteDia.setHours(0, 0, 0, 0);
+    return siguienteDia;
+  }
+
   private dosDigitos(valor: number): string {
     return String(valor).padStart(2, '0');
   }
@@ -371,6 +428,12 @@ export class CalendarioComponent {
     );
     if (fecha <= new Date()) {
       fecha.setMinutes(fecha.getMinutes() + MINIMUM_DURATION_MINUTES);
+    }
+    if (
+      fecha.getHours() * 60 + fecha.getMinutes() >
+      MAXIMUM_END_TIME_MINUTES - MINIMUM_DURATION_MINUTES
+    ) {
+      return this.inicioDelSiguienteDia(fecha);
     }
     return fecha;
   }
