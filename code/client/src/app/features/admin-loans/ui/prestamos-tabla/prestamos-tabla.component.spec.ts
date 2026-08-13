@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { withDefaultTestingProviders } from '@shared/lib/testing';
 import { PrestamoDto } from '@entities/admin';
+import { PrestamoAgrupados } from '@entities/loan';
 import { PrestamosTablaComponent } from './prestamos-tabla.component';
 
 describe('PrestamosTablaComponent', () => {
@@ -58,6 +59,35 @@ describe('PrestamosTablaComponent', () => {
     expect(sortableHeaders.length).toBe(0);
     expect(headers).toContain('Carnet');
     expect(headers).toContain('Estado');
+  });
+
+  it('marks an active loan as overdue at its exact return time', () => {
+    const prestamo = new PrestamoAgrupados([
+      crearPrestamo({
+        id: 3,
+        nombre: 'Préstamo horario',
+        estado: 'activo',
+        fechaDevolucionEsperada: '2020-06-14T10:00:00',
+      }),
+    ]);
+
+    expect(component.getEstadoCalculado(prestamo)).toBe('atrasado');
+  });
+
+  it('shows only the first equipment name when a loan has multiple items', () => {
+    const prestamo = new PrestamoAgrupados([
+      crearPrestamo({ id: 4, nombre: 'Usuario', equipo: 'Cargador Litio-Ion' }),
+      crearPrestamo({
+        id: 5,
+        nombre: 'Usuario',
+        equipo: 'Analizador de energía',
+      }),
+    ]);
+
+    expect(component.resumenEquipo(prestamo)).toBe('Cargador Litio-Ion...');
+    expect(component.detalleEquipos(prestamo)).toBe(
+      'Cargador Litio-Ion, Analizador de energía',
+    );
   });
 
   function cargarPrestamos(prestamos: PrestamoDto[]): void {

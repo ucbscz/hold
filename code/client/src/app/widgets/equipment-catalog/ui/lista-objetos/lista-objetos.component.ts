@@ -99,7 +99,7 @@ export class ListaObjetosComponent
     if (this.sinOperativos(item.id!)) return;
 
     if (this.addedToCart[item.id!]) {
-      this.carrito.quitarProducto(item.id!);
+      this.carrito.eliminarProducto(item.id!);
       this.addedToCart[item.id!] = false;
 
       return;
@@ -188,6 +188,11 @@ export class ListaObjetosComponent
     this.servicio.getGrupoEquipo('', '').subscribe({
       next: (data) => {
         this.todosLosProductos = data;
+        this.addedToCart = Object.fromEntries(
+          data
+            .filter((item) => item.id != null)
+            .map((item) => [item.id!, this.carrito.contieneProducto(item.id!)]),
+        );
         this.filtrarProductos();
         this.cargarOperatividad(data);
       },
@@ -206,9 +211,10 @@ export class ListaObjetosComponent
 
     if (ids.length === 0) return;
 
-    const hoy = new Date();
+    const inicio = new Date();
+    const fin = new Date(inicio.getTime() + 30 * 60 * 1000);
 
-    this.disponibilidad.obtenerDisponibilidad(hoy, hoy, ids).subscribe({
+    this.disponibilidad.obtenerDisponibilidad(inicio, fin, ids).subscribe({
       next: (data) => {
         for (const d of data) {
           this.totalOperativo[d.IdGrupoEquipo] = d.TotalOperativo ?? 0;

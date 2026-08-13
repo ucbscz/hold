@@ -21,19 +21,13 @@ export class CarritoService {
       return;
     }
 
-    const fechaLocal = new Date();
-    const anio = fechaLocal.getFullYear();
-    const mes = (fechaLocal.getMonth() + 1).toString().padStart(2, '0');
-    const dia = fechaLocal.getDate().toString().padStart(2, '0');
-    const fechaISO = `${anio}-${mes}-${dia}`;
-
     if (!this.carrito[id]) {
       this.carrito[id] = {
         nombre,
         modelo,
         marca,
         cantidad: 1,
-        fecha_inicio: fechaISO,
+        fecha_inicio: null,
         fecha_final: null,
         imagen,
         precio,
@@ -56,6 +50,19 @@ export class CarritoService {
         this.cantidadTotal--;
       }
     }
+  }
+
+  eliminarProducto(id: number): void {
+    const item = this.carrito[id];
+
+    if (!item) return;
+
+    this.cantidadTotal -= item.cantidad;
+    delete this.carrito[id];
+  }
+
+  contieneProducto(id: number): boolean {
+    return !!this.carrito[id];
   }
 
   obtenerCarrito(): Carrito {

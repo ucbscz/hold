@@ -74,6 +74,19 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     }));
   }
 
+  resumenEquipo(prestamo: PrestamoAgrupados): string {
+    const primerEquipo = prestamo.equipos[0]?.NombreGrupoEquipo ?? '';
+
+    return prestamo.equipos.length > 1 ? `${primerEquipo}...` : primerEquipo;
+  }
+
+  detalleEquipos(prestamo: PrestamoAgrupados): string {
+    return prestamo.equipos
+      .map((equipo) => equipo.NombreGrupoEquipo)
+      .filter((nombre): nombre is string => !!nombre)
+      .join(', ');
+  }
+
   vercontrato: WritableSignal<boolean> = signal(false);
   prestamoSeleccionado: PrestamoDto = new PrestamoDto();
   prestamoKeySeleccionado: number = 0;
@@ -312,12 +325,10 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     if (!prestamo?.datosgrupo) return estadoOrig;
     const fechaDev = prestamo.datosgrupo.FechaDevolucionEsperada;
     if (!fechaDev) return estadoOrig;
-    const fechaDevCopy = new Date(fechaDev.getTime());
-    fechaDevCopy.setUTCHours(23, 59, 59, 999);
     const ahora = new Date();
     if (
       (estadoOrig === 'activo' || estadoOrig === 'aprobado') &&
-      fechaDevCopy < ahora
+      fechaDev < ahora
     ) {
       return 'atrasado';
     }

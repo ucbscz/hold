@@ -708,14 +708,20 @@ td.actions-column {
   width: 100%;
 }
 .equipos-cell {
-  max-width: 100px;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
 }
 .equipos-info {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
+  min-width: 0;
 }
 .nombre-equipo {
+  display: block;
+  width: 100%;
+  min-width: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
