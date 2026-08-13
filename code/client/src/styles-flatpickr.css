@@ -9,6 +9,7 @@
   overflow: hidden !important;
   width: 308px !important;
   padding: 0 !important;
+  z-index: 80 !important;
 }
 
 .flatpickr-calendar.open {

@@ -53,6 +53,7 @@ export class CalendarioComponent {
       time_24hr: true,
       minuteIncrement: MINIMUM_DURATION_MINUTES,
       dateFormat: 'Y-m-d H:i',
+      clickOpens: true,
       minDate: this.minimoInicio,
     };
   }
@@ -65,6 +66,7 @@ export class CalendarioComponent {
       time_24hr: true,
       minuteIncrement: MINIMUM_DURATION_MINUTES,
       dateFormat: 'Y-m-d H:i',
+      clickOpens: true,
       minDate: inicio
         ? new Date(inicio.getTime() + MINIMUM_DURATION_MINUTES * 60 * 1000)
         : this.minimoInicio,

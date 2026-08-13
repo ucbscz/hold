@@ -387,8 +387,11 @@
 }
 
 @if (showCalendarioModal) {
-  <div class="disponibilidad-overlay" (click)="cerrarCalendarioModal()">
-    <div class="disponibilidad-modal" (click)="detenerPropagacion($event)">
+  <div
+    class="disponibilidad-overlay"
+    (click)="cerrarCalendarioDesdeFondo($event)"
+  >
+    <div class="disponibilidad-modal">
       <button
         class="modal-close-btn"
         (click)="cerrarCalendarioModal()"
@@ -400,15 +403,14 @@
         <h3>Disponibilidad del equipo</h3>
         <p>Consulta los días libres y ocupados antes de hacer tu reserva.</p>
       </div>
-      <div class="modal-scroll-body">
-        <app-calendario
-          [entradaCarrito]="carritoCalendario"
-          [fechaInicioSeleccionada]="fechaInicioCalendario"
-          [fechaFinSeleccionada]="fechaFinCalendario"
-          [soloAvisoFechasOcupadas]="true"
-          (avisarDisponibilidad)="onAvisarDisponibilidad($event)"
-        ></app-calendario>
-      </div>
+      <app-calendario
+        class="disponibilidad-modal__selector"
+        [entradaCarrito]="carritoCalendario"
+        [fechaInicioSeleccionada]="fechaInicioCalendario"
+        [fechaFinSeleccionada]="fechaFinCalendario"
+        [soloAvisoFechasOcupadas]="true"
+        (avisarDisponibilidad)="onAvisarDisponibilidad($event)"
+      ></app-calendario>
     </div>
   </div>
 }

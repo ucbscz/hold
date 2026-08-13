@@ -196,6 +196,10 @@ export class ObjetoComponent {
     this.renderer.removeStyle(this.document.body, 'overflow');
   }
 
+  cerrarCalendarioDesdeFondo(event: MouseEvent): void {
+    if (event.target === event.currentTarget) this.cerrarCalendarioModal();
+  }
+
   onAvisarDisponibilidad(fecha: Date): void {
     this.avisoFecha = fecha;
     this.avisoRegistrado = false;
