@@ -21,8 +21,8 @@ describe('CalendarioComponent', () => {
   it('renders an in-place calendar with 30-minute time options', () => {
     expect(component.diasDelMes.length % 7).toBe(0);
     expect(component.horas).toHaveSize(41);
-    expect(component.horas[0].valor).toBe('00:00');
-    expect(component.horas[40].valor).toBe('20:00');
+    expect(component.horas[0].value).toBe('00:00');
+    expect(component.horas[40].value).toBe('20:00');
     expect(
       fixture.nativeElement.querySelectorAll('.availability-selector__day')
         .length,

@@ -20,7 +20,7 @@ type CampoFecha = 'inicio' | 'fin';
 
 interface HoraOpcion {
   label: string;
-  valor: string;
+  value: string;
 }
 
 @Component({
@@ -128,7 +128,7 @@ export class CalendarioComponent {
 
   get horasDisponibles(): HoraOpcion[] {
     return this.horas.filter(
-      (hora) => !this.horaDeshabilitada(this.campoActivo, hora.valor),
+      (hora) => !this.horaDeshabilitada(this.campoActivo, hora.value),
     );
   }
 
@@ -367,8 +367,8 @@ export class CalendarioComponent {
       (_, indice) => {
         const horas = Math.floor(indice / 2);
         const minutos = (indice % 2) * MINIMUM_DURATION_MINUTES;
-        const valor = `${this.dosDigitos(horas)}:${this.dosDigitos(minutos)}`;
-        return { valor, label: valor };
+        const value = `${this.dosDigitos(horas)}:${this.dosDigitos(minutos)}`;
+        return { value, label: value };
       },
     );
   }
