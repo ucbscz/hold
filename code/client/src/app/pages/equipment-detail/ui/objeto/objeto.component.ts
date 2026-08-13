@@ -71,7 +71,7 @@ export class ObjetoComponent {
   fechaFinCalendario: WritableSignal<Date | null> = signal(null);
 
   showAvisoModal = false;
-  avisoFecha = '';
+  avisoFecha: Date | null = null;
   avisoRegistrado = false;
   comentarios: ComentarioEquipo[] = [];
   comentarioTexto = '';
@@ -110,6 +110,7 @@ export class ObjetoComponent {
         this.producto = data;
 
         if (this.producto?.id) {
+          this.addedToCart = this.carrito.contieneProducto(this.producto.id);
           this.carritoCalendario = {
             [this.producto.id]: {
               nombre: this.producto.nombre ?? '',
@@ -141,7 +142,11 @@ export class ObjetoComponent {
 
   obtenerDisponibilidad(): void {
     this.disponibilidadService
-      .obtenerDisponibilidad(new Date(), new Date(), [this.producto.id])
+      .obtenerDisponibilidad(
+        new Date(),
+        new Date(Date.now() + 30 * 60 * 1000),
+        [this.producto.id],
+      )
       .subscribe({
         next: (data) => {
           if (data?.length > 0) {
@@ -191,14 +196,14 @@ export class ObjetoComponent {
     this.renderer.removeStyle(this.document.body, 'overflow');
   }
 
-  onAvisarDisponibilidad(fecha: string): void {
+  onAvisarDisponibilidad(fecha: Date): void {
     this.avisoFecha = fecha;
     this.avisoRegistrado = false;
     this.showAvisoModal = true;
   }
 
   confirmarAviso(): void {
-    if (!this.producto.id) return;
+    if (!this.producto.id || !this.avisoFecha) return;
 
     this.avisoDisponibilidad
       .registrar(this.producto.id, this.avisoFecha)
@@ -438,7 +443,7 @@ export class ObjetoComponent {
 
   alternarProductoCarrito(): void {
     if (this.addedToCart) {
-      this.carrito.quitarProducto(this.producto.id);
+      this.carrito.eliminarProducto(this.producto.id);
       this.addedToCart = false;
 
       return;

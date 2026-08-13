@@ -522,7 +522,7 @@ create table avisos_disponibilidad
         references usuarios,
     id_grupo_equipo  integer                                not null
         references grupos_equipos,
-    fecha            date                                   not null,
+    fecha            timestamp                              not null,
     cantidad         integer                  default 1     not null,
     notificado       boolean                  default false not null,
     fecha_creacion   timestamp with time zone default now() not null,

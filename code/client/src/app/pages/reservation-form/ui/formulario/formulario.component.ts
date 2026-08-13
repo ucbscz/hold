@@ -25,7 +25,6 @@ import {
 } from '@shared/ui';
 import { finalize } from 'rxjs';
 
-const MILLISECONDS_PER_DAY = 86_400_000;
 const CONFLICT_STATUS = 409;
 const UNPROCESSABLE_ENTITY_STATUS = 422;
 const SERVER_ERROR_STATUS = 500;
@@ -83,8 +82,8 @@ export class FormularioComponent implements OnInit {
 
     const fechaInicio = new Date(fechaInicioReserva);
     const fechaFinal = new Date(fechaFinalReserva);
-    const diffDias = Math.ceil(
-      (fechaFinal.getTime() - fechaInicio.getTime()) / MILLISECONDS_PER_DAY,
+    const duracionMinutos = Math.round(
+      (fechaFinal.getTime() - fechaInicio.getTime()) / 60_000,
     );
     this.http.get('assets/contrato.html', { responseType: 'text' }).subscribe({
       next: (data: string) => {
@@ -99,11 +98,13 @@ export class FormularioComponent implements OnInit {
             this.usuario.obtenerUsuario().carnet ?? '',
           ),
           tablaprimera: this.primeradelobjeto(this.carrito.obtenerCarrito()),
-          fechaMaxima: String(diffDias),
+          fechaMaxima: this.formatearDuracion(duracionMinutos),
           precio: this.carrito.calcularPrecioTotal().toString(),
           tablasegunda: this.quintavalordebienes(this.carrito.obtenerCarrito()),
-          dia_devolucion: (fechaFinal.getDate() + 1).toString(),
-          mes_devolucion: (fechaFinal.getMonth() + 1).toString(),
+          dia_devolucion: fechaFinal.getDate().toString(),
+          mes_devolucion: new Intl.DateTimeFormat('es-ES', {
+            month: 'long',
+          }).format(fechaFinal),
           año_devolucion: fechaFinal.getFullYear().toString(),
         });
         this.contenidoHtml = processedTemplate;
@@ -129,6 +130,16 @@ export class FormularioComponent implements OnInit {
       resultado = resultado.replace(regex, valores[clave]);
     }
     return resultado;
+  }
+
+  private formatearDuracion(minutos: number): string {
+    const horas = Math.floor(minutos / 60);
+    const minutosRestantes = minutos % 60;
+
+    if (horas === 0) return `${minutos} minutos`;
+    if (minutosRestantes === 0) return `${horas} hora${horas === 1 ? '' : 's'}`;
+
+    return `${horas} hora${horas === 1 ? '' : 's'} y ${minutosRestantes} minutos`;
   }
 
   firmar() {

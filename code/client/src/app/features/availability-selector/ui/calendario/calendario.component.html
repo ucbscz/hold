@@ -1,59 +1,91 @@
-<div class="calendario-container">
-  <div class="calendario-header">
-    <button
-      type="button"
-      (click)="cambiarMes(-1)"
-      [disabled]="diaActual.getTime() >= inicio.getTime()"
+<section class="availability-selector" aria-live="polite">
+  <div class="availability-selector__heading">
+    <div>
+      <h3>Horario de reserva</h3>
+      <p>
+        Selecciona el inicio y la devolución. La duración mínima es de 30
+        minutos.
+      </p>
+    </div>
+    <i class="fa-regular fa-clock" aria-hidden="true"></i>
+  </div>
+
+  <div class="availability-selector__fields">
+    <label>
+      <span>Inicio</span>
+      <div class="availability-selector__input-wrapper">
+        <input
+          type="text"
+          class="availability-selector__control"
+          appFlatpickr
+          [fpOptions]="opcionesInicio"
+          [value]="formatearFechaHora(fechaInicioSeleccionada())"
+          (fpChange)="onFechaInicio($event)"
+          readonly
+          aria-label="Fecha y hora de inicio"
+        />
+        <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+      </div>
+      <small>Fecha y hora de inicio</small>
+    </label>
+    <label>
+      <span>Devolución</span>
+      <div class="availability-selector__input-wrapper">
+        <input
+          type="text"
+          class="availability-selector__control"
+          appFlatpickr
+          [fpOptions]="opcionesFin"
+          [value]="formatearFechaHora(fechaFinSeleccionada())"
+          (fpChange)="onFechaFin($event)"
+          readonly
+          aria-label="Fecha y hora de devolución"
+        />
+        <i class="fa-regular fa-calendar" aria-hidden="true"></i>
+      </div>
+      <small>Fecha y hora de devolución</small>
+    </label>
+  </div>
+
+  @if (!rangoValido) {
+    <p
+      class="availability-selector__message availability-selector__message--error"
     >
-      <i class="fas fa-chevron-left"></i>
-    </button>
-    <h3>{{ inicio | date: "MMMM yyyy" | uppercase }}</h3>
-    <button type="button" (click)="cambiarMes(1)">
-      <i class="fas fa-chevron-right"></i>
-    </button>
-  </div>
-  <div class="calendario-grid">
-    <div class="dia-semana">Lun</div>
-    <div class="dia-semana">Mar</div>
-    <div class="dia-semana">Mié</div>
-    <div class="dia-semana">Jue</div>
-    <div class="dia-semana">Vie</div>
-    <div class="dia-semana">Sáb</div>
-    <div class="dia-semana">Dom</div>
-    @for (dia of diasDelMes; track $index) {
-      @if (dia === null) {
-        <div class="dia-celda-vacio"></div>
-      } @else if (dia.getTime() < diaActual.getTime()) {
-        <div class="dia-celda-pasado"></div>
-      } @else if (estaOcupado(dia)) {
-        <div
-          class="dia-celda-ocupado"
-          title="Avisarme si se libera"
-          (click)="emitirAviso(dia)"
-        >
-          <span class="dia-numero">{{ dia.getDate() }}</span>
-          <span class="pildora-ocupada"> Lleno </span>
-        </div>
+      Elige una devolución de al menos 30 minutos después del inicio.
+    </p>
+  } @else if (cargando) {
+    <p class="availability-selector__message">Consultando disponibilidad...</p>
+  } @else if (consultado) {
+    <p
+      class="availability-selector__message"
+      [class.availability-selector__message--available]="hayDisponibilidad"
+      [class.availability-selector__message--unavailable]="!hayDisponibilidad"
+    >
+      @if (hayDisponibilidad) {
+        @if (disponibilidad.length === 1) {
+          {{ cantidadDisponible }} unidad{{
+            cantidadDisponible !== 1 ? "es" : ""
+          }}
+          disponible{{ cantidadDisponible !== 1 ? "s" : "" }} para este horario.
+        } @else {
+          Los equipos seleccionados están disponibles para este horario.
+        }
       } @else {
-        <div
-          class="dia-celda"
-          [class.dia-celda--solo-lectura]="soloAvisoFechasOcupadas"
-          [class.dia-celda-seleccionado]="esFechaSeleccionada(dia)"
-          [title]="
-            soloAvisoFechasOcupadas
-              ? 'Esta fecha ya está libre'
-              : 'Seleccionar fecha'
-          "
-          (click)="seleccionarFecha(dia)"
-        >
-          <span class="dia-numero">{{ dia.getDate() }}</span>
-          <span class="pildora-disponible"> Libre </span>
-        </div>
+        No hay suficientes unidades disponibles para este horario.
       }
+    </p>
+    @if (soloAvisoFechasOcupadas && !hayDisponibilidad) {
+      <button
+        type="button"
+        class="availability-selector__watch"
+        (click)="solicitarAviso()"
+      >
+        Avisarme cuando se libere
+      </button>
     }
-  </div>
-</div>
+  }
+</section>
+
 @if (error()) {
-  <app-mostrarerror [error]="error" [mensaje]="mensajeerror">
-  </app-mostrarerror>
+  <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>
 }

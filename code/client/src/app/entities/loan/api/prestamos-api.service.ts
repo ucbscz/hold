@@ -67,10 +67,11 @@ export class PrestamosAPIService {
         }
       }
     }
+    const fechas = Object.values(carrito)[0];
     const body = {
       GrupoEquipoId: grupoid,
-      FechaPrestamoEsperada: carrito[grupoid[0]].fecha_inicio || null,
-      FechaDevolucionEsperada: carrito[grupoid[0]].fecha_final || null,
+      FechaPrestamoEsperada: fechas?.fecha_inicio || null,
+      FechaDevolucionEsperada: fechas?.fecha_final || null,
       CarnetUsuario: carnet,
       Observacion: '',
       Contrato: contrato || null,

@@ -21,7 +21,7 @@ export class CartDateValidationService {
       return {
         isValid: false,
         message:
-          'Error: La fecha de inicio no puede ser mayor a la fecha final',
+          'Error: La fecha y hora de inicio no puede ser posterior a la fecha final',
       };
     }
 
@@ -29,7 +29,7 @@ export class CartDateValidationService {
       return {
         isValid: false,
         message:
-          'Error: La fecha de inicio no puede ser menor a la fecha actual',
+          'Error: La fecha y hora de inicio no puede ser menor a la hora actual',
       };
     }
 
@@ -38,6 +38,13 @@ export class CartDateValidationService {
         isValid: false,
         message:
           'Error: La fecha de inicio no puede ser mayor a un año desde la fecha actual',
+      };
+    }
+
+    if (endDate.getTime() - startDate.getTime() < 30 * 60 * 1000) {
+      return {
+        isValid: false,
+        message: 'Error: El préstamo debe durar al menos 30 minutos',
       };
     }
 

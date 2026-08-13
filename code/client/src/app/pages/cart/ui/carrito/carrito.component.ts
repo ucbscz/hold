@@ -66,7 +66,6 @@ export class CarritoComponent {
     private readonly cartDateValidationService: CartDateValidationService,
   ) {
     this.carrito = this.carritoService.obtenerCarrito();
-    this.fechaActual.setHours(0, 0, 0, 0);
     this.route.queryParams.subscribe((params) => {
       this.step = params['step'] ? Number(params['step']) : 1;
     });
@@ -80,32 +79,6 @@ export class CarritoComponent {
         error: () => {},
       });
     }
-  }
-
-  private parseDateLocal(dateString: string): Date {
-    const [year, month, day] = dateString.split('-').map(Number);
-
-    return new Date(year, month - 1, day);
-  }
-
-  get fechaInicioStr(): string {
-    const fecha = this.fechaInicio();
-
-    return fecha ? this.toLocalISOString(fecha) : '';
-  }
-
-  set fechaInicioStr(value: string) {
-    this.fechaInicio.set(value ? this.parseDateLocal(value) : null);
-  }
-
-  get fechaFinalStr(): string {
-    const fecha = this.fechaFinal();
-
-    return fecha ? this.toLocalISOString(fecha) : '';
-  }
-
-  set fechaFinalStr(value: string) {
-    this.fechaFinal.set(value ? this.parseDateLocal(value) : null);
   }
 
   nextStep(): void {
@@ -134,8 +107,7 @@ export class CarritoComponent {
       return;
     }
 
-    this.cambiarFechaInicio(this.fechaInicioStr);
-    this.cambiarFechaFinal(this.fechaFinalStr);
+    this.guardarFechasEnCarrito();
 
     const monto = this.carritoService.calcularPrecioTotal();
 
@@ -209,25 +181,15 @@ export class CarritoComponent {
     this.carrito = { ...this.carritoService.obtenerCarrito() };
   }
 
-  cambiarFechaInicio(fecha: string): void {
-    this.fechaInicio.set(fecha ? this.parseDateLocal(fecha) : null);
+  private guardarFechasEnCarrito(): void {
+    const inicio = this.fechaInicio();
+    const fin = this.fechaFinal();
+
+    if (!inicio || !fin) return;
 
     Object.values(this.carrito).forEach((item) => {
-      item.fecha_inicio = fecha || null;
+      item.fecha_inicio = inicio.toISOString();
+      item.fecha_final = fin.toISOString();
     });
-  }
-
-  cambiarFechaFinal(fecha: string): void {
-    this.fechaFinal.set(fecha ? this.parseDateLocal(fecha) : null);
-
-    Object.values(this.carrito).forEach((item) => {
-      item.fecha_final = fecha || null;
-    });
-  }
-
-  private toLocalISOString(date: Date): string {
-    const pad = (n: number) => String(n).padStart(2, '0');
-
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
   }
 }

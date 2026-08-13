@@ -17,4 +17,11 @@ describe('CalendarioComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('configures the date-time picker in 24-hour, 30-minute intervals', () => {
+    expect(component.opcionesInicio.enableTime).toBeTrue();
+    expect(component.opcionesInicio.time_24hr).toBeTrue();
+    expect(component.opcionesInicio.minuteIncrement).toBe(30);
+    expect(component.opcionesInicio.dateFormat).toBe('Y-m-d H:i');
+  });
 });

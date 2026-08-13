@@ -9,186 +9,185 @@ import {
 } from '@angular/core';
 import { Disponibilidad, DisponibilidadService } from '@entities/availability';
 import { Carrito } from '@entities/cart';
+import { FlatpickrDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import { MostrarerrorComponent } from '@shared/ui';
+import { Options } from 'flatpickr/dist/types/options';
+
+const MINIMUM_DURATION_MINUTES = 30;
+
 @Component({
   selector: 'app-calendario',
-  imports: [CommonModule, MostrarerrorComponent],
+  imports: [CommonModule, FlatpickrDirective, MostrarerrorComponent],
   templateUrl: './calendario.component.html',
   styleUrls: ['./calendario.component.css'],
 })
 export class CalendarioComponent {
   @Input() set entradaCarrito(value: Carrito) {
-    if (Object.keys(value).length != Object.keys(this.carrito).length) {
-      const keys: number[] = [];
-      for (let key in value) {
-        keys.push(Number(key));
-      }
-      this.obtenerDisponibilidad(keys);
-    }
     this.carrito = value;
-    this.validarSeleccion();
+    this.consultarDisponibilidad();
   }
   @Input() fechaInicioSeleccionada: WritableSignal<Date | null> = signal(null);
   @Input() fechaFinSeleccionada: WritableSignal<Date | null> = signal(null);
   @Input() soloAvisoFechasOcupadas = false;
-  @Output() avisarDisponibilidad = new EventEmitter<string>();
+  @Output() avisarDisponibilidad = new EventEmitter<Date>();
+
   carrito: Carrito = {};
-  disponibilidadPorFecha: Map<string, Map<number, number>> = new Map();
-  diasDelMes: (Date | null)[] = [];
-  diaActual: Date = new Date();
-  inicio: Date = new Date();
+  disponibilidad: Disponibilidad[] = [];
+  cargando = false;
+  consultado = false;
   error: WritableSignal<boolean> = signal(false);
-  mensajeerror: string = 'Error desconocido , intente mas tarde';
-  constructor(private readonly ApiDisponibilidad: DisponibilidadService) {}
+  mensajeerror = 'No se pudo consultar la disponibilidad.';
+  private readonly minimoInicio = this.siguienteBloque();
+
+  constructor(private readonly apiDisponibilidad: DisponibilidadService) {}
 
   ngOnInit(): void {
-    this.diaActual.setHours(0, 0, 0, 0);
-    this.inicio.setHours(0, 0, 0, 0);
-    this.generarDiasDelMes();
+    this.inicializarRango();
+    this.consultarDisponibilidad();
   }
 
-  generarDiasDelMes(): void {
-    const primerDia = new Date(
-      this.inicio.getFullYear(),
-      this.inicio.getMonth(),
-      1,
-    );
-    const ultimoDia = new Date(
-      this.inicio.getFullYear(),
-      this.inicio.getMonth() + 1,
-      0,
-    );
-    this.diasDelMes = [];
-    const diaSemana = primerDia.getDay();
-    const offset = diaSemana === 0 ? 6 : diaSemana - 1;
-    for (let i = 0; i < offset; i++) this.diasDelMes.push(null);
-    for (
-      let d = new Date(primerDia);
-      d <= ultimoDia;
-      d.setDate(d.getDate() + 1)
-    )
-      this.diasDelMes.push(new Date(d));
+  get opcionesInicio(): Partial<Options> {
+    return {
+      enableTime: true,
+      time_24hr: true,
+      minuteIncrement: MINIMUM_DURATION_MINUTES,
+      dateFormat: 'Y-m-d H:i',
+      minDate: this.minimoInicio,
+    };
   }
 
-  cambiarMes(valor: number) {
-    this.inicio = new Date(
-      this.inicio.getFullYear(),
-      this.inicio.getMonth() + valor,
-      1,
-    );
-    this.generarDiasDelMes();
+  get opcionesFin(): Partial<Options> {
+    const inicio = this.fechaInicioSeleccionada();
+
+    return {
+      enableTime: true,
+      time_24hr: true,
+      minuteIncrement: MINIMUM_DURATION_MINUTES,
+      dateFormat: 'Y-m-d H:i',
+      minDate: inicio
+        ? new Date(inicio.getTime() + MINIMUM_DURATION_MINUTES * 60 * 1000)
+        : this.minimoInicio,
+    };
   }
 
-  obtenerDisponibilidad(keys: number[]) {
-    this.ApiDisponibilidad.obtenerDisponibilidad(
-      new Date(),
-      new Date(
-        new Date().getFullYear() + 1,
-        new Date().getMonth(),
-        new Date().getDate(),
-      ),
-      keys,
-    ).subscribe({
-      next: (data: Disponibilidad[]) => {
-        this.disponibilidadPorFecha.clear();
-        data.forEach((item) => {
-          if (item.Fecha) {
-            const fecha: string = this.toLocalISOString(new Date(item.Fecha));
-            if (!this.disponibilidadPorFecha.has(fecha)) {
-              this.disponibilidadPorFecha.set(fecha, new Map());
-            }
-            this.disponibilidadPorFecha
-              .get(fecha)!
-              .set(item.IdGrupoEquipo, item.CantidadDisponible);
-          }
-        });
+  onFechaInicio(dates: Date[]): void {
+    const fechaInicio = dates[0] ?? null;
+    this.fechaInicioSeleccionada.set(fechaInicio);
+
+    const fechaFin = this.fechaFinSeleccionada();
+    if (
+      fechaInicio &&
+      (!fechaFin ||
+        fechaFin.getTime() - fechaInicio.getTime() <
+          MINIMUM_DURATION_MINUTES * 60 * 1000)
+    ) {
+      this.fechaFinSeleccionada.set(
+        new Date(fechaInicio.getTime() + MINIMUM_DURATION_MINUTES * 60 * 1000),
+      );
+    }
+
+    this.consultarDisponibilidad();
+  }
+
+  onFechaFin(dates: Date[]): void {
+    this.fechaFinSeleccionada.set(dates[0] ?? null);
+    this.consultarDisponibilidad();
+  }
+
+  formatearFechaHora(fecha: Date | null): string {
+    if (!fecha) return '';
+
+    const pad = (value: number) => String(value).padStart(2, '0');
+    return `${fecha.getFullYear()}-${pad(fecha.getMonth() + 1)}-${pad(fecha.getDate())} ${pad(fecha.getHours())}:${pad(fecha.getMinutes())}`;
+  }
+
+  get rangoValido(): boolean {
+    const inicio = this.fechaInicioSeleccionada();
+    const fin = this.fechaFinSeleccionada();
+
+    return (
+      !!inicio &&
+      !!fin &&
+      fin.getTime() - inicio.getTime() >= MINIMUM_DURATION_MINUTES * 60 * 1000
+    );
+  }
+
+  get hayDisponibilidad(): boolean {
+    if (!this.consultado || !this.rangoValido) return false;
+
+    return Object.entries(this.carrito).every(([id, item]) => {
+      const disponibilidad = this.disponibilidad.find(
+        (resultado) => resultado.IdGrupoEquipo === Number(id),
+      );
+
+      return (disponibilidad?.CantidadDisponible ?? 0) >= item.cantidad;
+    });
+  }
+
+  get cantidadDisponible(): number {
+    if (this.disponibilidad.length !== 1) return 0;
+
+    return this.disponibilidad[0].CantidadDisponible;
+  }
+
+  solicitarAviso(): void {
+    const inicio = this.fechaInicioSeleccionada();
+
+    if (inicio) this.avisarDisponibilidad.emit(inicio);
+  }
+
+  private inicializarRango(): void {
+    if (this.fechaInicioSeleccionada() && this.fechaFinSeleccionada()) return;
+
+    const inicio = this.siguienteBloque();
+    this.fechaInicioSeleccionada.set(inicio);
+    this.fechaFinSeleccionada.set(
+      new Date(inicio.getTime() + MINIMUM_DURATION_MINUTES * 60 * 1000),
+    );
+  }
+
+  private consultarDisponibilidad(): void {
+    const inicio = this.fechaInicioSeleccionada();
+    const fin = this.fechaFinSeleccionada();
+    const ids = Object.keys(this.carrito).map(Number);
+
+    if (!inicio || !fin || !this.rangoValido || ids.length === 0) {
+      this.disponibilidad = [];
+      this.consultado = false;
+      return;
+    }
+
+    this.cargando = true;
+    this.error.set(false);
+    this.apiDisponibilidad.obtenerDisponibilidad(inicio, fin, ids).subscribe({
+      next: (data) => {
+        this.disponibilidad = data;
+        this.consultado = true;
+        this.cargando = false;
       },
       error: (error) => {
-        const errorMsg = extractErrorMessage(
+        this.mensajeerror = extractErrorMessage(
           error,
-          'Error al obtener la disponibilidad de los prestamos, intente mas tarde',
+          'No se pudo consultar la disponibilidad.',
         );
-        this.mensajeerror = errorMsg;
+        this.cargando = false;
+        this.consultado = false;
         this.error.set(true);
       },
     });
   }
 
-  seleccionarFecha(fecha: Date): void {
-    if (this.soloAvisoFechasOcupadas) return;
+  private siguienteBloque(): Date {
+    const fecha = new Date();
+    fecha.setSeconds(0, 0);
+    fecha.setMinutes(
+      Math.ceil(fecha.getMinutes() / MINIMUM_DURATION_MINUTES) *
+        MINIMUM_DURATION_MINUTES,
+    );
+    if (fecha <= new Date())
+      fecha.setMinutes(fecha.getMinutes() + MINIMUM_DURATION_MINUTES);
 
-    if (
-      !this.fechaInicioSeleccionada() ||
-      (this.fechaInicioSeleccionada() && this.fechaFinSeleccionada())
-    ) {
-      this.fechaInicioSeleccionada.set(new Date(fecha));
-      this.fechaFinSeleccionada.set(null);
-    } else {
-      if (fecha.getTime() < this.fechaInicioSeleccionada()!.getTime()) {
-        this.fechaFinSeleccionada.set(
-          new Date(this.fechaInicioSeleccionada()!),
-        );
-        this.fechaInicioSeleccionada.set(new Date(fecha));
-      } else {
-        this.fechaFinSeleccionada.set(new Date(fecha));
-      }
-    }
-    this.validarSeleccion();
-  }
-
-  validarSeleccion() {
-    if (!this.fechaInicioSeleccionada() || !this.fechaFinSeleccionada()) {
-      return;
-    } else {
-      let dia = new Date(this.fechaInicioSeleccionada()!);
-      while (dia <= this.fechaFinSeleccionada()!) {
-        if (this.estaOcupado(new Date(dia))) {
-          this.fechaInicioSeleccionada.set(null);
-          this.fechaFinSeleccionada.set(null);
-          return;
-        }
-        dia.setDate(dia.getDate() + 1);
-      }
-    }
-  }
-
-  esFechaSeleccionada(fecha: Date): boolean {
-    if (!this.fechaInicioSeleccionada()) return false;
-    const inicio: number = this.fechaInicioSeleccionada()!.getTime();
-    const fin: number = this.fechaFinSeleccionada()
-      ? this.fechaFinSeleccionada()!.getTime()
-      : inicio;
-    return fecha.getTime() >= inicio && fecha.getTime() <= fin;
-  }
-
-  obtenerFechaKey(date: Date): string {
-    return this.toLocalISOString(date);
-  }
-
-  estaOcupado(dia: Date): boolean {
-    const fechaKey = this.obtenerFechaKey(dia);
-    if (this.disponibilidadPorFecha.has(fechaKey)) {
-      for (let key in this.carrito) {
-        if (
-          (this.disponibilidadPorFecha.get(fechaKey)?.get(Number(key)) ?? 0) <
-          this.carrito[key].cantidad
-        ) {
-          return true;
-        }
-      }
-      return false;
-    }
-    return this.disponibilidadPorFecha.size > 0;
-  }
-  emitirAviso(dia: Date): void {
-    if (!this.estaOcupado(dia)) return;
-
-    this.avisarDisponibilidad.emit(this.toLocalISOString(dia));
-  }
-
-  private toLocalISOString(date: Date): string {
-    const pad = (n: number) => String(n).padStart(2, '0');
-    return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+    return fecha;
   }
 }

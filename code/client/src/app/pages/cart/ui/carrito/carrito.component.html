@@ -62,32 +62,6 @@
         [fechaInicioSeleccionada]="fechaInicio"
         [fechaFinSeleccionada]="fechaFinal"
       ></app-calendario>
-      <div class="cart__dates">
-        <div class="cart__date-field">
-          <label for="fechaInicio">Fecha de Inicio</label>
-          <div class="cart__input-wrapper">
-            <input
-              type="text"
-              id="fechaInicio"
-              [ngModel]="fechaInicioStr"
-              readonly
-              placeholder="Seleccione en el calendario"
-            />
-          </div>
-        </div>
-        <div class="cart__date-field">
-          <label for="fechaFin">Fecha de Fin</label>
-          <div class="cart__input-wrapper">
-            <input
-              type="text"
-              id="fechaFin"
-              [ngModel]="fechaFinalStr"
-              readonly
-              placeholder="Seleccione en el calendario"
-            />
-          </div>
-        </div>
-      </div>
       <div class="cart__error">{{ validacionFechas().message }}</div>
       @if (!puedeReservar()) {
         <div class="cart__bloqueo">

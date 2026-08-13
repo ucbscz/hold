@@ -420,7 +420,9 @@
         <h3 class="aviso__title">Avisarme si se libera</h3>
         <p class="aviso__text">
           Te enviaremos una notificación si este equipo queda disponible el
-          <strong>{{ avisoFecha }}</strong
+          <strong>{{
+            avisoFecha | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
+          }}</strong
           >.
         </p>
         <div class="aviso__actions">
@@ -440,7 +442,10 @@
       } @else {
         <h3 class="aviso__title">Aviso registrado</h3>
         <p class="aviso__text">
-          Te notificaremos si se libera el <strong>{{ avisoFecha }}</strong
+          Te notificaremos si se libera el
+          <strong>{{
+            avisoFecha | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
+          }}</strong
           >.
         </p>
         <div class="aviso__actions">

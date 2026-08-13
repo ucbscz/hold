@@ -70,13 +70,14 @@ import { INLINE_SEARCH_STYLES } from './inline-search.styles';
                   </td>
                   <td>
                     {{
-                      p.FechaSolicitud | date: 'dd/MM/yyyy' : 'America/La_Paz'
+                      p.FechaSolicitud
+                        | date: 'dd/MM/yyyy HH:mm' : 'America/La_Paz'
                     }}
                   </td>
                   <td>
                     {{
                       p.FechaDevolucionEsperada
-                        | date: 'dd/MM/yyyy' : 'America/La_Paz'
+                        | date: 'dd/MM/yyyy HH:mm' : 'America/La_Paz'
                     }}
                   </td>
                 </tr>

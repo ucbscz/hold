@@ -107,13 +107,14 @@ const ESTADOS_PRESTAMO = [
                   <td>{{ h.Carnet }}</td>
                   <td>
                     {{
-                      h.FechaPrestamo | date: 'dd/MM/yyyy' : 'America/La_Paz'
+                      h.FechaPrestamo
+                        | date: 'dd/MM/yyyy HH:mm' : 'America/La_Paz'
                     }}
                   </td>
                   <td>
                     {{
                       h.FechaDevolucion || h.FechaDevolucionEsperada
-                        | date: 'dd/MM/yyyy' : 'America/La_Paz'
+                        | date: 'dd/MM/yyyy HH:mm' : 'America/La_Paz'
                     }}
                   </td>
                   <td>

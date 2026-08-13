@@ -156,58 +156,6 @@
 .cart__remove-button i {
   pointer-events: none;
 }
-.cart__dates {
-  display: flex;
-  gap: 1.5rem;
-  width: 100%;
-  max-width: 500px;
-  margin: 0 auto;
-  justify-content: center;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  padding: 1.25rem 1.5rem;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-.cart__date-field {
-  display: flex;
-  flex-direction: column;
-  gap: 0.375rem;
-  flex: 1;
-}
-.cart__date-field label {
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: var(--ink-secondary);
-  font-family: var(--font);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-.cart__input-wrapper {
-  position: relative;
-  width: 100%;
-  background: var(--sidebar);
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-}
-.cart__input-wrapper input[type="text"] {
-  width: 100%;
-  padding: 0.375rem 0.625rem;
-  border: none;
-  background: transparent;
-  font-size: 0.75rem;
-  color: var(--ink);
-  font-weight: 600;
-  font-family: var(--font);
-  text-align: center;
-  cursor: default;
-}
-.cart__input-wrapper input[type="text"]::placeholder {
-  color: var(--ink-muted);
-}
-.cart__input-wrapper input[type="text"]:focus {
-  outline: none;
-}
 .cart__error {
   color: var(--error);
   font-size: 0.8rem;
@@ -293,11 +241,6 @@
     margin: -1rem 0;
     align-self: stretch;
   }
-  .cart__dates {
-    flex-direction: column;
-    gap: 1rem;
-    padding: 1rem;
-  }
   .cart__button {
     width: 100%;
     max-width: 300px;
@@ -347,12 +290,6 @@
   }
   .cart__product-owner {
     font-size: 0.8rem;
-  }
-  .cart__dates {
-    padding: 0.75rem;
-  }
-  .cart__input-wrapper input[type="text"] {
-    padding: 0.5rem;
   }
   .cart__remove-button {
     grid-column: 3;

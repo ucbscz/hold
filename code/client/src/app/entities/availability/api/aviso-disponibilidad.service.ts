@@ -11,10 +11,10 @@ export class AvisoDisponibilidadService {
 
   constructor(private readonly http: HttpClient) {}
 
-  registrar(idGrupoEquipo: number, fecha: string): Observable<unknown> {
+  registrar(idGrupoEquipo: number, fecha: Date): Observable<unknown> {
     return this.http.post<unknown>(this.url, {
       IdGrupoEquipo: idGrupoEquipo,
-      Fecha: fecha,
+      Fecha: fecha.toISOString(),
       Cantidad: 1,
     });
   }

@@ -38,7 +38,7 @@
             <span class="fecha-valor">{{
               item.value.datosgrupo.FechaSolicitud
                 ? (item.value.datosgrupo.FechaSolicitud
-                  | date: "dd/MM/yyyy" : "America/La_Paz")
+                  | date: "dd/MM/yyyy HH:mm" : "America/La_Paz")
                 : "N/A"
             }}</span>
           </div>
@@ -49,7 +49,7 @@
             <span class="fecha-valor">{{
               item.value.datosgrupo.FechaPrestamoEsperada
                 ? (item.value.datosgrupo.FechaPrestamoEsperada
-                  | date: "dd/MM/yyyy" : "America/La_Paz")
+                  | date: "dd/MM/yyyy HH:mm" : "America/La_Paz")
                 : "N/A"
             }}</span>
           </div>
@@ -60,7 +60,7 @@
             <span class="fecha-valor">{{
               item.value.datosgrupo.FechaDevolucionEsperada
                 ? (item.value.datosgrupo.FechaDevolucionEsperada
-                  | date: "dd/MM/yyyy")
+                  | date: "dd/MM/yyyy HH:mm" : "America/La_Paz")
                 : "N/A"
             }}</span>
           </div>
