@@ -57,11 +57,18 @@
       </div>
     }
     @if (step === 2) {
-      <app-calendario
-        [entradaCarrito]="carrito"
-        [fechaInicioSeleccionada]="fechaInicio"
-        [fechaFinSeleccionada]="fechaFinal"
-      ></app-calendario>
+      <section class="cart__schedule-page" aria-labelledby="cart-schedule-title">
+        <div class="cart__page-heading">
+          <span>Paso 2 de 2</span>
+          <h1 id="cart-schedule-title">Programa tu préstamo</h1>
+          <p>Define el horario en el que necesitas los equipos seleccionados.</p>
+        </div>
+        <app-calendario
+          [entradaCarrito]="carrito"
+          [fechaInicioSeleccionada]="fechaInicio"
+          [fechaFinSeleccionada]="fechaFinal"
+        ></app-calendario>
+      </section>
       <div class="cart__error">{{ validacionFechas().message }}</div>
       @if (!puedeReservar()) {
         <div class="cart__bloqueo">
