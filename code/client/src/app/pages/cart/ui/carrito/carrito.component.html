@@ -32,7 +32,9 @@
                 <p class="cart__product-owner">Propietario: IMT</p>
               </div>
               <div class="cart__quantity">
-                <label class="cart__quantity-label" for="cantidad_{{ item.key }}"
+                <label
+                  class="cart__quantity-label"
+                  for="cantidad_{{ item.key }}"
                   >Cantidad</label
                 >
                 <select
@@ -41,7 +43,9 @@
                   (ngModelChange)="cambiarCantidad(item.key, $event)"
                 >
                   <option
-                    *ngFor="let n of generarCantidadesMax(item.value.cantidadMax)"
+                    *ngFor="
+                      let n of generarCantidadesMax(item.value.cantidadMax)
+                    "
                     [value]="n"
                   >
                     {{ n }}
