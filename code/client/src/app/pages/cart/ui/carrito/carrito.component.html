@@ -1,72 +1,85 @@
 @if (!carritoEstaVacio()) {
-  <div class="cart">
+  <div class="cart" [class.cart--schedule]="step === 2">
     @if (step === 1) {
-      <ul class="cart__list">
-        @for (item of carrito | keyvalue; track item.key) {
-          <li class="cart__item">
-            @if (obtenerImagenProducto(item.value.imagen); as imageUrl) {
-              <img
-                class="cart__product-image"
-                [src]="imageUrl"
-                alt="{{ item.value.nombre }}"
-                width="70"
-                height="70"
-                loading="lazy"
-                decoding="async"
-                (error)="registrarImagenFallida(imageUrl)"
-              />
-            } @else {
-              <app-equipment-image-placeholder
-                class="cart__product-image cart__product-image--empty"
-                label=""
-              ></app-equipment-image-placeholder>
-            }
-            <div class="cart__product-info">
-              <h3 class="cart__product-title">{{ item.value.nombre }}</h3>
-              <p class="cart__product-owner">Propietario: IMT</p>
-            </div>
-            <div class="cart__quantity">
-              <label class="cart__quantity-label" for="cantidad_{{ item.key }}"
-                >Cantidad</label
-              >
-              <select
-                id="cantidad_{{ item.key }}"
-                [ngModel]="item.value.cantidad"
-                (ngModelChange)="cambiarCantidad(item.key, $event)"
-              >
-                <option
-                  *ngFor="let n of generarCantidadesMax(item.value.cantidadMax)"
-                  [value]="n"
+      <section class="cart__items-page" aria-labelledby="cart-items-title">
+        <div class="cart__page-heading">
+          <span>Paso 1 de 2</span>
+          <h1 id="cart-items-title">Revisa tus equipos</h1>
+          <p>Ajusta las cantidades antes de programar tu préstamo.</p>
+        </div>
+        <ul class="cart__list">
+          @for (item of carrito | keyvalue; track item.key) {
+            <li class="cart__item">
+              @if (obtenerImagenProducto(item.value.imagen); as imageUrl) {
+                <img
+                  class="cart__product-image"
+                  [src]="imageUrl"
+                  alt="{{ item.value.nombre }}"
+                  width="70"
+                  height="70"
+                  loading="lazy"
+                  decoding="async"
+                  (error)="registrarImagenFallida(imageUrl)"
+                />
+              } @else {
+                <app-equipment-image-placeholder
+                  class="cart__product-image cart__product-image--empty"
+                  label=""
+                ></app-equipment-image-placeholder>
+              }
+              <div class="cart__product-info">
+                <h3 class="cart__product-title">{{ item.value.nombre }}</h3>
+                <p class="cart__product-owner">Propietario: IMT</p>
+              </div>
+              <div class="cart__quantity">
+                <label class="cart__quantity-label" for="cantidad_{{ item.key }}"
+                  >Cantidad</label
                 >
-                  {{ n }}
-                </option>
-              </select>
-            </div>
-            <button
-              (click)="cambiarCantidad(item.key, 0)"
-              class="cart__remove-button"
-              title="Eliminar del carrito"
-            >
-              <i class="fas fa-trash-alt"></i>
-            </button>
-          </li>
-        }
-      </ul>
+                <select
+                  id="cantidad_{{ item.key }}"
+                  [ngModel]="item.value.cantidad"
+                  (ngModelChange)="cambiarCantidad(item.key, $event)"
+                >
+                  <option
+                    *ngFor="let n of generarCantidadesMax(item.value.cantidadMax)"
+                    [value]="n"
+                  >
+                    {{ n }}
+                  </option>
+                </select>
+              </div>
+              <button
+                (click)="cambiarCantidad(item.key, 0)"
+                class="cart__remove-button"
+                title="Eliminar del carrito"
+              >
+                <i class="fas fa-trash-alt"></i>
+              </button>
+            </li>
+          }
+        </ul>
+      </section>
       <div class="cart__actions">
         <button (click)="nextStep()" class="cart__button">Siguiente</button>
       </div>
     }
     @if (step === 2) {
-      <section class="cart__schedule-page" aria-labelledby="cart-schedule-title">
+      <section
+        class="cart__schedule-page"
+        aria-labelledby="cart-schedule-title"
+      >
         <div class="cart__page-heading">
           <span>Paso 2 de 2</span>
           <h1 id="cart-schedule-title">Programa tu préstamo</h1>
-          <p>Define el horario en el que necesitas los equipos seleccionados.</p>
+          <p>
+            Define el horario en el que necesitas los equipos seleccionados.
+          </p>
         </div>
         <app-calendario
           [entradaCarrito]="carrito"
           [fechaInicioSeleccionada]="fechaInicio"
           [fechaFinSeleccionada]="fechaFinal"
+          [mostrarEncabezado]="false"
         ></app-calendario>
       </section>
       <div class="cart__error">{{ validacionFechas().message }}</div>

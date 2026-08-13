@@ -1,11 +1,13 @@
 <section class="availability-selector" aria-live="polite">
-  <div class="availability-selector__heading">
-    <div>
-      <h3>Horario de reserva</h3>
-      <p>Elige una fecha y una hora. La duración mínima es de 30 minutos.</p>
+  @if (mostrarEncabezado) {
+    <div class="availability-selector__heading">
+      <div>
+        <h3>Horario de reserva</h3>
+        <p>Elige una fecha y una hora. La duración mínima es de 30 minutos.</p>
+      </div>
+      <i class="fa-regular fa-clock" aria-hidden="true"></i>
     </div>
-    <i class="fa-regular fa-clock" aria-hidden="true"></i>
-  </div>
+  }
 
   <div class="availability-selector__planner">
     <div

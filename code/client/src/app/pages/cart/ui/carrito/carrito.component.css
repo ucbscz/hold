@@ -42,8 +42,12 @@
   margin-bottom: 0;
   width: 100%;
 }
+.cart__items-page,
 .cart__schedule-page {
   width: min(100%, 760px);
+}
+.cart--schedule {
+  margin-top: 3.25rem;
 }
 .cart__page-heading {
   margin: 0 0 var(--sp-6);
@@ -239,6 +243,9 @@
     margin-top: 5rem;
     padding: 0 1rem 80px;
   }
+  .cart--schedule {
+    margin-top: 3rem;
+  }
   .cart__item {
     grid-template-columns: 60px 1fr 56px;
     gap: 1rem;
@@ -291,6 +298,9 @@
   .cart {
     margin-top: 4rem;
     gap: 1rem;
+  }
+  .cart--schedule {
+    margin-top: 2.5rem;
   }
   .cart__item {
     padding: 0.75rem;

@@ -42,6 +42,7 @@ export class CalendarioComponent {
   @Input() fechaInicioSeleccionada: WritableSignal<Date | null> = signal(null);
   @Input() fechaFinSeleccionada: WritableSignal<Date | null> = signal(null);
   @Input() soloAvisoFechasOcupadas = false;
+  @Input() mostrarEncabezado = true;
   @Output() avisarDisponibilidad = new EventEmitter<Date>();
 
   carrito: Carrito = {};
