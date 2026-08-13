@@ -1,8 +1,6 @@
-import { CommonModule, DOCUMENT, NgOptimizedImage } from '@angular/common';
+import { CommonModule, NgOptimizedImage } from '@angular/common';
 import {
   Component,
-  Inject,
-  Renderer2,
   signal,
   WritableSignal,
 } from '@angular/core';
@@ -97,8 +95,6 @@ export class ObjetoComponent {
     private readonly disponibilidadService: DisponibilidadService,
     private readonly avisoDisponibilidad: AvisoDisponibilidadService,
     private readonly imageCache: ImageCacheService,
-    private readonly renderer: Renderer2,
-    @Inject(DOCUMENT) private readonly document: Document,
   ) {}
 
   ngOnInit(): void {
@@ -188,12 +184,10 @@ export class ObjetoComponent {
 
   abrirCalendarioModal(): void {
     this.showCalendarioModal = true;
-    this.renderer.setStyle(this.document.body, 'overflow', 'hidden');
   }
 
   cerrarCalendarioModal(): void {
     this.showCalendarioModal = false;
-    this.renderer.removeStyle(this.document.body, 'overflow');
   }
 
   cerrarCalendarioDesdeFondo(event: MouseEvent): void {

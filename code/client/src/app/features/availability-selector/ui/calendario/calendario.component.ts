@@ -9,16 +9,21 @@ import {
 } from '@angular/core';
 import { Disponibilidad, DisponibilidadService } from '@entities/availability';
 import { Carrito } from '@entities/cart';
-import { FlatpickrDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import { MostrarerrorComponent } from '@shared/ui';
-import { Options } from 'flatpickr/dist/types/options';
 
 const MINIMUM_DURATION_MINUTES = 30;
+const MILLISECONDS_PER_MINUTE = 60 * 1000;
+type CampoFecha = 'inicio' | 'fin';
+
+interface HoraOpcion {
+  etiqueta: string;
+  valor: string;
+}
 
 @Component({
   selector: 'app-calendario',
-  imports: [CommonModule, FlatpickrDirective, MostrarerrorComponent],
+  imports: [CommonModule, MostrarerrorComponent],
   templateUrl: './calendario.component.html',
   styleUrls: ['./calendario.component.css'],
 })
@@ -36,72 +41,53 @@ export class CalendarioComponent {
   disponibilidad: Disponibilidad[] = [];
   cargando = false;
   consultado = false;
+  campoActivo: CampoFecha = 'inicio';
+  mesVisible = this.inicioDelMes(new Date());
   error: WritableSignal<boolean> = signal(false);
   mensajeerror = 'No se pudo consultar la disponibilidad.';
+  readonly horas: HoraOpcion[] = this.crearHoras();
   private readonly minimoInicio = this.siguienteBloque();
 
   constructor(private readonly apiDisponibilidad: DisponibilidadService) {}
 
   ngOnInit(): void {
     this.inicializarRango();
+    this.mesVisible = this.inicioDelMes(
+      this.fechaInicioSeleccionada() ?? this.minimoInicio,
+    );
     this.consultarDisponibilidad();
   }
 
-  get opcionesInicio(): Partial<Options> {
-    return {
-      enableTime: true,
-      time_24hr: true,
-      minuteIncrement: MINIMUM_DURATION_MINUTES,
-      dateFormat: 'Y-m-d H:i',
-      clickOpens: true,
-      minDate: this.minimoInicio,
-    };
-  }
+  get diasDelMes(): Array<Date | null> {
+    const primerDia = this.inicioDelMes(this.mesVisible);
+    const primerIndice = (primerDia.getDay() + 6) % 7;
+    const dias: Array<Date | null> = Array.from(
+      { length: primerIndice },
+      () => null,
+    );
+    const ultimoDia = new Date(
+      primerDia.getFullYear(),
+      primerDia.getMonth() + 1,
+      0,
+    ).getDate();
 
-  get opcionesFin(): Partial<Options> {
-    const inicio = this.fechaInicioSeleccionada();
-
-    return {
-      enableTime: true,
-      time_24hr: true,
-      minuteIncrement: MINIMUM_DURATION_MINUTES,
-      dateFormat: 'Y-m-d H:i',
-      clickOpens: true,
-      minDate: inicio
-        ? new Date(inicio.getTime() + MINIMUM_DURATION_MINUTES * 60 * 1000)
-        : this.minimoInicio,
-    };
-  }
-
-  onFechaInicio(dates: Date[]): void {
-    const fechaInicio = dates[0] ?? null;
-    this.fechaInicioSeleccionada.set(fechaInicio);
-
-    const fechaFin = this.fechaFinSeleccionada();
-    if (
-      fechaInicio &&
-      (!fechaFin ||
-        fechaFin.getTime() - fechaInicio.getTime() <
-          MINIMUM_DURATION_MINUTES * 60 * 1000)
-    ) {
-      this.fechaFinSeleccionada.set(
-        new Date(fechaInicio.getTime() + MINIMUM_DURATION_MINUTES * 60 * 1000),
-      );
+    for (let dia = 1; dia <= ultimoDia; dia++) {
+      dias.push(new Date(primerDia.getFullYear(), primerDia.getMonth(), dia));
     }
 
-    this.consultarDisponibilidad();
+    while (dias.length % 7 !== 0) dias.push(null);
+    return dias;
   }
 
-  onFechaFin(dates: Date[]): void {
-    this.fechaFinSeleccionada.set(dates[0] ?? null);
-    this.consultarDisponibilidad();
+  get etiquetaMes(): string {
+    return new Intl.DateTimeFormat('es-BO', {
+      month: 'long',
+      year: 'numeric',
+    }).format(this.mesVisible);
   }
 
-  formatearFechaHora(fecha: Date | null): string {
-    if (!fecha) return '';
-
-    const pad = (value: number) => String(value).padStart(2, '0');
-    return `${fecha.getFullYear()}-${pad(fecha.getMonth() + 1)}-${pad(fecha.getDate())} ${pad(fecha.getHours())}:${pad(fecha.getMinutes())}`;
+  get etiquetaCampoActivo(): string {
+    return this.campoActivo === 'inicio' ? 'inicio' : 'devolución';
   }
 
   get rangoValido(): boolean {
@@ -111,7 +97,8 @@ export class CalendarioComponent {
     return (
       !!inicio &&
       !!fin &&
-      fin.getTime() - inicio.getTime() >= MINIMUM_DURATION_MINUTES * 60 * 1000
+      fin.getTime() - inicio.getTime() >=
+        MINIMUM_DURATION_MINUTES * MILLISECONDS_PER_MINUTE
     );
   }
 
@@ -129,24 +116,158 @@ export class CalendarioComponent {
 
   get cantidadDisponible(): number {
     if (this.disponibilidad.length !== 1) return 0;
-
     return this.disponibilidad[0].CantidadDisponible;
+  }
+
+  seleccionarCampo(campo: CampoFecha): void {
+    this.campoActivo = campo;
+    const fecha = this.obtenerFecha(campo);
+    if (fecha) this.mesVisible = this.inicioDelMes(fecha);
+  }
+
+  cambiarMes(desplazamiento: number): void {
+    const siguienteMes = new Date(
+      this.mesVisible.getFullYear(),
+      this.mesVisible.getMonth() + desplazamiento,
+      1,
+    );
+
+    if (this.comparaSoloFecha(siguienteMes, this.inicioDelMes(this.minimoInicio)) < 0)
+      return;
+
+    this.mesVisible = siguienteMes;
+  }
+
+  puedeRetrocederMes(): boolean {
+    return (
+      this.comparaSoloFecha(
+        this.mesVisible,
+        this.inicioDelMes(this.minimoInicio),
+      ) > 0
+    );
+  }
+
+  seleccionarDia(dia: Date): void {
+    if (this.esDiaDeshabilitado(dia)) return;
+
+    const fechaActual = this.obtenerFecha(this.campoActivo) ?? this.minimoInicio;
+    const fechaSeleccionada = this.combinarDiaYHora(dia, fechaActual);
+
+    if (this.campoActivo === 'inicio') {
+      const inicio = this.normalizarInicio(fechaSeleccionada);
+      this.fechaInicioSeleccionada.set(inicio);
+
+      const fin = this.fechaFinSeleccionada();
+      if (!fin || !this.esRangoValido(inicio, fin)) {
+        this.fechaFinSeleccionada.set(this.sumarMinutos(inicio, MINIMUM_DURATION_MINUTES));
+      }
+    } else {
+      const inicio = this.fechaInicioSeleccionada() ?? this.minimoInicio;
+      this.fechaFinSeleccionada.set(
+        this.normalizarFin(
+          fechaSeleccionada,
+          this.sumarMinutos(inicio, MINIMUM_DURATION_MINUTES),
+        ),
+      );
+    }
+
+    this.consultarDisponibilidad();
+  }
+
+  cambiarHora(campo: CampoFecha, valor: string): void {
+    const [horas, minutos] = valor.split(':').map(Number);
+    const fechaActual = this.obtenerFecha(campo) ?? this.minimoInicio;
+    const fechaConHora = new Date(fechaActual);
+    fechaConHora.setHours(horas, minutos, 0, 0);
+
+    if (campo === 'inicio') {
+      const inicio = this.normalizarInicio(fechaConHora);
+      this.fechaInicioSeleccionada.set(inicio);
+
+      const fin = this.fechaFinSeleccionada();
+      if (!fin || !this.esRangoValido(inicio, fin)) {
+        this.fechaFinSeleccionada.set(this.sumarMinutos(inicio, MINIMUM_DURATION_MINUTES));
+      }
+    } else {
+      const inicio = this.fechaInicioSeleccionada() ?? this.minimoInicio;
+      this.fechaFinSeleccionada.set(
+        this.normalizarFin(
+          fechaConHora,
+          this.sumarMinutos(inicio, MINIMUM_DURATION_MINUTES),
+        ),
+      );
+    }
+
+    this.consultarDisponibilidad();
+  }
+
+  esDiaDeshabilitado(dia: Date): boolean {
+    const minimo =
+      this.campoActivo === 'inicio'
+        ? this.minimoInicio
+        : (this.fechaInicioSeleccionada() ?? this.minimoInicio);
+    return this.comparaSoloFecha(dia, minimo) < 0;
+  }
+
+  esDiaSeleccionado(dia: Date, campo: CampoFecha): boolean {
+    const fecha = this.obtenerFecha(campo);
+    return !!fecha && this.comparaSoloFecha(dia, fecha) === 0;
+  }
+
+  esDiaEnRango(dia: Date): boolean {
+    const inicio = this.fechaInicioSeleccionada();
+    const fin = this.fechaFinSeleccionada();
+    if (!inicio || !fin) return false;
+
+    return (
+      this.comparaSoloFecha(dia, inicio) > 0 &&
+      this.comparaSoloFecha(dia, fin) < 0
+    );
+  }
+
+  esHoy(dia: Date): boolean {
+    return this.comparaSoloFecha(dia, new Date()) === 0;
+  }
+
+  horaSeleccionada(campo: CampoFecha): string {
+    const fecha = this.obtenerFecha(campo) ?? this.minimoInicio;
+    return `${this.dosDigitos(fecha.getHours())}:${this.dosDigitos(fecha.getMinutes())}`;
+  }
+
+  horaDeshabilitada(campo: CampoFecha, hora: string): boolean {
+    const [horas, minutos] = hora.split(':').map(Number);
+    const fecha = new Date(this.obtenerFecha(campo) ?? this.minimoInicio);
+    fecha.setHours(horas, minutos, 0, 0);
+    const minimo =
+      campo === 'inicio'
+        ? this.minimoInicio
+        : this.sumarMinutos(
+            this.fechaInicioSeleccionada() ?? this.minimoInicio,
+            MINIMUM_DURATION_MINUTES,
+          );
+    return fecha.getTime() < minimo.getTime();
+  }
+
+  formatearFecha(fecha: Date | null): string {
+    if (!fecha) return 'Sin seleccionar';
+    return new Intl.DateTimeFormat('es-BO', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+    }).format(fecha);
   }
 
   solicitarAviso(): void {
     const inicio = this.fechaInicioSeleccionada();
-
     if (inicio) this.avisarDisponibilidad.emit(inicio);
   }
 
   private inicializarRango(): void {
     if (this.fechaInicioSeleccionada() && this.fechaFinSeleccionada()) return;
 
-    const inicio = this.siguienteBloque();
+    const inicio = this.minimoInicio;
     this.fechaInicioSeleccionada.set(inicio);
-    this.fechaFinSeleccionada.set(
-      new Date(inicio.getTime() + MINIMUM_DURATION_MINUTES * 60 * 1000),
-    );
+    this.fechaFinSeleccionada.set(this.sumarMinutos(inicio, MINIMUM_DURATION_MINUTES));
   }
 
   private consultarDisponibilidad(): void {
@@ -180,6 +301,67 @@ export class CalendarioComponent {
     });
   }
 
+  private obtenerFecha(campo: CampoFecha): Date | null {
+    return campo === 'inicio'
+      ? this.fechaInicioSeleccionada()
+      : this.fechaFinSeleccionada();
+  }
+
+  private normalizarInicio(fecha: Date): Date {
+    return fecha.getTime() < this.minimoInicio.getTime()
+      ? new Date(this.minimoInicio)
+      : fecha;
+  }
+
+  private normalizarFin(fecha: Date, minimo: Date): Date {
+    return fecha.getTime() < minimo.getTime() ? minimo : fecha;
+  }
+
+  private crearHoras(): HoraOpcion[] {
+    return Array.from({ length: 48 }, (_, indice) => {
+      const horas = Math.floor(indice / 2);
+      const minutos = (indice % 2) * MINIMUM_DURATION_MINUTES;
+      const valor = `${this.dosDigitos(horas)}:${this.dosDigitos(minutos)}`;
+      return { valor, etiqueta: valor };
+    });
+  }
+
+  private combinarDiaYHora(dia: Date, hora: Date): Date {
+    const resultado = new Date(dia);
+    resultado.setHours(hora.getHours(), hora.getMinutes(), 0, 0);
+    return resultado;
+  }
+
+  private inicioDelMes(fecha: Date): Date {
+    return new Date(fecha.getFullYear(), fecha.getMonth(), 1);
+  }
+
+  private compararFechas(a: Date, b: Date): number {
+    return a.getTime() - b.getTime();
+  }
+
+  private comparaSoloFecha(a: Date, b: Date): number {
+    return this.compararFechas(
+      new Date(a.getFullYear(), a.getMonth(), a.getDate()),
+      new Date(b.getFullYear(), b.getMonth(), b.getDate()),
+    );
+  }
+
+  private esRangoValido(inicio: Date, fin: Date): boolean {
+    return (
+      fin.getTime() - inicio.getTime() >=
+      MINIMUM_DURATION_MINUTES * MILLISECONDS_PER_MINUTE
+    );
+  }
+
+  private sumarMinutos(fecha: Date, minutos: number): Date {
+    return new Date(fecha.getTime() + minutos * MILLISECONDS_PER_MINUTE);
+  }
+
+  private dosDigitos(valor: number): string {
+    return String(valor).padStart(2, '0');
+  }
+
   private siguienteBloque(): Date {
     const fecha = new Date();
     fecha.setSeconds(0, 0);
@@ -187,9 +369,9 @@ export class CalendarioComponent {
       Math.ceil(fecha.getMinutes() / MINIMUM_DURATION_MINUTES) *
         MINIMUM_DURATION_MINUTES,
     );
-    if (fecha <= new Date())
+    if (fecha <= new Date()) {
       fecha.setMinutes(fecha.getMinutes() + MINIMUM_DURATION_MINUTES);
-
+    }
     return fecha;
   }
 }
