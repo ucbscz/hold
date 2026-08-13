@@ -32,17 +32,17 @@ public class EstadoPrestamoJob
 
     public async Task Execute()
     {
-        var today = DateTime.UtcNow.Date;
+        var now = DateTime.UtcNow;
 
-        await ProcessOverdue(today);
-        await ProcessExpired(today);
-        await ProcessReminders(today);
+        await ProcessOverdue(now);
+        await ProcessExpired(now);
+        await ProcessReminders(now);
         await ProcessAvailabilityWatches();
     }
 
-    private async Task ProcessOverdue(DateTime today)
+    private async Task ProcessOverdue(DateTime now)
     {
-        var overdue = await _prestamoRepository.GetOverdueLoans(today);
+        var overdue = await _prestamoRepository.GetOverdueLoans(now);
 
         if (overdue.Count == 0)
             return;
@@ -88,9 +88,9 @@ public class EstadoPrestamoJob
         );
     }
 
-    private async Task ProcessExpired(DateTime today)
+    private async Task ProcessExpired(DateTime now)
     {
-        var expired = await _prestamoRepository.GetExpiredPendingLoans(today);
+        var expired = await _prestamoRepository.GetExpiredPendingLoans(now);
 
         if (expired.Count == 0)
             return;
@@ -122,23 +122,26 @@ public class EstadoPrestamoJob
         );
     }
 
-    private async Task ProcessReminders(DateTime today)
+    private async Task ProcessReminders(DateTime now)
     {
-        var dueTomorrow = await _prestamoRepository.GetLoansDueForReminder(today.AddDays(1));
+        var dueSoon = await _prestamoRepository.GetLoansDueForReminder(
+            now,
+            now.AddMinutes(30)
+        );
 
-        if (dueTomorrow.Count == 0)
+        if (dueSoon.Count == 0)
             return;
 
-        await _prestamoRepository.MarkReminderSent(dueTomorrow.Select(GetLoanId).ToList());
+        await _prestamoRepository.MarkReminderSent(dueSoon.Select(GetLoanId).ToList());
 
         await _notifications.CreateMany(
-            dueTomorrow
+            dueSoon
                 .Select(loan => new NotificacionDto
                 {
                     CarnetUsuario = loan.CarnetUsuario,
                     Tipo = nameof(TipoNotificacion.RecordatorioDevolucion),
                     Titulo = "Recordatorio de devolución",
-                    Contenido = "Tu préstamo vence mañana. No olvides devolver los equipos a tiempo.",
+                    Contenido = "Tu préstamo vence en menos de 30 minutos. No olvides devolver los equipos a tiempo.",
                 })
                 .ToList()
         );
@@ -156,9 +159,13 @@ public class EstadoPrestamoJob
 
         foreach (var watch in pending)
         {
-            var date = watch.Fecha.ToDateTime(TimeOnly.MinValue);
+            var date = watch.Fecha;
 
-            if (await _prestamoRepository.HasAvailableEquipo(watch.IdGrupoEquipo, date, date))
+            if (await _prestamoRepository.HasAvailableEquipo(
+                watch.IdGrupoEquipo,
+                date,
+                date.AddMinutes(30)
+            ))
             {
                 notifications.Add(
                     new NotificacionDto
@@ -167,7 +174,7 @@ public class EstadoPrestamoJob
                         Tipo = nameof(TipoNotificacion.DisponibilidadLiberada),
                         Titulo = "Disponibilidad liberada",
                         Contenido =
-                            $"Un equipo que esperabas está disponible para el {watch.Fecha:dd/MM/yyyy}.",
+                            $"Un equipo que esperabas está disponible el {watch.Fecha:dd/MM/yyyy HH:mm}.",
                     }
                 );
                 notified.Add(watch.Id);

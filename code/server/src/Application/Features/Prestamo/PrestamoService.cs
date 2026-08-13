@@ -53,23 +53,24 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         entity.FechaSolicitud = dto.FechaSolicitud ?? DateTime.UtcNow;
         entity.FechaPrestamo = dto.FechaPrestamo ?? dto.FechaPrestamoEsperada;
         entity.FechaPrestamoEsperada = dto.FechaPrestamoEsperada ?? DateTime.UtcNow;
-        entity.FechaDevolucionEsperada = dto.FechaDevolucionEsperada ?? DateTime.UtcNow.AddDays(7);
+        entity.FechaDevolucionEsperada = dto.FechaDevolucionEsperada ?? DateTime.UtcNow.AddMinutes(30);
         entity.EstadoPrestamo = EstadoPrestamo.Pendiente;
 
-        foreach (var grupoEquipoId in dto.GrupoEquipoId ?? [])
+        foreach (var grupo in (dto.GrupoEquipoId ?? []).GroupBy(id => id))
         {
-            var available = await Repository.HasAvailableEquipo(
-                grupoEquipoId,
+            var available = await Repository.HasAvailableEquipos(
+                grupo.Key,
+                grupo.Count(),
                 entity.FechaPrestamoEsperada,
                 entity.FechaDevolucionEsperada
             );
 
             if (!available)
             {
-                var grupoEquipoNombre = await Repository.GetGrupoEquipoNombre(grupoEquipoId);
+                var grupoEquipoNombre = await Repository.GetGrupoEquipoNombre(grupo.Key);
 
                 return Result<PrestamoDto>.Error(
-                    $"'{grupoEquipoNombre ?? grupoEquipoId.ToString(CultureInfo.InvariantCulture)}' no tiene unidades disponibles en las fechas seleccionadas"
+                    $"'{grupoEquipoNombre ?? grupo.Key.ToString(CultureInfo.InvariantCulture)}' no tiene suficientes unidades disponibles en el horario seleccionado"
                 );
             }
         }
@@ -226,9 +227,13 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
 
         foreach (var watch in pending)
         {
-            var date = watch.Fecha.ToDateTime(TimeOnly.MinValue);
+            var date = watch.Fecha;
 
-            if (!await Repository.HasAvailableEquipo(watch.IdGrupoEquipo, date, date))
+            if (!await Repository.HasAvailableEquipo(
+                watch.IdGrupoEquipo,
+                date,
+                date.AddMinutes(30)
+            ))
                 continue;
 
             notifications.Add(
@@ -238,7 +243,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
                     Tipo = nameof(TipoNotificacion.DisponibilidadLiberada),
                     Titulo = "Disponibilidad liberada",
                     Contenido =
-                        $"Un equipo que esperabas está disponible para el {watch.Fecha:dd/MM/yyyy}.",
+                        $"Un equipo que esperabas está disponible el {watch.Fecha:dd/MM/yyyy HH:mm}.",
                 }
             );
             notified.Add(watch.Id);

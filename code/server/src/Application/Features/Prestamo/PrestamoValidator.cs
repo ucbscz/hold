@@ -33,8 +33,17 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
             .Must(p =>
                 !p.FechaPrestamoEsperada.HasValue
                 || !p.FechaDevolucionEsperada.HasValue
-                || p.FechaPrestamoEsperada.Value <= p.FechaDevolucionEsperada.Value
+                || p.FechaDevolucionEsperada.Value > p.FechaPrestamoEsperada.Value
             )
-            .WithMessage("Fecha préstamo no puede ser posterior a devolución");
+            .WithMessage("La fecha y hora de devolución debe ser posterior al inicio del préstamo");
+
+        RuleFor(p => p)
+            .Must(p =>
+                !p.FechaPrestamoEsperada.HasValue
+                || !p.FechaDevolucionEsperada.HasValue
+                || p.FechaDevolucionEsperada.Value - p.FechaPrestamoEsperada.Value
+                    >= TimeSpan.FromMinutes(30)
+            )
+            .WithMessage("El préstamo debe tener una duración mínima de 30 minutos");
     }
 }

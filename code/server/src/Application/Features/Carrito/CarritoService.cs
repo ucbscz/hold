@@ -33,8 +33,18 @@ public class CarritoService
             return Result<List<CarritoDto>>.Success([]);
         }
 
-        var fechaInicio = request.FechaInicio.Value.Date;
-        var fechaFin = request.FechaFin.Value.Date;
+        var fechaInicio = request.FechaInicio.Value;
+        var fechaFin = request.FechaFin.Value;
+
+        if (fechaFin <= fechaInicio)
+            return Result<List<CarritoDto>>.Error(
+                "La fecha y hora final debe ser posterior a la fecha y hora inicial"
+            );
+
+        if (fechaFin - fechaInicio < TimeSpan.FromMinutes(30))
+            return Result<List<CarritoDto>>.Error(
+                "La duracion minima de un prestamo es de 30 minutos"
+            );
 
         var cantidades = await _repository.GetCantidadesByGrupos(request.ArrayIds);
         var prestamosActivos = await _repository.GetPrestamosActivosEnRango(
@@ -42,31 +52,37 @@ public class CarritoService
             fechaInicio,
             fechaFin
         );
+        var mantenimientosActivos = await _repository.GetMantenimientosActivosEnRango(
+            request.ArrayIds,
+            fechaInicio,
+            fechaFin
+        );
 
         var response = new List<CarritoDto>();
 
-        for (var date = fechaInicio; date <= fechaFin; date = date.AddDays(1))
+        foreach (var grupoId in request.ArrayIds.Distinct())
         {
-            foreach (var grupoId in request.ArrayIds)
-            {
-                var total = cantidades.TryGetValue(grupoId, out var t) ? t : 0;
+            var total = cantidades.TryGetValue(grupoId, out var t) ? t : 0;
 
-                var ocupados = prestamosActivos.Count(p =>
-                    p.IdGrupoEquipo == grupoId
-                    && p.FechaPrestamo.Date <= date
-                    && p.FechaDevolucion.Date >= date
-                );
+            var ocupados = prestamosActivos.Count(p =>
+                p.IdGrupoEquipo == grupoId
+                && p.FechaPrestamo < fechaFin
+                && p.FechaDevolucion > fechaInicio
+            ) + mantenimientosActivos.Count(m =>
+                m.IdGrupoEquipo == grupoId
+                && m.FechaInicio < fechaFin
+                && m.FechaFin > fechaInicio
+            );
 
-                response.Add(
-                    new CarritoDto
-                    {
-                        Fecha = date,
-                        IdGrupoEquipo = grupoId,
-                        CantidadDisponible = Math.Max(0, total - ocupados),
-                        TotalOperativo = total,
-                    }
-                );
-            }
+            response.Add(
+                new CarritoDto
+                {
+                    Fecha = fechaInicio,
+                    IdGrupoEquipo = grupoId,
+                    CantidadDisponible = Math.Max(0, total - ocupados),
+                    TotalOperativo = total,
+                }
+            );
         }
 
         return Result<List<CarritoDto>>.Success(response);

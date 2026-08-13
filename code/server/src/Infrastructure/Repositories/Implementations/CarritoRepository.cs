@@ -43,8 +43,8 @@ public class CarritoRepository
                     || prestamo.EstadoPrestamo == EstadoPrestamo.Aprobado
                     || prestamo.EstadoPrestamo == EstadoPrestamo.Atrasado
                 )
-                && prestamo.FechaPrestamoEsperada.Date <= fechaFin
-                && prestamo.FechaDevolucionEsperada.Date >= fechaInicio
+                && prestamo.FechaPrestamoEsperada < fechaFin
+                && prestamo.FechaDevolucionEsperada > fechaInicio
             select new
             {
                 equipo.IdGrupoEquipo,
@@ -55,6 +55,32 @@ public class CarritoRepository
 
         return rows.ConvertAll(r =>
             (r.IdGrupoEquipo, r.FechaPrestamoEsperada, r.FechaDevolucionEsperada)
+        );
+    }
+
+    public async Task<
+        List<(int IdGrupoEquipo, DateTime FechaInicio, DateTime FechaFin)>
+    > GetMantenimientosActivosEnRango(List<int> grupoIds, DateTime fechaInicio, DateTime fechaFin)
+    {
+        var rows = await (
+            from detalle in _dbContext.DetallesMantenimientos.AsNoTracking()
+            join mantenimiento in _dbContext.Mantenimientos.AsNoTracking()
+                on detalle.IdMantenimiento equals mantenimiento.Id
+            join equipo in _dbContext.Equipos.AsNoTracking() on detalle.IdEquipo equals equipo.Id
+            where
+                grupoIds.Contains(equipo.IdGrupoEquipo)
+                && mantenimiento.FechaMantenimiento < fechaFin
+                && mantenimiento.FechaFinalMantenimiento > fechaInicio
+            select new
+            {
+                equipo.IdGrupoEquipo,
+                mantenimiento.FechaMantenimiento,
+                mantenimiento.FechaFinalMantenimiento,
+            }
+        ).ToListAsync();
+
+        return rows.ConvertAll(r =>
+            (r.IdGrupoEquipo, r.FechaMantenimiento, r.FechaFinalMantenimiento)
         );
     }
 }

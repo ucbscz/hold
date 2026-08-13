@@ -13,7 +13,10 @@ public class AvisoDisponibilidadService
     public async Task<Result<object>> Create(string carnet, AvisoDisponibilidadDto dto)
     {
         if ((dto.IdGrupoEquipo ?? 0) <= 0 || dto.Fecha == null)
-            return Result<object>.Error("Grupo y fecha requeridos");
+            return Result<object>.Error("Grupo y fecha/hora requeridos");
+
+        if (dto.Fecha <= DateTime.UtcNow)
+            return Result<object>.Error("La fecha y hora del aviso debe ser futura");
 
         await _repository.Add(carnet, dto);
 

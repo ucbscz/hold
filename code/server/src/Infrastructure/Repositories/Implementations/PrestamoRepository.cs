@@ -141,8 +141,19 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
         DateTime startDate,
         DateTime endDate
     )
+        => await HasAvailableEquipos(grupoEquipoId, 1, startDate, endDate);
+
+    public async Task<bool> HasAvailableEquipos(
+        int grupoEquipoId,
+        int requiredQuantity,
+        DateTime startDate,
+        DateTime endDate
+    )
     {
-        return await DbContext
+        if (requiredQuantity <= 0 || endDate <= startDate)
+            return false;
+
+        var availableQuantity = await DbContext
             .Equipos.Where(equipment =>
                 equipment.IdGrupoEquipo == grupoEquipoId
                 && !equipment.EstadoEliminado
@@ -161,11 +172,25 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                             || activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Activo
                             || activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Atrasado
                         )
-                        && activeLoan.Loan.FechaPrestamoEsperada.Date <= endDate.Date
-                        && activeLoan.Loan.FechaDevolucionEsperada.Date >= startDate.Date
+                        && activeLoan.Loan.FechaPrestamoEsperada < endDate
+                        && activeLoan.Loan.FechaDevolucionEsperada > startDate
+                    )
+                && !DbContext
+                    .DetallesMantenimientos.Join(
+                        DbContext.Mantenimientos,
+                        detail => detail.IdMantenimiento,
+                        maintenance => maintenance.Id,
+                        (detail, maintenance) => new { Detail = detail, Maintenance = maintenance }
+                    )
+                    .Any(activeMaintenance =>
+                        activeMaintenance.Detail.IdEquipo == equipment.Id
+                        && activeMaintenance.Maintenance.FechaMantenimiento < endDate
+                        && activeMaintenance.Maintenance.FechaFinalMantenimiento > startDate
                     )
             )
-            .AnyAsync();
+            .CountAsync();
+
+        return availableQuantity >= requiredQuantity;
     }
 
     public async Task SaveGrupoEquipoReservations(int prestamoId, List<int>? grupoEquipoIds)
@@ -215,8 +240,8 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                     || activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Activo
                     || activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Atrasado
                 )
-                && activeLoan.Loan.FechaPrestamoEsperada.Date <= loan.FechaDevolucionEsperada.Date
-                && activeLoan.Loan.FechaDevolucionEsperada.Date >= loan.FechaPrestamoEsperada.Date
+                && activeLoan.Loan.FechaPrestamoEsperada < loan.FechaDevolucionEsperada
+                && activeLoan.Loan.FechaDevolucionEsperada > loan.FechaPrestamoEsperada
             )
             .Select(activeLoan => activeLoan.Detail.IdEquipo!.Value)
             .ToListAsync();
@@ -230,6 +255,20 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                     && !equipment.EstadoEliminado
                     && equipment.EstadoEquipo == EstadoEquipo.Operativo
                     && !loanedIds.Contains(equipment.Id)
+                    && !DbContext
+                        .DetallesMantenimientos.Join(
+                            DbContext.Mantenimientos,
+                            detail => detail.IdMantenimiento,
+                            maintenance => maintenance.Id,
+                            (detail, maintenance) => new { Detail = detail, Maintenance = maintenance }
+                        )
+                        .Any(activeMaintenance =>
+                            activeMaintenance.Detail.IdEquipo == equipment.Id
+                            && activeMaintenance.Maintenance.FechaMantenimiento
+                                < loan.FechaDevolucionEsperada
+                            && activeMaintenance.Maintenance.FechaFinalMantenimiento
+                                > loan.FechaPrestamoEsperada
+                        )
                 )
                 .Select(equipment => new { equipment.Id, equipment.IdGrupoEquipo })
                 .ToListAsync()
@@ -376,32 +415,33 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
             .Select(user => user.MotivoBloqueo)
             .FirstOrDefaultAsync();
 
-    public async Task<List<PrestamoDto>> GetOverdueLoans(DateTime today) =>
+    public async Task<List<PrestamoDto>> GetOverdueLoans(DateTime now) =>
         await ToLoanDtos(
             DbContext.Prestamos.Where(loan =>
                 loan.EstadoPrestamo == EstadoPrestamo.Activo
-                && loan.FechaDevolucionEsperada.Date < today
+                && loan.FechaDevolucionEsperada < now
                 && !loan.EstadoEliminado
             )
         );
 
-    public async Task<List<PrestamoDto>> GetExpiredPendingLoans(DateTime today) =>
+    public async Task<List<PrestamoDto>> GetExpiredPendingLoans(DateTime now) =>
         await ToLoanDtos(
             DbContext.Prestamos.Where(loan =>
                 (
                     loan.EstadoPrestamo == EstadoPrestamo.Pendiente
                     || loan.EstadoPrestamo == EstadoPrestamo.Aprobado
                 )
-                && loan.FechaPrestamoEsperada.Date < today
+                && loan.FechaPrestamoEsperada < now
                 && !loan.EstadoEliminado
             )
         );
 
-    public async Task<List<PrestamoDto>> GetLoansDueForReminder(DateTime dueDate) =>
+    public async Task<List<PrestamoDto>> GetLoansDueForReminder(DateTime now, DateTime reminderDeadline) =>
         await ToLoanDtos(
             DbContext.Prestamos.Where(loan =>
                 loan.EstadoPrestamo == EstadoPrestamo.Activo
-                && loan.FechaDevolucionEsperada.Date == dueDate.Date
+                && loan.FechaDevolucionEsperada > now
+                && loan.FechaDevolucionEsperada <= reminderDeadline
                 && !loan.RecordatorioEnviado
                 && !loan.EstadoEliminado
             )
