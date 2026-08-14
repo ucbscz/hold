@@ -145,20 +145,8 @@
   font-weight: 600;
   white-space: nowrap;
 }
-.cart__quantity select {
-  padding: 0.35rem 1.5rem 0.35rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  font-size: 0.875rem;
-  background-color: var(--surface);
-  width: 64px;
-  text-align: center;
-  font-family: var(--font);
-  font-weight: 600;
-  color: var(--ink);
-}
-.cart__quantity select option {
-  text-align: center;
+.cart__quantity app-custom-select {
+  width: 5.25rem;
 }
 .cart__remove-button {
   background-color: rgba(231, 76, 60, 0.15);
@@ -386,9 +374,8 @@
   .cart__quantity-label {
     font-size: 0.7rem;
   }
-  .cart__quantity select {
-    width: 52px;
-    font-size: 0.85rem;
+  .cart__quantity app-custom-select {
+    width: 4.75rem;
   }
   .cart__remove-button {
     width: 48px;

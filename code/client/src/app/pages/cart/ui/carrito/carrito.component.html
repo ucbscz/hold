@@ -32,25 +32,13 @@
                 <p class="cart__product-owner">Propietario: IMT</p>
               </div>
               <div class="cart__quantity">
-                <label
-                  class="cart__quantity-label"
-                  for="cantidad_{{ item.key }}"
-                  >Cantidad</label
-                >
-                <select
-                  id="cantidad_{{ item.key }}"
+                <span class="cart__quantity-label">Cantidad</span>
+                <app-custom-select
                   [ngModel]="item.value.cantidad"
                   (ngModelChange)="cambiarCantidad(item.key, $event)"
-                >
-                  <option
-                    *ngFor="
-                      let n of generarCantidadesMax(item.value.cantidadMax)
-                    "
-                    [value]="n"
-                  >
-                    {{ n }}
-                  </option>
-                </select>
+                  [opciones]="opcionesCantidad(item.value.cantidadMax)"
+                  [searchThreshold]="100"
+                ></app-custom-select>
               </div>
               <button
                 (click)="cambiarCantidad(item.key, 0)"

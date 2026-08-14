@@ -11,8 +11,10 @@ import { extractErrorMessage } from '@shared/lib/error';
 import {
   Aviso,
   AvisoExitoComponent,
+  CustomSelectComponent,
   EquipmentImagePlaceholderComponent,
   MostrarerrorComponent,
+  OpcionSelect,
   PantallaCargaComponent,
 } from '@shared/ui';
 import { finalize } from 'rxjs';
@@ -29,6 +31,7 @@ import { finalize } from 'rxjs';
     PantallaCargaComponent,
     CalendarioComponent,
     EquipmentImagePlaceholderComponent,
+    CustomSelectComponent,
   ],
   templateUrl: './carrito.component.html',
   styleUrl: './carrito.component.css',
@@ -157,6 +160,13 @@ export class CarritoComponent {
 
   generarCantidadesMax(cantidad: number): number[] {
     return Array.from({ length: cantidad }, (_, i) => i + 1);
+  }
+
+  opcionesCantidad(cantidad: number): OpcionSelect[] {
+    return this.generarCantidadesMax(cantidad).map((value) => ({
+      value,
+      label: String(value),
+    }));
   }
 
   obtenerImagenProducto(imagen: string | null | undefined): string | null {

@@ -179,91 +179,97 @@
                   </span>
                 </td>
                 <td class="actions-column">
-                  <button
-                    class="btn-icon btn-view"
-                    title="Ver detalles"
-                    aria-label="Ver detalles"
-                    (click)="abrirVistaPrestamos(prestamo.value.equipos)"
-                  >
-                    <i class="fas fa-eye"></i>
-                  </button>
-                  @if (prestamo.value.datosgrupo.IdContrato) {
+                  <div class="loan-actions" aria-label="Acciones del préstamo">
                     <button
                       class="btn-icon btn-view"
-                      (click)="
-                        cambiarestadovercontrato(prestamo.value.datosgrupo)
-                      "
+                      title="Ver detalles"
+                      aria-label="Ver detalles"
+                      (click)="abrirVistaPrestamos(prestamo.value.equipos)"
                     >
-                      <i class="fas fa-file-contract"></i>
+                      <i class="fas fa-eye"></i>
                     </button>
-                  }
-                  @if (
-                    prestamo.value.datosgrupo.EstadoPrestamo == "rechazado" ||
-                    prestamo.value.datosgrupo.EstadoPrestamo == "finalizado" ||
-                    prestamo.value.datosgrupo.EstadoPrestamo == "cancelado"
-                  ) {
-                    <button
-                      class="btn-icon btn-delete"
-                      (click)="eliminarPrestamo(prestamo.value.datosgrupo)"
-                    >
-                      <i class="fas fa-trash-alt"></i>
-                    </button>
-                  } @else if (
-                    prestamo.value.datosgrupo.EstadoPrestamo == "pendiente"
-                  ) {
-                    <button
-                      class="btn-action btn-accept"
-                      title="Aceptar"
-                      aria-label="Aceptar"
-                      (click)="validaraprobacion(prestamo.key)"
-                    >
-                      <i class="fas fa-check"></i>
-                      <span class="btn-label">Aceptar</span>
-                    </button>
-                    <button
-                      class="btn-action btn-reject"
-                      title="Rechazar"
-                      aria-label="Rechazar"
-                      (click)="validarrechazo(prestamo.key)"
-                    >
-                      <i class="fas fa-times"></i>
-                      <span class="btn-label">Rechazar</span>
-                    </button>
-                  } @else if (
-                    prestamo.value.datosgrupo.EstadoPrestamo == "aprobado"
-                  ) {
-                    <button
-                      class="btn-action btn-accept"
-                      title="Recogido"
-                      aria-label="Recogido"
-                      (click)="validarRecogido(prestamo.key)"
-                    >
-                      <i class="fas fa-briefcase"></i>
-                      <span class="btn-label">Recogido</span>
-                    </button>
-                    <button
-                      class="btn-action btn-reject"
-                      title="Cancelar"
-                      aria-label="Cancelar"
-                      (click)="validarcancelacion(prestamo.key)"
-                    >
-                      <i class="fas fa-times"></i>
-                      <span class="btn-label">Cancelar</span>
-                    </button>
-                  } @else if (
-                    getEstadoCalculado(prestamo.value) === "activo" ||
-                    getEstadoCalculado(prestamo.value) === "atrasado"
-                  ) {
-                    <button
-                      class="btn-action btn-accept"
-                      title="Devuelto"
-                      aria-label="Devuelto"
-                      (click)="validarDevuelto(prestamo.key)"
-                    >
-                      <i class="fas fa-undo"></i>
-                      <span class="btn-label">Devuelto</span>
-                    </button>
-                  }
+                    @if (prestamo.value.datosgrupo.IdContrato) {
+                      <button
+                        class="btn-icon btn-view"
+                        title="Ver contrato"
+                        aria-label="Ver contrato"
+                        (click)="
+                          cambiarestadovercontrato(prestamo.value.datosgrupo)
+                        "
+                      >
+                        <i class="fas fa-file-contract"></i>
+                      </button>
+                    }
+                    @if (
+                      prestamo.value.datosgrupo.EstadoPrestamo == "rechazado" ||
+                      prestamo.value.datosgrupo.EstadoPrestamo == "finalizado" ||
+                      prestamo.value.datosgrupo.EstadoPrestamo == "cancelado"
+                    ) {
+                      <button
+                        class="btn-icon btn-delete"
+                        title="Eliminar"
+                        aria-label="Eliminar"
+                        (click)="eliminarPrestamo(prestamo.value.datosgrupo)"
+                      >
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    } @else if (
+                      prestamo.value.datosgrupo.EstadoPrestamo == "pendiente"
+                    ) {
+                      <button
+                        class="btn-action btn-accept"
+                        title="Aceptar"
+                        aria-label="Aceptar"
+                        (click)="validaraprobacion(prestamo.key)"
+                      >
+                        <i class="fas fa-check"></i>
+                        <span class="btn-label">Aceptar</span>
+                      </button>
+                      <button
+                        class="btn-action btn-reject"
+                        title="Rechazar"
+                        aria-label="Rechazar"
+                        (click)="validarrechazo(prestamo.key)"
+                      >
+                        <i class="fas fa-times"></i>
+                        <span class="btn-label">Rechazar</span>
+                      </button>
+                    } @else if (
+                      prestamo.value.datosgrupo.EstadoPrestamo == "aprobado"
+                    ) {
+                      <button
+                        class="btn-action btn-accept"
+                        title="Recogido"
+                        aria-label="Recogido"
+                        (click)="validarRecogido(prestamo.key)"
+                      >
+                        <i class="fas fa-briefcase"></i>
+                        <span class="btn-label">Recogido</span>
+                      </button>
+                      <button
+                        class="btn-action btn-reject"
+                        title="Cancelar"
+                        aria-label="Cancelar"
+                        (click)="validarcancelacion(prestamo.key)"
+                      >
+                        <i class="fas fa-times"></i>
+                        <span class="btn-label">Cancelar</span>
+                      </button>
+                    } @else if (
+                      getEstadoCalculado(prestamo.value) === "activo" ||
+                      getEstadoCalculado(prestamo.value) === "atrasado"
+                    ) {
+                      <button
+                        class="btn-action btn-accept"
+                        title="Devuelto"
+                        aria-label="Devuelto"
+                        (click)="validarDevuelto(prestamo.key)"
+                      >
+                        <i class="fas fa-undo"></i>
+                        <span class="btn-label">Devuelto</span>
+                      </button>
+                    }
+                  </div>
                 </td>
               </tr>
             }
