@@ -91,7 +91,7 @@
   padding: 1.25rem;
   padding-right: 0;
   box-shadow: var(--shadow-sm);
-  overflow: hidden;
+  overflow: visible;
 }
 .cart__product-image {
   width: 70px;
@@ -137,6 +137,8 @@
   justify-content: center;
   gap: 0.3rem;
   align-self: center;
+  position: relative;
+  z-index: 1;
 }
 .cart__quantity-label {
   font-size: 0.72rem;

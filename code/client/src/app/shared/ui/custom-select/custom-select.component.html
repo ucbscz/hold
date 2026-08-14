@@ -13,7 +13,7 @@
     <i class="fas fa-chevron-down cs-chevron" [class.open]="abierto"></i>
   </button>
   @if (abierto) {
-    <div class="cs-menu">
+    <div class="cs-menu" [class.cs-menu--top]="menuPosition === 'top'">
       @if (debeMostrarBusqueda) {
         <div class="cs-search">
           <i class="fas fa-search cs-search__icon"></i>

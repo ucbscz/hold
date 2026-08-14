@@ -27,6 +27,7 @@ export class CustomSelectComponent implements ControlValueAccessor {
   @Input() placeholder = 'Seleccionar';
   @Input() invalid = false;
   @Input() searchThreshold = 8;
+  @Input() menuPosition: 'top' | 'bottom' = 'bottom';
   @Input() set opciones(valor: Array<OpcionSelect | string>) {
     this.opcionesNormalizadas = (valor ?? []).map((o) =>
       typeof o === 'string' ? { value: o, label: o } : o,
