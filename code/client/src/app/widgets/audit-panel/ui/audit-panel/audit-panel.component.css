@@ -83,6 +83,9 @@
 .audit-select-wrap {
   position: relative;
   z-index: 400;
+  width: 11rem;
+  min-width: 11rem;
+  max-width: 11rem;
 }
 .audit-select-trigger {
   display: flex;
