@@ -1,4 +1,5 @@
 using Ardalis.Result;
+using System.Text.Json;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Application.Features.AuditLog;
@@ -73,7 +74,14 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
                 "Cuenta bloqueada para reservas",
                 string.IsNullOrWhiteSpace(blockReason)
                     ? "Tu cuenta fue bloqueada para nuevas reservas. Contacta con un administrador para revisar tu caso."
-                    : $"{blockReason}. Contacta con un administrador para revisar tu caso."
+                    : $"{blockReason}. Contacta con un administrador para revisar tu caso.",
+                JsonSerializer.Serialize(new
+                {
+                    origen = "Administración",
+                    usuario = carnet,
+                    motivo = blockReason ?? "Bloqueo administrativo para nuevas reservas.",
+                    fecha = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
+                })
             );
 
         _ = await _cacheRepository.Remove(CacheKeys.Usuario(carnet));

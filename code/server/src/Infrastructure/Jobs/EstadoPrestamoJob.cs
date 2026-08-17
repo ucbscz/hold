@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text.Json;
 using IMT_Reservas.Server.Application.Features.AuditLog;
 using IMT_Reservas.Server.Application.Features.Notificacion;
 using IMT_Reservas.Server.Application.Features.Prestamo;
@@ -63,7 +64,11 @@ public class EstadoPrestamoJob
                     AuditAccion.AtrasadoAutomatico,
                     nameof(PrestamoEntity),
                     GetLoanIdText(loan),
-                    null
+                    BuildLoanDetail(
+                        loan,
+                        "Bloqueo automático por préstamo vencido.",
+                        loan.FechaDevolucionEsperada
+                    )
                 ))
                 .ToList()
         );
@@ -77,6 +82,11 @@ public class EstadoPrestamoJob
                     Titulo = "Cuenta bloqueada por atraso",
                     Contenido =
                         "Tu préstamo está atrasado. Tu cuenta queda bloqueada para nuevas reservas hasta que devuelvas los equipos. Si necesitas ayuda, contacta con un administrador.",
+                    Detalle = BuildLoanDetail(
+                        loan,
+                        "El préstamo no fue devuelto dentro del horario acordado.",
+                        loan.FechaDevolucionEsperada
+                    ),
                 })
                 .ToList()
         );
@@ -192,4 +202,21 @@ public class EstadoPrestamoJob
 
     private static string GetLoanIdText(PrestamoDto loan) =>
         GetLoanId(loan).ToString(CultureInfo.InvariantCulture);
+
+    private static string BuildLoanDetail(
+        PrestamoDto loan,
+        string motivo,
+        DateTime? fechaRelacionada
+    ) =>
+        JsonSerializer.Serialize(
+            new
+            {
+                origen = "Sistema de préstamos",
+                usuario = $"{loan.NombreUsuario ?? "Usuario"} {loan.ApellidoPaternoUsuario ?? string.Empty}".Trim(),
+                carnet = loan.CarnetUsuario,
+                producto = loan.NombreGrupoEquipo,
+                motivo,
+                fecha = fechaRelacionada?.ToString("dd/MM/yyyy HH:mm"),
+            }
+        );
 }

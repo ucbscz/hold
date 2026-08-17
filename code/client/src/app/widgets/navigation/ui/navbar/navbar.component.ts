@@ -1,4 +1,4 @@
-import { CommonModule, Location } from '@angular/common';
+import { CommonModule, DatePipe, Location } from '@angular/common';
 import {
   Component,
   effect,
@@ -18,7 +18,7 @@ import { UsuarioPrevioComponent } from './usuario-previo/usuario-previo.componen
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [RouterModule, CommonModule, UsuarioPrevioComponent],
+  imports: [RouterModule, CommonModule, DatePipe, UsuarioPrevioComponent],
   templateUrl: './navbar.component.html',
   styleUrls: ['./navbar.component.css'],
 })
@@ -145,6 +145,11 @@ export class NavbarComponent {
     if (!notificacion.Leido) {
       this.notifStore.marcarLeida(notificacion.Id);
     }
+    this.expandedNotificationId.set(
+      this.expandedNotificationId() === notificacion.Id
+        ? null
+        : notificacion.Id,
+    );
   }
 
   alternarDetalleNotificacion(notificacion: Notificacion, event: MouseEvent) {
@@ -161,6 +166,10 @@ export class NavbarComponent {
   obtenerDetalleOrganizado(notificacion: Notificacion): {
     observacion: string | null;
     equipos: { codigo: string; nombre: string; estado: string }[];
+    motivo: string | null;
+    origen: string | null;
+    fecha: string | null;
+    usuario: string | null;
   } | null {
     if (!notificacion.Detalle) return null;
 
@@ -183,6 +192,10 @@ export class NavbarComponent {
       observacion:
         typeof data['observacion'] === 'string' ? data['observacion'] : null,
       equipos,
+      motivo: typeof data['motivo'] === 'string' ? data['motivo'] : null,
+      origen: typeof data['origen'] === 'string' ? data['origen'] : null,
+      fecha: typeof data['fecha'] === 'string' ? data['fecha'] : null,
+      usuario: typeof data['usuario'] === 'string' ? data['usuario'] : null,
     };
   }
 
