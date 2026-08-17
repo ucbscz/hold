@@ -125,4 +125,19 @@ public class MantenimientoRepository : Repository<MantenimientoEntity, Mantenimi
 
         await DbContext.SaveChangesAsync();
     }
+
+    public async Task ReplaceDetalles(
+        int mantenimientoId,
+        int[] codigosImt,
+        string[]? tipos,
+        string[]? descripciones
+    )
+    {
+        var existing = DbContext.DetallesMantenimientos.Where(detail =>
+            detail.IdMantenimiento == mantenimientoId
+        );
+        DbContext.DetallesMantenimientos.RemoveRange(existing);
+        await DbContext.SaveChangesAsync();
+        await AddDetalles(mantenimientoId, codigosImt, tipos, descripciones);
+    }
 }

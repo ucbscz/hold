@@ -20,7 +20,7 @@
         <input
           type="text"
           appFlatpickr
-          [fpOptions]="{ minDate: fechaminima }"
+          [fpOptions]="opcionesFechaInicio"
           id="FechaMantenimiento"
           name="FechaMantenimiento"
           [(ngModel)]="mantenimiento.FechaMantenimiento"
@@ -36,10 +36,7 @@
         <input
           type="text"
           appFlatpickr
-          [fpOptions]="{
-            minDate: mantenimiento.FechaMantenimiento || fechaminima,
-            maxDate: fechamaxima(mantenimiento.FechaMantenimiento),
-          }"
+          [fpOptions]="opcionesFechaFinal"
           id="FechaFinalDeMantenimiento"
           name="FechaFinalDeMantenimiento"
           [(ngModel)]="mantenimiento.FechaFinalDeMantenimiento"
@@ -75,21 +72,28 @@
           class="form-input"
         ></textarea>
       </div>
-      @for (item of mantenimientoSeleccionado | keyvalue; track item.key) {
-        <div class="equipo-pill">
-          <span class="equipo-id">{{ item.key }}</span>
-          <span class="equipo-nombre">{{ item.value.nombre }}</span>
-          <span class="equipo-tipo">{{ item.value.TipoMantenimiento }}</span>
-          <button class="btn-remove" (click)="eliminarEquipo(item.key)">
-            <img
-              class="remove-icon"
-              src="assets/x.png"
-              alt="Eliminar"
-              width="12"
-              height="12"
-            />
-          </button>
-        </div>
+      @if (mantenimientoSeleccionado.size > 0) {
+        <section class="equipos-seleccionados" aria-label="Equipos incluidos">
+          <span class="equipos-seleccionados__title">Equipos incluidos</span>
+          @for (item of mantenimientoSeleccionado | keyvalue; track item.key) {
+            <div class="equipo-pill">
+              <div class="equipo-pill__identity">
+                <span class="equipo-id">IMT {{ item.key }}</span>
+                <span class="equipo-nombre" [title]="item.value.nombre">{{ item.value.nombre }}</span>
+              </div>
+              <app-custom-select
+                class="equipo-pill__type"
+                [ngModel]="item.value.TipoMantenimiento"
+                (ngModelChange)="actualizarTipoEquipo(item.key, $event)"
+                [opciones]="tipoOpciones"
+                [searchThreshold]="99"
+              ></app-custom-select>
+              <button type="button" class="btn-remove" (click)="eliminarEquipo(item.key)" aria-label="Quitar equipo">
+                <img class="remove-icon" src="assets/x.png" alt="" width="12" height="12" />
+              </button>
+            </div>
+          }
+        </section>
       }
       <div class="form-submit">
         <button

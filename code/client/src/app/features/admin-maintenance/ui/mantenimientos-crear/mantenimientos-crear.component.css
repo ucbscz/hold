@@ -137,23 +137,37 @@ textarea.form-input {
 .register-button {
   flex: 1;
 }
+.equipos-seleccionados {
+  display: grid;
+  gap: 0.5rem;
+}
+.equipos-seleccionados__title {
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
 .equipo-pill {
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 10.5rem 2rem;
   align-items: center;
   background: var(--sidebar);
   border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  padding: 0.35rem 0.625rem;
-  margin: 0.1rem;
+  border-radius: var(--radius-sm);
+  padding: 0.5rem 0.625rem;
   font-size: 0.8rem;
-  gap: 0.4rem;
+  gap: 0.625rem;
   transition:
     color var(--t-fast),
     background-color var(--t-fast),
     border-color var(--t-fast),
     box-shadow var(--t-fast),
     transform var(--t-fast);
-  max-width: 280px;
+  max-width: none;
+}
+.equipo-pill__identity {
+  min-width: 0;
+  display: grid;
+  gap: 0.125rem;
 }
 .equipo-pill:hover {
   background: var(--interactive-subtle);
@@ -171,17 +185,10 @@ textarea.form-input {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 120px;
+  max-width: 100%;
 }
-.equipo-tipo {
-  background: var(--interactive-subtle);
-  color: var(--brand-text);
-  padding: 0.1rem 0.3rem;
-  border-radius: 12px;
-  font-size: 0.7rem;
-  font-weight: 500;
-  border: 1px solid rgba(255, 215, 0, 0.35);
-  white-space: nowrap;
+.equipo-pill__type {
+  min-width: 0;
 }
 .btn-remove {
   background: transparent;
@@ -247,6 +254,14 @@ textarea.form-input {
   }
   .form-group label {
     font-size: 0.85rem;
+  }
+}
+@media (max-width: 420px) {
+  .equipo-pill {
+    grid-template-columns: minmax(0, 1fr) 2rem;
+  }
+  .equipo-pill__type {
+    grid-column: 1 / -1;
   }
 }
 @media (max-width: 360px) {

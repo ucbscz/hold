@@ -19,7 +19,13 @@
           @for (mantenimiento of mantenimientos; track $index; let i = $index) {
             <tr>
               <td>{{ mantenimiento.CodigoImtEquipo }}</td>
-              <td>{{ mantenimiento.TipoMantenimiento }}</td>
+              <td>
+                <app-custom-select
+                  [(ngModel)]="mantenimiento.TipoMantenimiento"
+                  [opciones]="tipoOpciones"
+                  [searchThreshold]="99"
+                ></app-custom-select>
+              </td>
               <td>{{ mantenimiento.DescripcionEquipo }}</td>
             </tr>
           }
@@ -29,6 +35,9 @@
     <div class="modal-footer">
       <button class="btn btn-secondary" (click)="cerrarDetalles()">
         Cerrar
+      </button>
+      <button class="btn btn-primary" [disabled]="guardando" (click)="guardarCambios()">
+        {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
       </button>
     </div>
   </div>

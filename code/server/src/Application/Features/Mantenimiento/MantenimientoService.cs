@@ -54,7 +54,33 @@ public class MantenimientoService
     public override async Task<Result<MantenimientoDto>> Update(int id, MantenimientoDto dto)
     {
         await ResolveEmpresa(dto);
-        return await base.Update(id, dto);
+        var validation = await Validator.ValidateAsync(dto);
+        if (!validation.IsValid)
+            return validation.ToResult<MantenimientoDto>();
+
+        dto.Id = id;
+        var updateResult = await UpdateEntity(MapToEntity(dto));
+        if (!updateResult.IsSuccess)
+            return updateResult;
+
+        if (dto.CodigoImt is { Length: > 0 })
+        {
+            await Repository.ReplaceDetalles(
+                id,
+                dto.CodigoImt,
+                dto.TiposMantenimiento,
+                dto.DescripcionesEquipo
+            );
+        }
+
+        await Audit!.Log(
+            AuditAccion.Editar,
+            typeof(MantenimientoEntity).Name,
+            id.ToString(CultureInfo.InvariantCulture),
+            "Mantenimiento y equipos actualizados"
+        );
+
+        return await Repository.Get(id);
     }
 
     private async Task ResolveEmpresa(MantenimientoDto dto)

@@ -134,6 +134,7 @@
   <app-detalles-mantenimiento
     [mantenimientos]="mantenimientoGruposeleccionado"
     [mostrardetalles]="mostrardetalles"
+    (actualizado)="cargarMantenimientos(); auditRefresh = auditRefresh + 1"
   ></app-detalles-mantenimiento>
 }
 @if (error()) {

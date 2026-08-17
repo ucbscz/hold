@@ -19,7 +19,9 @@ import {
   AvisoExitoComponent,
   CustomSelectComponent,
   MostrarerrorComponent,
+  OpcionSelect,
 } from '@shared/ui';
+import { Options } from 'flatpickr/dist/types/options';
 import { MantenimientosServiceEquipos } from '../../model/mantenimientos-equipos.service';
 import { ListaEquipoComponent } from './lista-equipo/lista-equipo.component';
 @Component({
@@ -43,6 +45,12 @@ export class MantenimientosCrearComponent extends BaseTablaComponent {
   @Output() Actualizar = new EventEmitter<void>();
   agregarequipo: WritableSignal<boolean> = signal(false);
   fechaminima = this.toLocalISOString(new Date());
+  opcionesFechaInicio: Partial<Options> = { minDate: this.fechaminima };
+  opcionesFechaFinal: Partial<Options> = { minDate: this.fechaminima };
+  readonly tipoOpciones: OpcionSelect[] = [
+    { value: 'preventivo', label: 'Preventivo' },
+    { value: 'correctivo', label: 'Correctivo' },
+  ];
   mantenimiento: Mantenimientos = new Mantenimientos();
   empresas: string[] = [];
   mantenimientoSeleccionado: Map<
@@ -88,6 +96,10 @@ export class MantenimientosCrearComponent extends BaseTablaComponent {
 
   onFechaMantenimiento(dates: Date[]): void {
     this.mantenimiento.FechaMantenimiento = dates[0] ?? null;
+    this.opcionesFechaFinal = {
+      minDate: this.mantenimiento.FechaMantenimiento ?? this.fechaminima,
+      maxDate: this.fechamaxima(this.mantenimiento.FechaMantenimiento),
+    };
 
     if (!this.validarFechaFinal()) {
       this.mantenimiento.FechaFinalDeMantenimiento = null;
@@ -142,6 +154,10 @@ export class MantenimientosCrearComponent extends BaseTablaComponent {
   }
   eliminarEquipo(codigo: number) {
     this.mantenimientoequipo.quitarEquipo(codigo);
+    this.obtenermantenimientoSeleccionado();
+  }
+  actualizarTipoEquipo(codigo: number, tipo: string): void {
+    this.mantenimientoequipo.actualizarTipo(codigo, tipo);
     this.obtenermantenimientoSeleccionado();
   }
   validarcreacion() {

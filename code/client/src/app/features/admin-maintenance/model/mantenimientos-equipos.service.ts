@@ -35,6 +35,16 @@ export class MantenimientosServiceEquipos {
     this.equiposSeleccionados.delete(codigo);
   }
 
+  actualizarTipo(codigo: number, tipo: string): void {
+    const equipo = this.equiposSeleccionados.get(codigo);
+    if (!equipo) return;
+
+    this.equiposSeleccionados.set(codigo, {
+      ...equipo,
+      TipoMantenimiento: tipo,
+    });
+  }
+
   vaciarEquiposMantenimientos(): void {
     this.equiposSeleccionados.clear();
   }

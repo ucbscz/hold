@@ -70,4 +70,26 @@ export class MantenimientoService {
   eliminarMantenimiento(id: number) {
     return this.http.delete<unknown>(`${this.apiUrl}/${id}`);
   }
+
+  actualizarMantenimiento(mantenimientos: Mantenimientos[]): Observable<unknown> {
+    const principal = mantenimientos[0];
+    if (!principal?.Id) throw new Error('Mantenimiento inválido');
+
+    return this.http.put<unknown>(`${this.apiUrl}/${principal.Id}`, {
+      NombreEmpresaMantenimiento: principal.NombreEmpresaMantenimiento,
+      FechaMantenimiento: principal.FechaMantenimiento,
+      FechaFinalMantenimiento: principal.FechaFinalDeMantenimiento,
+      Costo: principal.Costo,
+      Descripcion: principal.Descripcion,
+      CodigoImt: mantenimientos
+        .map((mantenimiento) => Number(mantenimiento.CodigoImtEquipo))
+        .filter(Number.isFinite),
+      TiposMantenimiento: mantenimientos.map(
+        (mantenimiento) => mantenimiento.TipoMantenimiento ?? '',
+      ),
+      DescripcionesEquipo: mantenimientos.map(
+        (mantenimiento) => mantenimiento.DescripcionEquipo ?? '',
+      ),
+    });
+  }
 }
