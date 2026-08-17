@@ -89,14 +89,20 @@ export class ListaObjetosComponent
     this.detenerEvento(event);
     const c = this.getCantidad(id);
 
-    if (c < (max || DEFAULT_MAX_QUANTITY)) this.cantidades[id] = c + 1;
+    if (c < (max || DEFAULT_MAX_QUANTITY)) {
+      this.cantidades[id] = c + 1;
+      this.actualizarCantidadEnCarrito(id);
+    }
   }
 
   decrementarCantidad(id: number, event: Event): void {
     this.detenerEvento(event);
     const c = this.getCantidad(id);
 
-    if (c > 1) this.cantidades[id] = c - 1;
+    if (c > 1) {
+      this.cantidades[id] = c - 1;
+      this.actualizarCantidadEnCarrito(id);
+    }
   }
 
   agregarAlCarrito(item: GrupoEquipo, event: Event): void {
@@ -139,6 +145,12 @@ export class ListaObjetosComponent
       this.addedToCart[Number(id)] = true;
       this.cantidades[Number(id)] = item.cantidad;
     });
+  }
+
+  private actualizarCantidadEnCarrito(id: number): void {
+    if (!this.carrito.contieneProducto(id)) return;
+
+    this.carrito.editarCantidad(id, this.getCantidad(id));
   }
 
   ngAfterViewInit(): void {

@@ -184,11 +184,15 @@ export class ObjetoComponent implements OnDestroy {
       )
     ) {
       this.cantidad++;
+      this.actualizarCantidadEnCarrito();
     }
   }
 
   decrementar(): void {
-    if (this.cantidad > MINIMUM_CART_QUANTITY) this.cantidad--;
+    if (this.cantidad > MINIMUM_CART_QUANTITY) {
+      this.cantidad--;
+      this.actualizarCantidadEnCarrito();
+    }
   }
 
   abrirCalendarioModal(): void {
@@ -466,5 +470,12 @@ export class ObjetoComponent implements OnDestroy {
       this.producto.Cantidad ?? MINIMUM_CART_QUANTITY,
       this.cantidad,
     );
+  }
+
+  private actualizarCantidadEnCarrito(): void {
+    if (!this.producto.id || !this.carrito.contieneProducto(this.producto.id))
+      return;
+
+    this.carrito.editarCantidad(this.producto.id, this.cantidad);
   }
 }
