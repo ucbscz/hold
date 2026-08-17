@@ -71,7 +71,9 @@ export class MantenimientoService {
     return this.http.delete<unknown>(`${this.apiUrl}/${id}`);
   }
 
-  actualizarMantenimiento(mantenimientos: Mantenimientos[]): Observable<unknown> {
+  actualizarMantenimiento(
+    mantenimientos: Mantenimientos[],
+  ): Observable<unknown> {
     const principal = mantenimientos[0];
     if (!principal?.Id) throw new Error('Mantenimiento inválido');
 

@@ -36,8 +36,12 @@
       <button class="btn btn-secondary" (click)="cerrarDetalles()">
         Cerrar
       </button>
-      <button class="btn btn-primary" [disabled]="guardando" (click)="guardarCambios()">
-        {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+      <button
+        class="btn btn-primary"
+        [disabled]="guardando"
+        (click)="guardarCambios()"
+      >
+        {{ guardando ? "Guardando..." : "Guardar cambios" }}
       </button>
     </div>
   </div>

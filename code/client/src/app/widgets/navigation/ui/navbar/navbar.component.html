@@ -166,22 +166,35 @@
                     ) {
                       <div class="notif__detail-panel">
                         <span class="notif__detail-label">Fecha</span>
-                        <span class="notif__detail-text">{{ n.FechaEnvio | date: "dd/MM/yyyy HH:mm" : "America/La_Paz" }}</span>
+                        <span class="notif__detail-text">{{
+                          n.FechaEnvio
+                            | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
+                        }}</span>
                         @if (detalle.origen) {
                           <span class="notif__detail-label">Origen</span>
-                          <span class="notif__detail-text">{{ detalle.origen }}</span>
+                          <span class="notif__detail-text">{{
+                            detalle.origen
+                          }}</span>
                         }
                         @if (detalle.usuario) {
                           <span class="notif__detail-label">Usuario</span>
-                          <span class="notif__detail-text">{{ detalle.usuario }}</span>
+                          <span class="notif__detail-text">{{
+                            detalle.usuario
+                          }}</span>
                         }
                         @if (detalle.motivo) {
                           <span class="notif__detail-label">Motivo</span>
-                          <span class="notif__detail-text">{{ detalle.motivo }}</span>
+                          <span class="notif__detail-text">{{
+                            detalle.motivo
+                          }}</span>
                         }
                         @if (detalle.fecha) {
-                          <span class="notif__detail-label">Fecha relacionada</span>
-                          <span class="notif__detail-text">{{ detalle.fecha }}</span>
+                          <span class="notif__detail-label"
+                            >Fecha relacionada</span
+                          >
+                          <span class="notif__detail-text">{{
+                            detalle.fecha
+                          }}</span>
                         }
                         @if (detalle.observacion) {
                           <span class="notif__detail-label">Observación</span>
@@ -211,12 +224,20 @@
                       <span class="notif__detail">{{ detalleTexto }}</span>
                     }
                   }
-                  @if (!tieneDetalleOrganizado(n) && expandedNotificationId() === n.Id) {
+                  @if (
+                    !tieneDetalleOrganizado(n) &&
+                    expandedNotificationId() === n.Id
+                  ) {
                     <div class="notif__detail-panel">
                       <span class="notif__detail-label">Fecha</span>
-                      <span class="notif__detail-text">{{ n.FechaEnvio | date: "dd/MM/yyyy HH:mm" : "America/La_Paz" }}</span>
+                      <span class="notif__detail-text">{{
+                        n.FechaEnvio
+                          | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
+                      }}</span>
                       <span class="notif__detail-label">Destino</span>
-                      <span class="notif__detail-text">{{ n.CarnetUsuario }}</span>
+                      <span class="notif__detail-text">{{
+                        n.CarnetUsuario
+                      }}</span>
                     </div>
                   }
                 </div>

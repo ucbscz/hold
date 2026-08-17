@@ -79,7 +79,9 @@
             <div class="equipo-pill">
               <div class="equipo-pill__identity">
                 <span class="equipo-id">IMT {{ item.key }}</span>
-                <span class="equipo-nombre" [title]="item.value.nombre">{{ item.value.nombre }}</span>
+                <span class="equipo-nombre" [title]="item.value.nombre">{{
+                  item.value.nombre
+                }}</span>
               </div>
               <app-custom-select
                 class="equipo-pill__type"
@@ -88,8 +90,19 @@
                 [opciones]="tipoOpciones"
                 [searchThreshold]="99"
               ></app-custom-select>
-              <button type="button" class="btn-remove" (click)="eliminarEquipo(item.key)" aria-label="Quitar equipo">
-                <img class="remove-icon" src="assets/x.png" alt="" width="12" height="12" />
+              <button
+                type="button"
+                class="btn-remove"
+                (click)="eliminarEquipo(item.key)"
+                aria-label="Quitar equipo"
+              >
+                <img
+                  class="remove-icon"
+                  src="assets/x.png"
+                  alt=""
+                  width="12"
+                  height="12"
+                />
               </button>
             </div>
           }

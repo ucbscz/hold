@@ -58,7 +58,10 @@ export abstract class Tabla extends BaseTablaComponent {
   }
 
   paginar<T>(items: readonly T[]): T[] {
-    const totalPaginas = Math.max(1, Math.ceil(items.length / this.filasPorPagina));
+    const totalPaginas = Math.max(
+      1,
+      Math.ceil(items.length / this.filasPorPagina),
+    );
     if (this.paginaActual > totalPaginas) this.paginaActual = totalPaginas;
     const inicio = (this.paginaActual - 1) * this.filasPorPagina;
     return items.slice(inicio, inicio + this.filasPorPagina);
@@ -72,11 +75,20 @@ export abstract class Tabla extends BaseTablaComponent {
     this.paginaActual = 1;
   }
 
-  exportarCsv(nombreArchivo: string, encabezados: string[], filas: unknown[][]): void {
-    const escape = (value: unknown) => `"${String(value ?? '').replaceAll('"', '""')}"`;
-    const csv = [encabezados, ...filas].map((fila) => fila.map(escape).join(',')).join('\n');
+  exportarCsv(
+    nombreArchivo: string,
+    encabezados: string[],
+    filas: unknown[][],
+  ): void {
+    const escape = (value: unknown) =>
+      `"${String(value ?? '').replaceAll('"', '""')}"`;
+    const csv = [encabezados, ...filas]
+      .map((fila) => fila.map(escape).join(','))
+      .join('\n');
     const enlace = document.createElement('a');
-    enlace.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    enlace.href = URL.createObjectURL(
+      new Blob([csv], { type: 'text/csv;charset=utf-8' }),
+    );
     enlace.download = `${nombreArchivo}.csv`;
     enlace.click();
     URL.revokeObjectURL(enlace.href);

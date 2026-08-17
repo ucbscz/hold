@@ -9,7 +9,11 @@ import {
 } from '@entities/loan';
 import { UsuarioServiceAPI } from '@entities/user';
 import { BuscadorComponent } from '@features/admin-search';
-import { AdminTableSort, Tabla, TablePaginationComponent } from '@shared/lib/admin-table';
+import {
+  AdminTableSort,
+  Tabla,
+  TablePaginationComponent,
+} from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -104,7 +108,9 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     );
   }
 
-  imprimirPrestamos(): void { window.print(); }
+  imprimirPrestamos(): void {
+    window.print();
+  }
 
   vercontrato: WritableSignal<boolean> = signal(false);
   prestamoSeleccionado: PrestamoDto = new PrestamoDto();

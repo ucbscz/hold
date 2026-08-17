@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output, signal, WritableSignal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  signal,
+  WritableSignal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Mantenimientos } from '@entities/admin';
 import { MantenimientoService } from '@entities/maintenance';
@@ -26,14 +33,16 @@ export class DetallesMantenimientoComponent {
     if (!this.mantenimientos.length || this.guardando) return;
 
     this.guardando = true;
-    this.mantenimientoApi.actualizarMantenimiento(this.mantenimientos).subscribe({
-      next: () => {
-        this.guardando = false;
-        this.actualizado.emit();
-        this.cerrarDetalles();
-      },
-      error: () => (this.guardando = false),
-    });
+    this.mantenimientoApi
+      .actualizarMantenimiento(this.mantenimientos)
+      .subscribe({
+        next: () => {
+          this.guardando = false;
+          this.actualizado.emit();
+          this.cerrarDetalles();
+        },
+        error: () => (this.guardando = false),
+      });
   }
   cerrarDetalles() {
     this.mostrardetalles.set(false);

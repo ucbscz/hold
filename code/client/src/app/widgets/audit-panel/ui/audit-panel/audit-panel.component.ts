@@ -27,7 +27,14 @@ const ACCIONES_POR_ENTIDAD: Record<string, string[]> = {
 @Component({
   selector: 'app-audit-panel',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, FlatpickrDirective, TablePaginationComponent, CustomSelectComponent],
+  imports: [
+    CommonModule,
+    DatePipe,
+    FormsModule,
+    FlatpickrDirective,
+    TablePaginationComponent,
+    CustomSelectComponent,
+  ],
   templateUrl: './audit-panel.component.html',
   styleUrl: './audit-panel.component.css',
 })
@@ -125,17 +132,25 @@ export class AuditPanelComponent implements OnChanges {
 
   exportarCsv(): void {
     const rows = this.logs.map((log) => [
-      log.Timestamp instanceof Date ? log.Timestamp.toISOString() : log.Timestamp,
+      log.Timestamp instanceof Date
+        ? log.Timestamp.toISOString()
+        : log.Timestamp,
       log.AdminNombre || log.AdminCarnet,
       log.Accion,
       log.EntidadId,
       this.resumenObs(log),
     ]);
     const csv = [['Fecha', 'Administrador', 'Acción', 'ID', 'Detalle'], ...rows]
-      .map((row) => row.map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`).join(','))
+      .map((row) =>
+        row
+          .map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`)
+          .join(','),
+      )
       .join('\n');
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    link.href = URL.createObjectURL(
+      new Blob([csv], { type: 'text/csv;charset=utf-8' }),
+    );
     link.download = `auditoria-${this.entidad.toLowerCase()}.csv`;
     link.click();
     URL.revokeObjectURL(link.href);
