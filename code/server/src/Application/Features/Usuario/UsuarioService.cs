@@ -77,8 +77,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
                     : $"{blockReason}. Contacta con un administrador para revisar tu caso.",
                 JsonSerializer.Serialize(new
                 {
-                    origen = "Administración",
-                    usuario = carnet,
+                    origen = "Sistema",
+                    usuario = "Sistema",
                     motivo = blockReason ?? "Bloqueo administrativo para nuevas reservas.",
                     fecha = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
                 })
