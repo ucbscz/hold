@@ -14,7 +14,7 @@ import {
   Tabla,
   TablePaginationComponent,
 } from '@shared/lib/admin-table';
-import { StickyScrollDirective } from '@shared/lib/directives';
+import { FlatpickrDirective, StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   Aviso,
@@ -47,6 +47,7 @@ import { VercontratoComponent } from '../vercontrato/vercontrato.component';
     AuditPanelComponent,
     CustomSelectComponent,
     TablePaginationComponent,
+    FlatpickrDirective,
   ],
   templateUrl: './prestamos-tabla.component.html',
   styleUrls: ['./prestamos-tabla.component.css'],
@@ -109,7 +110,17 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   }
 
   imprimirPrestamos(): void {
-    window.print();
+    const tabla = document.querySelector('.data-table--loans');
+    if (!tabla) return;
+    const ventana = window.open('', '_blank', 'noopener,noreferrer');
+    if (!ventana) return;
+    const clon = tabla.cloneNode(true) as HTMLTableElement;
+    clon.querySelectorAll('.actions-column, .loan-actions').forEach((node) => node.remove());
+    ventana.document.write(`<!doctype html><html><head><title>Préstamos</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#172033}h1{font-size:20px}table{width:100%;border-collapse:collapse}th,td{padding:9px;border:1px solid #d7dee8;text-align:left;font-size:12px}th{background:#f5f7fa}</style></head><body><h1>Préstamos</h1>${clon.outerHTML}</body></html>`);
+    ventana.document.close();
+    ventana.focus();
+    ventana.print();
+    ventana.close();
   }
 
   vercontrato: WritableSignal<boolean> = signal(false);
@@ -141,6 +152,9 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     'finalizado',
     'cancelado',
   ];
+  fechaPrestamoDesde = '';
+  fechaPrestamoHasta = '';
+  private busquedaActual?: [string, string];
   abrirVista: boolean = false;
   prestamosVista: PrestamoDto[] = [];
   constructor(
@@ -235,12 +249,22 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     this.showEstados = false;
     this.aplicarFiltros();
   }
+  onFechaPrestamoDesde(dates: Date[]): void {
+    this.fechaPrestamoDesde = dates[0]?.toISOString().slice(0, 10) ?? '';
+    this.aplicarFiltros();
+  }
+  onFechaPrestamoHasta(dates: Date[]): void {
+    this.fechaPrestamoHasta = dates[0]?.toISOString().slice(0, 10) ?? '';
+    this.aplicarFiltros();
+  }
   aplicarFiltros(event?: [string, string]) {
+    if (event) this.busquedaActual = event;
     let prestamosFiltrados = Array.from(this.prestamoscopia.entries());
-    if (event && event[0].trim() !== '') {
-      const busquedaNormalizada = this.normalizeText(event[0]);
+    const busqueda = this.busquedaActual;
+    if (busqueda && busqueda[0].trim() !== '') {
+      const busquedaNormalizada = this.normalizeText(busqueda[0]);
       prestamosFiltrados = prestamosFiltrados.filter(([_, prestamo]) => {
-        switch (event[1]) {
+        switch (busqueda[1]) {
           case 'Usuario':
             return (
               this.normalizeText(
@@ -311,6 +335,14 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
           this.getEstadoCalculado(prestamo).toLowerCase() === buscado,
       );
     }
+    if (this.fechaPrestamoDesde || this.fechaPrestamoHasta) {
+      const desde = this.fechaPrestamoDesde ? new Date(`${this.fechaPrestamoDesde}T00:00:00`) : null;
+      const hasta = this.fechaPrestamoHasta ? new Date(`${this.fechaPrestamoHasta}T23:59:59.999`) : null;
+      prestamosFiltrados = prestamosFiltrados.filter(([, prestamo]) => {
+        const fecha = prestamo.datosgrupo.FechaPrestamoEsperada;
+        return !!fecha && (!desde || fecha >= desde) && (!hasta || fecha <= hasta);
+      });
+    }
     this.prestamos = new Map<number, PrestamoAgrupados>(prestamosFiltrados);
     this.reiniciarPaginacion();
     this.aplicarOrdenActualSiExiste();
@@ -342,6 +374,9 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     this.estadoSeleccionado = '';
     this.prestamos = new Map(this.prestamoscopia);
     this.showEstados = false;
+    this.fechaPrestamoDesde = '';
+    this.fechaPrestamoHasta = '';
+    this.busquedaActual = undefined;
     this.aplicarOrdenActualSiExiste();
   }
   getEstadoCalculado(prestamo: PrestamoAgrupados): string {

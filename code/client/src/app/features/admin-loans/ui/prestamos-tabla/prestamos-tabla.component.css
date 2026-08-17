@@ -61,6 +61,10 @@
   display: flex;
   flex-direction: column;
 }
+.loan-date-filters { display:flex; flex-wrap:wrap; gap:.75rem; margin:-.75rem 0 1rem; }
+.loan-date-filters label { display:grid; gap:.35rem; color:var(--ink-secondary); font:700 .75rem var(--font); }
+.loan-date-filters input { width:10.5rem; height:2.5rem; padding:0 .75rem; border:1px solid var(--border); border-radius:var(--radius-full); background:var(--surface); color:var(--ink); font:500 .875rem var(--font); }
+.loan-date-filters input:focus { outline:none; border-color:var(--interactive-text); box-shadow:0 0 0 3px var(--interactive-subtle); }
 
 ::ng-deep app-audit-panel,
 ::ng-deep .audit-panel-container {
