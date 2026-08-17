@@ -74,6 +74,12 @@
           </ul>
         }
       </div>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="exportarPrestamos()" title="Exportar préstamos CSV">
+        <i class="fas fa-file-csv"></i> Exportar
+      </button>
+      <button type="button" class="btn btn-ghost btn-sm" (click)="imprimirPrestamos()" title="Imprimir préstamos">
+        <i class="fas fa-print"></i>
+      </button>
     </app-buscador>
   }
   @if (activeTab === "tabla") {
@@ -121,7 +127,7 @@
           </thead>
           <tbody>
             @for (
-              prestamo of prestamosTabla;
+              prestamo of paginar(prestamosTabla);
               track prestamo.key ||
                 prestamo.value.datosgrupo.Id ||
                 prestamo.value.datosgrupo.CarnetUsuario ||
@@ -284,6 +290,12 @@
         </div>
       }
     </div>
+    <app-table-pagination
+      [totalItems]="prestamos.size"
+      [page]="paginaActual"
+      [pageSize]="filasPorPagina"
+      (pageChange)="cambiarPagina($event)"
+    ></app-table-pagination>
   } @else {
     <app-audit-panel [refreshTrigger]="auditRefresh" [entidad]="'Prestamo'">
       <div admin-tabs class="admin-tabs">

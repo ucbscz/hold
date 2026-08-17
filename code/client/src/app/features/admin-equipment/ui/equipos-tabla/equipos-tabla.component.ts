@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Equipos } from '@entities/admin';
 import { EquipoService } from '@entities/equipment';
 import { BuscadorComponent } from '@features/admin-search';
-import { Tabla } from '@shared/lib/admin-table';
+import { Tabla, TablePaginationComponent } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -33,6 +33,7 @@ import { EquiposEditarComponent } from '../equipos-editar/equipos-editar.compone
     BuscadorComponent,
     HistorialEquipoInlineComponent,
     AuditPanelComponent,
+    TablePaginationComponent,
   ],
   templateUrl: './equipos-tabla.component.html',
   styleUrls: ['./equipos-tabla.component.css'],
@@ -176,6 +177,7 @@ export class EquiposTablaComponent extends Tabla {
       );
     }
     this.equipos = lista;
+    this.reiniciarPaginacion();
     this.aplicarOrdenActualSiExiste();
   }
   limpiarBusqueda() {

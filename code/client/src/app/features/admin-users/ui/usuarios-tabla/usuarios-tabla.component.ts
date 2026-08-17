@@ -5,7 +5,7 @@ import { Carrera } from '@entities/admin';
 import { CarreraService } from '@entities/career';
 import { Usuario, UsuarioServiceAPI } from '@entities/user';
 import { BuscadorComponent } from '@features/admin-search';
-import { Tabla } from '@shared/lib/admin-table';
+import { Tabla, TablePaginationComponent } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -33,6 +33,7 @@ import { UsuariosEditarComponent } from '../usuarios-editar/usuarios-editar.comp
     BuscadorComponent,
     PrestamosInlineComponent,
     AuditPanelComponent,
+    TablePaginationComponent,
   ],
   templateUrl: './usuarios-tabla.component.html',
   styleUrls: ['./usuarios-tabla.component.css'],
@@ -255,6 +256,7 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
     } else {
       this.usuarios = [...this.usuarioscopia];
     }
+    this.reiniciarPaginacion();
     this.aplicarOrdenActualSiExiste();
   }
   limpiarBusqueda() {

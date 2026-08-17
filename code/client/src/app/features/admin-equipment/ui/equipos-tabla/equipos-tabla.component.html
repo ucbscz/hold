@@ -95,7 +95,7 @@
         </thead>
         <tbody>
           @for (
-            equipo of equipos;
+            equipo of paginar(equipos);
             track equipo.Id ||
               equipo.CodigoImt ||
               equipo.NombreGrupoEquipo ||
@@ -160,6 +160,7 @@
         </tbody>
       </table>
     </div>
+    <app-table-pagination [totalItems]="equipos.length" [page]="paginaActual" [pageSize]="filasPorPagina" (pageChange)="cambiarPagina($event)"></app-table-pagination>
   } @else {
     <app-audit-panel [refreshTrigger]="auditRefresh" [entidad]="'Equipo'">
       <div admin-tabs class="admin-tabs">

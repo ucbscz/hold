@@ -9,7 +9,7 @@ import {
 } from '@entities/loan';
 import { UsuarioServiceAPI } from '@entities/user';
 import { BuscadorComponent } from '@features/admin-search';
-import { AdminTableSort, Tabla } from '@shared/lib/admin-table';
+import { AdminTableSort, Tabla, TablePaginationComponent } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -42,6 +42,7 @@ import { VercontratoComponent } from '../vercontrato/vercontrato.component';
     BuscadorComponent,
     AuditPanelComponent,
     CustomSelectComponent,
+    TablePaginationComponent,
   ],
   templateUrl: './prestamos-tabla.component.html',
   styleUrls: ['./prestamos-tabla.component.css'],
@@ -86,6 +87,24 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       .filter((nombre): nombre is string => !!nombre)
       .join(', ');
   }
+
+  exportarPrestamos(): void {
+    this.exportarCsv(
+      'prestamos',
+      ['ID', 'Estudiante', 'Carnet', 'Equipos', 'Inicio', 'Fin', 'Estado'],
+      this.prestamosTabla.map(({ key, value }) => [
+        key,
+        `${value.datosgrupo.NombreUsuario ?? ''} ${value.datosgrupo.ApellidoPaternoUsuario ?? ''}`.trim(),
+        value.datosgrupo.CarnetUsuario,
+        this.detalleEquipos(value),
+        value.datosgrupo.FechaPrestamoEsperada?.toISOString() ?? '',
+        value.datosgrupo.FechaDevolucionEsperada?.toISOString() ?? '',
+        this.getEstadoCalculado(value),
+      ]),
+    );
+  }
+
+  imprimirPrestamos(): void { window.print(); }
 
   vercontrato: WritableSignal<boolean> = signal(false);
   prestamoSeleccionado: PrestamoDto = new PrestamoDto();
@@ -287,6 +306,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       );
     }
     this.prestamos = new Map<number, PrestamoAgrupados>(prestamosFiltrados);
+    this.reiniciarPaginacion();
     this.aplicarOrdenActualSiExiste();
   }
 

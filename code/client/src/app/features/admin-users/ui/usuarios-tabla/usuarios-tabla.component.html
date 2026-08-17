@@ -41,7 +41,7 @@
         </thead>
         <tbody>
           @for (
-            usuario of usuarios;
+            usuario of paginar(usuarios);
             track usuario.id || usuario.carnet || usuario.correo || $index;
             let i = $index
           ) {
@@ -123,6 +123,7 @@
         </tbody>
       </table>
     </div>
+    <app-table-pagination [totalItems]="usuarios.length" [page]="paginaActual" [pageSize]="filasPorPagina" (pageChange)="cambiarPagina($event)"></app-table-pagination>
   } @else {
     <app-audit-panel [refreshTrigger]="auditRefresh" [entidad]="'Usuario'">
       <div admin-tabs class="admin-tabs">
