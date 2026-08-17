@@ -1,7 +1,8 @@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component, signal, WritableSignal } from '@angular/core';
+import { Component, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import {
   AvisoDisponibilidadService,
   DisponibilidadService,
@@ -42,7 +43,7 @@ const MAX_COMMENT_LENGTH = 1024;
   templateUrl: './objeto.component.html',
   styleUrl: './objeto.component.css',
 })
-export class ObjetoComponent {
+export class ObjetoComponent implements OnDestroy {
   readonly minimumCartQuantity = MINIMUM_CART_QUANTITY;
   readonly maxCommentLength = MAX_COMMENT_LENGTH;
   readonly skeletonComentarios = [0, 1, 2];
@@ -83,6 +84,7 @@ export class ObjetoComponent {
   publicandoRespuestaId: number | null = null;
   eliminandoComentarioId: number | null = null;
   private readonly likePendienteIds = new Set<number>();
+  private readonly carritoSubscription: Subscription;
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -91,7 +93,18 @@ export class ObjetoComponent {
     private readonly disponibilidadService: DisponibilidadService,
     private readonly avisoDisponibilidad: AvisoDisponibilidadService,
     private readonly imageCache: ImageCacheService,
-  ) {}
+  ) {
+    this.carritoSubscription = this.carrito.carrito$.subscribe(() => {
+      if (!this.producto.id) return;
+      const item = this.carrito.obtenerCarrito()[this.producto.id];
+      this.addedToCart = !!item;
+      if (item) this.cantidad = item.cantidad;
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.carritoSubscription.unsubscribe();
+  }
 
   ngOnInit(): void {
     const routeId = this.route.snapshot.paramMap.get('id');
@@ -443,17 +456,15 @@ export class ObjetoComponent {
       return;
     }
 
-    for (let i = 0; i < this.cantidad; i++) {
-      this.carrito.agregarProducto(
-        this.producto.id,
-        this.producto.nombre,
-        this.producto.link ?? '',
-        this.producto.marca ?? '',
-        this.producto.modelo ?? '',
-        this.producto.CostoPromedio ?? 0,
-        this.producto.Cantidad ?? MINIMUM_CART_QUANTITY,
-      );
-    }
-    this.addedToCart = true;
+    this.carrito.establecerCantidad(
+      this.producto.id,
+      this.producto.nombre,
+      this.producto.link ?? '',
+      this.producto.marca ?? '',
+      this.producto.modelo ?? '',
+      this.producto.CostoPromedio ?? 0,
+      this.producto.Cantidad ?? MINIMUM_CART_QUANTITY,
+      this.cantidad,
+    );
   }
 }

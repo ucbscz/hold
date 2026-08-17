@@ -14,6 +14,7 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { DisponibilidadService } from '@entities/availability';
 import { GrupoEquipo, GrupoequipoService } from '@entities/equipment-group';
 import { CarritoService } from '@features/cart';
@@ -63,13 +64,18 @@ export class ListaObjetosComponent
   cantidades: Record<number, number> = {};
   addedToCart: Record<number, boolean> = {};
   totalOperativo: Record<number, number> = {};
+  private readonly carritoSubscription: Subscription;
 
   constructor(
     private readonly servicio: GrupoequipoService,
     private readonly carrito: CarritoService,
     private readonly disponibilidad: DisponibilidadService,
     private readonly imageCache: ImageCacheService,
-  ) {}
+  ) {
+    this.carritoSubscription = this.carrito.carrito$.subscribe(() =>
+      this.sincronizarCarrito(),
+    );
+  }
 
   sinOperativos(id: number): boolean {
     return (this.totalOperativo[id] ?? 1) <= 0;
@@ -105,21 +111,16 @@ export class ListaObjetosComponent
       return;
     }
 
-    const n = this.getCantidad(item.id!);
-
-    for (let i = 0; i < n; i++) {
-      this.carrito.agregarProducto(
-        item.id!,
-        item.nombre,
-        item.link ?? '',
-        item.marca ?? '',
-        item.modelo ?? '',
-        item.CostoPromedio ?? 0,
-        item.Cantidad ?? 1,
-      );
-    }
-
-    this.addedToCart[item.id!] = true;
+    this.carrito.establecerCantidad(
+      item.id!,
+      item.nombre,
+      item.link ?? '',
+      item.marca ?? '',
+      item.modelo ?? '',
+      item.CostoPromedio ?? 0,
+      item.Cantidad ?? 1,
+      this.getCantidad(item.id!),
+    );
   }
 
   ngOnInit(): void {
@@ -127,6 +128,17 @@ export class ListaObjetosComponent
       this.servicio.cantidadObjetosGuardada || DEFAULT_PRODUCTS_PER_PAGE;
     this.paginaActual = this.servicio.paginaGuardada;
     this.cargarProductos();
+  }
+
+  private sincronizarCarrito(): void {
+    const carrito = this.carrito.obtenerCarrito();
+    Object.keys(this.addedToCart).forEach((id) => {
+      this.addedToCart[Number(id)] = !!carrito[Number(id)];
+    });
+    Object.entries(carrito).forEach(([id, item]) => {
+      this.addedToCart[Number(id)] = true;
+      this.cantidades[Number(id)] = item.cantidad;
+    });
   }
 
   ngAfterViewInit(): void {
@@ -171,6 +183,7 @@ export class ListaObjetosComponent
   }
 
   ngOnDestroy(): void {
+    this.carritoSubscription.unsubscribe();
     this.servicio.paginaGuardada = this.paginaActual;
     this.servicio.cantidadObjetosGuardada = this.cantidadObjetos;
   }

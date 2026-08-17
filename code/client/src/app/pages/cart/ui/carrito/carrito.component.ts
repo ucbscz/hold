@@ -1,5 +1,11 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, signal, WritableSignal } from '@angular/core';
+import {
+  Component,
+  computed,
+  OnDestroy,
+  signal,
+  WritableSignal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Carrito } from '@entities/cart';
@@ -17,7 +23,7 @@ import {
   OpcionSelect,
   PantallaCargaComponent,
 } from '@shared/ui';
-import { finalize } from 'rxjs';
+import { finalize, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-carrito',
@@ -36,7 +42,7 @@ import { finalize } from 'rxjs';
   templateUrl: './carrito.component.html',
   styleUrl: './carrito.component.css',
 })
-export class CarritoComponent {
+export class CarritoComponent implements OnDestroy {
   public step: number = 1;
   public errorSolicitudVisible: WritableSignal<boolean> = signal(false);
   public mensajeError: string = 'Datos insertados no validos';
@@ -51,6 +57,7 @@ export class CarritoComponent {
 
   private readonly fechaActual: Date = new Date();
   private readonly imagenesFallidas = new Set<string>();
+  private readonly carritoSubscription: Subscription;
 
   readonly validacionFechas = computed(() =>
     this.cartDateValidationService.validate(
@@ -69,6 +76,9 @@ export class CarritoComponent {
     private readonly cartDateValidationService: CartDateValidationService,
   ) {
     this.carrito = this.carritoService.obtenerCarrito();
+    this.carritoSubscription = this.carritoService.carrito$.subscribe(
+      (carrito) => (this.carrito = carrito),
+    );
     this.route.queryParams.subscribe((params) => {
       this.step = params['step'] ? Number(params['step']) : 1;
     });
@@ -191,15 +201,19 @@ export class CarritoComponent {
     this.carrito = { ...this.carritoService.obtenerCarrito() };
   }
 
+  ngOnDestroy(): void {
+    this.carritoSubscription.unsubscribe();
+  }
+
   private guardarFechasEnCarrito(): void {
     const inicio = this.fechaInicio();
     const fin = this.fechaFinal();
 
     if (!inicio || !fin) return;
 
-    Object.values(this.carrito).forEach((item) => {
-      item.fecha_inicio = inicio.toISOString();
-      item.fecha_final = fin.toISOString();
-    });
+    this.carritoService.actualizarFechas(
+      inicio.toISOString(),
+      fin.toISOString(),
+    );
   }
 }
