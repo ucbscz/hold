@@ -74,7 +74,12 @@
       </div>
       @if (mantenimientoSeleccionado.size > 0) {
         <section class="equipos-seleccionados" aria-label="Equipos incluidos">
-          <span class="equipos-seleccionados__title">Equipos incluidos</span>
+          <button type="button" class="equipos-seleccionados__toggle" (click)="alternarEquiposSeleccionados()" [attr.aria-expanded]="equiposExpandidos">
+            <span>Equipos incluidos ({{ mantenimientoSeleccionado.size }})</span>
+            <i class="fas" [class.fa-chevron-down]="!equiposExpandidos" [class.fa-chevron-up]="equiposExpandidos"></i>
+          </button>
+          @if (equiposExpandidos) {
+          <div class="equipos-seleccionados__list">
           @for (item of mantenimientoSeleccionado | keyvalue; track item.key) {
             <div class="equipo-pill">
               <div class="equipo-pill__identity">
@@ -105,6 +110,8 @@
                 />
               </button>
             </div>
+          }
+          </div>
           }
         </section>
       }

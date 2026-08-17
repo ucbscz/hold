@@ -44,6 +44,7 @@ export class MantenimientosCrearComponent extends BaseTablaComponent {
   @Input() botoncrear: WritableSignal<boolean> = signal(true);
   @Output() Actualizar = new EventEmitter<void>();
   agregarequipo: WritableSignal<boolean> = signal(false);
+  equiposExpandidos = false;
   fechaminima = this.toLocalISOString(new Date());
   opcionesFechaInicio: Partial<Options> = { minDate: this.fechaminima };
   opcionesFechaFinal: Partial<Options> = { minDate: this.fechaminima };
@@ -159,6 +160,9 @@ export class MantenimientosCrearComponent extends BaseTablaComponent {
   actualizarTipoEquipo(codigo: number, tipo: string): void {
     this.mantenimientoequipo.actualizarTipo(codigo, tipo);
     this.obtenermantenimientoSeleccionado();
+  }
+  alternarEquiposSeleccionados(): void {
+    this.equiposExpandidos = !this.equiposExpandidos;
   }
   validarcreacion() {
     this.mensajeaviso = '¿Está seguro de que desea crear este mantenimiento?';
