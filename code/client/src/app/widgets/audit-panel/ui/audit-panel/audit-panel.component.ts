@@ -161,7 +161,9 @@ export class AuditPanelComponent implements OnChanges {
     if (!tabla) return;
     const ventana = window.open('', '_blank', 'noopener,noreferrer');
     if (!ventana) return;
-    ventana.document.write(`<!doctype html><html><head><title>Auditoría</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#172033}h1{font-size:20px}table{width:100%;border-collapse:collapse}th,td{padding:9px;border:1px solid #d7dee8;text-align:left;font-size:12px}th{background:#f5f7fa}</style></head><body><h1>Auditoría: ${this.entidad}</h1>${tabla.outerHTML}</body></html>`);
+    ventana.document.write(
+      `<!doctype html><html><head><title>Auditoría</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#172033}h1{font-size:20px}table{width:100%;border-collapse:collapse}th,td{padding:9px;border:1px solid #d7dee8;text-align:left;font-size:12px}th{background:#f5f7fa}</style></head><body><h1>Auditoría: ${this.entidad}</h1>${tabla.outerHTML}</body></html>`,
+    );
     ventana.document.close();
     ventana.focus();
     ventana.print();

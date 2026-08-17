@@ -146,9 +146,30 @@ textarea.form-input {
   font-size: 0.8125rem;
   font-weight: 700;
 }
-.equipos-seleccionados__toggle { display:flex; align-items:center; justify-content:space-between; width:100%; padding:.625rem .75rem; border:1px solid var(--border); border-radius:var(--radius-sm); background:var(--sidebar); color:var(--ink); font:700 .8125rem var(--font); cursor:pointer; }
-.equipos-seleccionados__toggle:hover { border-color:var(--border-strong); background:var(--interactive-subtle); }
-.equipos-seleccionados__list { display:grid; gap:.5rem; max-height:16rem; overflow-y:auto; padding-right:.25rem; }
+.equipos-seleccionados__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 0.625rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--sidebar);
+  color: var(--ink);
+  font: 700 0.8125rem var(--font);
+  cursor: pointer;
+}
+.equipos-seleccionados__toggle:hover {
+  border-color: var(--border-strong);
+  background: var(--interactive-subtle);
+}
+.equipos-seleccionados__list {
+  display: grid;
+  gap: 0.5rem;
+  max-height: 16rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
 .equipo-pill {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 10.5rem 2rem;

@@ -92,8 +92,24 @@
       </button>
     </app-buscador>
     <div class="loan-date-filters">
-      <label>Inicio desde<input type="text" appFlatpickr [fpOptions]="{}" readonly placeholder="Seleccionar fecha" (fpChange)="onFechaPrestamoDesde($event)" /></label>
-      <label>Inicio hasta<input type="text" appFlatpickr [fpOptions]="{ minDate: fechaPrestamoDesde || undefined }" readonly placeholder="Seleccionar fecha" (fpChange)="onFechaPrestamoHasta($event)" /></label>
+      <label
+        >Inicio desde<input
+          type="text"
+          appFlatpickr
+          [fpOptions]="{}"
+          readonly
+          placeholder="Seleccionar fecha"
+          (fpChange)="onFechaPrestamoDesde($event)"
+      /></label>
+      <label
+        >Inicio hasta<input
+          type="text"
+          appFlatpickr
+          [fpOptions]="{ minDate: fechaPrestamoDesde || undefined }"
+          readonly
+          placeholder="Seleccionar fecha"
+          (fpChange)="onFechaPrestamoHasta($event)"
+      /></label>
     </div>
   }
   @if (activeTab === "tabla") {

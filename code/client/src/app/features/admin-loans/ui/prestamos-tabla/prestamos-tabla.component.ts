@@ -14,7 +14,10 @@ import {
   Tabla,
   TablePaginationComponent,
 } from '@shared/lib/admin-table';
-import { FlatpickrDirective, StickyScrollDirective } from '@shared/lib/directives';
+import {
+  FlatpickrDirective,
+  StickyScrollDirective,
+} from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   Aviso,
@@ -115,8 +118,12 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     const ventana = window.open('', '_blank', 'noopener,noreferrer');
     if (!ventana) return;
     const clon = tabla.cloneNode(true) as HTMLTableElement;
-    clon.querySelectorAll('.actions-column, .loan-actions').forEach((node) => node.remove());
-    ventana.document.write(`<!doctype html><html><head><title>Préstamos</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#172033}h1{font-size:20px}table{width:100%;border-collapse:collapse}th,td{padding:9px;border:1px solid #d7dee8;text-align:left;font-size:12px}th{background:#f5f7fa}</style></head><body><h1>Préstamos</h1>${clon.outerHTML}</body></html>`);
+    clon
+      .querySelectorAll('.actions-column, .loan-actions')
+      .forEach((node) => node.remove());
+    ventana.document.write(
+      `<!doctype html><html><head><title>Préstamos</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#172033}h1{font-size:20px}table{width:100%;border-collapse:collapse}th,td{padding:9px;border:1px solid #d7dee8;text-align:left;font-size:12px}th{background:#f5f7fa}</style></head><body><h1>Préstamos</h1>${clon.outerHTML}</body></html>`,
+    );
     ventana.document.close();
     ventana.focus();
     ventana.print();
@@ -336,11 +343,17 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       );
     }
     if (this.fechaPrestamoDesde || this.fechaPrestamoHasta) {
-      const desde = this.fechaPrestamoDesde ? new Date(`${this.fechaPrestamoDesde}T00:00:00`) : null;
-      const hasta = this.fechaPrestamoHasta ? new Date(`${this.fechaPrestamoHasta}T23:59:59.999`) : null;
+      const desde = this.fechaPrestamoDesde
+        ? new Date(`${this.fechaPrestamoDesde}T00:00:00`)
+        : null;
+      const hasta = this.fechaPrestamoHasta
+        ? new Date(`${this.fechaPrestamoHasta}T23:59:59.999`)
+        : null;
       prestamosFiltrados = prestamosFiltrados.filter(([, prestamo]) => {
         const fecha = prestamo.datosgrupo.FechaPrestamoEsperada;
-        return !!fecha && (!desde || fecha >= desde) && (!hasta || fecha <= hasta);
+        return (
+          !!fecha && (!desde || fecha >= desde) && (!hasta || fecha <= hasta)
+        );
       });
     }
     this.prestamos = new Map<number, PrestamoAgrupados>(prestamosFiltrados);
