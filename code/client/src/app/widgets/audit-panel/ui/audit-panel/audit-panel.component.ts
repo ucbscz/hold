@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { AuditLogDto } from '@entities/admin';
 import { AuditLogApiService } from '@entities/audit-log';
 import { FlatpickrDirective } from '@shared/lib/directives';
+import { TablePaginationComponent } from '@shared/lib/admin-table';
+import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
 import { parseJsonResult } from '@shared/lib/result';
 import { AuditObservationDetail } from '../../model/audit-observation-detail';
 
@@ -25,7 +27,7 @@ const ACCIONES_POR_ENTIDAD: Record<string, string[]> = {
 @Component({
   selector: 'app-audit-panel',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, FlatpickrDirective],
+  imports: [CommonModule, DatePipe, FormsModule, FlatpickrDirective, TablePaginationComponent, CustomSelectComponent],
   templateUrl: './audit-panel.component.html',
   styleUrl: './audit-panel.component.css',
 })
@@ -41,11 +43,23 @@ export class AuditPanelComponent implements OnChanges {
   fechaHasta = '';
   filtroAccion = '';
   filtroAdmin = '';
+  paginaActual = 1;
+  readonly filasPorPagina = 10;
 
   get acciones(): string[] {
     return (
       ACCIONES_POR_ENTIDAD[this.entidad] ?? ['Crear', 'Editar', 'Eliminar']
     );
+  }
+  get opcionesAccion(): OpcionSelect[] {
+    return [
+      { value: '', label: 'Todas las acciones' },
+      ...this.acciones.map((accion) => ({ value: accion, label: accion })),
+    ];
+  }
+  get logsPaginados(): AuditLogDto[] {
+    const inicio = (this.paginaActual - 1) * this.filasPorPagina;
+    return this.logs.slice(inicio, inicio + this.filasPorPagina);
   }
 
   constructor(private readonly auditService: AuditLogApiService) {}
@@ -82,6 +96,7 @@ export class AuditPanelComponent implements OnChanges {
               )
             : data;
           this.aplicarOrdenActual();
+          this.paginaActual = 1;
           this.cargando = false;
         },
         error: () => {
@@ -90,15 +105,8 @@ export class AuditPanelComponent implements OnChanges {
       });
   }
 
-  accionesOpen = false;
-
-  toggleAcciones() {
-    this.accionesOpen = !this.accionesOpen;
-  }
-
   seleccionarAccion(a: string) {
     this.filtroAccion = a;
-    this.accionesOpen = false;
     this.cargar();
   }
 
@@ -112,8 +120,29 @@ export class AuditPanelComponent implements OnChanges {
     this.fechaHasta = '';
     this.filtroAccion = '';
     this.filtroAdmin = '';
-    this.accionesOpen = false;
     this.cargar();
+  }
+
+  exportarCsv(): void {
+    const rows = this.logs.map((log) => [
+      log.Timestamp instanceof Date ? log.Timestamp.toISOString() : log.Timestamp,
+      log.AdminNombre || log.AdminCarnet,
+      log.Accion,
+      log.EntidadId,
+      this.resumenObs(log),
+    ]);
+    const csv = [['Fecha', 'Administrador', 'Acción', 'ID', 'Detalle'], ...rows]
+      .map((row) => row.map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`).join(','))
+      .join('\n');
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+    link.download = `auditoria-${this.entidad.toLowerCase()}.csv`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
+
+  imprimir(): void {
+    window.print();
   }
 
   ordenarPorColumna(columna: string): void {

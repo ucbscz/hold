@@ -38,41 +38,14 @@
       readonly
       (fpChange)="onFechaHasta($event)"
     />
-    <div class="audit-select-wrap">
-      <div
-        class="audit-select-trigger"
-        (click)="toggleAcciones()"
-        [class.open]="accionesOpen"
-      >
-        <span [class.placeholder]="!filtroAccion">{{
-          filtroAccion || "Todas las acciones"
-        }}</span>
-        <i
-          class="fas fa-chevron-down audit-chevron"
-          [class.open]="accionesOpen"
-        ></i>
-      </div>
-      @if (accionesOpen) {
-        <ul class="audit-select-menu">
-          <li
-            class="audit-select-item"
-            [class.active]="filtroAccion === ''"
-            (click)="seleccionarAccion('')"
-          >
-            Todas las acciones
-          </li>
-          @for (a of acciones; track a) {
-            <li
-              class="audit-select-item"
-              [class.active]="filtroAccion === a"
-              (click)="seleccionarAccion(a)"
-            >
-              {{ a }}
-            </li>
-          }
-        </ul>
-      }
-    </div>
+    <app-custom-select
+      class="audit-select-wrap"
+      [ngModel]="filtroAccion"
+      (ngModelChange)="seleccionarAccion($event)"
+      [opciones]="opcionesAccion"
+      [searchThreshold]="99"
+      placeholder="Todas las acciones"
+    ></app-custom-select>
     <div class="audit-filters-actions">
       <button class="btn btn-ghost btn-sm" (click)="limpiar()">
         <i class="fas fa-times"></i> Limpiar
@@ -83,6 +56,12 @@
         title="Actualizar"
       >
         <i class="fas fa-sync-alt"></i>
+      </button>
+      <button class="btn btn-ghost btn-sm" (click)="exportarCsv()" title="Exportar CSV">
+        <i class="fas fa-file-csv"></i>
+      </button>
+      <button class="btn btn-ghost btn-sm" (click)="imprimir()" title="Imprimir">
+        <i class="fas fa-print"></i>
       </button>
     </div>
   </div>
@@ -116,7 +95,7 @@
           </tr>
         </thead>
         <tbody>
-          @for (log of logs; track log.Id) {
+          @for (log of logsPaginados; track log.Id) {
             <tr>
               <td class="date-col">
                 {{
@@ -153,6 +132,12 @@
         </tbody>
       </table>
     </div>
+    <app-table-pagination
+      [totalItems]="logs.length"
+      [page]="paginaActual"
+      [pageSize]="filasPorPagina"
+      (pageChange)="paginaActual = $event"
+    ></app-table-pagination>
   }
 </div>
 
