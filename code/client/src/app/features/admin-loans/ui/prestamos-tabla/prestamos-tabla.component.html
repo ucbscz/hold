@@ -7,73 +7,14 @@
   </div>
   @if (activeTab === "tabla") {
     <app-buscador (terminoBusqueda)="aplicarFiltros($event)">
-      <div class="custom-dropdown">
-        <button
-          type="button"
-          class="dropdown-header"
-          (click)="mostrarEstados()"
-          [attr.aria-expanded]="showEstados"
-        >
-          <span class="current-value">
-            <i class="fas fa-filter dropdown-filter-icon"></i>
-            {{
-              estadoSeleccionado ? (estadoSeleccionado | titlecase) : "Filtrar"
-            }}
-          </span>
-          <img
-            [src]="
-              showEstados ? '/assets/down_solid.png' : '/assets/down_line.png'
-            "
-            alt="Desplegar"
-            class="dropdown-arrow"
-          />
-        </button>
-        @if (showEstados) {
-          <ul class="dropdown-list">
-            <li
-              (click)="seleccionarEstado('')"
-              [class.active]="estadoSeleccionado === ''"
-            >
-              <i class="fas fa-list"></i>
-              Todos los estados
-            </li>
-            @for (estado of estadosDisponibles; track estado) {
-              <li
-                (click)="seleccionarEstado(estado)"
-                [class.active]="estadoSeleccionado === estado"
-              >
-                @switch (estado.toLowerCase()) {
-                  @case ("pendiente") {
-                    <i class="fas fa-clock text-warning"></i>
-                  }
-                  @case ("aprobado") {
-                    <i class="fas fa-check-circle text-success"></i>
-                  }
-                  @case ("rechazado") {
-                    <i class="fas fa-times-circle text-danger"></i>
-                  }
-                  @case ("activo") {
-                    <i class="fas fa-play-circle text-primary"></i>
-                  }
-                  @case ("finalizado") {
-                    <i class="fas fa-check-double text-secondary"></i>
-                  }
-                  @case ("cancelado") {
-                    <i class="fas fa-ban text-danger"></i>
-                  }
-                  @case ("atrasado") {
-                    <i class="fas fa-exclamation-triangle text-warning"></i>
-                  }
-                  @default {
-                    <i class="fas fa-question-circle"></i>
-                  }
-                }
-                {{ estado | titlecase }}
-              </li>
-            }
-          </ul>
-        }
-      </div>
+      <app-custom-select
+        class="admin-filter-select"
+        [ngModel]="estadoSeleccionado"
+        (ngModelChange)="seleccionarEstado($event)"
+        [ngModelOptions]="{ standalone: true }"
+        [opciones]="estadoFiltroOpciones"
+        placeholder="Filtrar"
+      ></app-custom-select>
       <button
         type="button"
         class="btn admin-toolbar-button"

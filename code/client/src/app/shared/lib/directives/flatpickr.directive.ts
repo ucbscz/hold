@@ -41,6 +41,8 @@ export class FlatpickrDirective implements OnChanges, OnInit, OnDestroy {
       allowInput: false,
       disableMobile: true,
       monthSelectorType: 'static',
+      appendTo: document.body,
+      position: 'auto center',
       ...this.fpOptions,
       onChange: (dates, _dateStr) => {
         this.fpChange.emit(dates);
@@ -59,6 +61,9 @@ export class FlatpickrDirective implements OnChanges, OnInit, OnDestroy {
           yearInput.addEventListener('keydown', (e) => e.preventDefault());
         }
         this.fpReady.emit(instance);
+      },
+      onOpen: (_dates, _str, instance) => {
+        requestAnimationFrame(() => instance._positionCalendar());
       },
     }) as flatpickr.Instance;
   }

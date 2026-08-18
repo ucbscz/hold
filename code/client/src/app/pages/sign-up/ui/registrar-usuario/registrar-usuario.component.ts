@@ -7,7 +7,11 @@ import { CarreraService } from '@entities/career';
 import { Usuario, UsuarioService, UsuarioServiceAPI } from '@entities/user';
 import { AuthService } from '@features/auth-session';
 import { extractErrorMessage } from '@shared/lib/error';
-import { AvisoExitoComponent, MostrarerrorComponent } from '@shared/ui';
+import {
+  AvisoExitoComponent,
+  CustomSelectComponent,
+  MostrarerrorComponent,
+} from '@shared/ui';
 import { switchMap } from 'rxjs';
 @Component({
   selector: 'app-registrar-usuario',
@@ -16,6 +20,7 @@ import { switchMap } from 'rxjs';
     CommonModule,
     MostrarerrorComponent,
     AvisoExitoComponent,
+    CustomSelectComponent,
   ],
   templateUrl: './registrar-usuario.component.html',
   styleUrl: './registrar-usuario.component.css',
@@ -27,8 +32,6 @@ export class RegistrarUsuarioComponent {
   mostrarPassword = false;
   mostrarConfirmPassword = false;
   carreras: string[] = [];
-  isOpen: boolean = false;
-  isHovered: boolean = false;
   submitted: boolean = false;
   registrando: boolean = false;
   error: WritableSignal<boolean> = signal(false);
@@ -43,19 +46,6 @@ export class RegistrarUsuarioComponent {
     private carrerasS: CarreraService,
     private readonly authService: AuthService,
   ) {}
-  toggleDropdown() {
-    this.isOpen = !this.isOpen;
-  }
-  selectCarrera(carrera: string) {
-    this.nuevoUsuario.carrera = carrera;
-    this.isOpen = false;
-  }
-  onMouseEnter() {
-    this.isHovered = true;
-  }
-  onMouseLeave() {
-    this.isHovered = false;
-  }
   ngOnInit() {
     this.carrerasS.obtenerCarreras().subscribe({
       next: (response: Carrera[]) => {

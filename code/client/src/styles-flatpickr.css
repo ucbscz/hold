@@ -9,6 +9,7 @@
   overflow: hidden !important;
   width: 308px !important;
   padding: 0 !important;
+  z-index: 21000 !important;
 }
 
 .flatpickr-calendar.open {
@@ -236,4 +237,11 @@ span.flatpickr-weekday {
   background: rgba(255, 215, 0, 0.15) !important;
   border-color: transparent !important;
   box-shadow: none !important;
+}
+
+@media (max-width: 340px) {
+  .flatpickr-calendar {
+    width: calc(100vw - 1rem) !important;
+    max-width: calc(100vw - 1rem) !important;
+  }
 }

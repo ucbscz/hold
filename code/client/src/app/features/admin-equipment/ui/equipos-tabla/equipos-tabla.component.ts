@@ -10,7 +10,9 @@ import { extractErrorMessage } from '@shared/lib/error';
 import {
   AvisoEliminarComponent,
   AvisoExitoComponent,
+  CustomSelectComponent,
   MostrarerrorComponent,
+  OpcionSelect,
 } from '@shared/ui';
 import { HistorialEquipoInlineComponent } from '@widgets/admin-inline';
 import { AuditPanelComponent } from '@widgets/audit-panel';
@@ -34,6 +36,7 @@ import { EquiposEditarComponent } from '../equipos-editar/equipos-editar.compone
     HistorialEquipoInlineComponent,
     AuditPanelComponent,
     TablePaginationComponent,
+    CustomSelectComponent,
   ],
   templateUrl: './equipos-tabla.component.html',
   styleUrls: ['./equipos-tabla.component.css'],
@@ -68,16 +71,17 @@ export class EquiposTablaComponent extends Tabla {
     'Costo',
   ];
 
-  showEstados = false;
   estadoSeleccionado = '';
   estadosDisponibles = ['operativo', 'parcialmente_operativo', 'inoperativo'];
+  readonly estadoFiltroOpciones: OpcionSelect[] = [
+    { value: '', label: 'Todos los estados' },
+    { value: 'operativo', label: 'Operativo' },
+    { value: 'parcialmente_operativo', label: 'Parcialmente operativo' },
+    { value: 'inoperativo', label: 'Inoperativo' },
+  ];
   private busquedaActual?: [string, string];
-  mostrarEstados() {
-    this.showEstados = !this.showEstados;
-  }
   seleccionarEstado(estado: string) {
     this.estadoSeleccionado = estado;
-    this.showEstados = false;
     this.aplicarFiltros();
   }
   estadoEquipoLabel(estado: string): string {

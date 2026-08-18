@@ -175,7 +175,6 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     'Fecha Préstamo Esperada',
     'Fecha Devolución Esperada',
   ];
-  showEstados: boolean = false;
   estadoSeleccionado: string = '';
   estadosDisponibles: string[] = [
     'atrasado',
@@ -185,6 +184,13 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     'activo',
     'finalizado',
     'cancelado',
+  ];
+  readonly estadoFiltroOpciones: OpcionSelect[] = [
+    { value: '', label: 'Todos los estados' },
+    ...this.estadosDisponibles.map((estado) => ({
+      value: estado,
+      label: estado.charAt(0).toUpperCase() + estado.slice(1),
+    })),
   ];
   fechaPrestamoDesde = '';
   fechaPrestamoHasta = '';
@@ -275,12 +281,8 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     this.alertaeliminar = false;
     this.limpiarPrestamoSeleccionado();
   }
-  mostrarEstados() {
-    this.showEstados = !this.showEstados;
-  }
   seleccionarEstado(estado: string) {
     this.estadoSeleccionado = estado;
-    this.showEstados = false;
     this.aplicarFiltros();
   }
   onFechaPrestamoDesde(dates: Date[]): void {
@@ -413,7 +415,6 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   limpiarFiltros() {
     this.estadoSeleccionado = '';
     this.prestamos = new Map(this.prestamoscopia);
-    this.showEstados = false;
     this.fechaPrestamoDesde = '';
     this.fechaPrestamoHasta = '';
     this.busquedaActual = undefined;

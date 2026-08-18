@@ -312,6 +312,7 @@
   z-index: 11000;
   padding: 1rem;
   animation: fadeIn 200ms ease-out both;
+  font-family: var(--font);
 }
 .obs-modal {
   position: relative;
@@ -325,6 +326,32 @@
   max-height: 85vh;
   overflow-y: auto;
   animation: slideUp 200ms ease-out both;
+  font-family: var(--font);
+}
+
+@media (max-width: 480px) {
+  .obs-overlay {
+    padding: 0.5rem;
+  }
+
+  .obs-modal {
+    max-height: calc(100dvh - 1rem);
+    padding: 1.25rem;
+    border-radius: var(--radius-lg);
+  }
+
+  .obs-title {
+    padding-right: 2rem;
+  }
+
+  .obs-equipos {
+    font-size: 0.75rem;
+  }
+
+  .obs-equipos th,
+  .obs-equipos td {
+    padding: 0.4rem 0.25rem;
+  }
 }
 .obs-close {
   position: absolute;

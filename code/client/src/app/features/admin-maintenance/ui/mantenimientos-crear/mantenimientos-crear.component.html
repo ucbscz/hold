@@ -106,8 +106,8 @@
                     class="equipo-pill__type"
                     [ngModel]="item.value.TipoMantenimiento"
                     (ngModelChange)="actualizarTipoEquipo(item.key, $event)"
+                    [ngModelOptions]="{ standalone: true }"
                     [opciones]="tipoOpciones"
-                    [searchThreshold]="99"
                   ></app-custom-select>
                   <button
                     type="button"

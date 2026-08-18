@@ -144,42 +144,15 @@
         </div>
         <div class="form-group">
           <label for="carrera">Elige tu carrera</label>
-          <div class="custom-dropdown">
-            <div
-              class="dropdown-header form-input"
-              [class.error]="submitted && !nuevoUsuario.carrera"
-              (click)="toggleDropdown()"
-              (mouseenter)="onMouseEnter()"
-              (mouseleave)="onMouseLeave()"
-            >
-              <span
-                class="current-value"
-                [class.placeholder]="!nuevoUsuario.carrera"
-                >{{ nuevoUsuario.carrera || "Selecciona una carrera" }}</span
-              >
-              <img
-                [src]="
-                  isHovered || isOpen
-                    ? '/assets/down_solid.png'
-                    : '/assets/down_line.png'
-                "
-                alt="Desplegar"
-                class="dropdown-arrow"
-              />
-            </div>
-            @if (isOpen) {
-              <ul class="dropdown-list">
-                @for (item of carreras; track $index) {
-                  <li
-                    (click)="selectCarrera(item)"
-                    [class.selected]="item === nuevoUsuario.carrera"
-                  >
-                    {{ item }}
-                  </li>
-                }
-              </ul>
-            }
-          </div>
+          <app-custom-select
+            id="carrera"
+            name="carrera"
+            [(ngModel)]="nuevoUsuario.carrera"
+            [opciones]="carreras"
+            [invalid]="submitted && !nuevoUsuario.carrera"
+            placeholder="Selecciona una carrera"
+            required
+          ></app-custom-select>
           @if (submitted && !nuevoUsuario.carrera) {
             <div class="error-message">La carrera no seleccionada</div>
           }

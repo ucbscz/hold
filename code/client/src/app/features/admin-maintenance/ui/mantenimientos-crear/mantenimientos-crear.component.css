@@ -21,9 +21,9 @@
   border-radius: 20px;
   border: 1px solid #e1e5ea;
   box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
-  width: 90%;
+  width: min(90%, 500px);
   max-width: 500px;
-  max-height: 85vh;
+  max-height: calc(100dvh - 2rem);
   overflow: hidden;
   position: relative;
   display: flex;
@@ -34,14 +34,6 @@
   overflow-y: auto;
   padding: 0 2rem;
   flex: 1;
-}
-.form-content::-webkit-scrollbar {
-  width: 6px;
-}
-.form-content .form-content::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
-  border-radius: 10px;
-  margin: 10px 0;
 }
 .btn-close {
   position: absolute;
@@ -260,9 +252,11 @@ textarea.form-input {
 }
 @media (max-width: 768px) {
   .form-container {
-    margin: 1rem;
-    padding: 1.5rem;
+    width: calc(100vw - 1.5rem);
+    margin: 0.75rem;
+    padding: 1.5rem 0;
     max-width: calc(100vw - 2rem);
+    max-height: calc(100dvh - 1.5rem);
   }
   .form-container h2 {
     font-size: 1.4rem;
@@ -271,7 +265,10 @@ textarea.form-input {
 }
 @media (max-width: 480px) {
   .form-container {
-    padding: 1rem;
+    padding: 1.25rem 0;
+  }
+  .form-content {
+    padding: 0 1rem;
   }
   .form-container h2 {
     font-size: 1.2rem;
@@ -291,8 +288,9 @@ textarea.form-input {
 @media (max-width: 360px) {
   .form-container {
     margin: 0.5rem;
-    padding: 1rem;
+    padding: 1rem 0;
     max-width: calc(100vw - 1rem);
+    max-height: calc(100dvh - 1rem);
   }
   .form-content {
     padding: 0 1rem;
@@ -320,33 +318,4 @@ textarea.form-input {
     width: 1.5rem;
     height: 1.5rem;
   }
-}
-
-select.form-input,
-select.date-input,
-select {
-  -webkit-appearance: none !important;
-  appearance: none !important;
-  background-color: var(--surface) !important;
-  background-image:
-    linear-gradient(45deg, transparent 50%, #94a3b8 50%),
-    linear-gradient(135deg, #94a3b8 50%, transparent 50%) !important;
-  background-position:
-    calc(100% - 18px) calc(50% + 1px),
-    calc(100% - 13px) calc(50% + 1px) !important;
-  background-size:
-    5px 5px,
-    5px 5px !important;
-  background-repeat: no-repeat !important;
-  padding-right: 2.5rem !important;
-  cursor: pointer !important;
-  font-family: var(--font) !important;
-  border: 1px solid var(--border) !important;
-  border-radius: var(--radius-sm) !important;
-}
-select.form-input:focus,
-select:focus {
-  border-color: var(--interactive-text) !important;
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12) !important;
-  outline: none !important;
 }

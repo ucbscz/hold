@@ -3,8 +3,10 @@ import {
   Component,
   ElementRef,
   forwardRef,
+  HostBinding,
   HostListener,
   Input,
+  OnDestroy,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { OpcionSelect } from './opcion-select';
@@ -23,15 +25,16 @@ import { OpcionSelect } from './opcion-select';
     },
   ],
 })
-export class CustomSelectComponent implements ControlValueAccessor {
+export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
   @Input() placeholder = 'Seleccionar';
   @Input() invalid = false;
-  @Input() searchThreshold = 8;
-  @Input() menuPosition: 'top' | 'bottom' = 'bottom';
+  @Input() searchThreshold = 6;
+  @Input() menuPosition: 'auto' | 'top' | 'bottom' = 'auto';
   @Input() set opciones(valor: Array<OpcionSelect | string>) {
     this.opcionesNormalizadas = (valor ?? []).map((o) =>
       typeof o === 'string' ? { value: o, label: o } : o,
     );
+    if (this.abierto) this.programarPosicionMenu();
   }
 
   opcionesNormalizadas: OpcionSelect[] = [];
@@ -39,11 +42,26 @@ export class CustomSelectComponent implements ControlValueAccessor {
   disabled = false;
   valor: unknown = null;
   busqueda = '';
+  menuLeft = 0;
+  menuTop = 0;
+  menuWidth = 0;
+  menuMaxHeight = 300;
+  menuPosicionado = false;
+  abreHaciaArriba = false;
 
   private onChange: (valor: unknown) => void = () => {};
   private onTouched: () => void = () => {};
+  private animationFrameId?: number;
+  private readonly onViewportScroll = () => this.programarPosicionMenu();
 
-  constructor(private readonly elementRef: ElementRef) {}
+  constructor(private readonly elementRef: ElementRef<HTMLElement>) {
+    document.addEventListener('scroll', this.onViewportScroll, true);
+  }
+
+  @HostBinding('class.cs-open')
+  get estaAbierto(): boolean {
+    return this.abierto;
+  }
 
   get etiquetaActual(): string {
     const opcion = this.opcionesNormalizadas.find(
@@ -73,14 +91,20 @@ export class CustomSelectComponent implements ControlValueAccessor {
   alternar(): void {
     if (this.disabled) return;
     this.abierto = !this.abierto;
-    if (this.abierto) this.onTouched();
+    if (this.abierto) {
+      this.onTouched();
+      this.menuPosicionado = false;
+      this.programarPosicionMenu();
+    } else {
+      this.limpiarBusqueda();
+    }
   }
 
   seleccionar(opcion: OpcionSelect): void {
     this.valor = opcion.value;
     this.onChange(this.valor);
     this.abierto = false;
-    this.busqueda = '';
+    this.limpiarBusqueda();
   }
 
   buscar(evento: Event): void {
@@ -91,11 +115,24 @@ export class CustomSelectComponent implements ControlValueAccessor {
   onClickFuera(evento: Event): void {
     if (
       this.abierto &&
+      evento.target instanceof Node &&
       !this.elementRef.nativeElement.contains(evento.target)
     ) {
       this.abierto = false;
-      this.busqueda = '';
+      this.limpiarBusqueda();
     }
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscape(): void {
+    if (!this.abierto) return;
+    this.abierto = false;
+    this.limpiarBusqueda();
+  }
+
+  @HostListener('window:resize')
+  onResize(): void {
+    this.programarPosicionMenu();
   }
 
   writeValue(valor: unknown): void {
@@ -109,6 +146,82 @@ export class CustomSelectComponent implements ControlValueAccessor {
   }
   setDisabledState(disabled: boolean): void {
     this.disabled = disabled;
+  }
+
+  ngOnDestroy(): void {
+    document.removeEventListener('scroll', this.onViewportScroll, true);
+    if (this.animationFrameId !== undefined)
+      cancelAnimationFrame(this.animationFrameId);
+  }
+
+  private programarPosicionMenu(): void {
+    if (!this.abierto) return;
+    if (this.animationFrameId !== undefined)
+      cancelAnimationFrame(this.animationFrameId);
+
+    this.animationFrameId = requestAnimationFrame(() => {
+      this.animationFrameId = undefined;
+      this.posicionarMenu();
+    });
+  }
+
+  private posicionarMenu(): void {
+    const trigger =
+      this.elementRef.nativeElement.querySelector<HTMLElement>('.cs-trigger');
+    const menu =
+      this.elementRef.nativeElement.querySelector<HTMLElement>('.cs-menu');
+    if (!trigger || !menu) return;
+
+    const viewportPadding = 8;
+    const menuGap = 4;
+    const triggerRect = trigger.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const spaceAbove = Math.max(0, triggerRect.top - viewportPadding - menuGap);
+    const spaceBelow = Math.max(
+      0,
+      viewportHeight - triggerRect.bottom - viewportPadding - menuGap,
+    );
+    const desiredHeight = Math.min(
+      menu.scrollHeight || 300,
+      300,
+      viewportHeight - viewportPadding * 2,
+    );
+
+    this.abreHaciaArriba =
+      this.menuPosition === 'top' ||
+      (this.menuPosition === 'auto' &&
+        spaceBelow < desiredHeight &&
+        spaceAbove > spaceBelow);
+
+    const availableSpace = this.abreHaciaArriba ? spaceAbove : spaceBelow;
+    this.menuMaxHeight = Math.max(80, Math.min(desiredHeight, availableSpace));
+    this.menuWidth = Math.min(
+      triggerRect.width,
+      viewportWidth - viewportPadding * 2,
+    );
+    this.menuLeft = Math.min(
+      Math.max(viewportPadding, triggerRect.left),
+      viewportWidth - this.menuWidth - viewportPadding,
+    );
+    this.menuTop = this.abreHaciaArriba
+      ? Math.max(
+          viewportPadding,
+          triggerRect.top - menuGap - this.menuMaxHeight,
+        )
+      : triggerRect.bottom + menuGap;
+    this.menuPosicionado = true;
+
+    if (this.debeMostrarBusqueda) {
+      requestAnimationFrame(() =>
+        menu.querySelector<HTMLInputElement>('.cs-search__input')?.focus(),
+      );
+    }
+  }
+
+  private limpiarBusqueda(): void {
+    this.busqueda = '';
+    this.menuPosicionado = false;
   }
 
   private normalizarTexto(texto: unknown): string {

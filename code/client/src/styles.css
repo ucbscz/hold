@@ -437,6 +437,9 @@ body {
   box-shadow: var(--shadow-xs);
   font: 500 0.875rem var(--font) !important;
 }
+.admin-toolbar-button i {
+  color: var(--ink-muted) !important;
+}
 .admin-toolbar-button--icon {
   width: 42px !important;
   min-width: 42px !important;
@@ -448,11 +451,53 @@ body {
     background: var(--sidebar) !important;
     color: var(--ink) !important;
   }
+
+  .admin-toolbar-button:hover:not(:disabled) i {
+    color: var(--ink-secondary) !important;
+  }
 }
 .admin-toolbar-button:focus-visible {
   outline: none;
   border-color: var(--interactive-text) !important;
   box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
+}
+
+.btn-icon.btn-lock:not(.btn-icon--block-active) {
+  color: var(--ink-muted) !important;
+}
+
+.admin-filter-select {
+  display: block;
+  width: 11rem;
+  min-width: 11rem;
+}
+
+.admin-filter-select .cs-trigger {
+  height: 42px;
+  min-height: 42px;
+  padding: 0 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--ink-secondary);
+  box-shadow: var(--shadow-xs);
+  font: 500 0.875rem var(--font);
+}
+
+.admin-filter-select .cs-trigger:hover {
+  border-color: var(--border-strong);
+  background: var(--sidebar);
+}
+
+.inline-state-select .cs-trigger {
+  min-height: 42px;
+}
+
+@media (max-width: 768px) {
+  .admin-filter-select {
+    width: 100%;
+    min-width: 0;
+  }
 }
 
 .login-button,

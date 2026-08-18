@@ -7,60 +7,14 @@
   </div>
   @if (activeTab === "tabla") {
     <app-buscador (terminoBusqueda)="aplicarFiltros($event)">
-      <div class="custom-dropdown">
-        <button
-          type="button"
-          class="dropdown-header"
-          (click)="mostrarEstados()"
-          [attr.aria-expanded]="showEstados"
-        >
-          <span class="current-value">
-            <i class="fas fa-filter dropdown-filter-icon"></i>
-            {{
-              estadoSeleccionado
-                ? estadoEquipoLabel(estadoSeleccionado)
-                : "Filtrar"
-            }}
-          </span>
-          <img
-            [src]="
-              showEstados ? '/assets/down_solid.png' : '/assets/down_line.png'
-            "
-            alt="Desplegar"
-            class="dropdown-arrow"
-          />
-        </button>
-        @if (showEstados) {
-          <ul class="dropdown-list">
-            <li
-              (click)="seleccionarEstado('')"
-              [class.active]="estadoSeleccionado === ''"
-            >
-              <i class="fas fa-list"></i>
-              Todos los estados
-            </li>
-            @for (estado of estadosDisponibles; track estado) {
-              <li
-                (click)="seleccionarEstado(estado)"
-                [class.active]="estadoSeleccionado === estado"
-              >
-                @switch (estado) {
-                  @case ("operativo") {
-                    <i class="fas fa-check-circle text-success"></i>
-                  }
-                  @case ("parcialmente_operativo") {
-                    <i class="fas fa-exclamation-circle text-warning"></i>
-                  }
-                  @case ("inoperativo") {
-                    <i class="fas fa-times-circle text-danger"></i>
-                  }
-                }
-                {{ estadoEquipoLabel(estado) }}
-              </li>
-            }
-          </ul>
-        }
-      </div>
+      <app-custom-select
+        class="admin-filter-select"
+        [ngModel]="estadoSeleccionado"
+        (ngModelChange)="seleccionarEstado($event)"
+        [ngModelOptions]="{ standalone: true }"
+        [opciones]="estadoFiltroOpciones"
+        placeholder="Filtrar"
+      ></app-custom-select>
       <button class="botoncrear boton-derecha" (click)="crearequipo()">
         Nuevo Equipo
       </button>

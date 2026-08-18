@@ -6,6 +6,7 @@ import { HistorialEquipoDto } from '@entities/admin';
 import { environment } from '@environments/environment';
 import { ApiResponse, extractApiValue } from '@shared/api';
 import { FlatpickrDirective } from '@shared/lib/directives';
+import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
 import flatpickr from 'flatpickr';
 import { EquipoHistorialInlineItem } from '../model';
 import { INLINE_SEARCH_STYLES } from './inline-search.styles';
@@ -23,7 +24,13 @@ const ESTADOS_PRESTAMO = [
 @Component({
   selector: 'app-historial-equipo-inline',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule, FlatpickrDirective],
+  imports: [
+    CommonModule,
+    DatePipe,
+    FormsModule,
+    FlatpickrDirective,
+    CustomSelectComponent,
+  ],
   template: `
     <div class="inline-panel">
       @if (cargando) {
@@ -69,12 +76,13 @@ const ESTADOS_PRESTAMO = [
             (fpChange)="onFechaHasta($event)"
             (fpReady)="fpHasta = $event"
           />
-          <select class="date-input" [(ngModel)]="filtroEstado">
-            <option value="">Todos los estados</option>
-            @for (e of estadosPrestamo; track e) {
-              <option [value]="e">{{ estadoEquipoLabel(e) }}</option>
-            }
-          </select>
+          <app-custom-select
+            class="inline-state-select"
+            [(ngModel)]="filtroEstado"
+            [ngModelOptions]="{ standalone: true }"
+            [opciones]="estadoOpciones"
+            placeholder="Todos los estados"
+          ></app-custom-select>
           <div class="audit-filters-actions">
             <button class="btn btn-ghost btn-sm" (click)="limpiarFiltros()">
               <i class="fas fa-times"></i> Limpiar
@@ -211,6 +219,10 @@ const ESTADOS_PRESTAMO = [
         align-items: center;
         gap: 0.625rem;
       }
+      .inline-state-select {
+        width: 11rem;
+        min-width: 11rem;
+      }
 
       @media (max-width: 768px) {
         .date-input {
@@ -224,6 +236,10 @@ const ESTADOS_PRESTAMO = [
         }
         .audit-filters-actions {
           width: 100%;
+        }
+        .inline-state-select {
+          width: 100%;
+          min-width: 0;
         }
         .audit-filters-actions .btn {
           flex: 1;
@@ -244,6 +260,13 @@ export class HistorialEquipoInlineComponent implements OnInit {
   fechaDesde = '';
   fechaHasta = '';
   estadosPrestamo = ESTADOS_PRESTAMO;
+  readonly estadoOpciones: OpcionSelect[] = [
+    { value: '', label: 'Todos los estados' },
+    ...ESTADOS_PRESTAMO.map((estado) => ({
+      value: estado,
+      label: estado.charAt(0).toUpperCase() + estado.slice(1),
+    })),
+  ];
   fpDesde?: flatpickr.Instance;
   fpHasta?: flatpickr.Instance;
 

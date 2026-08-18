@@ -14,6 +14,7 @@ import { Usuario, UsuarioService, UsuarioServiceAPI } from '@entities/user';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   AvisoExitoComponent,
+  CustomSelectComponent,
   MostrarerrorComponent,
   PantallaCargaComponent,
 } from '@shared/ui';
@@ -29,6 +30,7 @@ const CLOSE_SUCCESS_DELAY_MS = 2000;
     AvisoExitoComponent,
     MostrarerrorComponent,
     PantallaCargaComponent,
+    CustomSelectComponent,
   ],
   templateUrl: './editar.component.html',
   styleUrl: './editar.component.css',
@@ -43,8 +45,6 @@ export class EditarComponent {
   error: WritableSignal<boolean> = signal(false);
   mensajeerror: string = '';
   carreras: string[] = [];
-  isOpen: boolean = false;
-  isHovered: boolean = false;
   contrasena: string = '';
   cargando: boolean = false;
 
@@ -53,19 +53,6 @@ export class EditarComponent {
     private readonly carrerasAPI: CarreraService,
     private readonly usuarioStore: UsuarioService,
   ) {}
-  toggleDropdown() {
-    this.isOpen = !this.isOpen;
-  }
-  selectCarrera(carrera: string) {
-    this.localUsuario.carrera = carrera;
-    this.isOpen = false;
-  }
-  onMouseEnter() {
-    this.isHovered = true;
-  }
-  onMouseLeave() {
-    this.isHovered = false;
-  }
   ngOnInit() {
     this.localUsuario = { ...this.usuario };
     this.cargarcarrera();
