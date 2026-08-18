@@ -20,4 +20,18 @@ describe('CarritoService', () => {
     expect(service.contieneProducto(10)).toBeFalse();
     expect(service.obtenerTotal()).toBe(0);
   });
+
+  it('emits the total units whenever a cart quantity changes', () => {
+    const totals: number[] = [];
+    const subscription = service.total$.subscribe((total) =>
+      totals.push(total),
+    );
+
+    service.agregarProducto(10, 'Multímetro', '', '', '', 0, 3);
+    service.editarCantidad(10, 3);
+    service.quitarProducto(10);
+
+    expect(totals).toEqual([0, 1, 3, 2]);
+    subscription.unsubscribe();
+  });
 });

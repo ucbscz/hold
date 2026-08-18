@@ -13,7 +13,7 @@ import { UsuarioService } from '@entities/user';
 import { CarritoService } from '@features/cart';
 import { parseJsonResult } from '@shared/lib/result';
 import { SidebarService } from '@widgets/admin-sidebar';
-import { filter } from 'rxjs';
+import { filter, Observable } from 'rxjs';
 import { UsuarioPrevioComponent } from './usuario-previo/usuario-previo.component';
 @Component({
   selector: 'app-navbar',
@@ -33,6 +33,7 @@ export class NavbarComponent {
   showBack: WritableSignal<boolean> = signal(true);
   showCart: WritableSignal<boolean> = signal(true);
   showProfile: WritableSignal<boolean> = signal(true);
+  readonly totalProductos$: Observable<number>;
 
   constructor(
     private readonly carrito: CarritoService,
@@ -43,6 +44,7 @@ export class NavbarComponent {
     private readonly el: ElementRef,
     readonly notifStore: NotificacionStoreService,
   ) {
+    this.totalProductos$ = this.carrito.total$;
     this.updateButtonVisibility(this.router.url);
     this.notifStore.iniciarPolling();
 
@@ -237,10 +239,6 @@ export class NavbarComponent {
       return this.notifStore.noLeidasAdmin();
 
     return this.notifStore.noLeidasUsuario();
-  }
-
-  totalproductos(): number {
-    return this.carrito.obtenerTotal();
   }
 
   mostrarcarrito() {
