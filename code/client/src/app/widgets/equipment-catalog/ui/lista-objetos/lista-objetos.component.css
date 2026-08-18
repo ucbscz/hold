@@ -47,8 +47,10 @@
   overflow: hidden;
 }
 .product-card__image-wrapper {
+  flex: 0 0 auto;
   position: relative;
   width: 100%;
+  min-height: 1px;
   aspect-ratio: 1;
   background-color: #f9fafb;
   border-radius: 0;
