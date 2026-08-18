@@ -1,12 +1,7 @@
-import {
-  Component,
-  ElementRef,
-  HostListener,
-  OnDestroy,
-  OnInit,
-} from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { FlatpickrDirective } from '@shared/lib/directives';
+import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
 import flatpickr from 'flatpickr';
 import { ActivoComponent } from './activo/activo.component';
 import { AprobadoComponent } from './aprobado/aprobado.component';
@@ -27,37 +22,27 @@ import { RechazadoComponent } from './rechazado/rechazado.component';
     RechazadoComponent,
     FormsModule,
     FlatpickrDirective,
+    CustomSelectComponent,
   ],
   templateUrl: './historial.component.html',
   styleUrl: './historial.component.css',
 })
 export class HistorialComponent implements OnInit, OnDestroy {
-  contenido: string[] = [
-    'Activo',
-    'Aprobado',
-    'Pendiente',
-    'Rechazado',
-    'Finalizado',
-    'Cancelado',
-    'Atrasado',
+  readonly estados: OpcionSelect[] = [
+    { value: 'Activo', label: 'Activos' },
+    { value: 'Aprobado', label: 'Aprobados' },
+    { value: 'Pendiente', label: 'Pendientes' },
+    { value: 'Rechazado', label: 'Rechazados' },
+    { value: 'Finalizado', label: 'Finalizados' },
+    { value: 'Cancelado', label: 'Cancelados' },
+    { value: 'Atrasado', label: 'Atrasados' },
   ];
-  item: string = 'Activo';
-  isOpen: boolean = false;
-  isHovered: boolean = false;
-  show: boolean = true;
-  filtroTexto: string = '';
-  fechaDesde: string = '';
-  fechaHasta: string = '';
+  item = 'Activo';
+  filtroTexto = '';
+  fechaDesde = '';
+  fechaHasta = '';
+  refreshTrigger = 0;
   private pollInterval: ReturnType<typeof setInterval> | null = null;
-
-  constructor(private el: ElementRef) {}
-
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent) {
-    if (this.isOpen && !this.el.nativeElement.contains(event.target)) {
-      this.isOpen = false;
-    }
-  }
 
   ngOnInit() {
     this.pollInterval = setInterval(() => this.recargar(), 30000);
@@ -67,21 +52,12 @@ export class HistorialComponent implements OnInit, OnDestroy {
     if (this.pollInterval) clearInterval(this.pollInterval);
   }
 
-  itemclick(item: string) {
-    this.item = item;
-    this.isOpen = false;
-    this.recargar();
+  seleccionarEstado(valor: unknown): void {
+    this.item = String(valor ?? 'Activo');
   }
 
-  private recargar() {
-    this.show = false;
-    setTimeout(() => {
-      this.show = true;
-    }, 0);
-  }
-
-  toggleDropdown() {
-    this.isOpen = !this.isOpen;
+  private recargar(): void {
+    this.refreshTrigger++;
   }
 
   onFechaDesde(dates: Date[]) {
@@ -106,10 +82,4 @@ export class HistorialComponent implements OnInit, OnDestroy {
 
   fpDesde?: flatpickr.Instance;
   fpHasta?: flatpickr.Instance;
-  onMouseEnter() {
-    this.isHovered = true;
-  }
-  onMouseLeave() {
-    this.isHovered = false;
-  }
 }

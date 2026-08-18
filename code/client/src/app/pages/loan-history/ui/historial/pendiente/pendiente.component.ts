@@ -16,7 +16,7 @@ import { HistorialBase } from '../base/historial-base';
     AvisoExitoComponent,
   ],
   templateUrl: './pendiente.component.html',
-  styleUrl: './pendiente.component.css',
+  styleUrl: '../historial-list.shared.css',
 })
 export class PendienteComponent extends HistorialBase {
   override estado: string = 'pendiente';
@@ -30,24 +30,20 @@ export class PendienteComponent extends HistorialBase {
   ngOnInit() {
     this.cargarDatos();
   }
-  aviso(item: PrestamoDto) {
-    this.itemSeleccionado = item;
-    this.avisocancelar.set(!this.avisocancelar());
-  }
   abrirAvisoCancelacion(event: Event, item: PrestamoDto): void {
     event.stopPropagation();
-    this.aviso(item);
+    this.itemSeleccionado = item;
+    this.avisocancelar.set(true);
   }
   cancelar() {
     this.prestamoApi
       .cambiarEstadoPrestamo(this.itemSeleccionado!.Id, 'cancelado')
       .subscribe({
-        next: (_response) => {
+        next: () => {
           this.cargarDatos();
           this.itemSeleccionado = null;
           this.avisocancelar.set(false);
-          this.mensajeexito =
-            'Préstamo cancelado con éxito , ahora pasa a Cancelado';
+          this.mensajeexito = 'Préstamo cancelado con éxito.';
           this.exito.set(true);
         },
         error: (error) => {

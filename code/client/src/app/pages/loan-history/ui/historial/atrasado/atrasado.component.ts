@@ -14,7 +14,7 @@ import { HistorialBase } from '../base/historial-base';
     AvisoExitoComponent,
   ],
   templateUrl: './atrasado.component.html',
-  styleUrl: './atrasado.component.css',
+  styleUrl: '../historial-list.shared.css',
 })
 export class AtrasadoComponent extends HistorialBase {
   override estado: string = 'atrasado';

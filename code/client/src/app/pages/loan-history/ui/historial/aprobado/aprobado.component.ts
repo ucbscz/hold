@@ -11,7 +11,7 @@ import { HistorialBase } from '../base/historial-base';
   standalone: true,
   imports: [CommonModule, Aviso, VistaPrestamosComponent, AvisoExitoComponent],
   templateUrl: './aprobado.component.html',
-  styleUrl: './aprobado.component.css',
+  styleUrl: '../historial-list.shared.css',
 })
 export class AprobadoComponent extends HistorialBase {
   override estado: string = 'aprobado';
@@ -27,8 +27,9 @@ export class AprobadoComponent extends HistorialBase {
     this.cargarDatos();
   }
 
-  avisocancelarf(item: PrestamoDto) {
-    this.avisocancelar.set(!this.avisocancelar());
+  abrirAvisoCancelacion(event: Event, item: PrestamoDto): void {
+    event.stopPropagation();
+    this.avisocancelar.set(true);
     this.itemSeleccionado = item;
   }
 
@@ -36,12 +37,11 @@ export class AprobadoComponent extends HistorialBase {
     this.prestamoApi
       .cambiarEstadoPrestamo(this.itemSeleccionado!.Id, 'cancelado')
       .subscribe({
-        next: (_response) => {
+        next: () => {
           this.cargarDatos();
           this.itemSeleccionado = null;
           this.avisocancelar.set(false);
-          this.mensajeexito =
-            'Préstamo cancelado con éxito , ahora pasa a Cancelado';
+          this.mensajeexito = 'Préstamo cancelado con éxito.';
           this.exito.set(true);
         },
         error: (error) => {

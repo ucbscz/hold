@@ -8,7 +8,7 @@ import { HistorialBase } from '../base/historial-base';
   selector: 'app-rechazado',
   imports: [CommonModule, VistaPrestamosComponent, MostrarerrorComponent],
   templateUrl: './rechazado.component.html',
-  styleUrl: './rechazado.component.css',
+  styleUrl: '../historial-list.shared.css',
 })
 export class RechazadoComponent extends HistorialBase {
   override estado: string = 'rechazado';

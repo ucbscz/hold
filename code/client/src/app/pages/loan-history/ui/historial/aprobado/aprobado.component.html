@@ -69,16 +69,14 @@
           <div class="botones-izquierda">
             <button
               class="btn btn-sm btn-danger"
-              (click)="
-                $event.stopPropagation(); avisocancelarf(item.value.datosgrupo)
-              "
+              (click)="abrirAvisoCancelacion($event, item.value.datosgrupo)"
             >
               Cancelar
             </button>
           </div>
           <button
             class="btn btn-sm btn-ghost"
-            (click)="AbrirVista(item.value.equipos)"
+            (click)="abrirVista(item.value.equipos)"
           >
             Ver detalles
           </button>

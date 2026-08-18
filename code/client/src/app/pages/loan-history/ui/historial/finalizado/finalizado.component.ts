@@ -8,7 +8,7 @@ import { HistorialBase } from '../base/historial-base';
   selector: 'app-finalizado',
   imports: [CommonModule, VistaPrestamosComponent, MostrarerrorComponent],
   templateUrl: './finalizado.component.html',
-  styleUrl: './finalizado.component.css',
+  styleUrl: '../historial-list.shared.css',
 })
 export class FinalizadoComponent extends HistorialBase {
   override estado: string = 'finalizado';

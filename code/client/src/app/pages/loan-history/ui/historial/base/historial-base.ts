@@ -1,13 +1,21 @@
-import { Directive, Input, signal, WritableSignal } from '@angular/core';
+import {
+  Directive,
+  Input,
+  OnChanges,
+  signal,
+  SimpleChanges,
+  WritableSignal,
+} from '@angular/core';
 import { PrestamoDto } from '@entities/admin';
 import { PrestamoAgrupados, PrestamosAPIService } from '@entities/loan';
 import { UsuarioService } from '@entities/user';
 import { extractErrorMessage } from '@shared/lib/error';
 @Directive()
-export abstract class HistorialBase {
+export abstract class HistorialBase implements OnChanges {
   @Input() filtroTexto: string = '';
   @Input() fechaDesde: string = '';
   @Input() fechaHasta: string = '';
+  @Input() refreshTrigger = 0;
   datos = new Map<number, PrestamoAgrupados>();
   itemSeleccionado: PrestamoDto | null = null;
   prestamosVista: PrestamoDto[] = [];
@@ -23,6 +31,12 @@ export abstract class HistorialBase {
     protected prestamoApi: PrestamosAPIService,
     protected usuario: UsuarioService,
   ) {}
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['refreshTrigger'] && !changes['refreshTrigger'].firstChange) {
+      this.cargarDatos();
+    }
+  }
   get datosFiltrados(): Map<number, PrestamoAgrupados> {
     const texto = this.filtroTexto.trim().toLowerCase();
     const desde = this.fechaDesde ? new Date(this.fechaDesde) : null;
@@ -52,7 +66,7 @@ export abstract class HistorialBase {
     return filtrado;
   }
   cargarDatos() {
-    if (this.usuario.estaVacio() == false) {
+    if (!this.usuario.estaVacio()) {
       this.prestamoApi
         .obtenerPrestamosPorUsuario(
           this.usuario.obtenerUsuario().id!,
@@ -75,7 +89,7 @@ export abstract class HistorialBase {
   }
   agruparPrestamos(datos: PrestamoDto[]) {
     const nuevo = new Map<number, PrestamoAgrupados>();
-    for (let prestamo of datos) {
+    for (const prestamo of datos) {
       if (nuevo.has(prestamo.Id!)) {
         nuevo.get(prestamo.Id)!.insertarEquipo(prestamo);
       } else {
@@ -84,7 +98,7 @@ export abstract class HistorialBase {
     }
     this.datos = nuevo;
   }
-  AbrirVista(item: PrestamoDto[]) {
+  abrirVista(item: PrestamoDto[]) {
     this.prestamosVista = item;
     this.abrirVistaPrestamos = true;
   }

@@ -13,7 +13,7 @@ import { HistorialBase } from '../base/historial-base';
     AvisoExitoComponent,
   ],
   templateUrl: './activo.component.html',
-  styleUrl: './activo.component.css',
+  styleUrl: '../historial-list.shared.css',
 })
 export class ActivoComponent extends HistorialBase {
   override estado: string = 'activo';

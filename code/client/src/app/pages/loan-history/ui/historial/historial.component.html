@@ -1,33 +1,20 @@
 <div class="container">
-  <div class="hist-dropdown">
-    <button
-      class="hist-trigger"
-      (click)="toggleDropdown()"
-      [attr.aria-expanded]="isOpen"
-      aria-haspopup="listbox"
-    >
-      <i class="fas fa-history"></i>
-      <span>Préstamos {{ item }}s</span>
-      <i class="fas fa-chevron-down hist-chevron" [class.open]="isOpen"></i>
-    </button>
-    @if (isOpen) {
-      <ul class="hist-menu" role="listbox">
-        @for (estado of contenido; track $index) {
-          <li
-            class="hist-menu-item"
-            [class.active]="estado === item"
-            [attr.aria-selected]="estado === item"
-            role="option"
-            (click)="itemclick(estado)"
-          >
-            {{ estado }}
-          </li>
-        }
-      </ul>
-    }
-  </div>
+  <header class="history-header">
+    <h1>Historial de préstamos</h1>
+    <p>Consulta el estado y las fechas de tus reservas de equipos.</p>
+  </header>
 
-  <div class="audit-filters">
+  <div class="history-toolbar">
+    <app-custom-select
+      class="history-state-select"
+      [ngModel]="item"
+      (ngModelChange)="seleccionarEstado($event)"
+      [ngModelOptions]="{ standalone: true }"
+      [opciones]="estados"
+      [searchThreshold]="99"
+      icon="fas fa-history"
+      placeholder="Estado del préstamo"
+    ></app-custom-select>
     <div class="audit-search-wrap">
       <i class="fas fa-search search-icon"></i>
       <input
@@ -67,58 +54,63 @@
       (fpChange)="onFechaHasta($event)"
       (fpReady)="fpHasta = $event"
     />
-    <div class="audit-filters-actions">
+    @if (filtroTexto || fechaDesde || fechaHasta) {
       <button class="btn btn-ghost btn-sm" (click)="limpiarFiltros()">
         <i class="fas fa-times"></i> Limpiar
       </button>
-    </div>
+    }
   </div>
 
   <div class="items-wrapper" role="tabpanel">
-    @if (show) {
-      @if (item == "Activo") {
-        <app-activo
-          [filtroTexto]="filtroTexto"
-          [fechaDesde]="fechaDesde"
-          [fechaHasta]="fechaHasta"
-        ></app-activo>
-      } @else if (item == "Aprobado") {
-        <app-aprobado
-          [filtroTexto]="filtroTexto"
-          [fechaDesde]="fechaDesde"
-          [fechaHasta]="fechaHasta"
-        ></app-aprobado>
-      } @else if (item == "Pendiente") {
-        <app-pendiente
-          [filtroTexto]="filtroTexto"
-          [fechaDesde]="fechaDesde"
-          [fechaHasta]="fechaHasta"
-        ></app-pendiente>
-      } @else if (item == "Rechazado") {
-        <app-rechazado
-          [filtroTexto]="filtroTexto"
-          [fechaDesde]="fechaDesde"
-          [fechaHasta]="fechaHasta"
-        ></app-rechazado>
-      } @else if (item == "Finalizado") {
-        <app-finalizado
-          [filtroTexto]="filtroTexto"
-          [fechaDesde]="fechaDesde"
-          [fechaHasta]="fechaHasta"
-        ></app-finalizado>
-      } @else if (item == "Cancelado") {
-        <app-cancelado
-          [filtroTexto]="filtroTexto"
-          [fechaDesde]="fechaDesde"
-          [fechaHasta]="fechaHasta"
-        ></app-cancelado>
-      } @else if (item == "Atrasado") {
-        <app-atrasado
-          [filtroTexto]="filtroTexto"
-          [fechaDesde]="fechaDesde"
-          [fechaHasta]="fechaHasta"
-        ></app-atrasado>
-      }
+    @if (item == "Activo") {
+      <app-activo
+        [filtroTexto]="filtroTexto"
+        [fechaDesde]="fechaDesde"
+        [fechaHasta]="fechaHasta"
+        [refreshTrigger]="refreshTrigger"
+      ></app-activo>
+    } @else if (item == "Aprobado") {
+      <app-aprobado
+        [filtroTexto]="filtroTexto"
+        [fechaDesde]="fechaDesde"
+        [fechaHasta]="fechaHasta"
+        [refreshTrigger]="refreshTrigger"
+      ></app-aprobado>
+    } @else if (item == "Pendiente") {
+      <app-pendiente
+        [filtroTexto]="filtroTexto"
+        [fechaDesde]="fechaDesde"
+        [fechaHasta]="fechaHasta"
+        [refreshTrigger]="refreshTrigger"
+      ></app-pendiente>
+    } @else if (item == "Rechazado") {
+      <app-rechazado
+        [filtroTexto]="filtroTexto"
+        [fechaDesde]="fechaDesde"
+        [fechaHasta]="fechaHasta"
+        [refreshTrigger]="refreshTrigger"
+      ></app-rechazado>
+    } @else if (item == "Finalizado") {
+      <app-finalizado
+        [filtroTexto]="filtroTexto"
+        [fechaDesde]="fechaDesde"
+        [fechaHasta]="fechaHasta"
+        [refreshTrigger]="refreshTrigger"
+      ></app-finalizado>
+    } @else if (item == "Cancelado") {
+      <app-cancelado
+        [filtroTexto]="filtroTexto"
+        [fechaDesde]="fechaDesde"
+        [fechaHasta]="fechaHasta"
+        [refreshTrigger]="refreshTrigger"
+      ></app-cancelado>
+    } @else if (item == "Atrasado") {
+      <app-atrasado
+        [filtroTexto]="filtroTexto"
+        [fechaDesde]="fechaDesde"
+        [fechaHasta]="fechaHasta"
+        [refreshTrigger]="refreshTrigger"
+      ></app-atrasado>
     }
   </div>
 </div>

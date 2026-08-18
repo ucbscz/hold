@@ -8,7 +8,7 @@ import { HistorialBase } from '../base/historial-base';
   selector: 'app-cancelado',
   imports: [CommonModule, VistaPrestamosComponent, MostrarerrorComponent],
   templateUrl: './cancelado.component.html',
-  styleUrl: './cancelado.component.css',
+  styleUrl: '../historial-list.shared.css',
 })
 export class CanceladoComponent extends HistorialBase {
   override estado = 'cancelado';
