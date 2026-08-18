@@ -87,6 +87,20 @@
   min-width: 11rem;
   max-width: 11rem;
 }
+.audit-select-wrap ::ng-deep .cs-trigger {
+  min-height: 42px;
+  height: 42px;
+  padding: 0 1.25rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--ink-secondary);
+  box-shadow: var(--shadow-xs);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+.audit-select-wrap ::ng-deep .cs-trigger:hover { border-color: var(--border-strong); background: var(--bg); }
+.audit-select-wrap ::ng-deep .cs-trigger.open { border-color: var(--interactive-text); box-shadow: 0 0 0 3px var(--interactive-subtle); }
 .audit-select-trigger {
   display: flex;
   align-items: center;
