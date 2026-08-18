@@ -115,7 +115,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   imprimirPrestamos(): void {
     const tabla = document.querySelector('.data-table--loans');
     if (!tabla) return;
-    const ventana = window.open('', '_blank', 'noopener,noreferrer');
+    const ventana = window.open('', '_blank');
     if (!ventana) return;
     const clon = tabla.cloneNode(true) as HTMLTableElement;
     clon
@@ -126,8 +126,8 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     );
     ventana.document.close();
     ventana.focus();
-    ventana.print();
-    ventana.close();
+    setTimeout(() => ventana.print(), 100);
+    ventana.onafterprint = () => ventana.close();
   }
 
   vercontrato: WritableSignal<boolean> = signal(false);
