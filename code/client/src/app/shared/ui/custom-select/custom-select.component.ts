@@ -61,7 +61,14 @@ export class CustomSelectComponent
   private onChange: (valor: unknown) => void = () => {};
   private onTouched: () => void = () => {};
   private animationFrameId?: number;
-  private readonly onViewportScroll = () => this.programarPosicionMenu();
+  private enfocarBusquedaAlPosicionar = false;
+  private readonly onViewportScroll = (evento: Event) => {
+    const menu = this.menuRef?.nativeElement;
+    if (menu && evento.target instanceof Node && menu.contains(evento.target)) {
+      return;
+    }
+    this.programarPosicionMenu();
+  };
 
   constructor(private readonly elementRef: ElementRef<HTMLElement>) {
     document.addEventListener('scroll', this.onViewportScroll, true);
@@ -107,6 +114,7 @@ export class CustomSelectComponent
     if (this.abierto) {
       this.onTouched();
       this.menuPosicionado = false;
+      this.enfocarBusquedaAlPosicionar = true;
       this.programarPosicionMenu();
     } else {
       this.limpiarBusqueda();
@@ -117,6 +125,7 @@ export class CustomSelectComponent
     this.valor = opcion.value;
     this.onChange(this.valor);
     this.abierto = false;
+    this.enfocarBusquedaAlPosicionar = false;
     this.limpiarBusqueda();
   }
 
@@ -133,6 +142,7 @@ export class CustomSelectComponent
       !this.menuRef.nativeElement.contains(evento.target)
     ) {
       this.abierto = false;
+      this.enfocarBusquedaAlPosicionar = false;
       this.limpiarBusqueda();
     }
   }
@@ -141,6 +151,7 @@ export class CustomSelectComponent
   onEscape(): void {
     if (!this.abierto) return;
     this.abierto = false;
+    this.enfocarBusquedaAlPosicionar = false;
     this.limpiarBusqueda();
   }
 
@@ -226,10 +237,13 @@ export class CustomSelectComponent
       : triggerRect.bottom + menuGap;
     this.menuPosicionado = true;
 
-    if (this.debeMostrarBusqueda) {
-      requestAnimationFrame(() =>
-        menu.querySelector<HTMLInputElement>('.cs-search__input')?.focus(),
-      );
+    if (this.debeMostrarBusqueda && this.enfocarBusquedaAlPosicionar) {
+      this.enfocarBusquedaAlPosicionar = false;
+      requestAnimationFrame(() => {
+        menu
+          .querySelector<HTMLInputElement>('.cs-search__input')
+          ?.focus({ preventScroll: true });
+      });
     }
   }
 

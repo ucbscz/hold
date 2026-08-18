@@ -1,4 +1,9 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import {
+  ComponentFixture,
+  fakeAsync,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
 import { By } from '@angular/platform-browser';
 import { CustomSelectComponent } from './custom-select.component';
 
@@ -51,4 +56,32 @@ describe('CustomSelectComponent', () => {
     fixture.destroy();
     expect(menu?.isConnected).toBeFalse();
   });
+
+  it('should focus search only once and ignore its own scrolling', fakeAsync(() => {
+    component.opciones = [
+      'Preventivo',
+      'Correctivo',
+      'Predictivo',
+      'Inspección',
+      'Calibración',
+      'Actualización',
+    ];
+    fixture.detectChanges();
+
+    const search = document.body.querySelector(
+      '.cs-search__input',
+    ) as HTMLInputElement;
+    const focusSpy = spyOn(search, 'focus');
+
+    fixture.debugElement.query(By.css('.cs-trigger')).nativeElement.click();
+    tick(32);
+
+    const options = document.body.querySelector('.cs-options') as HTMLElement;
+    options.dispatchEvent(new Event('scroll', { bubbles: true }));
+    component.onResize();
+    tick(32);
+
+    expect(focusSpy).toHaveBeenCalledTimes(1);
+    expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+  }));
 });
