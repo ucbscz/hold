@@ -47,27 +47,29 @@
       placeholder="Todas las acciones"
     ></app-custom-select>
     <div class="audit-filters-actions">
-      <button class="btn btn-ghost btn-sm" (click)="limpiar()">
+      <button class="btn admin-toolbar-button" (click)="limpiar()">
         <i class="fas fa-times"></i> Limpiar
       </button>
       <button
-        class="btn btn-ghost btn-sm"
+        class="btn admin-toolbar-button admin-toolbar-button--icon"
         (click)="cargar()"
         title="Actualizar"
+        aria-label="Actualizar auditoría"
       >
         <i class="fas fa-sync-alt"></i>
       </button>
       <button
-        class="btn btn-ghost btn-sm"
+        class="btn admin-toolbar-button"
         (click)="exportarCsv()"
         title="Exportar CSV"
       >
-        <i class="fas fa-file-csv"></i>
+        <i class="fas fa-file-csv"></i> Exportar
       </button>
       <button
-        class="btn btn-ghost btn-sm"
+        class="btn admin-toolbar-button admin-toolbar-button--icon"
         (click)="imprimir()"
         title="Imprimir"
+        aria-label="Imprimir auditoría"
       >
         <i class="fas fa-print"></i>
       </button>

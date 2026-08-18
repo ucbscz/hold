@@ -110,9 +110,9 @@
     transform var(--t-fast), color var(--t-fast), border-color var(--t-fast);
 
   --scrollbar-size: 8px;
-  --scrollbar-thumb: rgba(148, 163, 184, 0.65);
-  --scrollbar-thumb-hover: rgba(100, 116, 139, 0.85);
-  --scrollbar-track: rgba(226, 232, 240, 0.35);
+  --scrollbar-thumb: rgba(148, 163, 184, 0.48);
+  --scrollbar-thumb-hover: rgba(100, 116, 139, 0.68);
+  --scrollbar-track: transparent;
 }
 
 *,
@@ -139,6 +139,11 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+* {
+  scrollbar-color: var(--scrollbar-thumb) transparent;
+  scrollbar-width: thin;
+}
+
 ::-webkit-scrollbar {
   width: var(--scrollbar-size);
   height: var(--scrollbar-size);
@@ -155,7 +160,16 @@ body {
   background-clip: content-box;
 }
 ::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
+  background: transparent !important;
+}
+::-webkit-scrollbar-button,
+::-webkit-scrollbar-button:single-button,
+::-webkit-scrollbar-button:horizontal,
+::-webkit-scrollbar-button:vertical {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
 }
 
 .form-container,
@@ -409,6 +423,36 @@ body {
 }
 .btn-ghost:not(:disabled):active {
   transform: scale(0.97);
+}
+
+.admin-toolbar-button {
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 1rem !important;
+  gap: 0.5rem !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius-full) !important;
+  background: var(--surface) !important;
+  color: var(--ink-secondary) !important;
+  box-shadow: var(--shadow-xs);
+  font: 500 0.875rem var(--font) !important;
+}
+.admin-toolbar-button--icon {
+  width: 42px !important;
+  min-width: 42px !important;
+  padding: 0 !important;
+}
+@media (hover: hover) and (pointer: fine) {
+  .admin-toolbar-button:hover:not(:disabled) {
+    border-color: var(--border-strong) !important;
+    background: var(--sidebar) !important;
+    color: var(--ink) !important;
+  }
+}
+.admin-toolbar-button:focus-visible {
+  outline: none;
+  border-color: var(--interactive-text) !important;
+  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
 }
 
 .login-button,

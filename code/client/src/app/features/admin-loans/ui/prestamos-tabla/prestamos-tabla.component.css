@@ -1446,3 +1446,38 @@ td.actions-column > * {
   backdrop-filter: var(--dropdown-blur);
   -webkit-backdrop-filter: var(--dropdown-blur);
 }
+
+.custom-dropdown {
+  margin-right: 0;
+}
+
+.loan-date-filters {
+  margin: -0.25rem 0 1rem;
+}
+
+.loans-table-shell {
+  margin-bottom: 0;
+}
+
+app-table-pagination {
+  order: 4;
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .loan-date-filters {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .loan-date-filters input {
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .loan-date-filters {
+    grid-template-columns: 1fr;
+  }
+}

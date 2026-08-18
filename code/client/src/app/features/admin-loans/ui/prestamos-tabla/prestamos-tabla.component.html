@@ -76,7 +76,7 @@
       </div>
       <button
         type="button"
-        class="btn btn-ghost btn-sm"
+        class="btn admin-toolbar-button"
         (click)="exportarPrestamos()"
         title="Exportar préstamos CSV"
       >
@@ -84,9 +84,10 @@
       </button>
       <button
         type="button"
-        class="btn btn-ghost btn-sm"
+        class="btn admin-toolbar-button admin-toolbar-button--icon"
         (click)="imprimirPrestamos()"
         title="Imprimir préstamos"
+        aria-label="Imprimir préstamos"
       >
         <i class="fas fa-print"></i>
       </button>
