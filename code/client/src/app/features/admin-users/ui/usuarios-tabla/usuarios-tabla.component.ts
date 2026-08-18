@@ -11,7 +11,9 @@ import { extractErrorMessage } from '@shared/lib/error';
 import {
   AvisoEliminarComponent,
   AvisoExitoComponent,
+  CustomSelectComponent,
   MostrarerrorComponent,
+  OpcionSelect,
 } from '@shared/ui';
 import { PrestamosInlineComponent } from '@widgets/admin-inline';
 import { AuditPanelComponent } from '@widgets/audit-panel';
@@ -34,6 +36,7 @@ import { UsuariosEditarComponent } from '../usuarios-editar/usuarios-editar.comp
     PrestamosInlineComponent,
     AuditPanelComponent,
     TablePaginationComponent,
+    CustomSelectComponent,
   ],
   templateUrl: './usuarios-tabla.component.html',
   styleUrls: ['./usuarios-tabla.component.css'],
@@ -53,13 +56,25 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
   botoncrear: WritableSignal<boolean> = signal(false);
   botoneditar: WritableSignal<boolean> = signal(false);
   alertaeliminar: boolean = false;
-  valoreliminar: number = 0;
+  usuarioAEliminar: Usuario | null = null;
   bloqueoModalVisible = false;
   usuarioBloqueo: Usuario | null = null;
   motivoBloqueo = '';
+  procesandoBloqueo = false;
   usuarios: Usuario[] = [];
   usuarioscopia: Usuario[] = [];
   carreras: string[] = [];
+  filtroRol = '';
+  filtroCarrera = '';
+  filtroBusqueda: [string, string] = ['', ''];
+  readonly rolesFiltroOpciones: OpcionSelect[] = [
+    { value: '', label: 'Todos los roles' },
+    { value: 'administrador', label: 'Administrador' },
+    { value: 'estudiante', label: 'Estudiante' },
+  ];
+  carrerasFiltroOpciones: OpcionSelect[] = [
+    { value: '', label: 'Todas las carreras' },
+  ];
   usuarioSeleccionado: Usuario = new Usuario();
   override columnas: string[] = [
     'Carnet',
@@ -84,24 +99,23 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
     this.cargarCarreras();
   }
   alternarBloqueo(usuario: Usuario) {
-    if (usuario.bloqueado) {
-      this.aplicarBloqueo(usuario, false, null);
-      return;
-    }
-
     this.usuarioBloqueo = usuario;
     this.motivoBloqueo = '';
     this.bloqueoModalVisible = true;
   }
 
   confirmarBloqueo() {
-    if (this.usuarioBloqueo) {
-      this.aplicarBloqueo(this.usuarioBloqueo, true, this.motivoBloqueo);
-    }
-    this.cerrarBloqueo();
+    if (!this.usuarioBloqueo || this.procesandoBloqueo) return;
+
+    const bloquear = !this.usuarioBloqueo.bloqueado;
+    const motivo = bloquear ? this.motivoBloqueo.trim() : null;
+    if (bloquear && !motivo) return;
+
+    this.aplicarBloqueo(this.usuarioBloqueo, bloquear, motivo);
   }
 
   cerrarBloqueo() {
+    if (this.procesandoBloqueo) return;
     this.bloqueoModalVisible = false;
     this.usuarioBloqueo = null;
     this.motivoBloqueo = '';
@@ -112,6 +126,7 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
     bloqueado: boolean,
     motivo: string | null,
   ) {
+    this.procesandoBloqueo = true;
     this.usuarioapi
       .bloquearUsuario(usuario.carnet!, bloqueado, motivo)
       .subscribe({
@@ -123,8 +138,14 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
             : 'Usuario desbloqueado';
           this.exito.set(true);
           this.auditRefresh++;
+          this.procesandoBloqueo = false;
+          this.bloqueoModalVisible = false;
+          this.usuarioBloqueo = null;
+          this.motivoBloqueo = '';
+          this.cargarUsuarios();
         },
         error: (error) => {
+          this.procesandoBloqueo = false;
           this.mensajeerror = extractErrorMessage(
             error,
             'Error al cambiar el bloqueo del usuario',
@@ -142,6 +163,12 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
     this.carrerasAPI.obtenerCarreras().subscribe({
       next: (data: Carrera[]) => {
         this.carreras = data.map((carrera) => carrera.Nombre ?? '');
+        this.carrerasFiltroOpciones = [
+          { value: '', label: 'Todas las carreras' },
+          ...this.carreras
+            .filter(Boolean)
+            .map((carrera) => ({ value: carrera, label: carrera })),
+        ];
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -158,7 +185,7 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
       next: (data: Usuario[]) => {
         this.usuarios = data;
         this.usuarioscopia = [...this.usuarios];
-        this.aplicarOrdenActualSiExiste();
+        this.aplicarFiltros();
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -174,115 +201,144 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
     this.cargarUsuarios();
   }
   aplicarFiltros(event?: [string, string]) {
-    if (event && event[0].trim() !== '') {
-      const busquedaNormalizada = this.normalizeText(event[0]);
-      this.usuarios = this.usuarioscopia.filter((usuario) => {
-        switch (event[1]) {
-          case 'Carnet':
-            return this.normalizeText(usuario.carnet || '').includes(
-              busquedaNormalizada,
-            );
-          case 'Nombre':
-            return this.normalizeText(usuario.nombre || '').includes(
-              busquedaNormalizada,
-            );
-          case 'Apellido Paterno':
-            return this.normalizeText(usuario.apellido_paterno || '').includes(
-              busquedaNormalizada,
-            );
-          case 'Apellido Materno':
-            return this.normalizeText(usuario.apellido_materno || '').includes(
-              busquedaNormalizada,
-            );
-          case 'Correo':
-            return this.normalizeText(usuario.correo || '').includes(
-              busquedaNormalizada,
-            );
-          case 'Teléfono':
-            return this.normalizeText(usuario.telefono || '').includes(
-              busquedaNormalizada,
-            );
-          case 'Rol':
-            return this.normalizeText(usuario.rol || '').includes(
-              busquedaNormalizada,
-            );
-          case 'Carrera':
-            return this.normalizeText(usuario.carrera || '').includes(
-              busquedaNormalizada,
-            );
-          case 'Referencia':
-            return this.normalizeText(usuario.nombre_referencia || '').includes(
-              busquedaNormalizada,
-            );
-          case 'Tel. Referencia':
-            return this.normalizeText(
-              usuario.telefono_referencia || '',
-            ).includes(busquedaNormalizada);
-          default:
-            return (
-              this.normalizeText(usuario.carnet || '').includes(
-                busquedaNormalizada,
-              ) ||
-              this.normalizeText(usuario.nombre || '').includes(
-                busquedaNormalizada,
-              ) ||
-              this.normalizeText(usuario.apellido_paterno || '').includes(
-                busquedaNormalizada,
-              ) ||
-              this.normalizeText(usuario.apellido_materno || '').includes(
-                busquedaNormalizada,
-              ) ||
-              this.normalizeText(usuario.correo || '').includes(
-                busquedaNormalizada,
-              ) ||
-              this.normalizeText(usuario.telefono || '').includes(
-                busquedaNormalizada,
-              ) ||
-              this.normalizeText(usuario.rol || '').includes(
-                busquedaNormalizada,
-              ) ||
-              this.normalizeText(usuario.carrera || '').includes(
-                busquedaNormalizada,
-              ) ||
-              this.normalizeText(usuario.nombre_referencia || '').includes(
-                busquedaNormalizada,
-              ) ||
-              this.normalizeText(usuario.telefono_referencia || '').includes(
-                busquedaNormalizada,
-              )
-            );
-        }
-      });
-    } else {
-      this.usuarios = [...this.usuarioscopia];
-    }
+    if (event) this.filtroBusqueda = event;
+
+    const busquedaNormalizada = this.normalizeText(this.filtroBusqueda[0]);
+    const columna = this.filtroBusqueda[1];
+    const rol = this.normalizeText(this.filtroRol);
+    const carrera = this.normalizeText(this.filtroCarrera);
+
+    this.usuarios = this.usuarioscopia.filter((usuario) => {
+      const coincideBusqueda = !busquedaNormalizada
+        ? true
+        : (() => {
+            switch (columna) {
+              case 'Carnet':
+                return this.normalizeText(usuario.carnet || '').includes(
+                  busquedaNormalizada,
+                );
+              case 'Nombre':
+                return this.normalizeText(usuario.nombre || '').includes(
+                  busquedaNormalizada,
+                );
+              case 'Apellido Paterno':
+                return this.normalizeText(
+                  usuario.apellido_paterno || '',
+                ).includes(busquedaNormalizada);
+              case 'Apellido Materno':
+                return this.normalizeText(
+                  usuario.apellido_materno || '',
+                ).includes(busquedaNormalizada);
+              case 'Correo':
+                return this.normalizeText(usuario.correo || '').includes(
+                  busquedaNormalizada,
+                );
+              case 'Teléfono':
+                return this.normalizeText(usuario.telefono || '').includes(
+                  busquedaNormalizada,
+                );
+              case 'Rol':
+                return this.normalizeText(usuario.rol || '').includes(
+                  busquedaNormalizada,
+                );
+              case 'Carrera':
+                return this.normalizeText(usuario.carrera || '').includes(
+                  busquedaNormalizada,
+                );
+              case 'Referencia':
+                return this.normalizeText(
+                  usuario.nombre_referencia || '',
+                ).includes(busquedaNormalizada);
+              case 'Tel. Referencia':
+                return this.normalizeText(
+                  usuario.telefono_referencia || '',
+                ).includes(busquedaNormalizada);
+              default:
+                return (
+                  this.normalizeText(usuario.carnet || '').includes(
+                    busquedaNormalizada,
+                  ) ||
+                  this.normalizeText(usuario.nombre || '').includes(
+                    busquedaNormalizada,
+                  ) ||
+                  this.normalizeText(usuario.apellido_paterno || '').includes(
+                    busquedaNormalizada,
+                  ) ||
+                  this.normalizeText(usuario.apellido_materno || '').includes(
+                    busquedaNormalizada,
+                  ) ||
+                  this.normalizeText(usuario.correo || '').includes(
+                    busquedaNormalizada,
+                  ) ||
+                  this.normalizeText(usuario.telefono || '').includes(
+                    busquedaNormalizada,
+                  ) ||
+                  this.normalizeText(usuario.rol || '').includes(
+                    busquedaNormalizada,
+                  ) ||
+                  this.normalizeText(usuario.carrera || '').includes(
+                    busquedaNormalizada,
+                  ) ||
+                  this.normalizeText(usuario.nombre_referencia || '').includes(
+                    busquedaNormalizada,
+                  ) ||
+                  this.normalizeText(
+                    usuario.telefono_referencia || '',
+                  ).includes(busquedaNormalizada)
+                );
+            }
+          })();
+      const coincideRol = !rol || this.normalizeText(usuario.rol) === rol;
+      const coincideCarrera =
+        !carrera || this.normalizeText(usuario.carrera) === carrera;
+
+      return coincideBusqueda && coincideRol && coincideCarrera;
+    });
     this.reiniciarPaginacion();
     this.aplicarOrdenActualSiExiste();
   }
+
+  seleccionarRol(valor: unknown): void {
+    this.filtroRol = String(valor ?? '');
+    this.aplicarFiltros();
+  }
+
+  seleccionarCarrera(valor: unknown): void {
+    this.filtroCarrera = String(valor ?? '');
+    this.aplicarFiltros();
+  }
+
+  get desbloqueandoUsuario(): boolean {
+    return Boolean(this.usuarioBloqueo?.bloqueado);
+  }
+
+  get puedeConfirmarBloqueo(): boolean {
+    return this.desbloqueandoUsuario || this.motivoBloqueo.trim().length > 0;
+  }
   limpiarBusqueda() {
-    this.usuarios = [...this.usuarioscopia];
-    this.aplicarOrdenActualSiExiste();
+    this.filtroBusqueda = ['', ''];
+    this.aplicarFiltros();
   }
   editarUsuario(usuario: Usuario) {
     this.botoncrear.set(false);
     this.usuarioSeleccionado = usuario;
     this.botoneditar.set(true);
   }
-  eliminarUsuario(i: number) {
-    this.valoreliminar = i;
+  eliminarUsuario(usuario: Usuario) {
+    this.usuarioAEliminar = usuario;
     this.alertaeliminar = true;
   }
   confirmarEliminacion() {
-    const usuarioAEliminar = this.usuarios[this.valoreliminar];
-    this.usuarioapi.eliminarUsuario(usuarioAEliminar.id || '').subscribe({
+    if (!this.usuarioAEliminar) return;
+
+    this.usuarioapi.eliminarUsuario(this.usuarioAEliminar.id || '').subscribe({
       next: (_response) => {
         this.mensajeexito = 'Usuario eliminado exitosamente.';
         this.exito.set(true);
         this.auditRefresh++;
-        this.usuarios.splice(this.valoreliminar, 1);
-        this.usuarioscopia = [...this.usuarios];
         this.alertaeliminar = false;
-        this.valoreliminar = 0;
+        this.usuarioAEliminar = null;
+        this.cargarUsuarios();
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -292,13 +348,13 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
         this.mensajeerror = errorMsg;
         this.error.set(true);
         this.alertaeliminar = false;
-        this.valoreliminar = 0;
+        this.usuarioAEliminar = null;
       },
     });
   }
   cancelarEliminacion() {
     this.alertaeliminar = false;
-    this.valoreliminar = 0;
+    this.usuarioAEliminar = null;
   }
 
   override sortTable(e: { col: string; dir: 'asc' | 'desc' }): void {

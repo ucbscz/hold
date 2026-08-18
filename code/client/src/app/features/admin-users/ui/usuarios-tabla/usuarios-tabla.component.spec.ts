@@ -17,4 +17,26 @@ describe('UsuariosTablaComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should combine role and career filters', () => {
+    component.usuarioscopia = [
+      {
+        carnet: 'A1',
+        nombre: 'Ana',
+        rol: 'administrador',
+        carrera: 'Ingeniería de Software',
+      },
+      {
+        carnet: 'E1',
+        nombre: 'Elena',
+        rol: 'estudiante',
+        carrera: 'Ingeniería Mecatrónica',
+      },
+    ];
+
+    component.seleccionarRol('estudiante');
+    component.seleccionarCarrera('Ingeniería Mecatrónica');
+
+    expect(component.usuarios.map((usuario) => usuario.carnet)).toEqual(['E1']);
+  });
 });

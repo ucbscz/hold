@@ -7,8 +7,27 @@
   </div>
   @if (activeTab === "tabla") {
     <app-buscador (terminoBusqueda)="aplicarFiltros($event)">
+      <app-custom-select
+        class="admin-filter-select"
+        [ngModel]="filtroRol"
+        (ngModelChange)="seleccionarRol($event)"
+        [ngModelOptions]="{ standalone: true }"
+        [opciones]="rolesFiltroOpciones"
+        icon="fas fa-user-shield"
+        placeholder="Todos los roles"
+      ></app-custom-select>
+      <app-custom-select
+        class="admin-filter-select"
+        [ngModel]="filtroCarrera"
+        (ngModelChange)="seleccionarCarrera($event)"
+        [ngModelOptions]="{ standalone: true }"
+        [opciones]="carrerasFiltroOpciones"
+        icon="fas fa-graduation-cap"
+        placeholder="Todas las carreras"
+      ></app-custom-select>
       <button class="botoncrear boton-derecha" (click)="crearusuario()">
-        Nuevo Usuario
+        <i class="fas fa-plus" aria-hidden="true"></i>
+        Nuevo usuario
       </button>
     </app-buscador>
   }
@@ -76,7 +95,7 @@
                 </button>
                 <button
                   class="btn-icon btn-delete"
-                  (click)="eliminarUsuario(i)"
+                  (click)="eliminarUsuario(usuario)"
                 >
                   <i class="fas fa-trash-alt"></i>
                 </button>
@@ -159,27 +178,51 @@
   @if (bloqueoModalVisible) {
     <div class="bloqueo" (click)="cerrarBloqueo()">
       <div class="bloqueo__modal" (click)="$event.stopPropagation()">
-        <h3 class="bloqueo__title">Bloquear usuario</h3>
+        <button
+          type="button"
+          class="bloqueo__close"
+          (click)="cerrarBloqueo()"
+          [disabled]="procesandoBloqueo"
+          aria-label="Cerrar"
+        >
+          <i class="fas fa-times"></i>
+        </button>
+        <h3 class="bloqueo__title">
+          {{ desbloqueandoUsuario ? "Desbloquear" : "Bloquear" }} usuario
+        </h3>
         <p class="bloqueo__text">
-          El usuario no podrá realizar nuevas reservas. Indica el motivo.
+          @if (desbloqueandoUsuario) {
+            El usuario recuperará el acceso para realizar nuevas reservas.
+          } @else {
+            El usuario no podrá realizar nuevas reservas. Indica el motivo.
+          }
         </p>
-        <textarea
-          [(ngModel)]="motivoBloqueo"
-          class="bloqueo__input"
-          placeholder="Motivo del bloqueo..."
-        ></textarea>
+        @if (!desbloqueandoUsuario) {
+          <textarea
+            [(ngModel)]="motivoBloqueo"
+            class="bloqueo__input"
+            placeholder="Motivo del bloqueo..."
+            maxlength="500"
+          ></textarea>
+        }
         <div class="bloqueo__actions">
           <button
             class="bloqueo__btn bloqueo__btn--cancel"
             (click)="cerrarBloqueo()"
+            [disabled]="procesandoBloqueo"
           >
             Cancelar
           </button>
           <button
             class="bloqueo__btn bloqueo__btn--confirm"
+            [class.bloqueo__btn--unlock]="desbloqueandoUsuario"
             (click)="confirmarBloqueo()"
+            [disabled]="!puedeConfirmarBloqueo || procesandoBloqueo"
           >
-            Bloquear
+            @if (procesandoBloqueo) {
+              <i class="fas fa-spinner fa-spin"></i>
+            }
+            {{ desbloqueandoUsuario ? "Desbloquear" : "Bloquear" }}
           </button>
         </div>
       </div>
