@@ -1,9 +1,11 @@
 <div class="form-container">
-  <button class="btn-close" (click)="cerrar()">
-    <img src="assets/x.png" alt="Cerrar" />
-  </button>
+  <header class="form-header">
+    <h2>Registrar mantenimiento</h2>
+    <button class="btn-close" (click)="cerrar()" aria-label="Cerrar">
+      <img src="assets/x.png" alt="" />
+    </button>
+  </header>
   <div class="form-content">
-    <h2>Registrar Mantenimiento</h2>
     <form #form="ngForm">
       <div class="form-group">
         <label for="NombreEmpresaMantenimiento">Empresa de Mantenimiento</label>

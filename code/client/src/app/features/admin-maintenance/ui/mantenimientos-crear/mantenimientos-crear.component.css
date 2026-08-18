@@ -11,17 +11,18 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  box-sizing: border-box;
+  padding: 1rem;
   z-index: 9000;
   animation: fadeIn 220ms ease-out both;
 }
 
 .form-container {
   background: white;
-  padding: 2rem 0;
   border-radius: 20px;
   border: 1px solid #e1e5ea;
   box-shadow: 0 15px 25px rgba(0, 0, 0, 0.1);
-  width: min(90%, 500px);
+  width: min(100%, 500px);
   max-width: 500px;
   max-height: calc(100dvh - 2rem);
   overflow: hidden;
@@ -30,15 +31,25 @@
   flex-direction: column;
   animation: slideIn 0.3s ease-out;
 }
+.form-header {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-height: 4.5rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
 .form-content {
   overflow-y: auto;
-  padding: 0 2rem;
+  padding: 1.25rem 1.5rem 1.5rem;
   flex: 1;
+  min-height: 0;
 }
 .btn-close {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
+  position: static;
   background: none;
   border: none;
   cursor: pointer;
@@ -55,17 +66,23 @@
     transform var(--t-fast);
   z-index: 10;
   padding: 0;
+  flex: 0 0 auto;
+}
+.btn-close img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 .btn-close:hover {
   transform: scale(1.1);
 }
 .form-container h2 {
-  text-align: center;
+  text-align: left;
   color: var(--ink);
-  margin-bottom: 1.5rem;
-  font-size: 1.6rem;
+  margin: 0;
+  font-size: 1.4rem;
   font-weight: 700;
-  padding-right: 1.5rem;
+  line-height: 1.25;
 }
 .form-container form {
   display: flex;
@@ -128,6 +145,10 @@ textarea.form-input {
 }
 .register-button {
   flex: 1;
+  min-width: 0;
+}
+.register-button span {
+  white-space: normal;
 }
 .equipos-seleccionados {
   display: grid;
@@ -252,24 +273,40 @@ textarea.form-input {
 }
 @media (max-width: 768px) {
   .form-container {
-    width: calc(100vw - 1.5rem);
-    margin: 0.75rem;
-    padding: 1.5rem 0;
-    max-width: calc(100vw - 2rem);
-    max-height: calc(100dvh - 1.5rem);
+    max-width: 500px;
+    max-height: calc(100dvh - 2rem);
   }
   .form-container h2 {
-    font-size: 1.4rem;
-    padding-right: 1rem;
+    font-size: 1.25rem;
+  }
+}
+@media (max-width: 600px) {
+  :host {
+    padding: 0.5rem;
+  }
+  .form-container {
+    max-height: calc(100dvh - 1rem);
+    border-radius: var(--radius-lg);
+  }
+  .form-header {
+    min-height: 4rem;
+    padding: 0.875rem 1rem;
+  }
+  .form-content {
+    padding: 1rem;
+  }
+  .form-submit {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+  .btn-agregar-equipo,
+  .register-button {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: none;
   }
 }
 @media (max-width: 480px) {
-  .form-container {
-    padding: 1.25rem 0;
-  }
-  .form-content {
-    padding: 0 1rem;
-  }
   .form-container h2 {
     font-size: 1.2rem;
   }
@@ -286,18 +323,8 @@ textarea.form-input {
   }
 }
 @media (max-width: 360px) {
-  .form-container {
-    margin: 0.5rem;
-    padding: 1rem 0;
-    max-width: calc(100vw - 1rem);
-    max-height: calc(100dvh - 1rem);
-  }
-  .form-content {
-    padding: 0 1rem;
-  }
   .form-container h2 {
     font-size: 1.1rem;
-    padding-right: 0.5rem;
   }
   .form-group label {
     font-size: 0.8rem;
@@ -307,14 +334,12 @@ textarea.form-input {
     font-size: 0.85rem;
   }
   .register-button {
-    min-width: 160px;
-    max-width: 260px;
+    min-width: 0;
+    max-width: none;
     padding: 0.6rem 1rem;
     font-size: 0.85rem;
   }
   .btn-close {
-    top: 0.5rem;
-    right: 0.5rem;
     width: 1.5rem;
     height: 1.5rem;
   }
