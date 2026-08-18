@@ -9,7 +9,9 @@ export class CarritoService {
   private carrito: Carrito = {};
   private cantidadTotal = 0;
   private readonly carritoSubject = new BehaviorSubject<Carrito>({});
+  private readonly totalSubject = new BehaviorSubject<number>(0);
   readonly carrito$ = this.carritoSubject.asObservable();
+  readonly total$ = this.totalSubject.asObservable();
 
   agregarProducto(
     id: number,
@@ -161,5 +163,6 @@ export class CarritoService {
   private emitirCambios(): void {
     this.carrito = { ...this.carrito };
     this.carritoSubject.next(this.carrito);
+    this.totalSubject.next(this.cantidadTotal);
   }
 }
