@@ -2,7 +2,6 @@ import { CommonModule, DatePipe, Location } from '@angular/common';
 import {
   Component,
   effect,
-  ElementRef,
   HostListener,
   signal,
   WritableSignal,
@@ -41,7 +40,6 @@ export class NavbarComponent {
     private readonly usuario: UsuarioService,
     private readonly location: Location,
     private readonly sidebarService: SidebarService,
-    private readonly el: ElementRef,
     readonly notifStore: NotificacionStoreService,
   ) {
     this.totalProductos$ = this.carrito.total$;
