@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { FormsModule } from '@angular/forms';
 import { Carrera } from '@entities/admin';
 import { CarreraService } from '@entities/career';
 import { Usuario, UsuarioServiceAPI } from '@entities/user';
@@ -26,7 +26,6 @@ import { UsuariosEditarComponent } from '../usuarios-editar/usuarios-editar.comp
     StickyScrollDirective,
     CommonModule,
     FormsModule,
-    ReactiveFormsModule,
     UsuariosCrearComponent,
     UsuariosEditarComponent,
     AvisoEliminarComponent,
@@ -42,7 +41,6 @@ import { UsuariosEditarComponent } from '../usuarios-editar/usuarios-editar.comp
   styleUrls: ['./usuarios-tabla.component.css'],
 })
 export class UsuariosTablaComponent extends Tabla implements OnInit {
-  expandedRowId: number | null = null;
   auditRefresh = 0;
   expandedCarnet: string | null = null;
 
@@ -50,9 +48,6 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
     this.expandedCarnet = this.expandedCarnet === carnet ? null : carnet;
   }
 
-  toggleExpand(id: number) {
-    this.expandedRowId = this.expandedRowId === id ? null : id;
-  }
   botoncrear: WritableSignal<boolean> = signal(false);
   botoneditar: WritableSignal<boolean> = signal(false);
   alertaeliminar: boolean = false;
@@ -66,6 +61,7 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
   carreras: string[] = [];
   filtroRol = '';
   filtroCarrera = '';
+  filtroBloqueo = '';
   filtroBusqueda: [string, string] = ['', ''];
   readonly rolesFiltroOpciones: OpcionSelect[] = [
     { value: '', label: 'Todos los roles' },
@@ -74,6 +70,11 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
   ];
   carrerasFiltroOpciones: OpcionSelect[] = [
     { value: '', label: 'Todas las carreras' },
+  ];
+  readonly bloqueoFiltroOpciones: OpcionSelect[] = [
+    { value: '', label: 'Todos los accesos' },
+    { value: 'bloqueados', label: 'Bloqueados' },
+    { value: 'habilitados', label: 'Habilitados' },
   ];
   usuarioSeleccionado: Usuario = new Usuario();
   override columnas: string[] = [
@@ -207,6 +208,7 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
     const columna = this.filtroBusqueda[1];
     const rol = this.normalizeText(this.filtroRol);
     const carrera = this.normalizeText(this.filtroCarrera);
+    const bloqueo = this.filtroBloqueo;
 
     this.usuarios = this.usuarioscopia.filter((usuario) => {
       const coincideBusqueda = !busquedaNormalizada
@@ -291,8 +293,14 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
       const coincideRol = !rol || this.normalizeText(usuario.rol) === rol;
       const coincideCarrera =
         !carrera || this.normalizeText(usuario.carrera) === carrera;
+      const coincideBloqueo =
+        !bloqueo ||
+        (bloqueo === 'bloqueados' && usuario.bloqueado === true) ||
+        (bloqueo === 'habilitados' && usuario.bloqueado !== true);
 
-      return coincideBusqueda && coincideRol && coincideCarrera;
+      return (
+        coincideBusqueda && coincideRol && coincideCarrera && coincideBloqueo
+      );
     });
     this.reiniciarPaginacion();
     this.aplicarOrdenActualSiExiste();
@@ -308,16 +316,17 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
     this.aplicarFiltros();
   }
 
+  seleccionarBloqueo(valor: unknown): void {
+    this.filtroBloqueo = String(valor ?? '');
+    this.aplicarFiltros();
+  }
+
   get desbloqueandoUsuario(): boolean {
     return Boolean(this.usuarioBloqueo?.bloqueado);
   }
 
   get puedeConfirmarBloqueo(): boolean {
     return this.desbloqueandoUsuario || this.motivoBloqueo.trim().length > 0;
-  }
-  limpiarBusqueda() {
-    this.filtroBusqueda = ['', ''];
-    this.aplicarFiltros();
   }
   editarUsuario(usuario: Usuario) {
     this.botoncrear.set(false);
@@ -332,7 +341,7 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
     if (!this.usuarioAEliminar) return;
 
     this.usuarioapi.eliminarUsuario(this.usuarioAEliminar.id || '').subscribe({
-      next: (_response) => {
+      next: () => {
         this.mensajeexito = 'Usuario eliminado exitosamente.';
         this.exito.set(true);
         this.auditRefresh++;

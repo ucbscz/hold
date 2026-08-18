@@ -25,6 +25,15 @@
         icon="fas fa-graduation-cap"
         placeholder="Todas las carreras"
       ></app-custom-select>
+      <app-custom-select
+        class="admin-filter-select"
+        [ngModel]="filtroBloqueo"
+        (ngModelChange)="seleccionarBloqueo($event)"
+        [ngModelOptions]="{ standalone: true }"
+        [opciones]="bloqueoFiltroOpciones"
+        icon="fas fa-lock"
+        placeholder="Todos los accesos"
+      ></app-custom-select>
       <button class="botoncrear boton-derecha" (click)="crearusuario()">
         <i class="fas fa-plus" aria-hidden="true"></i>
         Nuevo usuario
@@ -61,8 +70,7 @@
         <tbody>
           @for (
             usuario of paginar(usuarios);
-            track usuario.id || usuario.carnet || usuario.correo || $index;
-            let i = $index
+            track usuario.id || usuario.carnet || usuario.correo || $index
           ) {
             <tr>
               <td>

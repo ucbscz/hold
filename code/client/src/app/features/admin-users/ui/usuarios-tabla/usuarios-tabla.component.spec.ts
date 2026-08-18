@@ -39,4 +39,15 @@ describe('UsuariosTablaComponent', () => {
 
     expect(component.usuarios.map((usuario) => usuario.carnet)).toEqual(['E1']);
   });
+
+  it('should filter users by blocked access state', () => {
+    component.usuarioscopia = [
+      { carnet: 'B1', nombre: 'Bruno', bloqueado: true },
+      { carnet: 'H1', nombre: 'Helena', bloqueado: false },
+    ];
+
+    component.seleccionarBloqueo('bloqueados');
+
+    expect(component.usuarios.map((usuario) => usuario.carnet)).toEqual(['B1']);
+  });
 });
