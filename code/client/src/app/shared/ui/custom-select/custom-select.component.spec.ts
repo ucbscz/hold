@@ -75,13 +75,15 @@ describe('CustomSelectComponent', () => {
 
     fixture.debugElement.query(By.css('.cs-trigger')).nativeElement.click();
     tick(32);
+    const initialHeight = component.menuMaxHeight;
 
     const options = document.body.querySelector('.cs-options') as HTMLElement;
     options.dispatchEvent(new Event('scroll', { bubbles: true }));
-    component.onResize();
+    for (let index = 0; index < 5; index++) component.onResize();
     tick(32);
 
     expect(focusSpy).toHaveBeenCalledTimes(1);
     expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+    expect(component.menuMaxHeight).toBe(initialHeight);
   }));
 });

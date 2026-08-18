@@ -208,8 +208,7 @@ export class CustomSelectComponent
       viewportHeight - triggerRect.bottom - viewportPadding - menuGap,
     );
     const desiredHeight = Math.min(
-      menu.scrollHeight || 300,
-      300,
+      this.calcularAlturaNaturalMenu(),
       viewportHeight - viewportPadding * 2,
     );
 
@@ -250,6 +249,19 @@ export class CustomSelectComponent
   private limpiarBusqueda(): void {
     this.busqueda = '';
     this.menuPosicionado = false;
+  }
+
+  private calcularAlturaNaturalMenu(): number {
+    const optionCount = Math.max(1, this.opcionesFiltradas.length);
+    const visibleRows = Math.min(optionCount, this.debeMostrarBusqueda ? 5 : 6);
+    const searchHeight = this.debeMostrarBusqueda ? 53 : 0;
+    const optionsPadding = 12;
+    const optionHeight = 42;
+
+    return Math.min(
+      300,
+      searchHeight + optionsPadding + visibleRows * optionHeight,
+    );
   }
 
   private normalizarTexto(texto: unknown): string {
