@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { AuditLogDto } from '@entities/admin';
 import { AuditLogApiService } from '@entities/audit-log';
 import { FlatpickrDirective } from '@shared/lib/directives';
-import { TablePaginationComponent } from '@shared/lib/admin-table';
+import { printTable, TablePaginationComponent } from '@shared/lib/admin-table';
 import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
 import { parseJsonResult } from '@shared/lib/result';
 import { AuditObservationDetail } from '../../model/audit-observation-detail';
@@ -157,17 +157,42 @@ export class AuditPanelComponent implements OnChanges {
   }
 
   imprimir(): void {
-    const tabla = document.querySelector('.audit-table');
-    if (!tabla) return;
-    const ventana = window.open('', '_blank');
-    if (!ventana) return;
-    ventana.document.write(
-      `<!doctype html><html><head><title>Auditoría</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#172033}h1{font-size:20px}table{width:100%;border-collapse:collapse}th,td{padding:9px;border:1px solid #d7dee8;text-align:left;font-size:12px}th{background:#f5f7fa}</style></head><body><h1>Auditoría: ${this.entidad}</h1>${tabla.outerHTML}</body></html>`,
-    );
-    ventana.document.close();
-    ventana.focus();
-    setTimeout(() => ventana.print(), 100);
-    ventana.onafterprint = () => ventana.close();
+    const incluyeDetalle = this.entidad === 'Prestamo';
+    printTable({
+      title: `Auditoría: ${this.entidad}`,
+      headers: [
+        'Fecha',
+        'Administrador',
+        'Acción',
+        'ID',
+        ...(incluyeDetalle ? ['Detalle'] : []),
+      ],
+      rows: this.logs.map((log) => [
+        this.formatearFechaImpresion(log.Timestamp),
+        log.AdminNombre || log.AdminCarnet,
+        log.Accion,
+        log.EntidadId,
+        ...(incluyeDetalle ? [this.resumenObs(log)] : []),
+      ]),
+    });
+  }
+
+  private formatearFechaImpresion(
+    fecha: Date | string | null | undefined,
+  ): string {
+    if (!fecha) return '';
+    const valor = fecha instanceof Date ? fecha : new Date(fecha);
+    if (Number.isNaN(valor.getTime())) return '';
+
+    return new Intl.DateTimeFormat('es-BO', {
+      timeZone: 'America/La_Paz',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(valor);
   }
 
   ordenarPorColumna(columna: string): void {

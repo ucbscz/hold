@@ -11,6 +11,7 @@ import { UsuarioServiceAPI } from '@entities/user';
 import { BuscadorComponent } from '@features/admin-search';
 import {
   AdminTableSort,
+  printTable,
   Tabla,
   TablePaginationComponent,
 } from '@shared/lib/admin-table';
@@ -113,21 +114,47 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   }
 
   imprimirPrestamos(): void {
-    const tabla = document.querySelector('.data-table--loans');
-    if (!tabla) return;
-    const ventana = window.open('', '_blank');
-    if (!ventana) return;
-    const clon = tabla.cloneNode(true) as HTMLTableElement;
-    clon
-      .querySelectorAll('.actions-column, .loan-actions')
-      .forEach((node) => node.remove());
-    ventana.document.write(
-      `<!doctype html><html><head><title>Préstamos</title><style>body{font-family:Arial,sans-serif;padding:24px;color:#172033}h1{font-size:20px}table{width:100%;border-collapse:collapse}th,td{padding:9px;border:1px solid #d7dee8;text-align:left;font-size:12px}th{background:#f5f7fa}</style></head><body><h1>Préstamos</h1>${clon.outerHTML}</body></html>`,
-    );
-    ventana.document.close();
-    ventana.focus();
-    setTimeout(() => ventana.print(), 100);
-    ventana.onafterprint = () => ventana.close();
+    printTable({
+      title: 'Préstamos',
+      headers: [
+        'Usuario',
+        'Carnet',
+        'Teléfono',
+        'Equipos',
+        'Fecha solicitud',
+        'Inicio esperado',
+        'Devolución esperada',
+        'Estado',
+      ],
+      rows: this.prestamosTabla.map(({ value }) => [
+        `${value.datosgrupo.NombreUsuario ?? ''} ${value.datosgrupo.ApellidoPaternoUsuario ?? ''}`.trim(),
+        value.datosgrupo.CarnetUsuario,
+        value.datosgrupo.TelefonoUsuario,
+        this.detalleEquipos(value),
+        this.formatearFechaImpresion(value.datosgrupo.FechaSolicitud),
+        this.formatearFechaImpresion(value.datosgrupo.FechaPrestamoEsperada),
+        this.formatearFechaImpresion(value.datosgrupo.FechaDevolucionEsperada),
+        this.getEstadoCalculado(value),
+      ]),
+    });
+  }
+
+  private formatearFechaImpresion(
+    fecha: Date | string | null | undefined,
+  ): string {
+    if (!fecha) return '';
+    const valor = fecha instanceof Date ? fecha : new Date(fecha);
+    if (Number.isNaN(valor.getTime())) return '';
+
+    return new Intl.DateTimeFormat('es-BO', {
+      timeZone: 'America/La_Paz',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(valor);
   }
 
   vercontrato: WritableSignal<boolean> = signal(false);

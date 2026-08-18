@@ -3,3 +3,4 @@ export * from './admin-table-tab';
 export * from './base';
 export * from './tabla';
 export * from './table-pagination.component';
+export * from './print-table';
