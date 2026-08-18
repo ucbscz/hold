@@ -122,14 +122,6 @@ export class AuditPanelComponent implements OnChanges {
     this.cargar();
   }
 
-  limpiar() {
-    this.fechaDesde = '';
-    this.fechaHasta = '';
-    this.filtroAccion = '';
-    this.filtroAdmin = '';
-    this.cargar();
-  }
-
   exportarCsv(): void {
     const rows = this.logs.map((log) => [
       log.Timestamp instanceof Date

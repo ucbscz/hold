@@ -198,6 +198,12 @@
   margin-bottom: 1rem;
   flex-wrap: wrap;
 }
+.audit-filter-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
 .audit-filters-actions {
   display: flex;
   align-items: center;
@@ -475,33 +481,42 @@
     align-items: stretch;
   }
   .audit-search-wrap,
-  .date-input,
-  .audit-select-wrap,
-  .audit-select-trigger,
   .admin-search {
     width: 100%;
     max-width: none;
     min-width: 0;
     flex: 0 0 auto;
   }
-  .date-input,
-  .audit-select-trigger {
-    height: 40px;
-    padding: 0.4rem 1.1rem;
+  .audit-filter-controls {
+    width: 100%;
+    align-items: center;
+  }
+  .date-input {
+    flex: 1 1 10rem;
+    width: auto;
+    min-width: 9rem;
+    height: 42px;
     font-size: 16px;
   }
   .admin-search {
-    height: 40px;
+    height: 42px;
     font-size: 16px;
   }
-  .audit-select-menu {
-    width: 100%;
-  }
   .audit-filters-actions {
-    width: 100%;
+    width: auto;
   }
   .audit-filters-actions .btn {
-    flex: 1;
+    flex: 0 0 auto;
+  }
+}
+
+@media (max-width: 480px) {
+  .audit-filter-controls {
+    gap: 0.5rem;
+  }
+
+  .date-input {
+    flex-basis: calc(50% - 0.25rem);
     min-width: 0;
   }
 }
