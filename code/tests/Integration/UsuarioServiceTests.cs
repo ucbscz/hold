@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging.Abstractions;
 using CarreraEntity = IMT_Reservas.Server.Core.Entities.Carrera;
 namespace IMT_Reservas.Tests.Integration;
 
@@ -37,7 +38,10 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         var validator = new UsuarioValidator(db);
         var jwt = new JwtService(jwtOptions);
         var memoryCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
-        var cacheService = new CacheRepository(memoryCache);
+        var cacheService = new CacheRepository(
+            memoryCache,
+            NullLogger<CacheRepository>.Instance
+        );
 
         var audit = new AuditLogService(new AuditLogRepository(db), new HttpContextAccessor());
         var notifications = new NotificacionService(new NotificacionRepository(db));
