@@ -42,7 +42,7 @@ export class FlatpickrDirective implements OnChanges, OnInit, OnDestroy {
       disableMobile: true,
       monthSelectorType: 'static',
       appendTo: document.body,
-      position: 'auto center',
+      position: (instance) => this.positionCalendar(instance),
       ...this.fpOptions,
       onChange: (dates, _dateStr) => {
         this.fpChange.emit(dates);
@@ -70,5 +70,49 @@ export class FlatpickrDirective implements OnChanges, OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.instance?.destroy();
+  }
+
+  private positionCalendar(instance: flatpickr.Instance): void {
+    const calendar = instance.calendarContainer;
+    const anchor = instance._positionElement;
+    if (!calendar || !anchor) return;
+
+    const viewportPadding = 8;
+    const gap = 6;
+    const anchorRect = anchor.getBoundingClientRect();
+    const calendarRect = calendar.getBoundingClientRect();
+    const calendarWidth = calendarRect.width || calendar.offsetWidth;
+    const calendarHeight = calendarRect.height || calendar.offsetHeight;
+    const spaceAbove = anchorRect.top - viewportPadding - gap;
+    const spaceBelow =
+      window.innerHeight - anchorRect.bottom - viewportPadding - gap;
+    const opensAbove =
+      spaceAbove >= calendarHeight ||
+      (spaceBelow < calendarHeight && spaceAbove > spaceBelow);
+
+    const preferredTop = opensAbove
+      ? anchorRect.top - calendarHeight - gap
+      : anchorRect.bottom + gap;
+    const maxTop = Math.max(
+      viewportPadding,
+      window.innerHeight - calendarHeight - viewportPadding,
+    );
+    const top = Math.min(Math.max(viewportPadding, preferredTop), maxTop);
+    const centeredLeft =
+      anchorRect.left + anchorRect.width / 2 - calendarWidth / 2;
+    const maxLeft = Math.max(
+      viewportPadding,
+      window.innerWidth - calendarWidth - viewportPadding,
+    );
+    const left = Math.min(Math.max(viewportPadding, centeredLeft), maxLeft);
+
+    calendar.style.setProperty('position', 'fixed', 'important');
+    calendar.style.setProperty('top', `${top}px`, 'important');
+    calendar.style.setProperty('left', `${left}px`, 'important');
+    calendar.style.setProperty('right', 'auto', 'important');
+    calendar.classList.toggle('arrowTop', !opensAbove);
+    calendar.classList.toggle('arrowBottom', opensAbove);
+    calendar.classList.add('arrowCenter');
+    calendar.classList.remove('arrowLeft', 'arrowRight');
   }
 }
