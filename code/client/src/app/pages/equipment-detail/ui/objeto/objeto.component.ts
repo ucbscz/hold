@@ -116,6 +116,8 @@ export class ObjetoComponent implements OnDestroy {
 
         if (this.producto?.id) {
           this.addedToCart = this.carrito.contieneProducto(this.producto.id);
+          const itemEnCarrito = this.carrito.obtenerCarrito()[this.producto.id];
+          if (itemEnCarrito) this.cantidad = itemEnCarrito.cantidad;
           this.carritoCalendario = {
             [this.producto.id]: {
               nombre: this.producto.nombre ?? '',
