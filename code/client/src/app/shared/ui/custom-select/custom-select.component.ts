@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterViewInit,
   Component,
   ElementRef,
   forwardRef,
@@ -7,6 +8,7 @@ import {
   HostListener,
   Input,
   OnDestroy,
+  ViewChild,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 import { OpcionSelect } from './opcion-select';
@@ -25,10 +27,16 @@ import { OpcionSelect } from './opcion-select';
     },
   ],
 })
-export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
+export class CustomSelectComponent
+  implements ControlValueAccessor, AfterViewInit, OnDestroy
+{
+  @ViewChild('menu', { static: true })
+  private menuRef!: ElementRef<HTMLElement>;
+
   @Input() placeholder = 'Seleccionar';
   @Input() icon = '';
   @Input() invalid = false;
+  @Input() menuAnimation = true;
   @Input() searchThreshold = 6;
   @Input() menuPosition: 'auto' | 'top' | 'bottom' = 'auto';
   @Input() set opciones(valor: Array<OpcionSelect | string>) {
@@ -57,6 +65,10 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
 
   constructor(private readonly elementRef: ElementRef<HTMLElement>) {
     document.addEventListener('scroll', this.onViewportScroll, true);
+  }
+
+  ngAfterViewInit(): void {
+    document.body.appendChild(this.menuRef.nativeElement);
   }
 
   @HostBinding('class.cs-open')
@@ -117,7 +129,8 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
     if (
       this.abierto &&
       evento.target instanceof Node &&
-      !this.elementRef.nativeElement.contains(evento.target)
+      !this.elementRef.nativeElement.contains(evento.target) &&
+      !this.menuRef.nativeElement.contains(evento.target)
     ) {
       this.abierto = false;
       this.limpiarBusqueda();
@@ -153,6 +166,7 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
     document.removeEventListener('scroll', this.onViewportScroll, true);
     if (this.animationFrameId !== undefined)
       cancelAnimationFrame(this.animationFrameId);
+    this.menuRef.nativeElement.remove();
   }
 
   private programarPosicionMenu(): void {
@@ -169,8 +183,7 @@ export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
   private posicionarMenu(): void {
     const trigger =
       this.elementRef.nativeElement.querySelector<HTMLElement>('.cs-trigger');
-    const menu =
-      this.elementRef.nativeElement.querySelector<HTMLElement>('.cs-menu');
+    const menu = this.menuRef.nativeElement;
     if (!trigger || !menu) return;
 
     const viewportPadding = 8;

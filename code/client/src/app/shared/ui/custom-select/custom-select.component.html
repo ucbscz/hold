@@ -17,44 +17,45 @@
     </span>
     <i class="fas fa-chevron-down cs-chevron" [class.open]="abierto"></i>
   </button>
-  @if (abierto) {
-    <div
-      class="cs-menu"
-      [class.cs-menu--top]="abreHaciaArriba"
-      [class.cs-menu--positioned]="menuPosicionado"
-      [style.left.px]="menuLeft"
-      [style.top.px]="menuTop"
-      [style.width.px]="menuWidth"
-      [style.max-height.px]="menuMaxHeight"
-    >
-      @if (debeMostrarBusqueda) {
-        <div class="cs-search">
-          <i class="fas fa-search cs-search__icon"></i>
-          <input
-            type="text"
-            class="cs-search__input"
-            [value]="busqueda"
-            (input)="buscar($event)"
-            (click)="$event.stopPropagation()"
-            (keydown.escape)="onEscape()"
-            placeholder="Buscar..."
-          />
-        </div>
-      }
-      <ul class="cs-options">
-        @for (opcion of opcionesFiltradas; track opcion.value) {
-          <li
-            class="cs-item"
-            [class.active]="opcion.value === valor"
-            (click)="seleccionar(opcion)"
-          >
-            {{ opcion.label }}
-          </li>
-        }
-        @if (opcionesFiltradas.length === 0) {
-          <li class="cs-empty">Sin resultados</li>
-        }
-      </ul>
+</div>
+<div
+  #menu
+  class="cs-menu"
+  [hidden]="!abierto"
+  [class.cs-menu--top]="abreHaciaArriba"
+  [class.cs-menu--positioned]="menuPosicionado"
+  [class.cs-menu--instant]="!menuAnimation"
+  [style.left.px]="menuLeft"
+  [style.top.px]="menuTop"
+  [style.width.px]="menuWidth"
+  [style.max-height.px]="menuMaxHeight"
+>
+  @if (debeMostrarBusqueda) {
+    <div class="cs-search">
+      <i class="fas fa-search cs-search__icon"></i>
+      <input
+        type="text"
+        class="cs-search__input"
+        [value]="busqueda"
+        (input)="buscar($event)"
+        (click)="$event.stopPropagation()"
+        (keydown.escape)="onEscape()"
+        placeholder="Buscar..."
+      />
     </div>
   }
+  <ul class="cs-options">
+    @for (opcion of opcionesFiltradas; track opcion.value) {
+      <li
+        class="cs-item"
+        [class.active]="opcion.value === valor"
+        (click)="seleccionar(opcion)"
+      >
+        {{ opcion.label }}
+      </li>
+    }
+    @if (opcionesFiltradas.length === 0) {
+      <li class="cs-empty">Sin resultados</li>
+    }
+  </ul>
 </div>

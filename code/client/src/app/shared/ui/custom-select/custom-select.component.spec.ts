@@ -29,15 +29,26 @@ describe('CustomSelectComponent', () => {
     fixture.debugElement.query(By.css('.cs-trigger')).nativeElement.click();
     fixture.detectChanges();
 
-    const search = fixture.debugElement.query(By.css('.cs-search__input'))
-      .nativeElement as HTMLInputElement;
+    const search = document.body.querySelector(
+      '.cs-search__input',
+    ) as HTMLInputElement;
     search.value = 'calibracion';
     search.dispatchEvent(new Event('input'));
     fixture.detectChanges();
 
-    const labels = fixture.debugElement
-      .queryAll(By.css('.cs-item'))
-      .map((item) => item.nativeElement.textContent.trim());
+    const labels = Array.from(document.body.querySelectorAll('.cs-item')).map(
+      (item) => item.textContent?.trim(),
+    );
     expect(labels).toEqual(['Calibración']);
+  });
+
+  it('should render its menu outside transformed form containers', () => {
+    fixture.detectChanges();
+
+    const menu = document.body.querySelector('.cs-menu');
+    expect(menu?.parentElement).toBe(document.body);
+
+    fixture.destroy();
+    expect(menu?.isConnected).toBeFalse();
   });
 });

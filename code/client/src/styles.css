@@ -625,6 +625,14 @@ input[type="date"] {
     border-color var(--t-fast),
     box-shadow var(--t-fast);
 }
+
+.form-input:not(textarea) {
+  border-radius: var(--radius-full) !important;
+}
+
+textarea.form-input {
+  border-radius: var(--radius-lg) !important;
+}
 input[type="date"]:focus {
   outline: none;
   border-color: var(--brand);

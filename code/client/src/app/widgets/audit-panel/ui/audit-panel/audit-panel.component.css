@@ -83,9 +83,10 @@
 .audit-select-wrap {
   position: relative;
   z-index: 400;
-  width: 11rem;
-  min-width: 11rem;
-  max-width: 11rem;
+  flex: 0 0 13rem;
+  width: 13rem;
+  min-width: 13rem;
+  max-width: 13rem;
 }
 .audit-select-wrap ::ng-deep .cs-trigger {
   min-height: 42px;
@@ -106,10 +107,6 @@
 .audit-select-wrap ::ng-deep .cs-trigger.open {
   border-color: var(--interactive-text);
   box-shadow: 0 0 0 3px var(--interactive-subtle);
-}
-.audit-select-wrap ::ng-deep .cs-menu {
-  animation: none !important;
-  transition: none !important;
 }
 .audit-select-trigger {
   display: flex;
