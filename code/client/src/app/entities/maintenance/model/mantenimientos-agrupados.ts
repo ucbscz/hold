@@ -41,9 +41,10 @@ export class MantenimientosAgrupados {
     if (!date) return null;
     if (date instanceof Date) return date;
 
-    const [year, month, day] = date.split('T')[0].split('-').map(Number);
+    const parsed = new Date(date);
+    if (!Number.isNaN(parsed.getTime())) return parsed;
 
-    return new Date(year, month - 1, day);
+    return null;
   }
 
   private toNullableString(value: number | string | null): string | null {

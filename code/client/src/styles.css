@@ -462,6 +462,24 @@ body {
   box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
 }
 
+.admin-date-filter {
+  width: 10rem;
+  height: 42px;
+  min-height: 42px;
+  padding: 0 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+  font: 500 0.875rem var(--font);
+}
+.admin-date-filter:focus {
+  outline: none;
+  border-color: var(--interactive-text);
+  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
+}
+
 .btn-icon.btn-lock:not(.btn-icon--block-active) {
   color: var(--ink-muted) !important;
 }
@@ -716,6 +734,73 @@ h2.title {
   *::after {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
+  }
+}
+
+app-administrador .container > :not(app-sidebar) {
+  display: block;
+  min-width: 0;
+  font-family: var(--font);
+}
+
+app-administrador .container > :not(app-sidebar) > div:first-child {
+  min-height: auto !important;
+  padding: 1.5rem 0 !important;
+  background: transparent !important;
+  font-family: var(--font) !important;
+}
+
+app-administrador .table-header {
+  margin-bottom: 1.5rem !important;
+}
+
+app-administrador .header-title h1 {
+  margin: 0 !important;
+  color: var(--ink) !important;
+  font: 700 1.75rem/1.25 var(--font) !important;
+}
+
+app-administrador .subtitle {
+  margin: 0.375rem 0 0 !important;
+  color: var(--ink-secondary) !important;
+  font: 400 0.875rem/1.5 var(--font) !important;
+}
+
+app-administrador .table-responsive {
+  max-width: 100%;
+  overflow-x: auto !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: var(--scrollbar-thumb) transparent !important;
+}
+
+app-administrador .table-responsive::-webkit-scrollbar {
+  display: block !important;
+  width: var(--scrollbar-size) !important;
+  height: var(--scrollbar-size) !important;
+}
+
+app-administrador .table-responsive::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb) !important;
+  border: 2px solid transparent !important;
+  border-radius: var(--radius-full) !important;
+  background-clip: content-box !important;
+}
+
+app-administrador .table-responsive::-webkit-scrollbar-track {
+  background: transparent !important;
+}
+
+@media (max-width: 768px) {
+  app-administrador .container > :not(app-sidebar) > div:first-child {
+    padding: 1rem 0 !important;
+  }
+
+  app-administrador .header-title h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .admin-date-filter {
+    font-size: 16px;
   }
 }
 

@@ -37,7 +37,40 @@
   background-color: var(--color-background);
   min-height: 100vh;
   color: var(--ink);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--font);
+}
+.maintenance-date-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+.maintenance-equipment-cell {
+  max-width: 15rem;
+  white-space: nowrap;
+}
+.maintenance-equipment-name {
+  display: inline-block;
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+.maintenance-equipment-count {
+  display: inline-flex;
+  margin-left: 0.375rem;
+  padding: 0.125rem 0.4rem;
+  border-radius: var(--radius-full);
+  background: var(--sidebar);
+  color: var(--ink-secondary);
+  font: 700 0.7rem var(--font);
+}
+.btn-view {
+  color: var(--ink-muted);
+}
+.btn-view:hover {
+  color: var(--interactive-text);
+  background: var(--interactive-subtle);
 }
 .table-header {
   display: flex;
@@ -335,6 +368,13 @@
     font-size: 0.75rem;
     height: 30px;
     align-self: flex-start;
+  }
+  .maintenance-date-filters {
+    width: 100%;
+  }
+  .maintenance-date-filters .admin-date-filter {
+    flex: 1 1 10rem;
+    width: auto;
   }
 }
 @media (max-width: 360px) {

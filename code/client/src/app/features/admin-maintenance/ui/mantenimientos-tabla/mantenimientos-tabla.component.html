@@ -7,8 +7,31 @@
   </div>
   @if (activeTab === "tabla") {
     <app-buscador (terminoBusqueda)="aplicarFiltros($event)">
+      <div class="maintenance-date-filters">
+        <input
+          type="text"
+          appFlatpickr
+          [fpOptions]="{ maxDate: fechaFinHasta || undefined }"
+          class="admin-date-filter"
+          readonly
+          aria-label="Mantenimientos iniciados desde"
+          placeholder="Inicio desde"
+          (fpChange)="onFechaInicioDesde($event)"
+        />
+        <input
+          type="text"
+          appFlatpickr
+          [fpOptions]="{ minDate: fechaInicioDesde || undefined }"
+          class="admin-date-filter"
+          readonly
+          aria-label="Mantenimientos finalizados hasta"
+          placeholder="Fin hasta"
+          (fpChange)="onFechaFinHasta($event)"
+        />
+      </div>
       <button class="botoncrear boton-derecha" (click)="crearmantenimiento()">
-        Nuevo Mantenimiento
+        <i class="fas fa-plus" aria-hidden="true"></i>
+        Nuevo mantenimiento
       </button>
     </app-buscador>
   }
@@ -42,7 +65,7 @@
         </thead>
         <tbody>
           @for (
-            mantenimiento of mantenimientosFiltrados;
+            mantenimiento of paginar(mantenimientosFiltrados);
             track mantenimiento.datosgrupo.Id ||
               mantenimiento.datosgrupo.CodigoImtEquipo ||
               mantenimiento.datosgrupo.NombreEmpresaMantenimiento ||
@@ -67,10 +90,28 @@
               <td class="precio-column">
                 Bs {{ mantenimiento.datosgrupo.Costo | number: "1.2-2" }}
               </td>
-              <td (click)="mostrarmantenimientosindividuales(mantenimiento)">
-                .......
+              <td class="maintenance-equipment-cell">
+                <span
+                  class="maintenance-equipment-name"
+                  [title]="mantenimiento.matenimientos[0].NombreGrupoEquipo"
+                >
+                  {{ mantenimiento.matenimientos[0].NombreGrupoEquipo }}
+                </span>
+                @if (mantenimiento.matenimientos.length > 1) {
+                  <span class="maintenance-equipment-count">
+                    +{{ mantenimiento.matenimientos.length - 1 }}
+                  </span>
+                }
               </td>
               <td class="actions-column">
+                <button
+                  class="btn-icon btn-view"
+                  (click)="mostrarmantenimientosindividuales(mantenimiento)"
+                  title="Ver equipos del mantenimiento"
+                  aria-label="Ver equipos del mantenimiento"
+                >
+                  <i class="fas fa-eye"></i>
+                </button>
                 <button
                   class="btn-icon btn-delete"
                   (click)="eliminarMantenimiento(mantenimiento)"
@@ -93,6 +134,12 @@
         </tbody>
       </table>
     </div>
+    <app-table-pagination
+      [totalItems]="mantenimientosFiltrados.length"
+      [page]="paginaActual"
+      [pageSize]="filasPorPagina"
+      (pageChange)="cambiarPagina($event)"
+    ></app-table-pagination>
   } @else {
     <app-audit-panel
       [refreshTrigger]="auditRefresh"

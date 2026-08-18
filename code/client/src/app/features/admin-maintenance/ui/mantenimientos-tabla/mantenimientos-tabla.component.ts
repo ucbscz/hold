@@ -7,8 +7,11 @@ import {
   MantenimientoService,
 } from '@entities/maintenance';
 import { BuscadorComponent } from '@features/admin-search';
-import { Tabla } from '@shared/lib/admin-table';
-import { StickyScrollDirective } from '@shared/lib/directives';
+import { Tabla, TablePaginationComponent } from '@shared/lib/admin-table';
+import {
+  FlatpickrDirective,
+  StickyScrollDirective,
+} from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   AvisoEliminarComponent,
@@ -33,6 +36,8 @@ import { DetallesMantenimientoComponent } from './detalles-mantenimiento/detalle
     AvisoExitoComponent,
     BuscadorComponent,
     AuditPanelComponent,
+    FlatpickrDirective,
+    TablePaginationComponent,
   ],
   templateUrl: './mantenimientos-tabla.component.html',
   styleUrl: './mantenimientos-tabla.component.css',
@@ -51,6 +56,9 @@ export class MantenimientosTablaComponent extends Tabla implements OnInit {
   mantenimientoGruposeleccionado: Mantenimientos[] = [];
   mantenimientosFiltrados: MantenimientosAgrupados[] = [];
   mantenimientoSeleccionado: Mantenimientos = new Mantenimientos();
+  fechaInicioDesde: Date | null = null;
+  fechaFinHasta: Date | null = null;
+  filtroBusqueda: [string, string] = ['', ''];
   override columnas: string[] = [
     'Empresa',
     'Códigos IMT',
@@ -102,77 +110,128 @@ export class MantenimientosTablaComponent extends Tabla implements OnInit {
       }
     }
     this.mantenimientosFiltrados = [...this.mantenimientos];
-    this.aplicarOrdenActualSiExiste();
+    this.aplicarFiltros();
   }
   buscar() {
     this.aplicarFiltros();
   }
   aplicarFiltros(event?: [string, string]) {
-    if (event && event[0].trim() !== '') {
-      const busquedaNormalizada = this.normalizeText(event[0]);
-      this.mantenimientosFiltrados = this.mantenimientos.filter(
-        (mantenimiento) => {
-          switch (event[1]) {
-            case 'Empresa':
-              return this.normalizeText(
-                mantenimiento.datosgrupo.NombreEmpresaMantenimiento || '',
-              ).includes(busquedaNormalizada);
-            case 'Códigos IMT':
-              return this.normalizeText(
-                String(mantenimiento.datosgrupo.CodigoImtEquipo || ''),
-              ).includes(busquedaNormalizada);
-            case 'Fecha Inicio':
-              const fechaFormateada = this.formatDate(
-                mantenimiento.datosgrupo.FechaMantenimiento,
-              );
-              return this.normalizeText(fechaFormateada).includes(
-                busquedaNormalizada,
-              );
-            case 'Fecha Fin':
-              return this.normalizeText(
-                this.formatDate(
-                  mantenimiento.datosgrupo.FechaFinalDeMantenimiento,
-                ),
-              ).includes(busquedaNormalizada);
-            case 'Costo':
-              return this.normalizeText(
-                String(mantenimiento.datosgrupo.Costo || ''),
-              ).includes(busquedaNormalizada);
-            default:
-              return (
-                this.normalizeText(
-                  mantenimiento.datosgrupo.NombreEmpresaMantenimiento || '',
-                ).includes(busquedaNormalizada) ||
-                this.normalizeText(
-                  mantenimiento.datosgrupo.TipoMantenimiento || '',
-                ).includes(busquedaNormalizada) ||
-                this.normalizeText(
-                  mantenimiento.datosgrupo.NombreGrupoEquipo || '',
-                ).includes(busquedaNormalizada) ||
-                this.normalizeText(
-                  String(mantenimiento.datosgrupo.CodigoImtEquipo || ''),
-                ).includes(busquedaNormalizada) ||
-                this.normalizeText(
-                  this.formatDate(mantenimiento.datosgrupo.FechaMantenimiento),
-                ).includes(busquedaNormalizada) ||
-                this.normalizeText(
-                  this.formatDate(
-                    mantenimiento.datosgrupo.FechaFinalDeMantenimiento,
-                  ),
-                ).includes(busquedaNormalizada) ||
-                this.normalizeText(
-                  String(mantenimiento.datosgrupo.Costo || ''),
-                ).includes(busquedaNormalizada)
-              );
-          }
-        },
-      );
-    } else {
-      this.mantenimientosFiltrados = [...this.mantenimientos];
-    }
+    if (event) this.filtroBusqueda = event;
+
+    const busquedaNormalizada = this.normalizeText(this.filtroBusqueda[0]);
+    const columna = this.filtroBusqueda[1];
+    const fechaInicio = this.inicioDelDia(this.fechaInicioDesde);
+    const fechaFin = this.finDelDia(this.fechaFinHasta);
+
+    this.mantenimientosFiltrados = this.mantenimientos.filter(
+      (mantenimiento) => {
+        const coincideBusqueda = !busquedaNormalizada
+          ? true
+          : (() => {
+              switch (columna) {
+                case 'Empresa':
+                  return this.normalizeText(
+                    mantenimiento.datosgrupo.NombreEmpresaMantenimiento || '',
+                  ).includes(busquedaNormalizada);
+                case 'Códigos IMT':
+                  return this.normalizeText(
+                    String(mantenimiento.datosgrupo.CodigoImtEquipo || ''),
+                  ).includes(busquedaNormalizada);
+                case 'Fecha Inicio':
+                  const fechaFormateada = this.formatDate(
+                    mantenimiento.datosgrupo.FechaMantenimiento,
+                  );
+                  return this.normalizeText(fechaFormateada).includes(
+                    busquedaNormalizada,
+                  );
+                case 'Fecha Fin':
+                  return this.normalizeText(
+                    this.formatDate(
+                      mantenimiento.datosgrupo.FechaFinalDeMantenimiento,
+                    ),
+                  ).includes(busquedaNormalizada);
+                case 'Costo':
+                  return this.normalizeText(
+                    String(mantenimiento.datosgrupo.Costo || ''),
+                  ).includes(busquedaNormalizada);
+                default:
+                  return (
+                    this.normalizeText(
+                      mantenimiento.datosgrupo.NombreEmpresaMantenimiento || '',
+                    ).includes(busquedaNormalizada) ||
+                    this.normalizeText(
+                      mantenimiento.datosgrupo.TipoMantenimiento || '',
+                    ).includes(busquedaNormalizada) ||
+                    this.normalizeText(
+                      mantenimiento.datosgrupo.NombreGrupoEquipo || '',
+                    ).includes(busquedaNormalizada) ||
+                    this.normalizeText(
+                      String(mantenimiento.datosgrupo.CodigoImtEquipo || ''),
+                    ).includes(busquedaNormalizada) ||
+                    this.normalizeText(
+                      this.formatDate(
+                        mantenimiento.datosgrupo.FechaMantenimiento,
+                      ),
+                    ).includes(busquedaNormalizada) ||
+                    this.normalizeText(
+                      this.formatDate(
+                        mantenimiento.datosgrupo.FechaFinalDeMantenimiento,
+                      ),
+                    ).includes(busquedaNormalizada) ||
+                    this.normalizeText(
+                      String(mantenimiento.datosgrupo.Costo || ''),
+                    ).includes(busquedaNormalizada)
+                  );
+              }
+            })();
+        const inicio = this.fechaValida(
+          mantenimiento.datosgrupo.FechaMantenimiento,
+        );
+        const fin = this.fechaValida(
+          mantenimiento.datosgrupo.FechaFinalDeMantenimiento,
+        );
+        const coincideInicio =
+          !fechaInicio || (!!inicio && inicio >= fechaInicio);
+        const coincideFin = !fechaFin || (!!fin && fin <= fechaFin);
+
+        return coincideBusqueda && coincideInicio && coincideFin;
+      },
+    );
+    this.reiniciarPaginacion();
     this.aplicarOrdenActualSiExiste();
   }
+
+  onFechaInicioDesde(dates: Date[]): void {
+    this.fechaInicioDesde = dates[0] ?? null;
+    this.aplicarFiltros();
+  }
+
+  onFechaFinHasta(dates: Date[]): void {
+    this.fechaFinHasta = dates[0] ?? null;
+    this.aplicarFiltros();
+  }
+
+  private fechaValida(valor: Date | string | null): Date | null {
+    if (!valor) return null;
+    const fecha = new Date(valor);
+    return Number.isNaN(fecha.getTime()) ? null : fecha;
+  }
+
+  private inicioDelDia(valor: Date | null): Date | null {
+    if (!valor) return null;
+    const fecha = new Date(valor);
+    fecha.setHours(0, 0, 0, 0);
+    return fecha;
+  }
+
+  private finDelDia(valor: Date | null): Date | null {
+    if (!valor) return null;
+    const fecha = new Date(valor);
+    fecha.setHours(23, 59, 59, 999);
+    return fecha;
+  }
   limpiarBusqueda() {
+    this.filtroBusqueda = ['', ''];
     this.aplicarFiltros();
   }
   eliminarMantenimiento(mantenimiento: MantenimientosAgrupados) {
