@@ -27,6 +27,7 @@ import { OpcionSelect } from './opcion-select';
 })
 export class CustomSelectComponent implements ControlValueAccessor, OnDestroy {
   @Input() placeholder = 'Seleccionar';
+  @Input() icon = '';
   @Input() invalid = false;
   @Input() searchThreshold = 6;
   @Input() menuPosition: 'auto' | 'top' | 'bottom' = 'auto';

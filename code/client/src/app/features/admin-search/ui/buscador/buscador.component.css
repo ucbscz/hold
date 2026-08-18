@@ -92,7 +92,7 @@
   flex-wrap: wrap;
   overflow: visible;
 }
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .search-and-filter-row {
     justify-content: space-between;
     flex-direction: column;
@@ -112,7 +112,7 @@
   }
   .search-input {
     padding: 0.65rem 1rem 0.65rem 2.25rem;
-    font-size: 0.8rem;
+    font-size: 16px;
   }
 }
 

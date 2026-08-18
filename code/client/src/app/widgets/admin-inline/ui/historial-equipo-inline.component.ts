@@ -81,6 +81,7 @@ const ESTADOS_PRESTAMO = [
             [(ngModel)]="filtroEstado"
             [ngModelOptions]="{ standalone: true }"
             [opciones]="estadoOpciones"
+            icon="fas fa-filter"
             placeholder="Todos los estados"
           ></app-custom-select>
           <div class="audit-filters-actions">

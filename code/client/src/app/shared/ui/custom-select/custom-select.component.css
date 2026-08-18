@@ -44,10 +44,50 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
+.cs-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+}
+.cs-leading-icon {
+  flex-shrink: 0;
+  color: var(--ink-muted);
+  font-size: 0.85rem;
+}
 .cs-value {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+:host(.admin-filter-select),
+:host(.inline-state-select) {
+  width: 11rem;
+  min-width: 11rem;
+}
+:host(.admin-filter-select) .cs-trigger,
+:host(.inline-state-select) .cs-trigger {
+  height: 42px;
+  min-height: 42px;
+  padding: 0 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--ink-secondary);
+  box-shadow: var(--shadow-xs);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+:host(.admin-filter-select) .cs-trigger:hover,
+:host(.inline-state-select) .cs-trigger:hover {
+  border-color: var(--border-strong);
+  background: var(--sidebar);
+}
+:host(.admin-filter-select) .cs-trigger.open,
+:host(.inline-state-select) .cs-trigger.open {
+  border-color: var(--interactive-text);
+  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
 }
 .cs-value.placeholder {
   color: var(--ink-muted);
@@ -183,5 +223,15 @@
   .cs-trigger {
     padding: 0.6rem;
     font-size: 0.95rem;
+  }
+  :host(.admin-filter-select) {
+    flex: 1 1 10.5rem;
+    width: auto;
+    min-width: 10.5rem;
+  }
+  :host(.admin-filter-select) .cs-trigger,
+  :host(.inline-state-select) .cs-trigger {
+    padding: 0 0.875rem;
+    font-size: 0.875rem;
   }
 }

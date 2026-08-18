@@ -493,10 +493,11 @@ body {
   min-height: 42px;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .admin-filter-select {
-    width: 100%;
-    min-width: 0;
+    flex: 1 1 10.5rem;
+    width: auto;
+    min-width: 10.5rem;
   }
 }
 

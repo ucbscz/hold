@@ -55,7 +55,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
         display: flex;
         align-items: center;
         justify-content: center;
-        gap: 0.5rem;
+        gap: 0.375rem;
         width: 100%;
         margin: 1.25rem 0 0.5rem;
         font-family: var(--font);
@@ -63,8 +63,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
       .table-pagination__numbers {
         display: flex;
         justify-content: center;
-        gap: 0.5rem;
-        min-width: 14.5rem;
+        gap: 0.375rem;
       }
       .table-pagination__page {
         display: grid;
@@ -94,9 +93,9 @@ import { Component, EventEmitter, Input, Output } from '@angular/core';
       .table-pagination__arrow {
         display: grid;
         place-items: center;
-        flex: 0 0 1.8rem;
-        width: 1.8rem;
-        height: 1.8rem;
+        flex: 0 0 2rem;
+        width: 2rem;
+        height: 2rem;
         min-height: 0;
         padding: 0;
         border: 0;

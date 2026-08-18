@@ -7,9 +7,14 @@
     [disabled]="disabled"
     (click)="alternar()"
   >
-    <span class="cs-value" [class.placeholder]="tienePlaceholder">{{
-      etiquetaActual
-    }}</span>
+    <span class="cs-label">
+      @if (icon) {
+        <i [class]="icon + ' cs-leading-icon'"></i>
+      }
+      <span class="cs-value" [class.placeholder]="tienePlaceholder">{{
+        etiquetaActual
+      }}</span>
+    </span>
     <i class="fas fa-chevron-down cs-chevron" [class.open]="abierto"></i>
   </button>
   @if (abierto) {
