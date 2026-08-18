@@ -149,7 +149,7 @@ export class AuditPanelComponent implements OnChanges {
       .join('\n');
     const link = document.createElement('a');
     link.href = URL.createObjectURL(
-      new Blob([csv], { type: 'text/csv;charset=utf-8' }),
+      new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }),
     );
     link.download = `auditoria-${this.entidad.toLowerCase()}.csv`;
     link.click();

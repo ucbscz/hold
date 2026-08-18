@@ -75,4 +75,21 @@ describe('Tabla', () => {
         .map((item) => (item.date as Date).getTime()),
     ).toEqual([newestDate.getTime(), oldestDate.getTime()]);
   });
+
+  it('should export CSV files with an UTF-8 byte order mark', async () => {
+    let exportedBlob: Blob | undefined;
+    spyOn(URL, 'createObjectURL').and.callFake((blob) => {
+      exportedBlob = blob as Blob;
+      return 'blob:test';
+    });
+    spyOn(URL, 'revokeObjectURL');
+    spyOn(HTMLAnchorElement.prototype, 'click');
+
+    tabla.exportarCsv('prestamos', ['ID'], [['—']]);
+
+    expect(exportedBlob).toBeDefined();
+    const bytes = new Uint8Array(await exportedBlob!.arrayBuffer());
+    expect(Array.from(bytes.slice(0, 3))).toEqual([0xef, 0xbb, 0xbf]);
+    expect(new TextDecoder().decode(bytes)).toContain('"—"');
+  });
 });

@@ -87,7 +87,7 @@ export abstract class Tabla extends BaseTablaComponent {
       .join('\n');
     const enlace = document.createElement('a');
     enlace.href = URL.createObjectURL(
-      new Blob([csv], { type: 'text/csv;charset=utf-8' }),
+      new Blob([`\uFEFF${csv}`], { type: 'text/csv;charset=utf-8' }),
     );
     enlace.download = `${nombreArchivo}.csv`;
     enlace.click();
