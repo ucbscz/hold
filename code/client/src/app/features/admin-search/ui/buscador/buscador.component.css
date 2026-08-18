@@ -34,9 +34,11 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-full);
   font-size: 0.875rem;
-  font-weight: 400;
+  font-family: var(--font);
+  font-weight: 500;
   box-sizing: border-box;
   color: var(--ink);
+  background: var(--surface);
   transition:
     color var(--t-fast),
     background-color var(--t-fast),
@@ -45,7 +47,7 @@
 }
 .search-input::placeholder {
   color: #757575;
-  font-weight: 400;
+  font-weight: 500;
 }
 .search-input:focus {
   outline: none;
@@ -91,6 +93,21 @@
   flex-shrink: 0;
   flex-wrap: wrap;
   overflow: visible;
+}
+
+:host ::ng-deep .botoncrear {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
+  width: auto !important;
+  min-width: max-content !important;
+  height: 42px !important;
+  min-height: 42px !important;
+  padding: 0 1.125rem !important;
+  border: 1px solid var(--brand) !important;
+  border-radius: var(--radius-full) !important;
+  font: 700 0.875rem var(--font) !important;
 }
 @media (max-width: 640px) {
   .search-and-filter-row {

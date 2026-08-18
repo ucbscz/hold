@@ -7,6 +7,26 @@
   </div>
   @if (activeTab === "tabla") {
     <app-buscador (terminoBusqueda)="aplicarFiltros($event)">
+      <div class="loan-date-filters">
+        <input
+          type="text"
+          appFlatpickr
+          [fpOptions]="{}"
+          readonly
+          aria-label="Inicio desde"
+          placeholder="Inicio desde"
+          (fpChange)="onFechaPrestamoDesde($event)"
+        />
+        <input
+          type="text"
+          appFlatpickr
+          [fpOptions]="{ minDate: fechaPrestamoDesde || undefined }"
+          readonly
+          aria-label="Inicio hasta"
+          placeholder="Inicio hasta"
+          (fpChange)="onFechaPrestamoHasta($event)"
+        />
+      </div>
       <app-custom-select
         class="admin-filter-select"
         [ngModel]="estadoSeleccionado"
@@ -34,26 +54,6 @@
         <i class="fas fa-print"></i>
       </button>
     </app-buscador>
-    <div class="loan-date-filters">
-      <label
-        >Inicio desde<input
-          type="text"
-          appFlatpickr
-          [fpOptions]="{}"
-          readonly
-          placeholder="Seleccionar fecha"
-          (fpChange)="onFechaPrestamoDesde($event)"
-      /></label>
-      <label
-        >Inicio hasta<input
-          type="text"
-          appFlatpickr
-          [fpOptions]="{ minDate: fechaPrestamoDesde || undefined }"
-          readonly
-          placeholder="Seleccionar fecha"
-          (fpChange)="onFechaPrestamoHasta($event)"
-      /></label>
-    </div>
   }
   @if (activeTab === "tabla") {
     <div class="admin-tabs">
