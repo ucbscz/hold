@@ -111,7 +111,11 @@ app-buscador {
 ::ng-deep .audit-empty {
   order: 3;
 }
-.table-pagination { order: 4; width: 100%; margin-top: 0; }
+.table-pagination {
+  order: 4;
+  width: 100%;
+  margin-top: 0;
+}
 .table-header {
   display: flex;
   justify-content: space-between;

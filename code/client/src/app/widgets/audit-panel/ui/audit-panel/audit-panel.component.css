@@ -99,8 +99,14 @@
   font-size: 0.875rem;
   font-weight: 500;
 }
-.audit-select-wrap ::ng-deep .cs-trigger:hover { border-color: var(--border-strong); background: var(--bg); }
-.audit-select-wrap ::ng-deep .cs-trigger.open { border-color: var(--interactive-text); box-shadow: 0 0 0 3px var(--interactive-subtle); }
+.audit-select-wrap ::ng-deep .cs-trigger:hover {
+  border-color: var(--border-strong);
+  background: var(--bg);
+}
+.audit-select-wrap ::ng-deep .cs-trigger.open {
+  border-color: var(--interactive-text);
+  box-shadow: 0 0 0 3px var(--interactive-subtle);
+}
 .audit-select-trigger {
   display: flex;
   align-items: center;
