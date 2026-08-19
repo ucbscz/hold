@@ -95,7 +95,7 @@ export class NavbarComponent {
         this.showBack.set(false);
       } else if (
         cleanUrl.includes('/Carrito') ||
-        cleanUrl.includes('/Objeto') ||
+        cleanUrl.includes('/equipo') ||
         cleanUrl.includes('/Formulario')
       ) {
         this.showHome.set(false);

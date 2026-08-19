@@ -9,7 +9,7 @@ import { AccesorioApiItem } from './accesorio-api-item';
   providedIn: 'root',
 })
 export class AccesoriosService {
-  private readonly apiUrl = environment.apiUrl + '/api/Accesorio';
+  private readonly apiUrl = environment.apiUrl + '/api/accesorio';
 
   constructor(private readonly http: HttpClient) {}
 

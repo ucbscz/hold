@@ -9,7 +9,7 @@ import { GaveteroApiItem } from './gavetero-api-item';
   providedIn: 'root',
 })
 export class GaveteroService {
-  private readonly apiUrl = environment.apiUrl + '/api/Gavetero';
+  private readonly apiUrl = environment.apiUrl + '/api/gavetero';
   constructor(private readonly http: HttpClient) {}
 
   crearGavetero(gavetero: Gaveteros) {

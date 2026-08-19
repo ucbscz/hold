@@ -9,7 +9,7 @@ import { Notificacion } from '../model/notificacion.model';
   providedIn: 'root',
 })
 export class NotificacionApiService {
-  private readonly url = environment.apiUrl + '/api/Notificacion';
+  private readonly url = environment.apiUrl + '/api/notificacion';
 
   constructor(private readonly http: HttpClient) {}
 

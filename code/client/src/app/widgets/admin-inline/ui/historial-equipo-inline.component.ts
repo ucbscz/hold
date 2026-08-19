@@ -353,7 +353,7 @@ export class HistorialEquipoInlineComponent implements OnInit {
   ngOnInit() {
     this.http
       .get<ApiResponse<EquipoHistorialInlineItem[]>>(
-        `${environment.apiUrl}/api/Equipo/${this.equipoId}/historial`,
+        `${environment.apiUrl}/api/equipo/${this.equipoId}/historial`,
       )
       .subscribe({
         next: (res) => {

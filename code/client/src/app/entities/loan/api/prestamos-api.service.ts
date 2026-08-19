@@ -10,7 +10,7 @@ import { PrestamoApiItem } from './prestamo-api-item';
   providedIn: 'root',
 })
 export class PrestamosAPIService {
-  private readonly url = environment.apiUrl + '/api/Prestamo';
+  private readonly url = environment.apiUrl + '/api/prestamo';
   constructor(private readonly http: HttpClient) {}
 
   private mapearPrestamo(item: PrestamoApiItem): PrestamoDto {

@@ -16,10 +16,15 @@ export const routes: Routes = [
       import('@pages/home').then((page) => page.PantallaMainComponent),
   },
   {
-    path: 'Objeto/:id',
+    path: 'equipo/:id',
     canActivate: [authGuard],
     loadComponent: () =>
       import('@pages/equipment-detail').then((page) => page.ObjetoComponent),
+  },
+  {
+    path: 'Objeto/:id',
+    redirectTo: 'equipo/:id',
+    pathMatch: 'full',
   },
   {
     path: 'Carrito',

@@ -14,7 +14,7 @@ import { GrupoEquipoApiItem } from './grupo-equipo-api-item';
   providedIn: 'root',
 })
 export class GrupoequipoService {
-  private readonly apiUrl = environment.apiUrl + '/api/GrupoEquipo';
+  private readonly apiUrl = environment.apiUrl + '/api/grupo-equipo';
   private readonly grupoEquipoApiVacio: GrupoEquipoApiItem = {
     Id: 0,
     Nombre: null,

@@ -28,8 +28,8 @@ export class JwtInterceptor implements HttpInterceptor {
     nextHandler: HttpHandler,
   ): Observable<HttpEvent<unknown>> {
     const isAuthEndpoint =
-      outgoingRequest.url.includes('/api/Usuario/login') ||
-      outgoingRequest.url.includes('/api/Usuario/refresh');
+      outgoingRequest.url.includes('/api/usuario/login') ||
+      outgoingRequest.url.includes('/api/usuario/refresh');
 
     if (isAuthEndpoint) return nextHandler.handle(outgoingRequest);
 

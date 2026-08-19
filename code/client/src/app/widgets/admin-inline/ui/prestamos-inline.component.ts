@@ -111,7 +111,7 @@ export class PrestamosInlineComponent implements OnInit {
   ngOnInit() {
     this.http
       .get<ApiResponse<PrestamoInlineItem[]>>(
-        `${environment.apiUrl}/api/Prestamo/byUsuario/${this.carnet}`,
+        `${environment.apiUrl}/api/prestamo/por-usuario/${this.carnet}`,
       )
       .subscribe({
         next: (res) => {
