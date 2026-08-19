@@ -15,7 +15,7 @@
   padding-left: 6rem;
   padding-right: 6rem;
   width: 100%;
-  min-height: 100vh;
+  min-height: 100dvh;
   box-sizing: border-box;
 }
 .container > *:not(app-sidebar) {

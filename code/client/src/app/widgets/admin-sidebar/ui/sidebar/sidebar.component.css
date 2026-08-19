@@ -15,7 +15,7 @@
   overflow: hidden;
   animation: slideInLeft 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
   font-family: var(--font);
-  max-height: min(34rem, calc(100vh - 6rem));
+  max-height: min(34rem, calc(100dvh - 6rem));
   padding: 10px 4px 10px 0;
 }
 
@@ -39,7 +39,7 @@
   flex-direction: column;
   width: 100%;
   overflow-y: auto;
-  max-height: calc(min(34rem, calc(100vh - 6rem)) - 20px);
+  max-height: calc(min(34rem, calc(100dvh - 6rem)) - 20px);
   padding: 0;
   border-radius: 10px;
   scrollbar-color: var(--scrollbar-thumb) transparent;
@@ -180,7 +180,7 @@
     left: 8px;
     right: auto;
     width: 180px;
-    max-height: calc(100vh - 80px);
+    max-height: calc(100dvh - 80px);
     padding: 10px 4px 10px 0;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
@@ -190,7 +190,7 @@
     gap: 0;
     overflow-x: visible;
     overflow-y: auto;
-    max-height: calc(100vh - 100px);
+    max-height: calc(100dvh - 100px);
     padding: 0;
     width: 100%;
   }

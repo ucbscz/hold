@@ -1,5 +1,5 @@
 .profile-page {
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg);
   padding: 3.5rem 1rem 2rem;
   display: flex;
@@ -53,7 +53,7 @@
   flex-direction: column;
   gap: 0.2rem;
 }
-.profile-title-group h2 {
+.profile-title-group h1 {
   font-size: 1.25rem;
   font-weight: 800;
   color: var(--ink);
@@ -180,7 +180,7 @@
   .profile-header {
     gap: 1rem;
   }
-  .profile-title-group h2 {
+  .profile-title-group h1 {
     font-size: 1.1rem;
   }
   .btn-update {

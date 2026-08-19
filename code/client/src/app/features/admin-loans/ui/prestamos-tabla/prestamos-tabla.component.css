@@ -57,7 +57,7 @@
   background-color: transparent;
   min-height: auto;
   color: var(--ink);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--font);
   display: flex;
   flex-direction: column;
 }

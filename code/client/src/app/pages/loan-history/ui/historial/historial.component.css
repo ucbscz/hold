@@ -1,13 +1,13 @@
 :host {
   display: block;
-  min-height: 100vh;
+  min-height: 100dvh;
   background: var(--bg);
   font-family: var(--font);
 }
 
 .container {
   width: min(100%, 1180px);
-  min-height: 100vh;
+  min-height: 100dvh;
   margin: 0 auto;
   padding: 3rem 2rem 4rem;
 }

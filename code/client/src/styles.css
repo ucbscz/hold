@@ -193,7 +193,7 @@ body {
 .custom-select__options,
 .dropdown-list,
 .audit-select-menu {
-  max-height: min(16rem, calc(100vh - 8rem));
+  max-height: min(16rem, calc(100dvh - 8rem));
   overflow-y: auto;
 }
 

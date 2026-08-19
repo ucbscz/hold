@@ -35,9 +35,9 @@
 .grupos-equipos-container {
   padding: 1.5rem;
   background-color: var(--color-background);
-  min-height: 100vh;
+  min-height: 100dvh;
   color: var(--ink);
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--font);
 }
 .table-header {
   display: flex;
@@ -220,7 +220,7 @@
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
