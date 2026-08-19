@@ -9,7 +9,7 @@ using ComponenteEntity = IMT_Reservas.Server.Core.Entities.Componente;
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/componente")]
+[Route("api/componentes")]
 public class ComponenteController : Controller
 {
     private readonly Service<ComponenteEntity, ComponenteRepository, ComponenteDto> _service;

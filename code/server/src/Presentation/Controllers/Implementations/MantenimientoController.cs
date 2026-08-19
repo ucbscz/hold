@@ -6,7 +6,7 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize(Roles = "administrador")]
-[Route("api/mantenimiento")]
+[Route("api/mantenimientos")]
 public class MantenimientoController : Controller
 {
     private readonly MantenimientoService _service;

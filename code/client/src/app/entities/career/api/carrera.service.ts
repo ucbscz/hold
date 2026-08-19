@@ -9,7 +9,7 @@ import { CarreraApiItem } from './carrera-api-item';
   providedIn: 'root',
 })
 export class CarreraService {
-  private readonly apiUrl = environment.apiUrl + '/api/carrera';
+  private readonly apiUrl = environment.apiUrl + '/api/carreras';
   constructor(private readonly http: HttpClient) {}
 
   obtenerCarreras(): Observable<Carrera[]> {

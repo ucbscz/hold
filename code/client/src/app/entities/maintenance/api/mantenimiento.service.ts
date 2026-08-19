@@ -10,7 +10,7 @@ import { MantenimientoApiItem } from './mantenimiento-api-item';
   providedIn: 'root',
 })
 export class MantenimientoService {
-  private readonly apiUrl = environment.apiUrl + '/api/mantenimiento';
+  private readonly apiUrl = environment.apiUrl + '/api/mantenimientos';
   constructor(private readonly http: HttpClient) {}
 
   crearMantenimiento(

@@ -9,7 +9,7 @@ import { MuebleApiItem } from './mueble-api-item';
   providedIn: 'root',
 })
 export class MuebleService {
-  private readonly apiUrl = environment.apiUrl + '/api/mueble';
+  private readonly apiUrl = environment.apiUrl + '/api/muebles';
   constructor(private readonly http: HttpClient) {}
 
   crearMueble(mueble: Muebles) {

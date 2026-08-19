@@ -8,7 +8,7 @@ import { AuditLogApiItem } from './audit-log-api-item';
 
 @Injectable({ providedIn: 'root' })
 export class AuditLogApiService {
-  private readonly url = `${environment.apiUrl}/api/audit-log`;
+  private readonly url = `${environment.apiUrl}/api/auditoria`;
 
   constructor(private readonly http: HttpClient) {}
 

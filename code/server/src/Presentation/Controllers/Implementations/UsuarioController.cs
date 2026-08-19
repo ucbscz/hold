@@ -8,7 +8,7 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/usuario")]
+[Route("api/usuarios")]
 public class UsuarioController : Controller
 {
     private readonly UsuarioService _service;

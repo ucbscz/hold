@@ -22,11 +22,6 @@ export const routes: Routes = [
       import('@pages/equipment-detail').then((page) => page.ObjetoComponent),
   },
   {
-    path: 'Objeto/:id',
-    redirectTo: 'equipo/:id',
-    pathMatch: 'full',
-  },
-  {
     path: 'Carrito',
     canActivate: [authGuard],
     loadComponent: () =>

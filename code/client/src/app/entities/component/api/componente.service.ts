@@ -9,7 +9,7 @@ import { ComponenteApiItem } from './componente-api-item';
   providedIn: 'root',
 })
 export class ComponenteService {
-  private readonly apiUrl = environment.apiUrl + '/api/componente';
+  private readonly apiUrl = environment.apiUrl + '/api/componentes';
   constructor(private readonly http: HttpClient) {}
 
   crearComponente(componente: Componente) {

@@ -7,7 +7,7 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize(Roles = "administrador")]
-[Route("api/audit-log")]
+[Route("api/auditoria")]
 public class AuditLogController : Controller
 {
     private readonly AuditLogService _service;

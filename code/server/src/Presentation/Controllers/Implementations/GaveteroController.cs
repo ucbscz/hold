@@ -6,7 +6,7 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/gavetero")]
+[Route("api/gaveteros")]
 public class GaveteroController : Controller
 {
     private readonly GaveteroService _service;

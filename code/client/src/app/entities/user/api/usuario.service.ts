@@ -10,7 +10,7 @@ import { UsuarioLoginApiResponse } from './usuario-login-api-response';
   providedIn: 'root',
 })
 export class UsuarioServiceAPI {
-  private readonly apiUrl = environment.apiUrl + '/api/usuario';
+  private readonly apiUrl = environment.apiUrl + '/api/usuarios';
   constructor(private readonly http: HttpClient) {}
 
   registrarCuenta(usuario: Usuario, contrasena: string, rol: string | null) {

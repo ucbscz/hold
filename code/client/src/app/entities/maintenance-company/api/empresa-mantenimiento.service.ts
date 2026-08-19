@@ -9,7 +9,7 @@ import { EmpresaMantenimientoApiItem } from './empresa-mantenimiento-api-item';
   providedIn: 'root',
 })
 export class EmpresamantenimientoService {
-  private readonly apiUrl = environment.apiUrl + '/api/empresa-mantenimiento';
+  private readonly apiUrl = environment.apiUrl + '/api/empresas-mantenimiento';
   constructor(private readonly http: HttpClient) {}
 
   crearEmpresaMantenimiento(empresa: EmpresaMantenimiento) {

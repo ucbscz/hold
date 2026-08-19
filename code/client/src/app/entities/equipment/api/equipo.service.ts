@@ -9,7 +9,7 @@ import { EquipoApiResponse } from './equipo-api-response';
   providedIn: 'root',
 })
 export class EquipoService {
-  private readonly apiUrl = environment.apiUrl + '/api/equipo';
+  private readonly apiUrl = environment.apiUrl + '/api/equipos';
 
   constructor(private readonly http: HttpClient) {}
 

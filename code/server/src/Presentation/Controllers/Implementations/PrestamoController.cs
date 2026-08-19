@@ -7,7 +7,7 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/prestamo")]
+[Route("api/prestamos")]
 public class PrestamoController : Controller
 {
     private readonly PrestamoService _service;

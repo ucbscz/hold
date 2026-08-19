@@ -9,7 +9,7 @@ import { CategoriaApiItem } from './categoria-api-item';
   providedIn: 'root',
 })
 export class CategoriaService {
-  private readonly apiurl = environment.apiUrl + '/api/categoria';
+  private readonly apiurl = environment.apiUrl + '/api/categorias';
   constructor(private readonly http: HttpClient) {}
 
   obtenercategorias(): Observable<Categorias[]> {

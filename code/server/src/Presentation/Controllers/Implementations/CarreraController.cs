@@ -9,7 +9,7 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/carrera")]
+[Route("api/carreras")]
 public class CarreraController : Controller
 {
     private readonly Service<
