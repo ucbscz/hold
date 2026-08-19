@@ -172,11 +172,14 @@ public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
         return (entity, result.CarreraNombre);
     }
 
-    public async Task UpdateEntity(UsuarioEntity entity)
+    public Task UpdateEntity(UsuarioEntity entity, bool saveChanges = true)
     {
         DbContext.Usuarios.Update(entity);
-        await DbContext.SaveChangesAsync();
+
+        return saveChanges ? DbContext.SaveChangesAsync() : Task.CompletedTask;
     }
+
+    public Task SaveChanges() => DbContext.SaveChangesAsync();
 
     public async Task SetBlockedStatus(
         IReadOnlyCollection<string> carnets,

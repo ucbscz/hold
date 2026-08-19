@@ -16,7 +16,8 @@ public class NotificacionRepository
         TipoNotificacion type,
         string title,
         string? content = null,
-        string? detail = null
+        string? detail = null,
+        bool saveChanges = true
     )
     {
         _db.Notificaciones.Add(
@@ -31,7 +32,8 @@ public class NotificacionRepository
                 }
             )
         );
-        await _db.SaveChangesAsync();
+        if (saveChanges)
+            await _db.SaveChangesAsync();
     }
 
     public async Task AddRange(IReadOnlyCollection<NotificacionDto> notifications)

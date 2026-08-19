@@ -18,11 +18,20 @@ public class AuditLogService
         AuditAccion accion,
         string entidad,
         string? entidadId,
-        string? detalle = null
+        string? detalle = null,
+        bool saveChanges = true
     )
     {
         var actor = GetActor();
-        await _repository.WriteLog(accion, entidad, entidadId, detalle, actor.Carnet, actor.Nombre);
+        await _repository.WriteLog(
+            accion,
+            entidad,
+            entidadId,
+            detalle,
+            actor.Carnet,
+            actor.Nombre,
+            saveChanges
+        );
     }
 
     public async Task LogMany(IReadOnlyCollection<AuditEntry> entries)

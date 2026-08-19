@@ -17,13 +17,15 @@ public class AuditLogRepository
         string? entidadId,
         string? detalle,
         string adminCarnet,
-        string adminNombre
+        string adminNombre,
+        bool saveChanges = true
     )
     {
         _db.AuditLogs.Add(
             BuildLog(accion, entidad, entidadId, detalle, adminCarnet, adminNombre, DateTime.UtcNow)
         );
-        await _db.SaveChangesAsync();
+        if (saveChanges)
+            await _db.SaveChangesAsync();
     }
 
     public async Task WriteMany(

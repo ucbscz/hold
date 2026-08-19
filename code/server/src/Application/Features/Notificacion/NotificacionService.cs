@@ -14,8 +14,9 @@ public class NotificacionService
         TipoNotificacion type,
         string title,
         string? content = null,
-        string? detail = null
-    ) => await _repository.Add(carnet, type, title, content, detail);
+        string? detail = null,
+        bool saveChanges = true
+    ) => await _repository.Add(carnet, type, title, content, detail, saveChanges);
 
     public async Task CreateMany(IReadOnlyCollection<NotificacionDto> notifications)
     {

@@ -58,13 +58,14 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         user.Bloqueado = isBlocked;
         user.MotivoBloqueo = isBlocked ? blockReason : null;
-        await Repository.UpdateEntity(user);
+        await Repository.UpdateEntity(user, saveChanges: false);
 
         await Audit!.Log(
             isBlocked ? AuditAccion.Bloquear : AuditAccion.Desbloquear,
             typeof(UsuarioEntity).Name,
             carnet,
-            blockReason
+            blockReason,
+            saveChanges: false
         );
 
         if (isBlocked)
@@ -81,10 +82,12 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
                     usuario = "Sistema",
                     motivo = blockReason ?? "Bloqueo administrativo para nuevas reservas.",
                     fecha = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
-                })
+                }),
+                saveChanges: false
             );
 
-        _ = await _cacheRepository.Remove(CacheKeys.Usuario(carnet));
+        await Repository.SaveChanges();
+        _ = _cacheRepository.Remove(CacheKeys.Usuario(carnet));
 
         return Result<object>.Success(null!);
     }

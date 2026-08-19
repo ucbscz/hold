@@ -15,6 +15,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 using CarreraEntity = IMT_Reservas.Server.Core.Entities.Carrera;
 namespace IMT_Reservas.Tests.Integration;
 
@@ -32,14 +33,23 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
 
     protected override UsuarioService CreateService(ApplicationDbContext db)
     {
+        var memoryCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+
+        return CreateService(db, memoryCache);
+    }
+
+    private static UsuarioService CreateService(
+        ApplicationDbContext db,
+        IDistributedCache distributedCache
+    )
+    {
         var jwtOptions = Options.Create(TestJwtSettings);
         var mapper = new UsuarioMapper();
         var repo = new UsuarioRepository(db, mapper, new PrestamoRepository(db, new PrestamoMapper()));
         var validator = new UsuarioValidator(db);
         var jwt = new JwtService(jwtOptions);
-        var memoryCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
         var cacheService = new CacheRepository(
-            memoryCache,
+            distributedCache,
             NullLogger<CacheRepository>.Instance
         );
 
@@ -345,9 +355,15 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         var result = await Sut.SetBlocked("U001", true, "Rompió un equipo", isAdmin: true);
 
         result.IsSuccess.Should().BeTrue();
+        Db.ChangeTracker.Clear();
         var stored = Db.Usuarios.Single(u => u.Carnet == "U001");
         stored.Bloqueado.Should().BeTrue();
         stored.MotivoBloqueo.Should().Be("Rompió un equipo");
+        Db.AuditLogs.Should().ContainSingle(log => log.Accion == AuditAccion.Bloquear.ToString());
+        Db.Notificaciones.Should().ContainSingle(notification =>
+            notification.CarnetUsuario == "U001"
+            && notification.Tipo == TipoNotificacion.UsuarioBloqueado.ToString()
+        );
     }
 
     [Test]
@@ -372,6 +388,27 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         var result = await Sut.SetBlocked("U001", true, "x", isAdmin: false);
 
         result.Status.Should().Be(Ardalis.Result.ResultStatus.Forbidden);
+    }
+
+    [Test]
+    public async Task SetBlocked_DoesNotWaitForSlowCacheInvalidation()
+    {
+        await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"), isAdmin: true);
+        var cache = new Mock<IDistributedCache>();
+        var cacheRelease = new TaskCompletionSource();
+        cache
+            .Setup(instance => instance.RemoveAsync("usuario:U001", It.IsAny<CancellationToken>()))
+            .Returns(cacheRelease.Task);
+        var service = CreateService(Db, cache.Object);
+
+        var result = await service.SetBlocked("U001", true, "motivo", isAdmin: true);
+
+        result.IsSuccess.Should().BeTrue();
+        cache.Verify(
+            instance => instance.RemoveAsync("usuario:U001", It.IsAny<CancellationToken>()),
+            Times.Once
+        );
+        cacheRelease.SetResult();
     }
 
     private static UsuarioDto BuildValidUsuario(
