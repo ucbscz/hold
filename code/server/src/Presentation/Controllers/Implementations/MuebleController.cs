@@ -9,7 +9,7 @@ using MuebleEntity = IMT_Reservas.Server.Core.Entities.Mueble;
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/[controller]")]
+[Route("api/mueble")]
 public class MuebleController : Controller
 {
     private readonly Service<MuebleEntity, Repository<MuebleEntity, MuebleDto>, MuebleDto> _service;

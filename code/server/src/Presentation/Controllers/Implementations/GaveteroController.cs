@@ -6,7 +6,7 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/[controller]")]
+[Route("api/gavetero")]
 public class GaveteroController : Controller
 {
     private readonly GaveteroService _service;
@@ -38,7 +38,7 @@ public class GaveteroController : Controller
     public async Task<IActionResult> Delete(int id) => ToDeleteResponse(await _service.Delete(id));
 
     [Authorize(Roles = "administrador")]
-    [HttpGet("byMueble/{muebleId:int}")]
+    [HttpGet("por-mueble/{muebleId:int}")]
     public async Task<IActionResult> GetByMueble(int muebleId) =>
         ToResponse(await _service.GetByMueble(muebleId));
 }

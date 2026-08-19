@@ -6,7 +6,7 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/[controller]")]
+[Route("api/equipo")]
 public class EquipoController : Controller
 {
     private readonly EquipoService _service;
@@ -37,12 +37,12 @@ public class EquipoController : Controller
     public async Task<IActionResult> Delete(int id) => ToDeleteResponse(await _service.Delete(id));
 
     [Authorize(Roles = "administrador")]
-    [HttpGet("byGrupo/{grupoId:int}")]
+    [HttpGet("por-grupo/{grupoId:int}")]
     public async Task<IActionResult> GetByGrupo(int grupoId) =>
         ToResponse(await _service.GetByGrupo(grupoId));
 
     [Authorize(Roles = "administrador")]
-    [HttpGet("byGavetero/{gaveteroId:int}")]
+    [HttpGet("por-gavetero/{gaveteroId:int}")]
     public async Task<IActionResult> GetByGavetero(int gaveteroId) =>
         ToResponse(await _service.GetByGavetero(gaveteroId));
 

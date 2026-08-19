@@ -9,7 +9,7 @@ using AccesorioEntity = IMT_Reservas.Server.Core.Entities.Accesorio;
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/[controller]")]
+[Route("api/accesorio")]
 public class AccesorioController : Controller
 {
     private readonly Service<AccesorioEntity, AccesorioRepository, AccesorioDto> _service;

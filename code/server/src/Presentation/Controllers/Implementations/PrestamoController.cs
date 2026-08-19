@@ -7,7 +7,7 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/[controller]")]
+[Route("api/prestamo")]
 public class PrestamoController : Controller
 {
     private readonly PrestamoService _service;
@@ -60,7 +60,7 @@ public class PrestamoController : Controller
     ) => ToResponse(await _service.GetHistory(carnetUsuario, estadoPrestamo));
 
     [Authorize(Roles = "administrador")]
-    [HttpGet("byUsuario/{carnet}")]
+    [HttpGet("por-usuario/{carnet}")]
     public async Task<IActionResult> GetByUsuario(string carnet) =>
         ToResponse(await _service.GetHistory(carnet, string.Empty));
 

@@ -6,14 +6,14 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/[controller]")]
+[Route("api/carrito")]
 public class CarritoController : Controller
 {
     private readonly CarritoService _service;
 
     public CarritoController(CarritoService service) => _service = service;
 
-    [HttpPost("disponibilidadEquipos")]
+    [HttpPost("disponibilidad-equipos")]
     public async Task<IActionResult> DisponibilidadEquipos([FromBody] CarritoDto request) =>
         ToResponse(await _service.GetDisponibilidad(request));
 }

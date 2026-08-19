@@ -6,7 +6,7 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/[controller]")]
+[Route("api/contrato")]
 public class ContratoController : Controller
 {
     private readonly ContratoService _contratoService;

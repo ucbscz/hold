@@ -9,7 +9,7 @@ using EmpresaMantenimientoEntity = IMT_Reservas.Server.Core.Entities.EmpresaMant
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize(Roles = "administrador")]
-[Route("api/[controller]")]
+[Route("api/empresa-mantenimiento")]
 public class EmpresaMantenimientoController : Controller
 {
     private readonly Service<
