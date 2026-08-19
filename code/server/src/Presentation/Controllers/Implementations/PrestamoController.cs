@@ -1,4 +1,3 @@
-using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Application.Features.Prestamo;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,22 +10,32 @@ namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 public class PrestamoController : Controller
 {
     private readonly PrestamoService _service;
-    private readonly ContratoService _contratoService;
 
-    public PrestamoController(PrestamoService service, ContratoService contratoService)
-    {
-        _service = service;
-        _contratoService = contratoService;
-    }
+    public PrestamoController(PrestamoService service) => _service = service;
 
-    [Authorize(Roles = "administrador")]
     [HttpGet]
-    public async Task<IActionResult> GetAll() => ToResponse(await _service.GetAll());
+    public async Task<IActionResult> GetAll(
+        [FromQuery] string? carnet = null,
+        [FromQuery] string? estado = null
+    )
+    {
+        if (User.IsInRole("administrador"))
+        {
+            if (string.IsNullOrWhiteSpace(carnet) && string.IsNullOrWhiteSpace(estado))
+                return ToResponse(await _service.GetAll());
+
+            return ToResponse(await _service.GetFiltered(carnet, estado ?? string.Empty));
+        }
+
+        return ToResponse(
+            await _service.GetHistory(User.Identity?.Name ?? string.Empty, estado ?? string.Empty)
+        );
+    }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id) => ToResponse(await _service.Get(id));
 
-    [HttpGet("estado-reserva")]
+    [HttpGet("elegibilidad")]
     public async Task<IActionResult> GetReservationStatus() =>
         ToResponse(await _service.GetReservationStatus(User.Identity?.Name ?? string.Empty));
 
@@ -42,36 +51,21 @@ public class PrestamoController : Controller
         ToResponse(await _service.Update(id, dto));
 
     [Authorize(Roles = "administrador")]
-    [HttpPut("{id:int}/estado")]
+    [HttpPatch("{id:int}/estado")]
     public async Task<IActionResult> UpdateStatus(
         int id,
-        [FromQuery] string estado,
-        [FromQuery] string? observacion = null,
-        [FromBody] PrestamoDto? body = null
-    ) => ToResponse(await _service.UpdateStatus(id, estado, observacion, body));
+        [FromBody] PrestamoDto request
+    ) =>
+        ToResponse(
+            await _service.UpdateStatus(
+                id,
+                request.EstadoPrestamo ?? string.Empty,
+                request.Observacion,
+                request
+            )
+        );
 
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id) => ToDeleteResponse(await _service.Delete(id));
 
-    [HttpGet("historial")]
-    public async Task<IActionResult> GetHistory(
-        [FromQuery] string carnetUsuario,
-        [FromQuery] string estadoPrestamo
-    ) => ToResponse(await _service.GetHistory(carnetUsuario, estadoPrestamo));
-
-    [Authorize(Roles = "administrador")]
-    [HttpGet("por-usuario/{carnet}")]
-    public async Task<IActionResult> GetByUsuario(string carnet) =>
-        ToResponse(await _service.GetHistory(carnet, string.Empty));
-
-    [HttpGet("contrato/{prestamoId}")]
-    public async Task<IActionResult> GetContrato(int prestamoId)
-    {
-        var result = await _contratoService.GetByPrestamoId(prestamoId);
-
-        if (!result.IsSuccess)
-            return ToResponse(result);
-
-        return Ok(new { contrato = result.Value!.ContratoHtml });
-    }
 }

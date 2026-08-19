@@ -212,7 +212,7 @@ public class EstadoPrestamoJob
             new
             {
                 origen = "Sistema de préstamos",
-                usuario = $"{loan.NombreUsuario ?? "Usuario"} {loan.ApellidoPaternoUsuario ?? string.Empty}".Trim(),
+                personaRelacionada = $"{loan.NombreUsuario ?? "Usuario"} {loan.ApellidoPaternoUsuario ?? string.Empty}".Trim(),
                 carnet = loan.CarnetUsuario,
                 producto = loan.NombreGrupoEquipo,
                 motivo,

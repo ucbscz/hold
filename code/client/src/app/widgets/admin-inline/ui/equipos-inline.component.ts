@@ -97,7 +97,7 @@ export class EquiposInlineComponent implements OnInit {
   ngOnInit() {
     this.http
       .get<ApiResponse<EquipoInlineItem[]>>(
-        `${environment.apiUrl}/api/equipos/por-grupo/${this.grupoEquipoId}`,
+        `${environment.apiUrl}/api/equipos?grupoId=${this.grupoEquipoId}`,
       )
       .subscribe({
         next: (res) => {

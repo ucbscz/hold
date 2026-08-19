@@ -64,8 +64,7 @@ export class NavbarComponent {
     const cleanUrl = url.split('?')[0];
     const rol = this.usuario.obtenerRol();
     const isLoginOrRegister =
-      cleanUrl.includes('/Iniciar-Sesion') ||
-      cleanUrl.includes('/Registrar-Usuario');
+      cleanUrl.includes('/login') || cleanUrl.includes('/sign-up');
 
     if (isLoginOrRegister) {
       this.showHome.set(false);
@@ -94,15 +93,15 @@ export class NavbarComponent {
         this.showHome.set(false);
         this.showBack.set(false);
       } else if (
-        cleanUrl.includes('/Carrito') ||
-        cleanUrl.includes('/equipo') ||
-        cleanUrl.includes('/Formulario')
+        cleanUrl.includes('/cart') ||
+        cleanUrl.includes('/equipment') ||
+        cleanUrl.includes('/reservation')
       ) {
         this.showHome.set(false);
         this.showBack.set(true);
       } else if (
-        cleanUrl.includes('/Perfil') ||
-        cleanUrl.includes('/Historial')
+        cleanUrl.includes('/profile') ||
+        cleanUrl.includes('/loan-history')
       ) {
         this.showHome.set(true);
         this.showBack.set(false);
@@ -115,7 +114,7 @@ export class NavbarComponent {
 
   botonhome() {
     if (this.usuario.estaVacio()) {
-      this.router.navigate(['/Iniciar-Sesion']);
+      this.router.navigate(['/login']);
     } else {
       this.router.navigate(['/home']);
     }
@@ -169,7 +168,7 @@ export class NavbarComponent {
     motivo: string | null;
     origen: string | null;
     fecha: string | null;
-    usuario: string | null;
+    personaRelacionada: string | null;
   } | null {
     if (!notificacion.Detalle) return null;
 
@@ -195,7 +194,12 @@ export class NavbarComponent {
       motivo: typeof data['motivo'] === 'string' ? data['motivo'] : null,
       origen: typeof data['origen'] === 'string' ? data['origen'] : null,
       fecha: typeof data['fecha'] === 'string' ? data['fecha'] : null,
-      usuario: typeof data['usuario'] === 'string' ? data['usuario'] : null,
+      personaRelacionada:
+        typeof data['personaRelacionada'] === 'string'
+          ? data['personaRelacionada']
+          : typeof data['usuario'] === 'string'
+            ? data['usuario']
+            : null,
     };
   }
 
@@ -241,9 +245,9 @@ export class NavbarComponent {
 
   mostrarcarrito() {
     if (this.usuario.estaVacio()) {
-      this.router.navigate(['/Iniciar-Sesion']);
+      this.router.navigate(['/login']);
     } else {
-      this.router.navigate(['/Carrito']);
+      this.router.navigate(['/cart']);
     }
   }
 

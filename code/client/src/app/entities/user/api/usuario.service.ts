@@ -36,7 +36,7 @@ export class UsuarioServiceAPI {
   }
 
   iniciarSesion(correo: string, contrasena: string) {
-    const api = `${this.apiUrl}/login`;
+    const api = `${environment.apiUrl}/api/auth/login`;
     const body = { Email: correo, Contrasena: contrasena };
     return this.http.post<UsuarioLoginApiResponse>(api, body).pipe(
       map((response) => ({
@@ -124,7 +124,7 @@ export class UsuarioServiceAPI {
   }
 
   bloquearUsuario(carnet: string, bloqueado: boolean, motivo: string | null) {
-    return this.http.put(`${this.apiUrl}/${carnet}/bloqueo`, {
+    return this.http.patch(`${this.apiUrl}/${carnet}/bloqueo`, {
       Bloqueado: bloqueado,
       MotivoBloqueo: motivo,
     });

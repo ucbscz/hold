@@ -14,7 +14,10 @@ public class GaveteroController : Controller
     public GaveteroController(GaveteroService service) => _service = service;
 
     [HttpGet]
-    public async Task<IActionResult> GetAll() => ToResponse(await _service.GetAll());
+    public async Task<IActionResult> GetAll([FromQuery] int? muebleId = null) =>
+        muebleId.HasValue
+            ? ToResponse(await _service.GetByMueble(muebleId.Value))
+            : ToResponse(await _service.GetAll());
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id) => ToResponse(await _service.Get(id));
@@ -37,8 +40,4 @@ public class GaveteroController : Controller
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id) => ToDeleteResponse(await _service.Delete(id));
 
-    [Authorize(Roles = "administrador")]
-    [HttpGet("por-mueble/{muebleId:int}")]
-    public async Task<IActionResult> GetByMueble(int muebleId) =>
-        ToResponse(await _service.GetByMueble(muebleId));
 }

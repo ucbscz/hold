@@ -116,14 +116,11 @@ export class GrupoequipoService {
 
     const request =
       productoNormalizado || categoriaNormalizada
-        ? this.http.get<ApiResponse<GrupoEquipoApiItem[]>>(
-            `${this.apiUrl}/buscar`,
-            {
-              params: new HttpParams()
-                .set('nombre', productoNormalizado)
-                .set('categoria', categoriaNormalizada),
-            },
-          )
+        ? this.http.get<ApiResponse<GrupoEquipoApiItem[]>>(this.apiUrl, {
+            params: new HttpParams()
+              .set('nombre', productoNormalizado)
+              .set('categoria', categoriaNormalizada),
+          })
         : this.http.get<ApiResponse<GrupoEquipoApiItem[]>>(this.apiUrl);
 
     return request.pipe(
@@ -195,7 +192,7 @@ export class GrupoequipoService {
   ): Observable<ComentarioEquipo> {
     return this.http
       .post<ApiResponse<ComentarioEquipoApiItem>>(
-        `${this.apiUrl}/${idGrupoEquipo}/comentarios/${idComentario}/like`,
+        `${this.apiUrl}/${idGrupoEquipo}/comentarios/${idComentario}/likes`,
         {},
       )
       .pipe(

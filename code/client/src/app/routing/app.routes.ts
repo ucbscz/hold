@@ -3,9 +3,9 @@ import { adminGuard } from '@app/providers/guards/admin.guard';
 import { authGuard } from '@app/providers/guards/auth.guard';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/Iniciar-Sesion', pathMatch: 'full' },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
   {
-    path: 'Iniciar-Sesion',
+    path: 'login',
     loadComponent: () =>
       import('@pages/sign-in').then((page) => page.IniciarSesionComponent),
   },
@@ -16,25 +16,19 @@ export const routes: Routes = [
       import('@pages/home').then((page) => page.PantallaMainComponent),
   },
   {
-    path: 'equipo/:id',
+    path: 'equipment/:id',
     canActivate: [authGuard],
     loadComponent: () =>
       import('@pages/equipment-detail').then((page) => page.ObjetoComponent),
   },
   {
-    path: 'Carrito',
+    path: 'cart',
     canActivate: [authGuard],
     loadComponent: () =>
       import('@pages/cart').then((page) => page.CarritoComponent),
   },
   {
-    path: 'ConfirmarReserva',
-    canActivate: [authGuard],
-    loadComponent: () =>
-      import('@pages/cart').then((page) => page.CarritoComponent),
-  },
-  {
-    path: 'Perfil',
+    path: 'profile',
     canActivate: [authGuard],
     loadComponent: () =>
       import('@pages/profile').then((page) => page.PerfilComponent),
@@ -46,7 +40,7 @@ export const routes: Routes = [
       import('@pages/admin').then((page) => page.AdministradorComponent),
   },
   {
-    path: 'Formulario',
+    path: 'reservation',
     canActivate: [authGuard],
     loadComponent: () =>
       import('@pages/reservation-form').then(
@@ -54,22 +48,14 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'Historial',
+    path: 'loan-history',
     canActivate: [authGuard],
     loadComponent: () =>
       import('@pages/loan-history').then((page) => page.HistorialComponent),
   },
   {
-    path: 'Registrar-Usuario',
+    path: 'sign-up',
     loadComponent: () =>
       import('@pages/sign-up').then((page) => page.RegistrarUsuarioComponent),
-  },
-  {
-    path: 'pruebas',
-    canActivate: [adminGuard],
-    loadComponent: () =>
-      import('@features/admin-search').then(
-        (feature) => feature.BuscadorComponent,
-      ),
   },
 ];

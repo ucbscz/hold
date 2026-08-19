@@ -115,7 +115,7 @@ export class CarritoComponent implements OnDestroy {
     }
 
     if (this.usuarioService.estaVacio()) {
-      this.router.navigate(['/Iniciar-Sesion']);
+      this.router.navigate(['/login']);
 
       return;
     }
@@ -125,7 +125,7 @@ export class CarritoComponent implements OnDestroy {
     const monto = this.carritoService.calcularPrecioTotal();
 
     if (monto >= 1000) {
-      this.router.navigate(['/Formulario']);
+      this.router.navigate(['/reservation']);
 
       return;
     }

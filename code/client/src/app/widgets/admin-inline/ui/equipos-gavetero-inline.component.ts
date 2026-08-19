@@ -89,7 +89,7 @@ export class EquiposGaveteroInlineComponent implements OnInit {
   ngOnInit() {
     this.http
       .get<ApiResponse<EquipoInlineItem[]>>(
-        `${environment.apiUrl}/api/equipos/por-gavetero/${this.gaveteroId}`,
+        `${environment.apiUrl}/api/equipos?gaveteroId=${this.gaveteroId}`,
       )
       .subscribe({
         next: (res) => {

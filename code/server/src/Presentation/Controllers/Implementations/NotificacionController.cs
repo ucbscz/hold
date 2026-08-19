@@ -17,11 +17,11 @@ public class NotificacionController : Controller
     public async Task<IActionResult> GetAll() =>
         ToResponse(await _service.GetByCarnet(CurrentCarnet));
 
-    [HttpPut("{id:int}/leido")]
+    [HttpPatch("{id:int}/lectura")]
     public async Task<IActionResult> MarkAsRead(int id) =>
         ToResponse(await _service.MarkAsRead(id, CurrentCarnet));
 
-    [HttpPut("leidos")]
+    [HttpPatch("lectura")]
     public async Task<IActionResult> MarkAllAsRead() =>
         ToResponse(await _service.MarkAllAsRead(CurrentCarnet));
 

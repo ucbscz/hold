@@ -1,6 +1,8 @@
 using System.Reflection;
+using System.Text.RegularExpressions;
 using IMT_Reservas.Server.Presentation.Controllers.Implementations;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Routing;
 
 namespace IMT_Reservas.Tests.Unit;
 
@@ -11,6 +13,7 @@ internal class ApiRouteConventionTests
         new Dictionary<Type, string>
         {
             [typeof(AccesorioController)] = "api/accesorios",
+            [typeof(AuthController)] = "api/auth",
             [typeof(AuditLogController)] = "api/auditoria",
             [typeof(AvisoDisponibilidadController)] = "api/avisos-disponibilidad",
             [typeof(CarreraController)] = "api/carreras",
@@ -43,5 +46,34 @@ internal class ApiRouteConventionTests
     private static IEnumerable<TestCaseData> RouteCases() =>
         ExpectedRoutes.Select(pair =>
             new TestCaseData(pair.Key, pair.Value).SetName($"{pair.Key.Name}_route_is_lowercase")
+        );
+
+    [TestCaseSource(nameof(ActionRouteCases))]
+    public void ActionRoute_UsesLowercaseResourceSegments(string controller, string action, string route)
+    {
+        var literalSegments = Regex.Replace(route, "\\{[^}]+\\}", string.Empty);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(literalSegments, Is.EqualTo(literalSegments.ToLowerInvariant()));
+            Assert.That(route, Does.Not.Contain("crear"));
+            Assert.That(route, Does.Not.Contain("buscar"));
+            Assert.That(route, Does.Not.Contain("historial"));
+            Assert.That(route, Does.Not.Contain("por-"));
+        });
+    }
+
+    private static IEnumerable<TestCaseData> ActionRouteCases() =>
+        ExpectedRoutes.Keys.SelectMany(controllerType =>
+            controllerType
+                .GetMethods(BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly)
+                .SelectMany(method =>
+                    method
+                        .GetCustomAttributes<HttpMethodAttribute>()
+                        .Where(attribute => !string.IsNullOrWhiteSpace(attribute.Template))
+                        .Select(attribute =>
+                            new TestCaseData(controllerType.Name, method.Name, attribute.Template!)
+                        )
+                )
         );
 }

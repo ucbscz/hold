@@ -14,7 +14,19 @@ public class EquipoController : Controller
     public EquipoController(EquipoService service) => _service = service;
 
     [HttpGet]
-    public async Task<IActionResult> GetAll() => ToResponse(await _service.GetAll());
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int? grupoId = null,
+        [FromQuery] int? gaveteroId = null
+    )
+    {
+        if (grupoId.HasValue)
+            return ToResponse(await _service.GetByGrupo(grupoId.Value));
+
+        if (gaveteroId.HasValue)
+            return ToResponse(await _service.GetByGavetero(gaveteroId.Value));
+
+        return ToResponse(await _service.GetAll());
+    }
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id) => ToResponse(await _service.Get(id));
@@ -37,17 +49,7 @@ public class EquipoController : Controller
     public async Task<IActionResult> Delete(int id) => ToDeleteResponse(await _service.Delete(id));
 
     [Authorize(Roles = "administrador")]
-    [HttpGet("por-grupo/{grupoId:int}")]
-    public async Task<IActionResult> GetByGrupo(int grupoId) =>
-        ToResponse(await _service.GetByGrupo(grupoId));
-
-    [Authorize(Roles = "administrador")]
-    [HttpGet("por-gavetero/{gaveteroId:int}")]
-    public async Task<IActionResult> GetByGavetero(int gaveteroId) =>
-        ToResponse(await _service.GetByGavetero(gaveteroId));
-
-    [Authorize(Roles = "administrador")]
-    [HttpGet("{id:int}/historial")]
-    public async Task<IActionResult> GetHistorial(int id) =>
+    [HttpGet("{id:int}/prestamos")]
+    public async Task<IActionResult> GetPrestamos(int id) =>
         ToResponse(await _service.GetHistorial(id));
 }

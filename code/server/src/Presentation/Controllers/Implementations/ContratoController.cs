@@ -14,7 +14,7 @@ public class ContratoController : Controller
     public ContratoController(ContratoService contratoService) =>
         _contratoService = contratoService;
 
-    [HttpPost("crear")]
+    [HttpPost]
     [Consumes("multipart/form-data")]
     public async Task<IActionResult> Create([FromForm] int? prestamoId, IFormFile? archivo)
     {

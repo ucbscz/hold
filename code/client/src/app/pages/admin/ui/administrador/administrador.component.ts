@@ -57,7 +57,7 @@ export class AdministradorComponent {
   ) {}
   ngOnInit() {
     if (this.usuario.estaVacio()) {
-      this.router.navigate(['/Iniciar-Sesion']);
+      this.router.navigate(['/login']);
     } else if (this.usuario.obtenerRol() != 'administrador') {
       this.router.navigate(['/home']);
     }

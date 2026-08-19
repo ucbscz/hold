@@ -231,6 +231,18 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     }
 
     [Test]
+    public async Task GetFiltered_WithoutCarnet_FiltersAllLoansByStatus()
+    {
+        await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.Today, DateTime.Today.AddDays(3)));
+
+        var result = await Sut.GetFiltered(null, "pendiente");
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().ContainSingle();
+        result.Value.Should().AllSatisfy(p => p.EstadoPrestamo.Should().Be("pendiente"));
+    }
+
+    [Test]
     public async Task GetHistory_EmptyCarnet_ReturnsError()
     {
         var result = await Sut.GetHistory("", "todos");

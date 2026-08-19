@@ -59,6 +59,13 @@ public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
     public async Task<UsuarioEntity?> GetTrackedByCarnet(string carnet) =>
         await DbContext.Usuarios.FirstOrDefaultAsync(u => u.Carnet == carnet && !u.EstadoEliminado);
 
+    public async Task<string?> GetDisplayName(string carnet) =>
+        await DbContext
+            .Usuarios.AsNoTracking()
+            .Where(user => user.Carnet == carnet && !user.EstadoEliminado)
+            .Select(user => (user.Nombre + " " + user.ApellidoPaterno).Trim())
+            .FirstOrDefaultAsync();
+
     public async Task<Result<object>> Delete(string carnet)
     {
         var entity = await DbContext.Usuarios.FirstOrDefaultAsync(u =>

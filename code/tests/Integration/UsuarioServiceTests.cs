@@ -378,6 +378,10 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         var stored = Db.Usuarios.Single(u => u.Carnet == "U001");
         stored.Bloqueado.Should().BeFalse();
         stored.MotivoBloqueo.Should().BeNull();
+        Db.Notificaciones.Should().ContainSingle(notification =>
+            notification.CarnetUsuario == "U001"
+            && notification.Tipo == TipoNotificacion.UsuarioDesbloqueado.ToString()
+        );
     }
 
     [Test]

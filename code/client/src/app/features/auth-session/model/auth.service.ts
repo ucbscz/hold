@@ -102,12 +102,9 @@ export class AuthService {
     refreshToken: string,
   ): Observable<{ accessToken: string; refreshToken: string }> {
     return this.http
-      .post<RefreshTokenResponse>(
-        `${environment.apiUrl}/api/usuarios/refresh`,
-        {
-          RefreshToken: refreshToken,
-        },
-      )
+      .post<RefreshTokenResponse>(`${environment.apiUrl}/api/auth/refresh`, {
+        RefreshToken: refreshToken,
+      })
       .pipe(
         map((rawResponse) => ({
           accessToken: rawResponse.Value.AccessToken,

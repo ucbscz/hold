@@ -89,12 +89,12 @@ public class GrupoEquipoControllerTests
     }
 
     [Test]
-    public async Task Search_WithParams_ReturnsOk()
+    public async Task GetAll_WithSearchParams_ReturnsOk()
     {
         var data = new List<GrupoEquipoDto> { new GrupoEquipoDto { Id = 1, Nombre = "Osciloscopio" } };
         _serviceMock.Setup(s => s.Search("Osci", null)).ReturnsAsync(Result<List<GrupoEquipoDto>>.Success(data));
 
-        var result = await _controller.Search("Osci", null);
+        var result = await _controller.GetAll("Osci", null);
 
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var value = okResult.Value as Response<List<GrupoEquipoDto>>;

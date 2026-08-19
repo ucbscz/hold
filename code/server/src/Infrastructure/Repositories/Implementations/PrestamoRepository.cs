@@ -30,11 +30,14 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
     }
 
     public async Task<Result<List<PrestamoDto>>> GetHistoryWithDetails(
-        string carnetUsuario,
+        string? carnetUsuario,
         EstadoPrestamo? estado
     )
     {
-        var query = DbContext.Prestamos.AsNoTracking().Where(p => p.Carnet == carnetUsuario);
+        var query = DbContext.Prestamos.AsNoTracking();
+
+        if (!string.IsNullOrWhiteSpace(carnetUsuario))
+            query = query.Where(p => p.Carnet == carnetUsuario);
 
         if (estado.HasValue)
             query = query.Where(p => p.EstadoPrestamo == estado.Value);

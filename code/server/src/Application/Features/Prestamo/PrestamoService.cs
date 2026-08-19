@@ -212,7 +212,22 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         if (await Repository.HasAtrasadoPrestamo(carnet))
             return;
 
+        if (!await Repository.IsUserBlocked(carnet))
+            return;
+
         await _usuarioRepository.SetBlockedStatus([carnet], false, null);
+        await _notifications.Create(
+            carnet,
+            TipoNotificacion.UsuarioDesbloqueado,
+            "Cuenta desbloqueada para reservas",
+            "Tu cuenta fue desbloqueada porque ya no tienes préstamos atrasados.",
+            JsonSerializer.Serialize(new
+            {
+                origen = "Sistema de préstamos",
+                motivo = "Todos los préstamos atrasados fueron regularizados.",
+                fecha = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
+            })
+        );
     }
 
     private async Task NotifyAvailabilityWatches()
@@ -401,6 +416,15 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
     {
         if (string.IsNullOrEmpty(carnetUsuario))
             return Result<List<PrestamoDto>>.Error("Carnet requerido");
+
+        return await GetFiltered(carnetUsuario, estadoPrestamo);
+    }
+
+    public async Task<Result<List<PrestamoDto>>> GetFiltered(
+        string? carnetUsuario,
+        string estadoPrestamo
+    )
+    {
 
         EstadoPrestamo? estado = null;
 

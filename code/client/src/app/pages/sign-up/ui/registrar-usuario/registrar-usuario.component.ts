@@ -113,7 +113,7 @@ export class RegistrarUsuarioComponent {
       });
   }
   irALogin() {
-    this.router.navigate(['/Iniciar-Sesion']);
+    this.router.navigate(['/login']);
   }
 
   irAHome() {

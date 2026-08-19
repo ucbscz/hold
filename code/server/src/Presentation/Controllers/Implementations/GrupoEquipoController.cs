@@ -19,13 +19,13 @@ public class GrupoEquipoController : Controller
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll() => ToResponse(await _service.GetAll());
-
-    [HttpGet("buscar")]
-    public async Task<IActionResult> Search(
+    public async Task<IActionResult> GetAll(
         [FromQuery] string? nombre = null,
         [FromQuery] string? categoria = null
-    ) => ToResponse(await _service.Search(nombre, categoria));
+    ) =>
+        string.IsNullOrWhiteSpace(nombre) && string.IsNullOrWhiteSpace(categoria)
+            ? ToResponse(await _service.GetAll())
+            : ToResponse(await _service.Search(nombre, categoria));
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id) => ToResponse(await _service.Get(id));
@@ -42,7 +42,7 @@ public class GrupoEquipoController : Controller
         [FromBody] CrearComentarioEquipoDto? dto
     ) => ToResponse(await _comentarios.Create(id, CurrentCarnet, dto));
 
-    [HttpPost("{id:int}/comentarios/{comentarioId:int}/like")]
+    [HttpPost("{id:int}/comentarios/{comentarioId:int}/likes")]
     public async Task<IActionResult> ToggleComentarioLike(int id, int comentarioId) =>
         ToResponse(await _comentarios.ToggleLike(id, comentarioId, CurrentCarnet, IsAdmin));
 

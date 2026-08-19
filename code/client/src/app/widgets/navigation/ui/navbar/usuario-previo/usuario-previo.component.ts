@@ -24,17 +24,17 @@ export class UsuarioPrevioComponent {
   }
   seleccionar(item: string) {
     if (this.usuario.estaVacio() == true) {
-      this.router.navigate(['/Iniciar-Sesion']);
+      this.router.navigate(['/login']);
     } else if (item == 'iniciar-sesion') {
-      this.router.navigate(['/Iniciar-Sesion']);
+      this.router.navigate(['/login']);
     } else if (item == 'perfil') {
-      this.router.navigate(['/Perfil']);
+      this.router.navigate(['/profile']);
     } else if (item == 'historial') {
-      this.router.navigate(['/Historial']);
+      this.router.navigate(['/loan-history']);
     } else if (item == 'cerrar-sesion') {
       this.authService.clear();
       this.usuario.limpiarSesion();
-      this.router.navigate(['/Iniciar-Sesion']);
+      this.router.navigate(['/login']);
     } else if (item == 'admin') {
       this.router.navigate(['/admin']);
     } else if (item == 'modousuario') {

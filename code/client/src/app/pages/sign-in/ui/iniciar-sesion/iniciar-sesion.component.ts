@@ -6,8 +6,6 @@ import { UsuarioService, UsuarioServiceAPI } from '@entities/user';
 import { AuthService } from '@features/auth-session';
 import { MostrarerrorComponent } from '@shared/ui';
 
-const AUTH_REDIRECT_CHECK_INTERVAL_MS = 50;
-const AUTH_REDIRECT_TIMEOUT_MS = 2000;
 const BAD_REQUEST_STATUS = 400;
 const UNAUTHORIZED_STATUS = 401;
 
@@ -44,23 +42,9 @@ export class IniciarSesionComponent {
         );
         this.usuario.guardarSesion(data.usuario);
 
-        const checkInterval = setInterval(() => {
-          if (this.authService.getAccessToken()) {
-            clearInterval(checkInterval);
-            this.loading = false;
-            this.incorrecto = false;
-            this.router.navigate(['/home']);
-          }
-        }, AUTH_REDIRECT_CHECK_INTERVAL_MS);
-
-        setTimeout(() => {
-          clearInterval(checkInterval);
-          if (this.loading) {
-            this.loading = false;
-            this.incorrecto = false;
-            this.router.navigate(['/home']);
-          }
-        }, AUTH_REDIRECT_TIMEOUT_MS);
+        this.loading = false;
+        this.incorrecto = false;
+        this.router.navigate(['/home']);
       },
       error: (error) => {
         if (
@@ -76,7 +60,7 @@ export class IniciarSesionComponent {
     });
   }
   registrarUsuario() {
-    this.router.navigate(['/Registrar-Usuario']);
+    this.router.navigate(['/sign-up']);
   }
 
   alternarVisibilidadContrasena(): void {

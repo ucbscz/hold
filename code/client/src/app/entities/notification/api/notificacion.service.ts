@@ -20,10 +20,10 @@ export class NotificacionApiService {
   }
 
   marcarLeida(id: number): Observable<unknown> {
-    return this.http.put<unknown>(`${this.url}/${id}/leido`, {});
+    return this.http.patch<unknown>(`${this.url}/${id}/lectura`, {});
   }
 
   marcarTodasLeidas(): Observable<unknown> {
-    return this.http.put<unknown>(`${this.url}/leidos`, {});
+    return this.http.patch<unknown>(`${this.url}/lectura`, {});
   }
 }

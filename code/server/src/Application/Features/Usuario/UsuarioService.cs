@@ -45,7 +45,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         string carnet,
         bool isBlocked,
         string? blockReason,
-        bool isAdmin
+        bool isAdmin,
+        string? actorCarnet = null
     )
     {
         if (!isAdmin)
@@ -68,23 +69,37 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             saveChanges: false
         );
 
-        if (isBlocked)
-            await _notifications.Create(
-                carnet,
-                TipoNotificacion.UsuarioBloqueado,
-                "Cuenta bloqueada para reservas",
-                string.IsNullOrWhiteSpace(blockReason)
-                    ? "Tu cuenta fue bloqueada para nuevas reservas. Contacta con un administrador para revisar tu caso."
-                    : $"{blockReason}. Contacta con un administrador para revisar tu caso.",
-                JsonSerializer.Serialize(new
-                {
-                    origen = "Sistema",
-                    usuario = "Sistema",
-                    motivo = blockReason ?? "Bloqueo administrativo para nuevas reservas.",
-                    fecha = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
-                }),
-                saveChanges: false
-            );
+        var actorName = string.IsNullOrWhiteSpace(actorCarnet)
+            ? null
+            : await Repository.GetDisplayName(actorCarnet);
+        var notificationType = isBlocked
+            ? TipoNotificacion.UsuarioBloqueado
+            : TipoNotificacion.UsuarioDesbloqueado;
+        var notificationTitle = isBlocked
+            ? "Cuenta bloqueada para reservas"
+            : "Cuenta desbloqueada para reservas";
+        var notificationReason = isBlocked
+            ? blockReason ?? "Bloqueo administrativo para nuevas reservas."
+            : "Desbloqueo administrativo de la cuenta.";
+        var notificationContent = isBlocked
+            ? string.IsNullOrWhiteSpace(blockReason)
+                ? "Tu cuenta fue bloqueada para nuevas reservas. Contacta con un administrador para revisar tu caso."
+                : $"{blockReason}. Contacta con un administrador para revisar tu caso."
+            : "Tu cuenta fue desbloqueada. Ya puedes realizar nuevas reservas.";
+
+        await _notifications.Create(
+            carnet,
+            notificationType,
+            notificationTitle,
+            notificationContent,
+            JsonSerializer.Serialize(new
+            {
+                origen = actorName ?? "Sistema",
+                motivo = notificationReason,
+                fecha = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
+            }),
+            saveChanges: false
+        );
 
         await Repository.SaveChanges();
         _ = _cacheRepository.Remove(CacheKeys.Usuario(carnet));

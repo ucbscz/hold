@@ -9,6 +9,7 @@ public enum TipoNotificacion
     EquipoObservacion,
     DisponibilidadLiberada,
     UsuarioBloqueado,
+    UsuarioDesbloqueado,
     AdminNuevoPrestamo,
     AdminPrestamoAtrasado,
 }

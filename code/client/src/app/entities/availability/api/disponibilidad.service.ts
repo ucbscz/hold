@@ -9,8 +9,7 @@ import { DisponibilidadApiResponse } from './disponibilidad-api-response';
   providedIn: 'root',
 })
 export class DisponibilidadService {
-  private readonly url =
-    environment.apiUrl + '/api/carrito/disponibilidad-equipos';
+  private readonly url = environment.apiUrl + '/api/carrito/disponibilidad';
   constructor(private readonly http: HttpClient) {}
   private mapear(item: DisponibilidadApiItem): Disponibilidad {
     return {

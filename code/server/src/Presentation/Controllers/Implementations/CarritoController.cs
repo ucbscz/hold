@@ -13,7 +13,7 @@ public class CarritoController : Controller
 
     public CarritoController(CarritoService service) => _service = service;
 
-    [HttpPost("disponibilidad-equipos")]
+    [HttpPost("disponibilidad")]
     public async Task<IActionResult> DisponibilidadEquipos([FromBody] CarritoDto request) =>
         ToResponse(await _service.GetDisponibilidad(request));
 }

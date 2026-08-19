@@ -176,10 +176,12 @@
                             detalle.origen
                           }}</span>
                         }
-                        @if (detalle.usuario) {
-                          <span class="notif__detail-label">Usuario</span>
+                        @if (detalle.personaRelacionada) {
+                          <span class="notif__detail-label"
+                            >Persona relacionada</span
+                          >
                           <span class="notif__detail-text">{{
-                            detalle.usuario
+                            detalle.personaRelacionada
                           }}</span>
                         }
                         @if (detalle.motivo) {

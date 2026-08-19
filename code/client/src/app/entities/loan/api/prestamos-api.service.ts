@@ -87,7 +87,7 @@ export class PrestamosAPIService {
   estadoReserva() {
     return this.http
       .get<ApiResponse<{ PuedeReservar: boolean; Motivo: string | null }>>(
-        `${this.url}/estado-reserva`,
+        `${this.url}/elegibilidad`,
       )
       .pipe(
         map((data) => {
@@ -109,23 +109,16 @@ export class PrestamosAPIService {
     observacion?: string,
     equiposRetorno?: { CodigoImt: string; EstadoEquipo: string }[],
   ) {
-    let params = `estado=${encodeURIComponent(estado)}`;
-    if (
-      observacion !== undefined &&
-      observacion !== null &&
-      observacion !== ''
-    ) {
-      params += `&observacion=${encodeURIComponent(observacion)}`;
-    }
-    const body =
-      equiposRetorno && equiposRetorno.length > 0
-        ? { EquiposRetorno: equiposRetorno }
-        : null;
-    return this.http.put(`${this.url}/${Id}/estado?${params}`, body);
+    const body = {
+      EstadoPrestamo: estado,
+      Observacion: observacion || null,
+      EquiposRetorno: equiposRetorno ?? [],
+    };
+    return this.http.patch(`${this.url}/${Id}/estado`, body);
   }
 
   obtenerPrestamosPorUsuario(carnet: string, estadoPrestamo: string) {
-    const APIurl = `${this.url}/historial?carnetUsuario=${carnet}&estadoPrestamo=${estadoPrestamo}`;
+    const APIurl = `${this.url}?carnet=${encodeURIComponent(carnet)}&estado=${encodeURIComponent(estadoPrestamo)}`;
     return this.http
       .get<ApiResponse<PrestamoApiItem[]> | PrestamoApiItem[]>(APIurl)
       .pipe(
@@ -142,12 +135,11 @@ export class PrestamosAPIService {
   }
 
   obtenercontratoPrestamo(id: number) {
-    const APIurl = `${this.url}/contrato/${id}`;
-    return this.http.get<{ contrato: string }>(APIurl).pipe(
-      map((response) => {
-        if (!response || !response.contrato) return '';
-        return response.contrato;
-      }),
-    );
+    const APIurl = `${environment.apiUrl}/api/contratos/${id}`;
+    return this.http
+      .get<ApiResponse<{ ContratoHtml?: string }>>(APIurl)
+      .pipe(
+        map((response) => extractApiValue(response, {}).ContratoHtml ?? ''),
+      );
   }
 }

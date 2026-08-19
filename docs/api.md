@@ -6,9 +6,27 @@ The API is a REST contract under `/api`. Collection resources use lowercase plur
 
 - JSON property names retain the backend DTO contract.
 - Collection queries use `GET`; creation uses `POST`; full updates use `PUT`; and deletion uses `DELETE`.
+- Partial state changes use `PATCH`.
 - Nested resources describe ownership, for example `/api/grupos-equipos/{id}/comentarios`.
-- Routes are lowercase. The former `/Objeto/:id` client route and earlier singular API routes are not supported.
+- Filters use query parameters instead of action routes such as `buscar`, `por-grupo`, or `historial`.
+- Routes are lowercase. Previous mixed-case client routes and earlier API routes are not supported or redirected.
 - Protected routes require a Bearer token. Administrator-only operations additionally require the `administrador` role.
+
+## Client Routes
+
+The Angular application uses lowercase English paths because these URLs are public navigation identifiers rather than domain DTO names.
+
+| Route             | Purpose                         |
+| ----------------- | ------------------------------- |
+| `/login`          | Authenticate an existing user.  |
+| `/sign-up`        | Register a new user.            |
+| `/home`           | Browse the equipment catalog.   |
+| `/equipment/{id}` | View one equipment group.       |
+| `/cart`           | Review and schedule a request.  |
+| `/reservation`    | Review and sign the contract.   |
+| `/profile`        | View and edit the user profile. |
+| `/loan-history`   | Review the user's loans.        |
+| `/admin`          | Open the administration panel.  |
 
 ## Response Contract
 
@@ -50,24 +68,26 @@ Validation and domain failures preserve the same structure:
 Authorization: Bearer <token>
 ```
 
-| Method | Route                   | Purpose                                    |
-| ------ | ----------------------- | ------------------------------------------ |
-| `POST` | `/api/usuarios`         | Register a user. Public.                   |
-| `POST` | `/api/usuarios/login`   | Authenticate and create a session. Public. |
-| `POST` | `/api/usuarios/refresh` | Refresh an access token. Public.           |
+| Method | Route               | Purpose                                    |
+| ------ | ------------------- | ------------------------------------------ |
+| `POST` | `/api/usuarios`     | Register a user. Public.                   |
+| `POST` | `/api/auth/login`   | Authenticate and create a session. Public. |
+| `POST` | `/api/auth/refresh` | Rotate the access and refresh tokens.      |
 
 ## Users and Notifications
 
-| Method   | Route                            | Purpose                                        |
-| -------- | -------------------------------- | ---------------------------------------------- |
-| `GET`    | `/api/usuarios`                  | List users. Administrator only.                |
-| `GET`    | `/api/usuarios/{carnet}`         | Get a user by carnet.                          |
-| `PUT`    | `/api/usuarios/{carnet}`         | Update a user.                                 |
-| `PUT`    | `/api/usuarios/{carnet}/bloqueo` | Block or unblock a user. Administrator only.   |
-| `DELETE` | `/api/usuarios/{carnet}`         | Soft-delete a user. Administrator only.        |
-| `GET`    | `/api/notificaciones`            | List notifications for the authenticated user. |
-| `PUT`    | `/api/notificaciones/{id}/leido` | Mark one notification as read.                 |
-| `PUT`    | `/api/notificaciones/leidos`     | Mark all notifications as read.                |
+| Method   | Route                              | Purpose                                        |
+| -------- | ---------------------------------- | ---------------------------------------------- |
+| `GET`    | `/api/usuarios`                    | List users. Administrator only.                |
+| `GET`    | `/api/usuarios/{carnet}`           | Get a user by carnet.                          |
+| `PUT`    | `/api/usuarios/{carnet}`           | Update a user.                                 |
+| `PATCH`  | `/api/usuarios/{carnet}/bloqueo`   | Block or unblock a user. Administrator only.   |
+| `DELETE` | `/api/usuarios/{carnet}`           | Soft-delete a user. Administrator only.        |
+| `GET`    | `/api/notificaciones`              | List notifications for the authenticated user. |
+| `PATCH`  | `/api/notificaciones/{id}/lectura` | Mark one notification as read.                 |
+| `PATCH`  | `/api/notificaciones/lectura`      | Mark all notifications as read.                |
+
+Notification details distinguish the sender from the related person. `Origen` is the service or administrator that generated the notification. `Persona relacionada` appears only when another user is part of the event, such as an overdue-loan alert sent to administrators. It is not the notification destination. Block and unblock operations notify the affected user.
 
 ## Equipment Catalog
 
@@ -88,42 +108,40 @@ All CRUD operations for the following resources use `GET /`, `GET /{id}`, `POST 
 
 Additional catalog routes:
 
-| Method | Route                                    | Purpose                                               |
-| ------ | ---------------------------------------- | ----------------------------------------------------- |
-| `GET`  | `/api/equipos/por-grupo/{grupoId}`       | List equipment units in a group. Administrator only.  |
-| `GET`  | `/api/equipos/por-gavetero/{gaveteroId}` | List equipment units in a locker. Administrator only. |
-| `GET`  | `/api/equipos/{id}/historial`            | Get equipment loan history. Administrator only.       |
-| `GET`  | `/api/gaveteros/por-mueble/{muebleId}`   | List lockers in a furniture item. Administrator only. |
-| `GET`  | `/api/grupos-equipos/buscar`             | Search equipment groups by `nombre` and `categoria`.  |
+| Method | Route                                    | Purpose                                         |
+| ------ | ---------------------------------------- | ----------------------------------------------- |
+| `GET`  | `/api/equipos?grupoId={id}`              | List equipment units in a group.                |
+| `GET`  | `/api/equipos?gaveteroId={id}`           | List equipment units in a locker.               |
+| `GET`  | `/api/equipos/{id}/prestamos`            | Get equipment loan records. Administrator only. |
+| `GET`  | `/api/gaveteros?muebleId={id}`           | List lockers in a furniture item.               |
+| `GET`  | `/api/grupos-equipos?nombre=&categoria=` | Search equipment groups.                        |
 
 ## Comments
 
-| Method   | Route                                                      | Purpose                                                |
-| -------- | ---------------------------------------------------------- | ------------------------------------------------------ |
-| `GET`    | `/api/grupos-equipos/{id}/comentarios`                     | List group comments. Supports `orden`.                 |
-| `POST`   | `/api/grupos-equipos/{id}/comentarios`                     | Add an authenticated comment or reply.                 |
-| `POST`   | `/api/grupos-equipos/{id}/comentarios/{comentarioId}/like` | Toggle the authenticated user's like.                  |
-| `DELETE` | `/api/grupos-equipos/{id}/comentarios/{comentarioId}`      | Delete an own comment or any comment as administrator. |
+| Method   | Route                                                       | Purpose                                                |
+| -------- | ----------------------------------------------------------- | ------------------------------------------------------ |
+| `GET`    | `/api/grupos-equipos/{id}/comentarios`                      | List group comments. Supports `orden`.                 |
+| `POST`   | `/api/grupos-equipos/{id}/comentarios`                      | Add an authenticated comment or reply.                 |
+| `POST`   | `/api/grupos-equipos/{id}/comentarios/{comentarioId}/likes` | Toggle the authenticated user's like.                  |
+| `DELETE` | `/api/grupos-equipos/{id}/comentarios/{comentarioId}`       | Delete an own comment or any comment as administrator. |
 
 ## Loans, Availability, and Contracts
 
-| Method   | Route                                  | Purpose                                                           |
-| -------- | -------------------------------------- | ----------------------------------------------------------------- |
-| `GET`    | `/api/prestamos`                       | List loans. Administrator only.                                   |
-| `GET`    | `/api/prestamos/{id}`                  | Get a loan.                                                       |
-| `POST`   | `/api/prestamos`                       | Create a loan request.                                            |
-| `PUT`    | `/api/prestamos/{id}`                  | Update a loan.                                                    |
-| `PUT`    | `/api/prestamos/{id}/estado`           | Change a loan state. Administrator only.                          |
-| `DELETE` | `/api/prestamos/{id}`                  | Soft-delete a loan.                                               |
-| `GET`    | `/api/prestamos/estado-reserva`        | Get reservation status for the authenticated user.                |
-| `GET`    | `/api/prestamos/historial`             | Get user loan history using `carnetUsuario` and `estadoPrestamo`. |
-| `GET`    | `/api/prestamos/por-usuario/{carnet}`  | Get a user's loans for administration.                            |
-| `GET`    | `/api/prestamos/contrato/{prestamoId}` | Get a loan contract.                                              |
-| `POST`   | `/api/contratos/crear`                 | Upload or create a contract for a loan. Multipart form data.      |
-| `GET`    | `/api/contratos/{prestamoId}`          | Get a contract by loan id.                                        |
-| `DELETE` | `/api/contratos/{prestamoId}`          | Delete a contract.                                                |
-| `POST`   | `/api/carrito/disponibilidad-equipos`  | Calculate availability for an equipment group and date range.     |
-| `POST`   | `/api/avisos-disponibilidad`           | Create an availability watch for the authenticated user.          |
+| Method   | Route                            | Purpose                                                           |
+| -------- | -------------------------------- | ----------------------------------------------------------------- |
+| `GET`    | `/api/prestamos`                 | List all loans for administrators or own loans for regular users. |
+| `GET`    | `/api/prestamos/{id}`            | Get a loan.                                                       |
+| `POST`   | `/api/prestamos`                 | Create a loan request.                                            |
+| `PUT`    | `/api/prestamos/{id}`            | Update a loan.                                                    |
+| `PATCH`  | `/api/prestamos/{id}/estado`     | Change a loan state. Administrator only.                          |
+| `DELETE` | `/api/prestamos/{id}`            | Soft-delete a loan.                                               |
+| `GET`    | `/api/prestamos/elegibilidad`    | Get reservation eligibility for the authenticated user.           |
+| `GET`    | `/api/prestamos?carnet=&estado=` | Filter loans; non-admin users are restricted to their own carnet. |
+| `POST`   | `/api/contratos`                 | Upload or create a contract for a loan. Multipart form data.      |
+| `GET`    | `/api/contratos/{prestamoId}`    | Get a contract by loan id.                                        |
+| `DELETE` | `/api/contratos/{prestamoId}`    | Delete a contract.                                                |
+| `POST`   | `/api/carrito/disponibilidad`    | Calculate availability for equipment groups and a date range.     |
+| `POST`   | `/api/avisos-disponibilidad`     | Create an availability watch for the authenticated user.          |
 
 ## Audit and Health
 

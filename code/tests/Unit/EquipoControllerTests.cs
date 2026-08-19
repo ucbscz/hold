@@ -87,12 +87,12 @@ public class EquipoControllerTests
     }
 
     [Test]
-    public async Task GetByGrupo_ReturnsOk()
+    public async Task GetAll_WithGrupoFilter_ReturnsOk()
     {
         var data = new List<EquipoDto> { new EquipoDto { Id = 1 } };
         _serviceMock.Setup(s => s.GetByGrupo(2)).ReturnsAsync(Result<List<EquipoDto>>.Success(data));
 
-        var result = await _controller.GetByGrupo(2);
+        var result = await _controller.GetAll(grupoId: 2);
 
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var value = okResult.Value as Response<List<EquipoDto>>;
@@ -100,12 +100,12 @@ public class EquipoControllerTests
     }
 
     [Test]
-    public async Task GetByGavetero_ReturnsOk()
+    public async Task GetAll_WithGaveteroFilter_ReturnsOk()
     {
         var data = new List<EquipoDto> { new EquipoDto { Id = 1 } };
         _serviceMock.Setup(s => s.GetByGavetero(3)).ReturnsAsync(Result<List<EquipoDto>>.Success(data));
 
-        var result = await _controller.GetByGavetero(3);
+        var result = await _controller.GetAll(gaveteroId: 3);
 
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var value = okResult.Value as Response<List<EquipoDto>>;
@@ -113,12 +113,12 @@ public class EquipoControllerTests
     }
 
     [Test]
-    public async Task GetHistorial_ReturnsOk()
+    public async Task GetPrestamos_ReturnsOk()
     {
         var data = new List<HistorialEquipoDto> { new HistorialEquipoDto { IdPrestamo = 1 } };
         _serviceMock.Setup(s => s.GetHistorial(1)).ReturnsAsync(Result<List<HistorialEquipoDto>>.Success(data));
 
-        var result = await _controller.GetHistorial(1);
+        var result = await _controller.GetPrestamos(1);
 
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var value = okResult.Value as Response<List<HistorialEquipoDto>>;

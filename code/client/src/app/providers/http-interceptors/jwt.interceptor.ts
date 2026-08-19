@@ -28,8 +28,8 @@ export class JwtInterceptor implements HttpInterceptor {
     nextHandler: HttpHandler,
   ): Observable<HttpEvent<unknown>> {
     const isAuthEndpoint =
-      outgoingRequest.url.includes('/api/usuarios/login') ||
-      outgoingRequest.url.includes('/api/usuarios/refresh');
+      outgoingRequest.url.includes('/api/auth/login') ||
+      outgoingRequest.url.includes('/api/auth/refresh');
 
     if (isAuthEndpoint) return nextHandler.handle(outgoingRequest);
 
@@ -67,7 +67,7 @@ export class JwtInterceptor implements HttpInterceptor {
     if (!storedRefreshToken) {
       if (this.authService.getAccessToken()) {
         this.authService.clear();
-        this.router.navigate(['/Iniciar-Sesion']);
+        this.router.navigate(['/login']);
       }
       return throwError(() => originalError);
     }
@@ -90,7 +90,7 @@ export class JwtInterceptor implements HttpInterceptor {
         catchError((refreshError) => {
           this.activeRefresh = false;
           this.authService.clear();
-          this.router.navigate(['/Iniciar-Sesion']);
+          this.router.navigate(['/login']);
           return throwError(() => refreshError);
         }),
       );
