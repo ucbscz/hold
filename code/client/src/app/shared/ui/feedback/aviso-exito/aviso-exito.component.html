@@ -1,12 +1,9 @@
-<div class="container">
-  <button class="cerrar" (click)="cerrar()" aria-label="Cerrar">
-    <img src="assets/x.png" alt="Cerrar" />
+<div class="toast" role="status" aria-live="polite">
+  <button class="toast-close" (click)="cerrar()" aria-label="Cerrar aviso">
+    <img src="assets/x.png" alt="" />
   </button>
-  <h1>¡Éxito!</h1>
-  <div class="mensaje-container">
+  <div class="toast-content">
+    <strong>Éxito</strong>
     <p>{{ mensaje }}</p>
-  </div>
-  <div class="botones-container">
-    <div class="aceptar" (click)="cerrar()">Aceptar</div>
   </div>
 </div>

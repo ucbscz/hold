@@ -1,4 +1,10 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { signal } from '@angular/core';
+import {
+  ComponentFixture,
+  fakeAsync,
+  TestBed,
+  tick,
+} from '@angular/core/testing';
 import { withDefaultTestingProviders } from '@shared/lib/testing';
 import { MostrarerrorComponent } from './mostrarerror.component';
 describe('MostrarerrorComponent', () => {
@@ -12,9 +18,18 @@ describe('MostrarerrorComponent', () => {
     ).compileComponents();
     fixture = TestBed.createComponent(MostrarerrorComponent);
     component = fixture.componentInstance;
-    fixture.detectChanges();
+    component.error = signal(true);
   });
   it('should create', () => {
+    fixture.detectChanges();
+
     expect(component).toBeTruthy();
   });
+
+  it('should close automatically after one second', fakeAsync(() => {
+    fixture.detectChanges();
+    tick(1000);
+
+    expect(component.error()).toBeFalse();
+  }));
 });
