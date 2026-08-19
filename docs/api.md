@@ -14,19 +14,19 @@ The API is a REST contract under `/api`. Collection resources use short, lowerca
 
 ## Client Routes
 
-The Angular application uses lowercase English paths because these URLs are public navigation identifiers rather than domain DTO names.
+The Angular application uses lowercase Spanish paths with one-word segments and no hyphens. `/login` is the explicit authentication exception.
 
 | Route             | Purpose                         |
 | ----------------- | ------------------------------- |
 | `/login`          | Authenticate an existing user.  |
-| `/sign-up`        | Register a new user.            |
-| `/home`           | Browse the equipment catalog.   |
-| `/equipment/{id}` | View one equipment group.       |
-| `/cart`           | Review and schedule a request.  |
-| `/reservation`    | Review and sign the contract.   |
-| `/profile`        | View and edit the user profile. |
-| `/loan-history`   | Review the user's loans.        |
-| `/admin`          | Open the administration panel.  |
+| `/registro`       | Register a new user.            |
+| `/inicio`         | Browse the equipment catalog.   |
+| `/equipo/{id}`    | View one equipment group.       |
+| `/carrito`        | Review and schedule a request.  |
+| `/reserva`        | Review and sign the contract.   |
+| `/perfil`         | View and edit the user profile. |
+| `/historial`      | Review the user's loans.        |
+| `/administracion` | Open the administration panel.  |
 
 ## Response Contract
 
