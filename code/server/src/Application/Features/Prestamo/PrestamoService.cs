@@ -89,7 +89,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         await _notifications.CreateForAdmins(
             TipoNotificacion.AdminNuevoPrestamo,
             "Nueva reserva",
-            $"{userDisplayName} realizó una reserva."
+            $"{userDisplayName} realizó una reserva.",
+            userDisplayName
         );
 
         return await Repository.Get(entity.Id);
@@ -117,7 +118,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         int id,
         string newStatus,
         string? observacion = null,
-        PrestamoDto? body = null
+        PrestamoDto? body = null,
+        string? actorCarnet = null
     )
     {
         var loan = await Repository.FindById(id);
@@ -187,12 +189,17 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             auditDetail
         );
 
+        var emitter = string.IsNullOrWhiteSpace(actorCarnet)
+            ? "Sistema"
+            : await _usuarioRepository.GetDisplayName(actorCarnet) ?? "Sistema";
+
         await NotifyStatusChange(
             loan.Carnet!,
             parsedState.Value,
             observacion,
             equipmentObservationMessage,
-            hasDamagedEquipment
+            hasDamagedEquipment,
+            emitter
         );
 
         if (parsedState.Value == EstadoPrestamo.Finalizado)
@@ -223,7 +230,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             "Tu cuenta fue desbloqueada porque ya no tienes préstamos atrasados.",
             JsonSerializer.Serialize(new
             {
-                origen = "Sistema de préstamos",
+                emisor = "Sistema",
                 motivo = "Todos los préstamos atrasados fueron regularizados.",
                 fecha = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
             })
@@ -276,7 +283,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         EstadoPrestamo estado,
         string? observacion,
         string? userMessage,
-        bool hasDamagedEquipment
+        bool hasDamagedEquipment,
+        string emitter
     )
     {
         switch (estado)
@@ -286,7 +294,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
                     carnet,
                     TipoNotificacion.PrestamoAprobado,
                     "Préstamo aprobado",
-                    "Tu solicitud de préstamo fue aprobada. Ya puedes revisar los detalles de recogida."
+                    "Tu solicitud de préstamo fue aprobada. Ya puedes revisar los detalles de recogida.",
+                    NotificacionService.BuildEmitterDetail(emitter, "Solicitud aprobada.")
                 );
                 break;
             case EstadoPrestamo.Rechazado:
@@ -296,7 +305,11 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
                     "Préstamo rechazado",
                     string.IsNullOrWhiteSpace(observacion)
                         ? "Tu solicitud de préstamo fue rechazada."
-                        : $"Tu solicitud de préstamo fue rechazada: {observacion}"
+                        : $"Tu solicitud de préstamo fue rechazada: {observacion}",
+                    NotificacionService.BuildEmitterDetail(
+                        emitter,
+                        observacion ?? "Solicitud rechazada."
+                    )
                 );
                 break;
             case EstadoPrestamo.Finalizado when hasDamagedEquipment:
@@ -305,7 +318,10 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
                     TipoNotificacion.EquipoObservacion,
                     "Equipo marcado como inoperativo",
                     userMessage,
-                    observacion
+                    NotificacionService.BuildEmitterDetail(
+                        emitter,
+                        observacion ?? "Equipo devuelto con observaciones."
+                    )
                 );
                 break;
         }

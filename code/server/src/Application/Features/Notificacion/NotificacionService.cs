@@ -1,5 +1,6 @@
 using Ardalis.Result;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+using System.Text.Json;
 
 namespace IMT_Reservas.Server.Application.Features.Notificacion;
 
@@ -16,17 +17,33 @@ public class NotificacionService
         string? content = null,
         string? detail = null,
         bool saveChanges = true
-    ) => await _repository.Add(carnet, type, title, content, detail, saveChanges);
+    ) =>
+        await _repository.Add(
+            carnet,
+            type,
+            title,
+            content,
+            detail ?? BuildEmitterDetail("Sistema"),
+            saveChanges
+        );
 
     public async Task CreateMany(IReadOnlyCollection<NotificacionDto> notifications)
     {
         if (notifications.Count == 0)
             return;
 
+        foreach (var notification in notifications)
+            notification.Detalle ??= BuildEmitterDetail("Sistema");
+
         await _repository.AddRange(notifications);
     }
 
-    public async Task CreateForAdmins(TipoNotificacion type, string title, string? content = null)
+    public async Task CreateForAdmins(
+        TipoNotificacion type,
+        string title,
+        string? content = null,
+        string emitter = "Sistema"
+    )
     {
         var adminCarnets = await _repository.GetAdminCarnets();
         var notifications = adminCarnets
@@ -36,6 +53,7 @@ public class NotificacionService
                 Tipo = type.ToString(),
                 Titulo = title,
                 Contenido = content,
+                Detalle = BuildEmitterDetail(emitter),
             })
             .ToList();
 
@@ -58,4 +76,14 @@ public class NotificacionService
 
         return Result<object>.Success(null!);
     }
+
+    public static string BuildEmitterDetail(string emitter, string? reason = null) =>
+        JsonSerializer.Serialize(
+            new
+            {
+                emisor = string.IsNullOrWhiteSpace(emitter) ? "Sistema" : emitter,
+                motivo = reason,
+                fecha = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
+            }
+        );
 }

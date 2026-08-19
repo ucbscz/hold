@@ -170,18 +170,10 @@
                           n.FechaEnvio
                             | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
                         }}</span>
-                        @if (detalle.origen) {
-                          <span class="notif__detail-label">Origen</span>
+                        @if (detalle.emisor) {
+                          <span class="notif__detail-label">Emisor</span>
                           <span class="notif__detail-text">{{
-                            detalle.origen
-                          }}</span>
-                        }
-                        @if (detalle.personaRelacionada) {
-                          <span class="notif__detail-label"
-                            >Persona relacionada</span
-                          >
-                          <span class="notif__detail-text">{{
-                            detalle.personaRelacionada
+                            detalle.emisor
                           }}</span>
                         }
                         @if (detalle.motivo) {
@@ -236,10 +228,8 @@
                         n.FechaEnvio
                           | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
                       }}</span>
-                      <span class="notif__detail-label">Origen</span>
-                      <span class="notif__detail-text"
-                        >Sistema de reservas</span
-                      >
+                      <span class="notif__detail-label">Emisor</span>
+                      <span class="notif__detail-text">Sistema</span>
                     </div>
                   }
                 </div>

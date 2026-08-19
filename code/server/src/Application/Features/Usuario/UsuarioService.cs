@@ -94,7 +94,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             notificationContent,
             JsonSerializer.Serialize(new
             {
-                origen = actorName ?? "Sistema",
+                emisor = actorName ?? "Sistema",
                 motivo = notificationReason,
                 fecha = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
             }),

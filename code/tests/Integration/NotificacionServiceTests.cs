@@ -4,6 +4,7 @@ using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using IMT_Reservas.Tests.Helpers;
+using System.Text.Json;
 
 namespace IMT_Reservas.Tests.Integration;
 
@@ -29,6 +30,7 @@ internal class NotificacionServiceTests : ServiceTest<NotificacionService>
         result
             .Value.Should()
             .ContainSingle(n => n.Titulo == "Préstamo aprobado" && n.Leido == false);
+        GetEmitter(result.Value.Single().Detalle).Should().Be("Sistema");
     }
 
     [Test]
@@ -52,11 +54,21 @@ internal class NotificacionServiceTests : ServiceTest<NotificacionService>
         await Sut.CreateForAdmins(
             TipoNotificacion.AdminNuevoPrestamo,
             "Nueva reserva",
-            "detalle"
+            "detalle",
+            "Ana Pérez"
         );
 
-        (await Sut.GetByCarnet("A001")).Value.Should().HaveCount(1);
+        var adminNotifications = (await Sut.GetByCarnet("A001")).Value;
+
+        adminNotifications.Should().HaveCount(1);
+        GetEmitter(adminNotifications.Single().Detalle).Should().Be("Ana Pérez");
         (await Sut.GetByCarnet("E001")).Value.Should().BeEmpty();
+    }
+
+    private static string? GetEmitter(string? detail)
+    {
+        using var document = JsonDocument.Parse(detail!);
+        return document.RootElement.GetProperty("emisor").GetString();
     }
 
     private static Usuario BuildUsuario(string carnet, TipoUsuario rol) =>

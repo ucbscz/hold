@@ -211,8 +211,7 @@ public class EstadoPrestamoJob
         JsonSerializer.Serialize(
             new
             {
-                origen = "Sistema de préstamos",
-                personaRelacionada = $"{loan.NombreUsuario ?? "Usuario"} {loan.ApellidoPaternoUsuario ?? string.Empty}".Trim(),
+                emisor = "Sistema",
                 carnet = loan.CarnetUsuario,
                 producto = loan.NombreGrupoEquipo,
                 motivo,

@@ -61,7 +61,8 @@ public class PrestamoController : Controller
                 id,
                 request.EstadoPrestamo ?? string.Empty,
                 request.Observacion,
-                request
+                request,
+                User.Identity?.Name
             )
         );
 

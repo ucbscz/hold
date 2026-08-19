@@ -8,6 +8,7 @@ using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using IMT_Reservas.Tests.Helpers;
+using System.Text.Json;
 namespace IMT_Reservas.Tests.Integration;
 
 [TestFixture]
@@ -206,6 +207,29 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
 
         result.IsSuccess.Should().BeTrue();
         result.Value.EstadoPrestamo.Should().Be("aprobado");
+    }
+
+    [Test]
+    public async Task UpdateStatus_ManualApproval_UsesActorNameAsNotificationEmitter()
+    {
+        var createResult = await Sut.Create(
+            BuildValidPrestamo(Carnet, GrupoId, DateTime.Today, DateTime.Today.AddDays(3))
+        );
+        var prestamoId = createResult.Value.Id!.Value;
+
+        var result = await Sut.UpdateStatus(
+            prestamoId,
+            "aprobado",
+            actorCarnet: Carnet
+        );
+
+        result.IsSuccess.Should().BeTrue();
+        var notification = Db.Notificaciones.Single(notification =>
+            notification.CarnetUsuario == Carnet
+            && notification.Tipo == TipoNotificacion.PrestamoAprobado.ToString()
+        );
+        using var detail = JsonDocument.Parse(notification.Detalle!);
+        detail.RootElement.GetProperty("emisor").GetString().Should().Be("Test User");
     }
 
     [Test]

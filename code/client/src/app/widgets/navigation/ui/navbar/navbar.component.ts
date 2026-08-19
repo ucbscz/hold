@@ -166,9 +166,8 @@ export class NavbarComponent {
     observacion: string | null;
     equipos: { codigo: string; nombre: string; estado: string }[];
     motivo: string | null;
-    origen: string | null;
+    emisor: string | null;
     fecha: string | null;
-    personaRelacionada: string | null;
   } | null {
     if (!notificacion.Detalle) return null;
 
@@ -192,14 +191,13 @@ export class NavbarComponent {
         typeof data['observacion'] === 'string' ? data['observacion'] : null,
       equipos,
       motivo: typeof data['motivo'] === 'string' ? data['motivo'] : null,
-      origen: typeof data['origen'] === 'string' ? data['origen'] : null,
-      fecha: typeof data['fecha'] === 'string' ? data['fecha'] : null,
-      personaRelacionada:
-        typeof data['personaRelacionada'] === 'string'
-          ? data['personaRelacionada']
-          : typeof data['usuario'] === 'string'
-            ? data['usuario']
+      emisor:
+        typeof data['emisor'] === 'string'
+          ? data['emisor']
+          : typeof data['origen'] === 'string'
+            ? data['origen']
             : null,
+      fecha: typeof data['fecha'] === 'string' ? data['fecha'] : null,
     };
   }
 
