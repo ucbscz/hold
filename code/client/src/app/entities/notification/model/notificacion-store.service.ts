@@ -1,9 +1,10 @@
 import { computed, Injectable, signal, WritableSignal } from '@angular/core';
 import { AuthService } from '@features/auth-session';
+import { finalize } from 'rxjs';
 import { NotificacionApiService } from '../api/notificacion.service';
 import { Notificacion } from './notificacion.model';
 
-const INTERVALO_MS = 10000;
+const INTERVALO_MS = 30000;
 
 @Injectable({
   providedIn: 'root',
@@ -27,6 +28,7 @@ export class NotificacionStoreService {
     () => this.notificacionesAdmin().filter((n) => !n.Leido).length,
   );
   private intervalo: ReturnType<typeof setInterval> | null = null;
+  private actualizando = false;
 
   constructor(
     private readonly api: NotificacionApiService,
@@ -48,15 +50,25 @@ export class NotificacionStoreService {
   }
 
   refrescar(): void {
+    if (
+      this.actualizando ||
+      (typeof document !== 'undefined' && document.hidden)
+    )
+      return;
+
     if (!this.auth.isLoggedIn()) {
       this._notificaciones.set([]);
       return;
     }
 
-    this.api.obtenerNotificaciones().subscribe({
-      next: (lista) => this._notificaciones.set(lista),
-      error: () => {},
-    });
+    this.actualizando = true;
+    this.api
+      .obtenerNotificaciones()
+      .pipe(finalize(() => (this.actualizando = false)))
+      .subscribe({
+        next: (lista) => this._notificaciones.set(lista),
+        error: () => {},
+      });
   }
 
   marcarLeida(id: number): void {

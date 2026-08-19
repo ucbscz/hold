@@ -57,6 +57,8 @@ export class HistorialComponent implements OnInit, OnDestroy {
   }
 
   private recargar(): void {
+    if (typeof document !== 'undefined' && document.hidden) return;
+
     this.refreshTrigger++;
   }
 
