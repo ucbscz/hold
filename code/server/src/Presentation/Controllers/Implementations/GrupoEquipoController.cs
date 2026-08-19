@@ -6,7 +6,7 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/grupos-equipos")]
+[Route("api/grupos")]
 public class GrupoEquipoController : Controller
 {
     private readonly GrupoEquipoService _service;

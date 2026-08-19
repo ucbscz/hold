@@ -7,7 +7,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class AvisoDisponibilidadService {
-  private readonly url = environment.apiUrl + '/api/avisos-disponibilidad';
+  private readonly url = environment.apiUrl + '/api/avisos';
 
   constructor(private readonly http: HttpClient) {}
 

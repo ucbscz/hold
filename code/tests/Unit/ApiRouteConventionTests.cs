@@ -15,16 +15,16 @@ internal class ApiRouteConventionTests
             [typeof(AccesorioController)] = "api/accesorios",
             [typeof(AuthController)] = "api/auth",
             [typeof(AuditLogController)] = "api/auditoria",
-            [typeof(AvisoDisponibilidadController)] = "api/avisos-disponibilidad",
+            [typeof(AvisoDisponibilidadController)] = "api/avisos",
             [typeof(CarreraController)] = "api/carreras",
             [typeof(CarritoController)] = "api/carrito",
             [typeof(CategoriaController)] = "api/categorias",
             [typeof(ComponenteController)] = "api/componentes",
             [typeof(ContratoController)] = "api/contratos",
-            [typeof(EmpresaMantenimientoController)] = "api/empresas-mantenimiento",
+            [typeof(EmpresaMantenimientoController)] = "api/empresas",
             [typeof(EquipoController)] = "api/equipos",
             [typeof(GaveteroController)] = "api/gaveteros",
-            [typeof(GrupoEquipoController)] = "api/grupos-equipos",
+            [typeof(GrupoEquipoController)] = "api/grupos",
             [typeof(MantenimientoController)] = "api/mantenimientos",
             [typeof(MuebleController)] = "api/muebles",
             [typeof(NotificacionController)] = "api/notificaciones",
@@ -41,6 +41,7 @@ internal class ApiRouteConventionTests
         Assert.That(route!.Template, Is.EqualTo(expectedRoute));
         Assert.That(route.Template, Does.Not.Contain("[controller]"));
         Assert.That(route.Template, Is.EqualTo(route.Template.ToLowerInvariant()));
+        Assert.That(route.Template, Does.Not.Contain("-"));
     }
 
     private static IEnumerable<TestCaseData> RouteCases() =>
@@ -60,6 +61,7 @@ internal class ApiRouteConventionTests
             Assert.That(route, Does.Not.Contain("buscar"));
             Assert.That(route, Does.Not.Contain("historial"));
             Assert.That(route, Does.Not.Contain("por-"));
+            Assert.That(literalSegments, Does.Not.Contain("-"));
         });
     }
 

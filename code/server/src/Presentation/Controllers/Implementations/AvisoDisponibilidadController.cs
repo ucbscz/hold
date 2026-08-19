@@ -6,7 +6,7 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [Authorize]
-[Route("api/avisos-disponibilidad")]
+[Route("api/avisos")]
 public class AvisoDisponibilidadController : Controller
 {
     private readonly AvisoDisponibilidadService _service;
