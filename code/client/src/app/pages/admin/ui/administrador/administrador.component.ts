@@ -59,7 +59,7 @@ export class AdministradorComponent {
     if (this.usuario.estaVacio()) {
       this.router.navigate(['/login']);
     } else if (this.usuario.obtenerRol() != 'administrador') {
-      this.router.navigate(['/home']);
+      this.router.navigate(['/inicio']);
     }
   }
   clickitem(item: string) {

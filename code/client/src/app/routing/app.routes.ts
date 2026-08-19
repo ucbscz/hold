@@ -10,37 +10,37 @@ export const routes: Routes = [
       import('@pages/sign-in').then((page) => page.IniciarSesionComponent),
   },
   {
-    path: 'home',
+    path: 'inicio',
     canActivate: [authGuard],
     loadComponent: () =>
       import('@pages/home').then((page) => page.PantallaMainComponent),
   },
   {
-    path: 'equipment/:id',
+    path: 'equipo/:id',
     canActivate: [authGuard],
     loadComponent: () =>
       import('@pages/equipment-detail').then((page) => page.ObjetoComponent),
   },
   {
-    path: 'cart',
+    path: 'carrito',
     canActivate: [authGuard],
     loadComponent: () =>
       import('@pages/cart').then((page) => page.CarritoComponent),
   },
   {
-    path: 'profile',
+    path: 'perfil',
     canActivate: [authGuard],
     loadComponent: () =>
       import('@pages/profile').then((page) => page.PerfilComponent),
   },
   {
-    path: 'admin',
+    path: 'administracion',
     canActivate: [adminGuard],
     loadComponent: () =>
       import('@pages/admin').then((page) => page.AdministradorComponent),
   },
   {
-    path: 'reservation',
+    path: 'reserva',
     canActivate: [authGuard],
     loadComponent: () =>
       import('@pages/reservation-form').then(
@@ -48,13 +48,13 @@ export const routes: Routes = [
       ),
   },
   {
-    path: 'loan-history',
+    path: 'historial',
     canActivate: [authGuard],
     loadComponent: () =>
       import('@pages/loan-history').then((page) => page.HistorialComponent),
   },
   {
-    path: 'sign-up',
+    path: 'registro',
     loadComponent: () =>
       import('@pages/sign-up').then((page) => page.RegistrarUsuarioComponent),
   },

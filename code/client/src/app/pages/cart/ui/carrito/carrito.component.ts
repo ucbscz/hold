@@ -125,7 +125,7 @@ export class CarritoComponent implements OnDestroy {
     const monto = this.carritoService.calcularPrecioTotal();
 
     if (monto >= 1000) {
-      this.router.navigate(['/reservation']);
+      this.router.navigate(['/reserva']);
 
       return;
     }
@@ -154,7 +154,7 @@ export class CarritoComponent implements OnDestroy {
   }
 
   redirigirHome(): void {
-    this.router.navigate(['/home']);
+    this.router.navigate(['/inicio']);
   }
 
   carritoEstaVacio(): boolean {

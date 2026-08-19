@@ -199,7 +199,7 @@ export class FormularioComponent implements OnInit {
   }
 
   irhome() {
-    this.router.navigate(['/home']);
+    this.router.navigate(['/inicio']);
   }
 
   guardarfirma(signatureData: string): void {

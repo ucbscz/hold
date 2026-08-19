@@ -44,7 +44,7 @@ export class IniciarSesionComponent {
 
         this.loading = false;
         this.incorrecto = false;
-        this.router.navigate(['/home']);
+        this.router.navigate(['/inicio']);
       },
       error: (error) => {
         if (
@@ -60,7 +60,7 @@ export class IniciarSesionComponent {
     });
   }
   registrarUsuario() {
-    this.router.navigate(['/sign-up']);
+    this.router.navigate(['/registro']);
   }
 
   alternarVisibilidadContrasena(): void {

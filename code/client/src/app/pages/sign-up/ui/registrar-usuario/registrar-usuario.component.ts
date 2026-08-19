@@ -99,7 +99,7 @@ export class RegistrarUsuarioComponent {
           this.mensajeaviso = 'Usuario registrado exitosamente';
           this.aviso.set(true);
           this.registrando = false;
-          this.router.navigate(['/home']);
+          this.router.navigate(['/inicio']);
         },
         error: (err) => {
           const mensajePorDefecto = registroCompletado
@@ -117,7 +117,7 @@ export class RegistrarUsuarioComponent {
   }
 
   irAHome() {
-    this.router.navigate(['/home']);
+    this.router.navigate(['/inicio']);
   }
 
   alternarVisibilidadPassword(): void {

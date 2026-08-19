@@ -64,7 +64,7 @@ export class NavbarComponent {
     const cleanUrl = url.split('?')[0];
     const rol = this.usuario.obtenerRol();
     const isLoginOrRegister =
-      cleanUrl.includes('/login') || cleanUrl.includes('/sign-up');
+      cleanUrl.includes('/login') || cleanUrl.includes('/registro');
 
     if (isLoginOrRegister) {
       this.showHome.set(false);
@@ -76,7 +76,7 @@ export class NavbarComponent {
     }
 
     const isAdmin = rol === 'administrador';
-    const isInAdminMode = isAdmin && cleanUrl.includes('/admin');
+    const isInAdminMode = isAdmin && cleanUrl.includes('/administracion');
 
     this.showProfile.set(true);
 
@@ -89,19 +89,19 @@ export class NavbarComponent {
     } else {
       this.showAdminSidebarToggle.set(false);
 
-      if (cleanUrl.includes('/home')) {
+      if (cleanUrl.includes('/inicio')) {
         this.showHome.set(false);
         this.showBack.set(false);
       } else if (
-        cleanUrl.includes('/cart') ||
-        cleanUrl.includes('/equipment') ||
-        cleanUrl.includes('/reservation')
+        cleanUrl.includes('/carrito') ||
+        cleanUrl.includes('/equipo') ||
+        cleanUrl.includes('/reserva')
       ) {
         this.showHome.set(false);
         this.showBack.set(true);
       } else if (
-        cleanUrl.includes('/profile') ||
-        cleanUrl.includes('/loan-history')
+        cleanUrl.includes('/perfil') ||
+        cleanUrl.includes('/historial')
       ) {
         this.showHome.set(true);
         this.showBack.set(false);
@@ -116,7 +116,7 @@ export class NavbarComponent {
     if (this.usuario.estaVacio()) {
       this.router.navigate(['/login']);
     } else {
-      this.router.navigate(['/home']);
+      this.router.navigate(['/inicio']);
     }
   }
 
@@ -245,7 +245,7 @@ export class NavbarComponent {
     if (this.usuario.estaVacio()) {
       this.router.navigate(['/login']);
     } else {
-      this.router.navigate(['/cart']);
+      this.router.navigate(['/carrito']);
     }
   }
 
