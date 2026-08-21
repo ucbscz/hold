@@ -34,4 +34,23 @@ describe('CarritoService', () => {
     expect(totals).toEqual([0, 1, 3, 2]);
     subscription.unsubscribe();
   });
+
+  it('counts a newly established cart item from its first unit', () => {
+    const totals: number[] = [];
+    const subscription = service.total$.subscribe((total) =>
+      totals.push(total),
+    );
+
+    service.establecerCantidad(10, 'Multimetro', '', '', '', 0, 3, 1);
+
+    expect(service.obtenerTotal()).toBe(1);
+    expect(totals).toEqual([0, 1]);
+    subscription.unsubscribe();
+  });
+
+  it('emits the exact requested quantity for a newly established item', () => {
+    service.establecerCantidad(10, 'Multimetro', '', '', '', 0, 4, 3);
+
+    expect(service.obtenerTotal()).toBe(3);
+  });
 });

@@ -137,6 +137,7 @@ export class CarritoService {
         precio,
         cantidadMax: cantidadMaxima,
       };
+      this.cantidadTotal += 1;
     }
 
     this.editarCantidad(id, cantidad);
