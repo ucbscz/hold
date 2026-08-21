@@ -73,7 +73,7 @@ export class EmpresasMantenimientoTablaComponent
       next: (data: EmpresaMantenimiento[]) => {
         this.empresas = data;
         this.empresascopia = [...this.empresas];
-        this.aplicarOrdenActualSiExiste();
+        this.aplicarFiltros();
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -86,10 +86,11 @@ export class EmpresasMantenimientoTablaComponent
     });
   }
   aplicarFiltros(event?: [string, string]) {
-    if (event && event[0].trim() !== '') {
-      const busquedaNormalizada = this.normalizeText(event[0]);
+    const busqueda = this.mantenerBusqueda(event);
+    if (busqueda[0].trim() !== '') {
+      const busquedaNormalizada = this.normalizeText(busqueda[0]);
       this.empresas = this.empresascopia.filter((empresa) => {
-        switch (event[1]) {
+        switch (busqueda[1]) {
           case 'Nombre Empresa':
             return this.normalizeText(empresa.NombreEmpresa || '').includes(
               busquedaNormalizada,
@@ -131,6 +132,7 @@ export class EmpresasMantenimientoTablaComponent
     this.aplicarOrdenActualSiExiste();
   }
   limpiarBusqueda() {
+    this.limpiarBusquedaPersistida();
     this.empresas = [...this.empresascopia];
     this.aplicarOrdenActualSiExiste();
   }

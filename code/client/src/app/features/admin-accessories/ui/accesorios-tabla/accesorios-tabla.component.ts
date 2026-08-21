@@ -81,6 +81,7 @@ export class AccesoriosTablaComponent extends Tabla {
       next: (data: Accesorio[]) => {
         this.accesorios = data;
         this.accesorioscopia = [...this.accesorios];
+        this.aplicarFiltros();
         this.aplicarOrdenActualSiExiste();
       },
       error: (error) => {
@@ -95,10 +96,11 @@ export class AccesoriosTablaComponent extends Tabla {
   }
 
   aplicarFiltros(event?: [string, string]) {
-    if (event && event[0].trim() !== '') {
-      const busquedaNormalizada = this.normalizeText(event[0]);
+    const busqueda = this.mantenerBusqueda(event);
+    if (busqueda[0].trim() !== '') {
+      const busquedaNormalizada = this.normalizeText(busqueda[0]);
       this.accesorios = this.accesorioscopia.filter((accesorio) => {
-        switch (event[1]) {
+        switch (busqueda[1]) {
           case 'Nombre':
             return this.normalizeText(accesorio.nombre || '').includes(
               busquedaNormalizada,
@@ -149,6 +151,7 @@ export class AccesoriosTablaComponent extends Tabla {
   }
 
   limpiarBusqueda() {
+    this.limpiarBusquedaPersistida();
     this.accesorios = [...this.accesorioscopia];
     this.aplicarOrdenActualSiExiste();
   }

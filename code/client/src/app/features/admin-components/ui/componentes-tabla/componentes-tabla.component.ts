@@ -72,6 +72,7 @@ export class ComponentesTablaComponent extends Tabla implements OnInit {
       next: (data: Componente[]) => {
         this.componentes = data;
         this.componentescopia = [...this.componentes];
+        this.aplicarFiltros();
         this.aplicarOrdenActualSiExiste();
       },
       error: (error) => {
@@ -85,10 +86,11 @@ export class ComponentesTablaComponent extends Tabla implements OnInit {
     });
   }
   aplicarFiltros(event?: [string, string]) {
-    if (event && event[0].trim() !== '') {
-      const busquedaNormalizada = this.normalizeText(event[0]);
+    const busqueda = this.mantenerBusqueda(event);
+    if (busqueda[0].trim() !== '') {
+      const busquedaNormalizada = this.normalizeText(busqueda[0]);
       this.componentes = this.componentescopia.filter((componente) => {
-        switch (event[1]) {
+        switch (busqueda[1]) {
           case 'Nombre':
             return this.normalizeText(componente.Nombre || '').includes(
               busquedaNormalizada,
@@ -148,6 +150,7 @@ export class ComponentesTablaComponent extends Tabla implements OnInit {
     });
   }
   limpiarBusqueda() {
+    this.limpiarBusquedaPersistida();
     this.componentes = [...this.componentescopia];
     this.aplicarOrdenActualSiExiste();
   }

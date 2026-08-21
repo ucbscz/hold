@@ -112,10 +112,11 @@ export class GruposEquiposTablaComponent extends Tabla implements OnInit {
     this.aplicarFiltros();
   }
   aplicarFiltros(event?: [string, string]) {
-    if (event && event[0].trim() !== '') {
-      const busquedaNormalizada = this.normalizeText(event[0]);
+    const busqueda = this.mantenerBusqueda(event);
+    if (busqueda[0].trim() !== '') {
+      const busquedaNormalizada = this.normalizeText(busqueda[0]);
       this.gruposEquiposFiltrados = this.gruposEquipos.filter((grupoequipo) => {
-        switch (event[1]) {
+        switch (busqueda[1]) {
           case 'Nombre':
             return this.normalizeText(grupoequipo.nombre || '').includes(
               busquedaNormalizada,
@@ -169,7 +170,9 @@ export class GruposEquiposTablaComponent extends Tabla implements OnInit {
     this.aplicarOrdenActualSiExiste();
   }
   limpiarBusqueda() {
-    this.aplicarFiltros();
+    this.limpiarBusquedaPersistida();
+    this.gruposEquiposFiltrados = [...this.gruposEquipos];
+    this.aplicarOrdenActualSiExiste();
   }
 
   override sortTable(e: { col: string; dir: 'asc' | 'desc' }): void {

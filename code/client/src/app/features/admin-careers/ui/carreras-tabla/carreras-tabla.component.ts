@@ -71,6 +71,7 @@ export class CarrerasTablaComponent extends Tabla {
       next: (data: Carrera[]) => {
         this.carreras = data;
         this.carrerascopia = [...this.carreras];
+        this.aplicarFiltros();
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -84,10 +85,11 @@ export class CarrerasTablaComponent extends Tabla {
   }
 
   aplicarFiltros(event?: [string, string]): void {
-    if (event && event[0].trim() !== '') {
-      const busquedaNormalizada = this.normalizeText(event[0]);
+    const busqueda = this.mantenerBusqueda(event);
+    if (busqueda[0].trim() !== '') {
+      const busquedaNormalizada = this.normalizeText(busqueda[0]);
       this.carreras = this.carrerascopia.filter((carrera) => {
-        switch (event[1]) {
+        switch (busqueda[1]) {
           case 'Nombre':
             return this.normalizeText(carrera.Nombre || '').includes(
               busquedaNormalizada,
@@ -104,6 +106,7 @@ export class CarrerasTablaComponent extends Tabla {
   }
 
   limpiarBusqueda(): void {
+    this.limpiarBusquedaPersistida();
     this.carreras = [...this.carrerascopia];
   }
 

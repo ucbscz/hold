@@ -91,11 +91,12 @@ export class MueblesTablaComponent extends Tabla implements OnInit {
     this.aplicarFiltros();
   }
   aplicarFiltros(event?: [string, string]) {
-    if (event && event[0].trim() !== '') {
-      const busquedaNormalizada = this.normalizeText(event[0]);
+    const busqueda = this.mantenerBusqueda(event);
+    if (busqueda[0].trim() !== '') {
+      const busquedaNormalizada = this.normalizeText(busqueda[0]);
       this.mueblesFiltrados = this.muebles.filter((mueble) => {
         const dimensiones = `${mueble.Longitud || ''}x${mueble.Profundidad || ''}x${mueble.Altura || ''}`;
-        switch (event[1]) {
+        switch (busqueda[1]) {
           case 'Nombre':
             return this.normalizeText(mueble.Nombre || '').includes(
               busquedaNormalizada,
@@ -147,7 +148,9 @@ export class MueblesTablaComponent extends Tabla implements OnInit {
     this.aplicarOrdenActualSiExiste();
   }
   limpiarBusqueda() {
-    this.aplicarFiltros();
+    this.limpiarBusquedaPersistida();
+    this.mueblesFiltrados = [...this.muebles];
+    this.aplicarOrdenActualSiExiste();
   }
 
   override sortTable(e: { col: string; dir: 'asc' | 'desc' }): void {

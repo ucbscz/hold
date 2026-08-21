@@ -71,6 +71,7 @@ export class CategoriasTablaComponent extends Tabla {
       next: (data: Categorias[]) => {
         this.categorias = data;
         this.categoriascopia = [...this.categorias];
+        this.aplicarFiltros();
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -83,17 +84,19 @@ export class CategoriasTablaComponent extends Tabla {
     });
   }
   aplicarFiltros(event?: [string, string]): void {
-    if (!event || event[0].trim() === '') {
-      this.limpiarBusqueda();
+    const busqueda = this.mantenerBusqueda(event);
+    if (busqueda[0].trim() === '') {
+      this.categorias = [...this.categoriascopia];
       return;
     }
-    const busquedaNormalizada = this.normalizeText(event[0]);
+    const busquedaNormalizada = this.normalizeText(busqueda[0]);
     this.categorias = this.categoriascopia.filter((categoria) =>
       this.normalizeText(categoria.Nombre || '').includes(busquedaNormalizada),
     );
   }
 
   limpiarBusqueda(): void {
+    this.limpiarBusquedaPersistida();
     this.categorias = [...this.categoriascopia];
   }
 

@@ -114,7 +114,7 @@ export class EquiposTablaComponent extends Tabla {
       next: (data: Equipos[]) => {
         this.equipos = data;
         this.equiposcopia = [...this.equipos];
-        this.aplicarOrdenActualSiExiste();
+        this.aplicarFiltros();
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -185,6 +185,7 @@ export class EquiposTablaComponent extends Tabla {
     this.aplicarOrdenActualSiExiste();
   }
   limpiarBusqueda() {
+    this.busquedaActual = undefined;
     this.equipos = [...this.equiposcopia];
     this.aplicarOrdenActualSiExiste();
   }

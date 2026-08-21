@@ -76,6 +76,7 @@ export class GaveterosTablaComponent extends Tabla {
       next: (data: Gaveteros[]) => {
         this.gaveteros = data;
         this.gaveteroscopia = [...this.gaveteros];
+        this.aplicarFiltros();
         this.aplicarOrdenActualSiExiste();
       },
       error: (error) => {
@@ -89,10 +90,11 @@ export class GaveterosTablaComponent extends Tabla {
     });
   }
   aplicarFiltros(event?: [string, string]) {
-    if (event && event[0].trim() !== '') {
-      const busquedaNormalizada = this.normalizeText(event[0]);
+    const busqueda = this.mantenerBusqueda(event);
+    if (busqueda[0].trim() !== '') {
+      const busquedaNormalizada = this.normalizeText(busqueda[0]);
       this.gaveteros = this.gaveteroscopia.filter((gavetero) => {
-        switch (event[1]) {
+        switch (busqueda[1]) {
           case 'Nombre':
             return this.normalizeText(gavetero.Nombre || '').includes(
               busquedaNormalizada,
@@ -146,6 +148,7 @@ export class GaveterosTablaComponent extends Tabla {
     this.aplicarOrdenActualSiExiste();
   }
   limpiarBusqueda() {
+    this.limpiarBusquedaPersistida();
     this.gaveteros = [...this.gaveteroscopia];
     this.aplicarOrdenActualSiExiste();
   }

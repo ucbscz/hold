@@ -9,6 +9,7 @@ export abstract class Tabla extends BaseTablaComponent {
   sortDirection: AdminTableSort['dir'] = 'asc';
   paginaActual = 1;
   readonly filasPorPagina = 10;
+  private busquedaPersistida: [string, string] = ['', ''];
 
   seleccionarTab(tab: AdminTableTab): void {
     this.activeTab = tab;
@@ -73,6 +74,16 @@ export abstract class Tabla extends BaseTablaComponent {
 
   reiniciarPaginacion(): void {
     this.paginaActual = 1;
+  }
+
+  protected mantenerBusqueda(event?: [string, string]): [string, string] {
+    if (event) this.busquedaPersistida = event;
+
+    return this.busquedaPersistida;
+  }
+
+  protected limpiarBusquedaPersistida(): void {
+    this.busquedaPersistida = ['', ''];
   }
 
   exportarCsv(
