@@ -9,4 +9,5 @@ export interface GrupoEquipoApiItem {
   NombreCategoria?: string | null;
   Cantidad?: number | null;
   CostoPromedio?: number | null;
+  TiempoMaximoPrestamoDias?: number | null;
 }

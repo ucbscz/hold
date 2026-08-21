@@ -126,6 +126,7 @@ export class ListaObjetosComponent
       item.CostoPromedio ?? 0,
       item.Cantidad ?? 1,
       this.getCantidad(item.id!),
+      item.TiempoMaximoPrestamoDias,
     );
   }
 

@@ -24,4 +24,27 @@ describe('CartDateValidationService', () => {
     expect(result.isValid).toBeFalse();
     expect(result.message).toContain('30 minutos');
   });
+
+  it('rejects reservations longer than the most restrictive group limit', () => {
+    const result = service.validate(
+      new Date('2026-08-12T09:00:00'),
+      new Date('2026-08-14T09:01:00'),
+      currentDate,
+      2,
+    );
+
+    expect(result.isValid).toBeFalse();
+    expect(result.message).toContain('2 día');
+  });
+
+  it('accepts a reservation that exactly matches the group limit', () => {
+    const result = service.validate(
+      new Date('2026-08-12T09:00:00'),
+      new Date('2026-08-14T09:00:00'),
+      currentDate,
+      2,
+    );
+
+    expect(result.isValid).toBeTrue();
+  });
 });

@@ -57,6 +57,7 @@ export class GruposEquiposTablaComponent extends Tabla implements OnInit {
     'Modelo',
     'Marca',
     'Categoría',
+    'Préstamo máximo',
     'Descripción',
   ];
   constructor(
@@ -137,6 +138,10 @@ export class GruposEquiposTablaComponent extends Tabla implements OnInit {
             return this.normalizeText(
               grupoequipo.nombreCategoria || '',
             ).includes(busquedaNormalizada);
+          case 'Préstamo máximo':
+            return this.normalizeText(
+              String(grupoequipo.TiempoMaximoPrestamoDias),
+            ).includes(busquedaNormalizada);
           case 'Descripción':
             return this.normalizeText(grupoequipo.descripcion || '').includes(
               busquedaNormalizada,
@@ -158,6 +163,9 @@ export class GruposEquiposTablaComponent extends Tabla implements OnInit {
               this.normalizeText(grupoequipo.nombreCategoria || '').includes(
                 busquedaNormalizada,
               ) ||
+              this.normalizeText(
+                String(grupoequipo.TiempoMaximoPrestamoDias),
+              ).includes(busquedaNormalizada) ||
               this.normalizeText(grupoequipo.descripcion || '').includes(
                 busquedaNormalizada,
               )
@@ -185,6 +193,8 @@ export class GruposEquiposTablaComponent extends Tabla implements OnInit {
         Modelo: (grupoEquipo) => grupoEquipo.modelo,
         Marca: (grupoEquipo) => grupoEquipo.marca,
         Categoría: (grupoEquipo) => grupoEquipo.nombreCategoria,
+        'Préstamo máximo': (grupoEquipo) =>
+          grupoEquipo.TiempoMaximoPrestamoDias,
         Descripción: (grupoEquipo) => grupoEquipo.descripcion,
       },
     );

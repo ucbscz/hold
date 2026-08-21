@@ -21,6 +21,7 @@ export class CarritoService {
     modelo: string,
     precio: number,
     cantidadMaxima: number,
+    tiempoMaximoPrestamoDias = 7,
   ): void {
     if (!nombre) {
       return;
@@ -37,6 +38,7 @@ export class CarritoService {
         imagen,
         precio,
         cantidadMax: cantidadMaxima,
+        tiempoMaximoPrestamoDias,
       };
       this.cantidadTotal++;
     } else if (this.carrito[id].cantidad < this.carrito[id].cantidadMax) {
@@ -122,6 +124,7 @@ export class CarritoService {
     precio: number,
     cantidadMaxima: number,
     cantidad: number,
+    tiempoMaximoPrestamoDias = 7,
   ): void {
     if (!nombre) return;
 
@@ -136,10 +139,12 @@ export class CarritoService {
         imagen,
         precio,
         cantidadMax: cantidadMaxima,
+        tiempoMaximoPrestamoDias,
       };
       this.cantidadTotal += 1;
     }
 
+    this.carrito[id].tiempoMaximoPrestamoDias = tiempoMaximoPrestamoDias;
     this.editarCantidad(id, cantidad);
   }
 

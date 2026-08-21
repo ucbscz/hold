@@ -129,6 +129,7 @@ export class ObjetoComponent implements OnDestroy {
               imagen: this.producto.link ?? '',
               precio: this.producto.CostoPromedio ?? 0,
               cantidadMax: this.producto.Cantidad ?? MINIMUM_CART_QUANTITY,
+              tiempoMaximoPrestamoDias: this.producto.TiempoMaximoPrestamoDias,
             },
           };
           this.obtenerDisponibilidad();
@@ -471,6 +472,7 @@ export class ObjetoComponent implements OnDestroy {
       this.producto.CostoPromedio ?? 0,
       this.producto.Cantidad ?? MINIMUM_CART_QUANTITY,
       this.cantidad,
+      this.producto.TiempoMaximoPrestamoDias,
     );
   }
 

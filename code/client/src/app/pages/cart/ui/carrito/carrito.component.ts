@@ -54,6 +54,7 @@ export class CarritoComponent implements OnDestroy {
   cargando = false;
   puedeReservar: WritableSignal<boolean> = signal(true);
   motivoBloqueo: WritableSignal<string> = signal('');
+  maximoDiasPrestamo: WritableSignal<number | null> = signal(null);
 
   private readonly fechaActual: Date = new Date();
   private readonly imagenesFallidas = new Set<string>();
@@ -64,6 +65,7 @@ export class CarritoComponent implements OnDestroy {
       this.fechaInicio(),
       this.fechaFinal(),
       this.fechaActual,
+      this.maximoDiasPrestamo(),
     ),
   );
 
@@ -76,8 +78,9 @@ export class CarritoComponent implements OnDestroy {
     private readonly cartDateValidationService: CartDateValidationService,
   ) {
     this.carrito = this.carritoService.obtenerCarrito();
+    this.actualizarCarrito(this.carrito);
     this.carritoSubscription = this.carritoService.carrito$.subscribe(
-      (carrito) => (this.carrito = carrito),
+      (carrito) => this.actualizarCarrito(carrito),
     );
     this.route.queryParams.subscribe((params) => {
       this.step = params['step'] ? Number(params['step']) : 1;
@@ -215,5 +218,13 @@ export class CarritoComponent implements OnDestroy {
       inicio.toISOString(),
       fin.toISOString(),
     );
+  }
+
+  private actualizarCarrito(carrito: Carrito): void {
+    this.carrito = carrito;
+    const limits = Object.values(carrito)
+      .map((item) => item.tiempoMaximoPrestamoDias)
+      .filter((days) => Number.isFinite(days) && days > 0);
+    this.maximoDiasPrestamo.set(limits.length > 0 ? Math.min(...limits) : null);
   }
 }

@@ -22,7 +22,6 @@ export class EquipoService {
       Ubicacion: equipo.Ubicacion,
       Procedencia: equipo.Procedencia,
       CostoReferencia: equipo.CostoReferencia,
-      TiempoMaximoPrestamo: equipo.TiempoMaximoPrestamo,
       IdGavetero: equipo.IdGavetero,
       EstadoEquipo: equipo.EstadoEquipo,
       FechaIngresoEquipo: equipo.FechaIngresoEquipo,
@@ -47,7 +46,6 @@ export class EquipoService {
           IdGavetero: item.IdGavetero,
           CostoReferencia: item.CostoReferencia,
           Descripcion: item.Descripcion,
-          TiempoMaximoPrestamo: item.TiempoMaximoPrestamo,
           Procedencia: item.Procedencia,
           FechaIngresoEquipo: item.FechaIngresoEquipo,
         })),
@@ -66,7 +64,6 @@ export class EquipoService {
       Ubicacion: equipo.Ubicacion,
       Procedencia: equipo.Procedencia,
       CostoReferencia: equipo.CostoReferencia,
-      TiempoMaximoPrestamo: equipo.TiempoMaximoPrestamo,
       IdGavetero: equipo.IdGavetero,
       FechaIngresoEquipo: equipo.FechaIngresoEquipo,
     };

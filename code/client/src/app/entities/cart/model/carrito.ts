@@ -11,5 +11,6 @@ export interface Carrito {
     numero_serie_unico?: string[];
     codigo_ucb_unico?: string[];
     cantidadMax: number;
+    tiempoMaximoPrestamoDias: number;
   };
 }

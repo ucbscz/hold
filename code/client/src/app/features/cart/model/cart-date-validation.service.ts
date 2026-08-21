@@ -9,6 +9,7 @@ export class CartDateValidationService {
     startDate: Date | null,
     endDate: Date | null,
     currentDate: Date,
+    maximumLoanDays: number | null = null,
   ): CartDateValidationResult {
     if (!startDate || !endDate) {
       return { isValid: false, message: null };
@@ -45,6 +46,17 @@ export class CartDateValidationService {
       return {
         isValid: false,
         message: 'Error: El préstamo debe durar al menos 30 minutos',
+      };
+    }
+
+    if (
+      maximumLoanDays != null &&
+      endDate.getTime() - startDate.getTime() >
+        maximumLoanDays * 24 * 60 * 60 * 1000
+    ) {
+      return {
+        isValid: false,
+        message: `Error: Los equipos seleccionados permiten un préstamo máximo de ${maximumLoanDays} día(s)`,
       };
     }
 

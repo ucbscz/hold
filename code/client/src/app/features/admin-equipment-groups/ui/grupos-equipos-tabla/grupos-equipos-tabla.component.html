@@ -54,6 +54,7 @@
               <td>{{ grupoequipo.modelo }}</td>
               <td>{{ grupoequipo.marca }}</td>
               <td>{{ grupoequipo.nombreCategoria || "" }}</td>
+              <td>{{ grupoequipo.TiempoMaximoPrestamoDias }} días</td>
               <td>{{ grupoequipo.descripcion }}</td>
               <td class="actions-column">
                 <button
@@ -89,7 +90,7 @@
           }
           @if (gruposEquiposFiltrados.length === 0) {
             <tr>
-              <td colspan="7" class="empty-table">
+              <td colspan="8" class="empty-table">
                 <div class="empty-state">
                   <i class="fas fa-search fa-3x"></i>
                   <p>No se encontraron grupos de equipos</p>

@@ -53,6 +53,7 @@ export class GrupoequipoService {
       nombreCategoria: item.NombreCategoria || '',
       Cantidad: item.Cantidad || 0,
       CostoPromedio: item.CostoPromedio || 0,
+      TiempoMaximoPrestamoDias: item.TiempoMaximoPrestamoDias ?? 7,
     };
   }
 
@@ -83,6 +84,7 @@ export class GrupoequipoService {
       Descripcion: grupoEquipo.descripcion,
       UrlDataSheet: grupoEquipo.url_data_sheet,
       UrlImagen: grupoEquipo.link,
+      TiempoMaximoPrestamoDias: grupoEquipo.TiempoMaximoPrestamoDias,
     };
     return this.http
       .post<unknown>(this.apiUrl, envio)
@@ -223,6 +225,7 @@ export class GrupoequipoService {
       Descripcion: grupoEquipo.descripcion,
       UrlDataSheet: grupoEquipo.url_data_sheet,
       UrlImagen: grupoEquipo.link,
+      TiempoMaximoPrestamoDias: grupoEquipo.TiempoMaximoPrestamoDias,
     };
     return this.http
       .put<unknown>(`${this.apiUrl}/${grupoEquipo.id}`, envio)

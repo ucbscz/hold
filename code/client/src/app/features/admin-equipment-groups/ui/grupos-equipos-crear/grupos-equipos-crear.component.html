@@ -55,6 +55,21 @@
         ></app-custom-select>
       </div>
       <div class="form-group">
+        <label for="tiempoMaximoPrestamoDias">Préstamo máximo (días)</label>
+        <input
+          type="number"
+          id="tiempoMaximoPrestamoDias"
+          name="tiempoMaximoPrestamoDias"
+          [(ngModel)]="grupoEquipo.TiempoMaximoPrestamoDias"
+          required
+          min="1"
+          max="365"
+          step="1"
+          placeholder="7"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group">
         <label for="descripcion">Descripción</label>
         <textarea
           id="descripcion"

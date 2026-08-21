@@ -47,4 +47,29 @@ describe('CalendarioComponent', () => {
     expect(component.horaDeshabilitada('inicio', '20:00')).toBeTrue();
     expect(component.horaDeshabilitada('inicio', '19:30')).toBeFalse();
   });
+
+  it('disables dates and times beyond the selected groups maximum duration', () => {
+    component.entradaCarrito = {
+      1: {
+        nombre: 'Equipo',
+        modelo: '',
+        marca: '',
+        cantidad: 1,
+        fecha_inicio: null,
+        fecha_final: null,
+        imagen: '',
+        precio: 0,
+        cantidadMax: 1,
+        tiempoMaximoPrestamoDias: 1,
+      },
+    };
+    const inicio = new Date(2030, 0, 10, 8, 0);
+    component.fechaInicioSeleccionada.set(inicio);
+    component.fechaFinSeleccionada.set(new Date(2030, 0, 11, 8, 0));
+    component.seleccionarCampo('fin');
+
+    expect(component.rangoValido).toBeTrue();
+    expect(component.esDiaDeshabilitado(new Date(2030, 0, 12))).toBeTrue();
+    expect(component.horaDeshabilitada('fin', '08:30')).toBeTrue();
+  });
 });

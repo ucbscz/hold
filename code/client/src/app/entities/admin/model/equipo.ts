@@ -7,7 +7,6 @@ export class Equipos extends BaseModel {
   Ubicacion: string | null = null;
   CostoReferencia: number | null = null;
   Descripcion: string | null = null;
-  TiempoMaximoPrestamo: number | null = null;
   Procedencia: string | null = null;
   NombreGrupoEquipo: string | null = null;
   IdGrupoEquipo: number | null = null;

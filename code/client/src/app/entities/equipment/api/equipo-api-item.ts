@@ -11,7 +11,6 @@ export interface EquipoApiItem {
   IdGavetero: number | null;
   CostoReferencia: number | null;
   Descripcion: string | null;
-  TiempoMaximoPrestamo: number | null;
   Procedencia: string | null;
   FechaIngresoEquipo: Date | null;
 }
