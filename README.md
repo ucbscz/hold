@@ -22,7 +22,7 @@ Plataforma full-stack para gestionar reservas, préstamos, mantenimiento y traza
 
 [![Tests](https://github.com/alejandroramirezvallejos/UCB_Hold/actions/workflows/tests.yml/badge.svg)](https://github.com/alejandroramirezvallejos/UCB_Hold/actions/workflows/tests.yml)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
-[![Angular](https://img.shields.io/badge/Angular-19.2-DD0031?style=flat-square&logo=angular)](https://angular.dev/)
+[![Angular](https://img.shields.io/badge/Angular-21.2-DD0031?style=flat-square&logo=angular)](https://angular.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-4169E1?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat-square&logo=redis&logoColor=white)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
@@ -52,7 +52,7 @@ UCB Hold centraliza el ciclo operativo de los equipos de laboratorio: consulta d
 
 | Layer | Stack | Responsibility |
 | --- | --- | --- |
-| Frontend | Angular 19.2, TypeScript, RxJS | Application shell, screens, widgets, forms, guards and HTTP integration. |
+| Frontend | Angular 21.2, TypeScript, RxJS | Application shell, screens, widgets, forms, guards and HTTP integration. |
 | Backend | ASP.NET Core 8, Ardalis.Result, FluentValidation, Mapperly | REST API, business rules, validation and normalized responses. |
 | Data | PostgreSQL 14+, EF Core 8, Npgsql | Persistence, native enums, triggers, indexes and projections. |
 | Infrastructure | Redis 7, Docker Compose, Nginx | Local services, cache support and containerized delivery. |

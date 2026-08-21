@@ -7,7 +7,7 @@ This guide describes how to run UCB Hold locally for development, testing and re
 | Tool | Minimum version | Check |
 | --- | --- | --- |
 | .NET SDK | 8.0 LTS | `dotnet --version` |
-| Node.js | 20.x recommended | `node -v` |
+| Node.js | 22.x LTS | `node -v` |
 | npm | Bundled with Node.js | `npm -v` |
 | Docker Desktop | Current stable | `docker -v` |
 | Git | Current stable | `git --version` |
