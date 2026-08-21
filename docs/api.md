@@ -116,6 +116,8 @@ Additional catalog routes:
 | `GET`  | `/api/gaveteros?muebleId={id}`   | List lockers in a furniture item.               |
 | `GET`  | `/api/grupos?nombre=&categoria=` | Search equipment groups.                        |
 
+Equipment group payloads expose `TiempoMaximoPrestamoDias` (1 to 365). This group-level value applies to every physical unit in the group and is required for create and update operations.
+
 ## Comments
 
 | Method   | Route                                               | Purpose                                                |
@@ -132,7 +134,6 @@ Additional catalog routes:
 | `GET`    | `/api/prestamos`                 | List all loans for administrators or own loans for regular users. |
 | `GET`    | `/api/prestamos/{id}`            | Get a loan.                                                       |
 | `POST`   | `/api/prestamos`                 | Create a loan request.                                            |
-| `PUT`    | `/api/prestamos/{id}`            | Update a loan.                                                    |
 | `PATCH`  | `/api/prestamos/{id}/estado`     | Change a loan state. Administrator only.                          |
 | `DELETE` | `/api/prestamos/{id}`            | Soft-delete a loan.                                               |
 | `GET`    | `/api/prestamos/elegibilidad`    | Get reservation eligibility for the authenticated user.           |
@@ -140,7 +141,7 @@ Additional catalog routes:
 | `POST`   | `/api/contratos`                 | Upload or create a contract for a loan. Multipart form data.      |
 | `GET`    | `/api/contratos/{prestamoId}`    | Get a contract by loan id.                                        |
 | `DELETE` | `/api/contratos/{prestamoId}`    | Delete a contract.                                                |
-| `POST`   | `/api/carrito/disponibilidad`    | Calculate availability for equipment groups and a date range.     |
+| `POST`   | `/api/carrito/disponibilidad`    | Calculate availability after validating each group's maximum duration. |
 | `POST`   | `/api/avisos`                    | Create an availability watch for the authenticated user.          |
 
 ## Audit and Health

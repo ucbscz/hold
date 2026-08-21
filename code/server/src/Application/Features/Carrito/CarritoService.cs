@@ -5,6 +5,7 @@ namespace IMT_Reservas.Server.Application.Features.Carrito;
 
 public class CarritoService
 {
+    private const int MaxGroupsPerRequest = 100;
     private readonly CarritoRepository _repository;
     private readonly ILogger<CarritoService> _logger;
 
@@ -35,6 +36,12 @@ public class CarritoService
 
         var fechaInicio = request.FechaInicio.Value;
         var fechaFin = request.FechaFin.Value;
+        var groupIds = request.ArrayIds.Distinct().ToList();
+
+        if (groupIds.Count > MaxGroupsPerRequest)
+            return Result<List<CarritoDto>>.Error(
+                $"No se pueden consultar más de {MaxGroupsPerRequest} grupos a la vez"
+            );
 
         if (fechaFin <= fechaInicio)
             return Result<List<CarritoDto>>.Error(
@@ -46,33 +53,44 @@ public class CarritoService
                 "La duracion minima de un prestamo es de 30 minutos"
             );
 
-        var cantidades = await _repository.GetCantidadesByGrupos(request.ArrayIds);
+        var limits = await _repository.GetLoanLimitsByGroups(groupIds);
+        var duration = fechaFin - fechaInicio;
+        var exceeded = limits.Values
+            .Where(limit => duration > TimeSpan.FromDays(limit.MaximoDias))
+            .OrderBy(limit => limit.MaximoDias)
+            .FirstOrDefault();
+
+        if (exceeded != default)
+            return Result<List<CarritoDto>>.Error(
+                $"El grupo '{exceeded.Nombre}' permite préstamos de hasta {exceeded.MaximoDias} día(s)"
+            );
+
+        var cantidades = await _repository.GetCantidadesByGrupos(groupIds);
         var prestamosActivos = await _repository.GetPrestamosActivosEnRango(
-            request.ArrayIds,
+            groupIds,
             fechaInicio,
             fechaFin
         );
         var mantenimientosActivos = await _repository.GetMantenimientosActivosEnRango(
-            request.ArrayIds,
+            groupIds,
             fechaInicio,
             fechaFin
         );
+        var unavailableByGroup = prestamosActivos
+            .Concat(mantenimientosActivos)
+            .GroupBy(item => item.IdGrupoEquipo)
+            .ToDictionary(
+                group => group.Key,
+                group => group.Select(item => item.IdEquipo).Distinct().Count()
+            );
 
         var response = new List<CarritoDto>();
 
-        foreach (var grupoId in request.ArrayIds.Distinct())
+        foreach (var grupoId in groupIds)
         {
             var total = cantidades.TryGetValue(grupoId, out var t) ? t : 0;
 
-            var ocupados = prestamosActivos.Count(p =>
-                p.IdGrupoEquipo == grupoId
-                && p.FechaPrestamo < fechaFin
-                && p.FechaDevolucion > fechaInicio
-            ) + mantenimientosActivos.Count(m =>
-                m.IdGrupoEquipo == grupoId
-                && m.FechaInicio < fechaFin
-                && m.FechaFin > fechaInicio
-            );
+            var ocupados = unavailableByGroup.GetValueOrDefault(grupoId);
 
             response.Add(
                 new CarritoDto

@@ -18,7 +18,13 @@ public class UsuarioController : Controller
     public async Task<IActionResult> GetAll() => ToResponse(await _service.GetAll());
 
     [HttpGet("{carnet}")]
-    public async Task<IActionResult> Get(string carnet) => ToResponse(await _service.Get(carnet));
+    public async Task<IActionResult> Get(string carnet)
+    {
+        if (!User.IsInRole("administrador") && User.Identity?.Name != carnet)
+            return Forbid();
+
+        return ToResponse(await _service.Get(carnet));
+    }
 
     [AllowAnonymous]
     [HttpPost]

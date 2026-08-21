@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using IMT_Reservas.Server.Application.Features.Jwt;
 using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Application.Features.Usuario;
+using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
@@ -45,7 +46,11 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     {
         var jwtOptions = Options.Create(TestJwtSettings);
         var mapper = new UsuarioMapper();
-        var repo = new UsuarioRepository(db, mapper, new PrestamoRepository(db, new PrestamoMapper()));
+        var repo = new UsuarioRepository(
+            db,
+            mapper,
+            new PrestamoRepository(db, new PrestamoMapper(), new ContractHtmlProcessor())
+        );
         var validator = new UsuarioValidator(db);
         var jwt = new JwtService(jwtOptions);
         var cacheService = new CacheRepository(
@@ -185,6 +190,11 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         result.Value.AccessToken.Should().NotBeNullOrEmpty();
         result.Value.RefreshToken.Should().NotBeNullOrEmpty();
         result.Value.Usuario.Carnet.Should().Be("U001");
+        Db.ChangeTracker.Clear();
+        Db.Usuarios.Single(user => user.Carnet == "U001").RefreshToken
+            .Should().Be(JwtService.HashRefreshToken(result.Value.RefreshToken));
+        Db.Usuarios.Single(user => user.Carnet == "U001").RefreshToken
+            .Should().NotBe(result.Value.RefreshToken);
     }
 
     [Test]
@@ -199,6 +209,9 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         result.Value.AccessToken.Should().NotBeNullOrEmpty();
         result.Value.RefreshToken.Should().NotBeNullOrEmpty();
         result.Value.RefreshToken.Should().NotBe(loginResult.Value.RefreshToken);
+
+        var replayResult = await Sut.Refresh(loginResult.Value.RefreshToken);
+        replayResult.Status.Should().Be(Ardalis.Result.ResultStatus.Unauthorized);
     }
 
     [Test]
@@ -216,7 +229,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
 
         var usuario = Db.Usuarios.Single(u => u.Carnet == "U001");
-        usuario.RefreshToken = "expired-token";
+        usuario.RefreshToken = JwtService.HashRefreshToken("expired-token");
         usuario.RefreshTokenExpiry = DateTime.UtcNow.AddDays(-1);
         await Db.SaveChangesAsync();
 

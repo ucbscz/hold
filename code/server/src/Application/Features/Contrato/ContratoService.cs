@@ -9,18 +9,35 @@ namespace IMT_Reservas.Server.Application.Features.Contrato;
 public class ContratoService : Service<ContratoEntity, ContratoRepository, ContratoDto>
 {
     private readonly PrestamoRepository _prestamos;
+    private readonly ContractHtmlProcessor _contractHtml;
 
     public ContratoService(
         ContratoRepository repository,
         ContratoMapper mapper,
         IValidator<ContratoDto> validator,
-        PrestamoRepository prestamos
+        PrestamoRepository prestamos,
+        ContractHtmlProcessor contractHtml
     )
-        : base(repository, validator, mapper) => _prestamos = prestamos;
+        : base(repository, validator, mapper)
+    {
+        _prestamos = prestamos;
+        _contractHtml = contractHtml;
+    }
 
     public async Task<Result<ContratoDto>> CreateForPrestamo(int prestamoId, string htmlContent)
     {
-        var dto = new ContratoDto { ContratoHtml = htmlContent, PrestamoId = prestamoId };
+        string sanitizedHtml;
+
+        try
+        {
+            sanitizedHtml = _contractHtml.Sanitize(htmlContent);
+        }
+        catch (ArgumentException exception)
+        {
+            return Result<ContratoDto>.Error(exception.Message);
+        }
+
+        var dto = new ContratoDto { ContratoHtml = sanitizedHtml, PrestamoId = prestamoId };
         var validation = await Validator.ValidateAsync(dto);
 
         if (!validation.IsValid)
@@ -48,9 +65,15 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
         return result;
     }
 
-    public async Task<Result<ContratoDto>> GetByPrestamoId(int prestamoId)
+    public async Task<Result<ContratoDto>> GetByPrestamoId(
+        int prestamoId,
+        string carnet,
+        bool isAdmin
+    )
     {
-        await _prestamos.UpdateContratoWithEquipos(prestamoId);
+        if (!await Repository.CanAccess(prestamoId, carnet, isAdmin))
+            return Result<ContratoDto>.NotFound();
+
         var result = await Repository.GetEntityByPrestamoId(prestamoId);
 
         if (!result.IsSuccess)
@@ -58,6 +81,12 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
                 result.Errors.FirstOrDefault() ?? "Contrato no encontrado"
             );
 
-        return Result<ContratoDto>.Success(MapToDto(result.Value));
+        var dto = MapToDto(result.Value);
+        dto.ContratoHtml = _contractHtml.RenderEquipment(
+            dto.ContratoHtml ?? string.Empty,
+            await _prestamos.GetContractEquipment(prestamoId)
+        );
+
+        return Result<ContratoDto>.Success(dto);
     }
 }

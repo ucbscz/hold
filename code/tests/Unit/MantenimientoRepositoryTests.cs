@@ -102,4 +102,37 @@ public class MantenimientoRepositoryTests
         detalles.First().IdEquipo.Should().Be(10);
         detalles.First().TipoMantenimiento.Should().Be("Preventivo");
     }
+
+    [Test]
+    public async Task HasScheduleConflict_PendingLoanForEquipment_ReturnsTrue()
+    {
+        var start = DateTime.UtcNow.AddDays(1);
+        var end = start.AddHours(2);
+        var equipment = new Equipo
+        {
+            Id = 10,
+            CodigoImt = 123,
+            EstadoEquipo = EstadoEquipo.Operativo,
+            FechaIngresoEquipo = DateOnly.FromDateTime(DateTime.Today),
+        };
+        var loan = new Prestamo
+        {
+            EstadoPrestamo = EstadoPrestamo.Pendiente,
+            FechaSolicitud = DateTime.UtcNow,
+            FechaPrestamoEsperada = start,
+            FechaDevolucionEsperada = end,
+        };
+        _dbContext.AddRange(equipment, loan);
+        await _dbContext.SaveChangesAsync();
+        _dbContext.DetallesPrestamos.Add(new DetallePrestamo
+        {
+            IdPrestamo = loan.Id,
+            IdEquipo = equipment.Id,
+        });
+        await _dbContext.SaveChangesAsync();
+
+        var result = await _repository.HasScheduleConflict([123], start, end);
+
+        result.Should().BeTrue();
+    }
 }

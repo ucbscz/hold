@@ -1,4 +1,5 @@
 using FluentValidation;
+using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
 
@@ -21,9 +22,27 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
             )
             .WithMessage("Usuario no existe o está inactivo");
 
+        RuleFor(p => p.GrupoEquipoId)
+            .NotEmpty()
+            .WithMessage("Debe seleccionar al menos un equipo")
+            .Must(groups => groups == null || groups.Count <= 100)
+            .WithMessage("No se pueden reservar más de 100 unidades por solicitud");
+
+        RuleForEach(p => p.GrupoEquipoId)
+            .GreaterThan(0)
+            .WithMessage("El identificador del equipo no es válido");
+
+        RuleFor(p => p.Contrato)
+            .MaximumLength(ContractHtmlProcessor.MaxHtmlLength)
+            .WithMessage("El contrato supera el tamaño máximo permitido");
+
         RuleFor(p => p.FechaPrestamoEsperada)
             .NotNull()
-            .WithMessage("Fecha préstamo esperada requerida");
+            .WithMessage("Fecha préstamo esperada requerida")
+            .Must(date => !date.HasValue || date.Value >= DateTime.UtcNow)
+            .WithMessage("La fecha y hora de inicio no puede estar en el pasado")
+            .Must(date => !date.HasValue || date.Value <= DateTime.UtcNow.AddYears(1))
+            .WithMessage("La fecha de inicio no puede superar un año desde la fecha actual");
 
         RuleFor(p => p.FechaDevolucionEsperada)
             .NotNull()

@@ -152,6 +152,7 @@ builder.Services.AddScoped<MantenimientoRepository>();
 builder.Services.AddScoped<EmpresaMantenimientoRepository>();
 builder.Services.AddScoped<GaveteroRepository>();
 builder.Services.AddScoped<ContratoRepository>();
+builder.Services.AddSingleton<ContractHtmlProcessor>();
 builder.Services.AddScoped<ComponenteRepository>();
 builder.Services.AddScoped<CarritoRepository>();
 builder.Services.AddScoped<UsuarioService>();

@@ -8,12 +8,30 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
 {
     public UsuarioValidator(ApplicationDbContext dbContext)
     {
-        RuleFor(usuario => usuario.Carnet).NotEmpty().WithMessage("Carnet requerido");
-        RuleFor(usuario => usuario.Nombre).NotEmpty().WithMessage("Nombre requerido");
+        RuleFor(usuario => usuario.Carnet)
+            .NotEmpty()
+            .WithMessage("Carnet requerido")
+            .MaximumLength(20)
+            .WithMessage("Carnet no puede superar 20 caracteres");
+        RuleFor(usuario => usuario.Nombre)
+            .NotEmpty()
+            .WithMessage("Nombre requerido")
+            .MaximumLength(64)
+            .WithMessage("Nombre no puede superar 64 caracteres");
         RuleFor(usuario => usuario.ApellidoPaterno)
             .NotEmpty()
-            .WithMessage("Apellido paterno requerido");
-        RuleFor(usuario => usuario.Email).NotEmpty().EmailAddress().WithMessage("Email inválido");
+            .WithMessage("Apellido paterno requerido")
+            .MaximumLength(64)
+            .WithMessage("Apellido paterno no puede superar 64 caracteres");
+        RuleFor(usuario => usuario.ApellidoMaterno)
+            .MaximumLength(64)
+            .WithMessage("Apellido materno no puede superar 64 caracteres");
+        RuleFor(usuario => usuario.Email)
+            .NotEmpty()
+            .EmailAddress()
+            .WithMessage("Email inválido")
+            .MaximumLength(255)
+            .WithMessage("Email no puede superar 255 caracteres");
         RuleFor(usuario => usuario.Contrasena)
             .Cascade(CascadeMode.Stop)
             .MinimumLength(8)
@@ -24,7 +42,31 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
             .WithMessage("Contraseña debe tener al menos un número")
             .Matches("[^a-zA-Z0-9]")
             .WithMessage("Contraseña debe tener al menos un carácter especial")
+            .MaximumLength(72)
+            .WithMessage("Contraseña no puede superar 72 caracteres")
             .When(usuario => !string.IsNullOrWhiteSpace(usuario.Contrasena));
+
+        RuleFor(usuario => usuario.Telefono)
+            .MaximumLength(32)
+            .WithMessage("Teléfono no puede superar 32 caracteres");
+        RuleFor(usuario => usuario.TelefonoReferencia)
+            .MaximumLength(32)
+            .WithMessage("Teléfono de referencia no puede superar 32 caracteres");
+        RuleFor(usuario => usuario.NombreReferencia)
+            .MaximumLength(32)
+            .WithMessage("Nombre de referencia no puede superar 32 caracteres");
+        RuleFor(usuario => usuario.EmailReferencia)
+            .MaximumLength(255)
+            .WithMessage("Email de referencia no puede superar 255 caracteres");
+        RuleFor(usuario => usuario.MotivoBloqueo)
+            .MaximumLength(1024)
+            .WithMessage("Motivo de bloqueo no puede superar 1024 caracteres");
+        RuleFor(usuario => usuario.ImagenFrenteCarnet)
+            .Must(image => image == null || image.Length <= 5 * 1024 * 1024)
+            .WithMessage("La imagen frontal del carnet no puede superar 5 MB");
+        RuleFor(usuario => usuario.ImagenAtrasCarnet)
+            .Must(image => image == null || image.Length <= 5 * 1024 * 1024)
+            .WithMessage("La imagen posterior del carnet no puede superar 5 MB");
 
         RuleFor(usuario => usuario.IdCarrera)
             .MustAsync(

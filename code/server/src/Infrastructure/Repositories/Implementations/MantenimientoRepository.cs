@@ -95,6 +95,60 @@ public class MantenimientoRepository : Repository<MantenimientoEntity, Mantenimi
     protected override async Task CascadeDelete(MantenimientoEntity mantenimiento) =>
         await CascadeLeaf<DetalleMantenimiento>(d => d.IdMantenimiento == mantenimiento.Id);
 
+    public async Task<bool> HasScheduleConflict(
+        IReadOnlyCollection<int> codigosImt,
+        DateTime start,
+        DateTime end,
+        int? excludedMaintenanceId = null
+    )
+    {
+        if (codigosImt.Count == 0)
+            return false;
+
+        var equipmentIds = DbContext
+            .Equipos.Where(equipment =>
+                codigosImt.Contains(equipment.CodigoImt) && !equipment.EstadoEliminado
+            )
+            .Select(equipment => equipment.Id);
+
+        var conflictsWithLoans = await DbContext
+            .DetallesPrestamos.Join(
+                DbContext.Prestamos,
+                detail => detail.IdPrestamo,
+                loan => loan.Id,
+                (detail, loan) => new { Detail = detail, Loan = loan }
+            )
+            .AnyAsync(item =>
+                item.Detail.IdEquipo != null
+                && equipmentIds.Contains(item.Detail.IdEquipo.Value)
+                && (
+                    item.Loan.EstadoPrestamo == EstadoPrestamo.Pendiente
+                    || item.Loan.EstadoPrestamo == EstadoPrestamo.Aprobado
+                    || item.Loan.EstadoPrestamo == EstadoPrestamo.Activo
+                    || item.Loan.EstadoPrestamo == EstadoPrestamo.Atrasado
+                )
+                && item.Loan.FechaPrestamoEsperada < end
+                && item.Loan.FechaDevolucionEsperada > start
+            );
+
+        if (conflictsWithLoans)
+            return true;
+
+        return await DbContext
+            .DetallesMantenimientos.Join(
+                DbContext.Mantenimientos,
+                detail => detail.IdMantenimiento,
+                maintenance => maintenance.Id,
+                (detail, maintenance) => new { Detail = detail, Maintenance = maintenance }
+            )
+            .AnyAsync(item =>
+                equipmentIds.Contains(item.Detail.IdEquipo)
+                && item.Maintenance.Id != excludedMaintenanceId
+                && item.Maintenance.FechaMantenimiento < end
+                && item.Maintenance.FechaFinalMantenimiento > start
+            );
+    }
+
     public async Task AddDetalles(
         int mantenimientoId,
         int[] codigosImt,

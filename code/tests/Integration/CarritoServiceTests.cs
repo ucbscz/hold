@@ -56,6 +56,22 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
     }
 
     [Test]
+    public async Task GetDisponibilidad_WhenDurationExceedsGroupMaximum_ReturnsError()
+    {
+        var group = await Db.GruposEquipos.FindAsync(GrupoId);
+        group!.TiempoMaximoPrestamoDias = 1;
+        await Db.SaveChangesAsync();
+        var start = DateTime.Today.AddHours(8);
+
+        var result = await Sut.GetDisponibilidad(
+            BuildRequest([GrupoId], start, start.AddDays(1).AddMinutes(1))
+        );
+
+        result.IsSuccess.Should().BeFalse();
+        result.Errors.Should().Contain(error => error.Contains("hasta 1 día"));
+    }
+
+    [Test]
     public async Task GetDisponibilidad_OneActiveLoan_ReducesCapacity()
     {
         var fechaInicio = DateTime.Today;
@@ -84,7 +100,7 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
     }
 
     [Test]
-    public async Task GetDisponibilidad_PendienteLoan_DoesNotReduceCapacity()
+    public async Task GetDisponibilidad_PendienteLoan_ReducesCapacity()
     {
         var fechaInicio = DateTime.Today;
         var fechaFin = DateTime.Today.AddDays(2);
@@ -94,7 +110,7 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
         var result = await Sut.GetDisponibilidad(request);
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().AllSatisfy(d => d.CantidadDisponible.Should().Be(Total));
+        result.Value.Should().AllSatisfy(d => d.CantidadDisponible.Should().Be(Total - 1));
     }
 
     [Test]

@@ -13,4 +13,5 @@ public class GrupoEquipoDto
     public string? NombreCategoria { get; set; }
     public int? Cantidad { get; set; }
     public decimal? CostoPromedio { get; set; }
+    public int? TiempoMaximoPrestamoDias { get; set; } = 7;
 }

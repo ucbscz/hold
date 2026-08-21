@@ -12,6 +12,11 @@ public class GrupoEquipoValidator : AbstractValidator<GrupoEquipoDto>
         RuleFor(g => g.Modelo).NotEmpty().WithMessage("Modelo requerido");
         RuleFor(g => g.Marca).NotEmpty().WithMessage("Marca requerida");
 
+        RuleFor(g => g.TiempoMaximoPrestamoDias)
+            .NotNull()
+            .InclusiveBetween(1, 365)
+            .WithMessage("El tiempo máximo de préstamo debe estar entre 1 y 365 días");
+
         RuleFor(g => g.IdCategoria)
             .Cascade(CascadeMode.Stop)
             .NotNull()

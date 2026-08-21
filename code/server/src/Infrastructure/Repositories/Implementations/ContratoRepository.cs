@@ -32,6 +32,12 @@ public class ContratoRepository : Repository<ContratoEntity, ContratoDto>
         return Result<ContratoEntity>.Success(contract);
     }
 
+    public async Task<bool> CanAccess(int prestamoId, string carnet, bool isAdmin) =>
+        isAdmin
+        || await DbContext.Prestamos.AsNoTracking().AnyAsync(loan =>
+            loan.Id == prestamoId && loan.Carnet == carnet
+        );
+
     public override async Task<Result<object>> Delete(int id)
     {
         var loan = await DbContext.Prestamos.FirstOrDefaultAsync(loan => loan.Id == id);

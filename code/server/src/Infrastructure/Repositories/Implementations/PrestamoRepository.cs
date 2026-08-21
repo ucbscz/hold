@@ -1,21 +1,28 @@
+using System.Data;
 using System.Globalization;
-using System.Net;
-using System.Text.RegularExpressions;
 using Ardalis.Result;
+using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Application.Features.Prestamo.State;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 using PrestamoEntity = IMT_Reservas.Server.Core.Entities.Prestamo;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
 public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
 {
-    public PrestamoRepository(ApplicationDbContext dbContext, PrestamoMapper mapper)
-        : base(dbContext, mapper) { }
+    private readonly ContractHtmlProcessor _contractHtml;
+
+    public PrestamoRepository(
+        ApplicationDbContext dbContext,
+        PrestamoMapper mapper,
+        ContractHtmlProcessor contractHtml
+    )
+        : base(dbContext, mapper) => _contractHtml = contractHtml;
 
     public override async Task<Result<List<PrestamoDto>>> GetAll()
     {
@@ -27,6 +34,17 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
     {
         var list = await GetPrestamoList(DbContext.Prestamos.AsNoTracking().Where(p => p.Id == id));
         var item = list.FirstOrDefault();
+        return item == null ? Result<PrestamoDto>.NotFound() : Result<PrestamoDto>.Success(item);
+    }
+
+    public async Task<Result<PrestamoDto>> GetAuthorized(int id, string carnet, bool isAdmin)
+    {
+        var query = DbContext.Prestamos.AsNoTracking().Where(loan => loan.Id == id);
+
+        if (!isAdmin)
+            query = query.Where(loan => loan.Carnet == carnet);
+
+        var item = (await GetPrestamoList(query)).FirstOrDefault();
         return item == null ? Result<PrestamoDto>.NotFound() : Result<PrestamoDto>.Success(item);
     }
 
@@ -78,9 +96,147 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
         return string.IsNullOrWhiteSpace(fullName) ? carnet : fullName;
     }
 
-    public async Task SavePrestamo(PrestamoEntity entity)
+    public async Task<Result<PrestamoEntity>> CreateReservation(
+        PrestamoEntity entity,
+        IReadOnlyCollection<int> groupIds,
+        string? contractHtml
+    )
     {
-        DbContext.Prestamos.Add(entity);
+        await using var transaction = DbContext.Database.IsRelational()
+            ? await DbContext.Database.BeginTransactionAsync(IsolationLevel.Serializable)
+            : null;
+
+        try
+        {
+            var durationViolation = await GetLoanDurationViolation(
+                groupIds,
+                entity.FechaPrestamoEsperada,
+                entity.FechaDevolucionEsperada
+            );
+
+            if (durationViolation != null)
+            {
+                if (transaction != null)
+                    await transaction.RollbackAsync();
+
+                return Result<PrestamoEntity>.Error(durationViolation);
+            }
+
+            DbContext.Prestamos.Add(entity);
+            await DbContext.SaveChangesAsync();
+
+            var details = groupIds.Select(groupId => new DetallePrestamo
+            {
+                IdPrestamo = entity.Id,
+                IdGrupoEquipo = groupId,
+                EstadoEliminado = false,
+            });
+
+            DbContext.DetallesPrestamos.AddRange(details);
+            await DbContext.SaveChangesAsync();
+
+            if (!await AssignEquiposOnApproval(entity.Id))
+            {
+                await RollbackCreate(transaction, entity.Id);
+                return Result<PrestamoEntity>.Error(
+                    "No hay suficientes unidades disponibles en el horario seleccionado"
+                );
+            }
+
+            if (!string.IsNullOrWhiteSpace(contractHtml))
+            {
+                var equipment = await GetContractEquipment(entity.Id);
+                var contract = new Contrato
+                {
+                    ContratoHtml = _contractHtml.RenderEquipment(contractHtml, equipment),
+                };
+
+                DbContext.Contratos.Add(contract);
+                await DbContext.SaveChangesAsync();
+
+                entity.IdContrato = contract.Id;
+                await DbContext.SaveChangesAsync();
+            }
+
+            if (transaction != null)
+                await transaction.CommitAsync();
+
+            return Result<PrestamoEntity>.Success(entity);
+        }
+        catch (ArgumentException exception)
+        {
+            await RollbackCreate(transaction, entity.Id);
+            return Result<PrestamoEntity>.Error(exception.Message);
+        }
+        catch (DbUpdateException)
+        {
+            await RollbackCreate(transaction, entity.Id);
+            return Result<PrestamoEntity>.Error(
+                "La disponibilidad cambió mientras se procesaba la reserva. Intente nuevamente."
+            );
+        }
+        catch (PostgresException exception)
+            when (exception.SqlState == PostgresErrorCodes.SerializationFailure)
+        {
+            await RollbackCreate(transaction, entity.Id);
+            return Result<PrestamoEntity>.Error(
+                "Otra reserva modificó la disponibilidad. Intente nuevamente."
+            );
+        }
+    }
+
+    private async Task<string?> GetLoanDurationViolation(
+        IReadOnlyCollection<int> groupIds,
+        DateTime startDate,
+        DateTime endDate
+    )
+    {
+        var requestedIds = groupIds.Distinct().ToArray();
+        var groups = await DbContext
+            .GruposEquipos.AsNoTracking()
+            .Where(group => requestedIds.Contains(group.Id))
+            .Select(group => new
+            {
+                group.Nombre,
+                group.TiempoMaximoPrestamoDias,
+            })
+            .ToListAsync();
+
+        if (groups.Count != requestedIds.Length)
+            return "Uno o más grupos de equipos no existen o no están disponibles";
+
+        var duration = endDate - startDate;
+        var exceeded = groups
+            .Where(group => duration > TimeSpan.FromDays(group.TiempoMaximoPrestamoDias))
+            .OrderBy(group => group.TiempoMaximoPrestamoDias)
+            .FirstOrDefault();
+
+        return exceeded == null
+            ? null
+            : $"El grupo '{exceeded.Nombre}' permite préstamos de hasta {exceeded.TiempoMaximoPrestamoDias} día(s)";
+    }
+
+    private async Task RollbackCreate(
+        Microsoft.EntityFrameworkCore.Storage.IDbContextTransaction? transaction,
+        int prestamoId
+    )
+    {
+        if (transaction != null)
+        {
+            await transaction.RollbackAsync();
+            return;
+        }
+
+        var details = await DbContext
+            .DetallesPrestamos.Where(detail => detail.IdPrestamo == prestamoId)
+            .ToListAsync();
+        DbContext.DetallesPrestamos.RemoveRange(details);
+
+        var loan = await DbContext.Prestamos.FirstOrDefaultAsync(item => item.Id == prestamoId);
+
+        if (loan != null)
+            DbContext.Prestamos.Remove(loan);
+
         await DbContext.SaveChangesAsync();
     }
 
@@ -173,6 +329,7 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                         activeLoan.Detail.IdEquipo == equipment.Id
                         && (
                             activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Aprobado
+                            || activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Pendiente
                             || activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Activo
                             || activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Atrasado
                         )
@@ -194,24 +351,22 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
             )
             .CountAsync();
 
-        return availableQuantity >= requiredQuantity;
-    }
+        var unassignedReservations = await DbContext
+            .DetallesPrestamos.Join(
+                DbContext.Prestamos,
+                detail => detail.IdPrestamo,
+                loan => loan.Id,
+                (detail, loan) => new { Detail = detail, Loan = loan }
+            )
+            .CountAsync(reservation =>
+                reservation.Detail.IdGrupoEquipo == grupoEquipoId
+                && reservation.Detail.IdEquipo == null
+                && reservation.Loan.EstadoPrestamo == EstadoPrestamo.Pendiente
+                && reservation.Loan.FechaPrestamoEsperada < endDate
+                && reservation.Loan.FechaDevolucionEsperada > startDate
+            );
 
-    public async Task SaveGrupoEquipoReservations(int prestamoId, List<int>? grupoEquipoIds)
-    {
-        if (grupoEquipoIds == null || grupoEquipoIds.Count == 0)
-            return;
-
-        var details = grupoEquipoIds.Select(groupId => new DetallePrestamo
-        {
-            IdPrestamo = prestamoId,
-            IdGrupoEquipo = groupId,
-            IdEquipo = null,
-            EstadoEliminado = false,
-        });
-
-        DbContext.DetallesPrestamos.AddRange(details);
-        await DbContext.SaveChangesAsync();
+        return availableQuantity - unassignedReservations >= requiredQuantity;
     }
 
     public async Task<bool> AssignEquiposOnApproval(int prestamoId)
@@ -239,8 +394,10 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
             )
             .Where(activeLoan =>
                 activeLoan.Detail.IdEquipo != null
+                && activeLoan.Loan.Id != prestamoId
                 && (
-                    activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Aprobado
+                    activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Pendiente
+                    || activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Aprobado
                     || activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Activo
                     || activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Atrasado
                 )
@@ -274,6 +431,7 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                                 > loan.FechaPrestamoEsperada
                         )
                 )
+                .OrderBy(equipment => equipment.Id)
                 .Select(equipment => new { equipment.Id, equipment.IdGrupoEquipo })
                 .ToListAsync()
         )
@@ -298,103 +456,23 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
         return true;
     }
 
-    public async Task UpdateContratoWithEquipos(int prestamoId)
-    {
-        var loan = await DbContext.Prestamos.FirstOrDefaultAsync(loan => loan.Id == prestamoId);
-
-        if (loan?.IdContrato == null)
-            return;
-
-        var contract = await DbContext.Contratos.FirstOrDefaultAsync(contract =>
-            contract.Id == loan.IdContrato
-        );
-
-        if (contract == null || string.IsNullOrEmpty(contract.ContratoHtml))
-            return;
-
-        var details = await DbContext
-            .DetallesPrestamos.Where(detail =>
-                detail.IdPrestamo == prestamoId && !detail.EstadoEliminado && detail.IdEquipo != null
+    public async Task<List<ContractEquipmentData>> GetContractEquipment(int prestamoId) =>
+        await (
+            from detail in DbContext.DetallesPrestamos.AsNoTracking()
+            join equipment in DbContext.Equipos.AsNoTracking()
+                on detail.IdEquipo equals equipment.Id
+            where
+                detail.IdPrestamo == prestamoId
+                && !detail.EstadoEliminado
+                && detail.IdEquipo != null
+            orderby equipment.CodigoImt
+            select new ContractEquipmentData(
+                detail.IdGrupoEquipo,
+                equipment.CodigoImt,
+                equipment.CodigoUcb,
+                equipment.NumeroSerial
             )
-            .ToListAsync();
-
-        var equipmentIds = details.Select(detail => detail.IdEquipo!.Value).ToHashSet();
-
-        var equipmentById = await DbContext
-            .Equipos.AsNoTracking()
-            .Where(equipment => equipmentIds.Contains(equipment.Id))
-            .ToDictionaryAsync(equipment => equipment.Id);
-
-        var equipmentByGroup = new Dictionary<int, List<Equipo>>();
-
-        foreach (var detail in details)
-        {
-            if (!equipmentById.TryGetValue(detail.IdEquipo!.Value, out var equipment))
-                continue;
-
-            if (!equipmentByGroup.TryGetValue(detail.IdGrupoEquipo, out var groupEquipment))
-            {
-                groupEquipment = [];
-                equipmentByGroup[detail.IdGrupoEquipo] = groupEquipment;
-            }
-
-            groupEquipment.Add(equipment);
-        }
-
-        var html = contract.ContratoHtml;
-
-        foreach (var (groupId, equipment) in equipmentByGroup)
-        {
-            var imtCodes = string.Join(
-                ", ",
-                equipment.Select(item => item.CodigoImt.ToString(CultureInfo.InvariantCulture))
-            );
-            var ucbCodes = string.Join(
-                ", ",
-                equipment.Select(item => FormatContractCode(item.CodigoUcb))
-            );
-            var serials = string.Join(
-                ", ",
-                equipment.Select(item => FormatContractCode(item.NumeroSerial))
-            );
-
-            html = Regex.Replace(
-                html,
-                $@"<td[^>]*class=""imt-code""[^>]*data-grupo-id=""{groupId}""[^>]*>.*?</td>",
-                $@"<td class=""imt-code"" data-grupo-id=""{groupId}"">{imtCodes}</td>",
-                RegexOptions.None,
-                TimeSpan.FromMilliseconds(500)
-            );
-
-            html = Regex.Replace(
-                html,
-                $@"<td[^>]*class=""ucb-code""[^>]*data-grupo-id=""{groupId}""[^>]*>.*?</td>",
-                $@"<td class=""ucb-code"" data-grupo-id=""{groupId}"">{ucbCodes}</td>",
-                RegexOptions.None,
-                TimeSpan.FromMilliseconds(500)
-            );
-
-            html = Regex.Replace(
-                html,
-                $@"<td[^>]*class=""serial-code""[^>]*data-grupo-id=""{groupId}""[^>]*>.*?</td>",
-                $@"<td class=""serial-code"" data-grupo-id=""{groupId}"">{serials}</td>",
-                RegexOptions.None,
-                TimeSpan.FromMilliseconds(500)
-            );
-        }
-
-        if (html == contract.ContratoHtml)
-            return;
-
-        contract.ContratoHtml = html;
-        DbContext.Contratos.Update(contract);
-        await DbContext.SaveChangesAsync();
-    }
-
-    private static string FormatContractCode(string? value) =>
-        WebUtility.HtmlEncode(
-            string.IsNullOrWhiteSpace(value) ? "No registrado" : value.Trim()
-        );
+        ).ToListAsync();
 
     public async Task<string?> GetGrupoEquipoNombre(int grupoEquipoId) =>
         await DbContext
@@ -402,20 +480,6 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
             .Where(group => group.Id == grupoEquipoId && !group.EstadoEliminado)
             .Select(group => group.Nombre)
             .FirstOrDefaultAsync();
-
-    public async Task SaveContrato(PrestamoEntity entity, string? contratoHtml)
-    {
-        if (string.IsNullOrEmpty(contratoHtml))
-            return;
-
-        var contract = new Contrato { ContratoHtml = contratoHtml };
-        DbContext.Contratos.Add(contract);
-        await DbContext.SaveChangesAsync();
-
-        entity.IdContrato = contract.Id;
-        DbContext.Prestamos.Update(entity);
-        await DbContext.SaveChangesAsync();
-    }
 
     public async Task<bool> HasAtrasadoPrestamo(string carnet) =>
         await DbContext.Prestamos.AnyAsync(loan =>

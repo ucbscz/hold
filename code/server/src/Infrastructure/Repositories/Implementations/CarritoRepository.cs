@@ -27,8 +27,22 @@ public class CarritoRepository
             .ToDictionaryAsync(group => group.GrupoId, group => group.Cantidad);
     }
 
+    public async Task<Dictionary<int, (string Nombre, int MaximoDias)>> GetLoanLimitsByGroups(
+        IReadOnlyCollection<int> grupoIds
+    ) =>
+        await _dbContext
+            .GruposEquipos.AsNoTracking()
+            .Where(group => grupoIds.Contains(group.Id))
+            .ToDictionaryAsync(
+                group => group.Id,
+                group => new ValueTuple<string, int>(
+                    group.Nombre,
+                    group.TiempoMaximoPrestamoDias
+                )
+            );
+
     public async Task<
-        List<(int IdGrupoEquipo, DateTime FechaPrestamo, DateTime FechaDevolucion)>
+        List<(int IdGrupoEquipo, int IdEquipo)>
     > GetPrestamosActivosEnRango(List<int> grupoIds, DateTime fechaInicio, DateTime fechaFin)
     {
         var rows = await (
@@ -39,7 +53,8 @@ public class CarritoRepository
             where
                 grupoIds.Contains(equipo.IdGrupoEquipo)
                 && (
-                    prestamo.EstadoPrestamo == EstadoPrestamo.Activo
+                    prestamo.EstadoPrestamo == EstadoPrestamo.Pendiente
+                    || prestamo.EstadoPrestamo == EstadoPrestamo.Activo
                     || prestamo.EstadoPrestamo == EstadoPrestamo.Aprobado
                     || prestamo.EstadoPrestamo == EstadoPrestamo.Atrasado
                 )
@@ -48,18 +63,19 @@ public class CarritoRepository
             select new
             {
                 equipo.IdGrupoEquipo,
+                equipo.Id,
                 prestamo.FechaPrestamoEsperada,
                 prestamo.FechaDevolucionEsperada,
             }
         ).ToListAsync();
 
         return rows.ConvertAll(r =>
-            (r.IdGrupoEquipo, r.FechaPrestamoEsperada, r.FechaDevolucionEsperada)
+            (r.IdGrupoEquipo, r.Id)
         );
     }
 
     public async Task<
-        List<(int IdGrupoEquipo, DateTime FechaInicio, DateTime FechaFin)>
+        List<(int IdGrupoEquipo, int IdEquipo)>
     > GetMantenimientosActivosEnRango(List<int> grupoIds, DateTime fechaInicio, DateTime fechaFin)
     {
         var rows = await (
@@ -74,13 +90,14 @@ public class CarritoRepository
             select new
             {
                 equipo.IdGrupoEquipo,
+                equipo.Id,
                 mantenimiento.FechaMantenimiento,
                 mantenimiento.FechaFinalMantenimiento,
             }
         ).ToListAsync();
 
         return rows.ConvertAll(r =>
-            (r.IdGrupoEquipo, r.FechaMantenimiento, r.FechaFinalMantenimiento)
+            (r.IdGrupoEquipo, r.Id)
         );
     }
 }

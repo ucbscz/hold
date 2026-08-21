@@ -4,6 +4,7 @@ using IMT_Reservas.Server.Application.Features.Notificacion;
 using IMT_Reservas.Server.Application.Features.Usuario;
 using Microsoft.AspNetCore.Http;
 using IMT_Reservas.Server.Application.Features.Prestamo;
+using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
@@ -21,7 +22,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     protected override PrestamoService CreateService(ApplicationDbContext db)
     {
         var mapper = new PrestamoMapper();
-        var repo = new PrestamoRepository(db, mapper);
+        var repo = new PrestamoRepository(db, mapper, new ContractHtmlProcessor());
         var validator = new PrestamoValidator(db);
 
         var audit = new AuditLogService(new AuditLogRepository(db), new HttpContextAccessor());
@@ -81,19 +82,67 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     [Test]
     public async Task Create_WithAvailableEquipo_ReturnsSuccess()
     {
-        var dto = BuildValidPrestamo(Carnet, GrupoId, DateTime.Today, DateTime.Today.AddDays(3));
+        var start = DateTime.UtcNow.AddDays(1);
+        var dto = BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3));
 
         var result = await Sut.Create(dto);
 
         result.IsSuccess.Should().BeTrue();
         Db.DetallesPrestamos.Should().HaveCount(1);
+        Db.DetallesPrestamos.Single().IdEquipo.Should().Be(EquipoId);
+    }
+
+    [Test]
+    public async Task Create_WhenDurationExceedsGroupMaximum_ReturnsError()
+    {
+        var group = await Db.GruposEquipos.FindAsync(GrupoId);
+        group!.TiempoMaximoPrestamoDias = 2;
+        await Db.SaveChangesAsync();
+        var start = DateTime.UtcNow.AddDays(1);
+
+        var result = await Sut.Create(
+            BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(2).AddMinutes(1))
+        );
+
+        result.IsSuccess.Should().BeFalse();
+        result.Errors.Should().Contain(error => error.Contains("hasta 2 día"));
+        Db.Prestamos.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task Create_WhenDurationMatchesGroupMaximum_ReturnsSuccess()
+    {
+        var group = await Db.GruposEquipos.FindAsync(GrupoId);
+        group!.TiempoMaximoPrestamoDias = 2;
+        await Db.SaveChangesAsync();
+        var start = DateTime.UtcNow.AddDays(1);
+
+        var result = await Sut.Create(
+            BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(2))
+        );
+
+        result.IsSuccess.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Create_WhenGroupDoesNotExist_ReturnsErrorWithoutPersistingLoan()
+    {
+        var start = DateTime.UtcNow.AddDays(1);
+
+        var result = await Sut.Create(
+            BuildValidPrestamo(Carnet, 999_999, start, start.AddHours(1))
+        );
+
+        result.IsSuccess.Should().BeFalse();
+        result.Errors.Should().Contain(error => error.Contains("no existen"));
+        Db.Prestamos.Should().BeEmpty();
     }
 
     [Test]
     public async Task Create_EquipoAprobadoInSameDates_ReturnsError()
     {
-        var fechaInicio = DateTime.Today;
-        var fechaFin = DateTime.Today.AddDays(3);
+        var fechaInicio = DateTime.UtcNow.AddDays(1);
+        var fechaFin = fechaInicio.AddDays(3);
         await SeedActiveLoan(EstadoPrestamo.Aprobado, fechaInicio, fechaFin);
 
         var result = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, fechaInicio, fechaFin));
@@ -105,8 +154,8 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     [Test]
     public async Task Create_EquipoActivoInSameDates_ReturnsError()
     {
-        var fechaInicio = DateTime.Today;
-        var fechaFin = DateTime.Today.AddDays(3);
+        var fechaInicio = DateTime.UtcNow.AddDays(1);
+        var fechaFin = fechaInicio.AddDays(3);
         await SeedActiveLoan(EstadoPrestamo.Activo, fechaInicio, fechaFin);
 
         var result = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, fechaInicio, fechaFin));
@@ -116,23 +165,25 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     }
 
     [Test]
-    public async Task Create_EquipoPendienteInSameDates_DoesNotBlock()
+    public async Task Create_EquipoPendienteInSameDates_ReturnsError()
     {
-        var fechaInicio = DateTime.Today;
-        var fechaFin = DateTime.Today.AddDays(3);
+        var fechaInicio = DateTime.UtcNow.AddDays(1);
+        var fechaFin = fechaInicio.AddDays(3);
         await SeedActiveLoan(EstadoPrestamo.Pendiente, fechaInicio, fechaFin);
 
         var result = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, fechaInicio, fechaFin));
 
-        result.IsSuccess.Should().BeTrue();
+        result.IsSuccess.Should().BeFalse();
+        result.Errors.Should().Contain(e => e.Contains("disponible"));
     }
 
     [Test]
     public async Task Create_EquipoLoanedOnDifferentDates_DoesNotBlock()
     {
-        await SeedActiveLoan(EstadoPrestamo.Aprobado, DateTime.Today.AddDays(10), DateTime.Today.AddDays(15));
+        await SeedActiveLoan(EstadoPrestamo.Aprobado, DateTime.UtcNow.AddDays(10), DateTime.UtcNow.AddDays(15));
 
-        var result = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.Today, DateTime.Today.AddDays(3)));
+        var start = DateTime.UtcNow.AddDays(1);
+        var result = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
 
         result.IsSuccess.Should().BeTrue();
     }
@@ -140,7 +191,8 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     [Test]
     public async Task UpdateStatus_ValidTransition_Succeeds()
     {
-        var createResult = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.Today, DateTime.Today.AddDays(3)));
+        var start = DateTime.UtcNow.AddDays(1);
+        var createResult = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
         var prestamoId = createResult.Value.Id!.Value;
 
         var result = await Sut.UpdateStatus(prestamoId, "rechazado");
@@ -152,7 +204,8 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     [Test]
     public async Task UpdateStatus_InvalidTransition_ReturnsError()
     {
-        var createResult = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.Today, DateTime.Today.AddDays(3)));
+        var start = DateTime.UtcNow.AddDays(1);
+        var createResult = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
         var prestamoId = createResult.Value.Id!.Value;
 
         var result = await Sut.UpdateStatus(prestamoId, "activo");
@@ -164,7 +217,8 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     [Test]
     public async Task UpdateStatus_UnknownStatus_ReturnsError()
     {
-        var createResult = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.Today, DateTime.Today.AddDays(3)));
+        var start = DateTime.UtcNow.AddDays(1);
+        var createResult = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
         var prestamoId = createResult.Value.Id!.Value;
 
         var result = await Sut.UpdateStatus(prestamoId, "estado_inventado");
@@ -188,12 +242,26 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var fechaInicio = DateTime.UtcNow.AddDays(1);
         var fechaFin = DateTime.UtcNow.AddDays(3);
 
-        var createResult = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, fechaInicio, fechaFin));
-        var prestamoId = createResult.Value.Id!.Value;
+        var loan = new Prestamo
+        {
+            Carnet = Carnet,
+            EstadoPrestamo = EstadoPrestamo.Pendiente,
+            FechaSolicitud = DateTime.UtcNow,
+            FechaPrestamoEsperada = fechaInicio,
+            FechaDevolucionEsperada = fechaFin,
+        };
+        Db.Prestamos.Add(loan);
+        await Db.SaveChangesAsync();
+        Db.DetallesPrestamos.Add(new DetallePrestamo
+        {
+            IdPrestamo = loan.Id,
+            IdGrupoEquipo = GrupoId,
+        });
+        await Db.SaveChangesAsync();
 
         await SeedActiveLoanForEquipo(EquipoId, EstadoPrestamo.Aprobado, fechaInicio, fechaFin);
 
-        var result = await Sut.UpdateStatus(prestamoId, "aprobado");
+        var result = await Sut.UpdateStatus(loan.Id, "aprobado");
 
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().Contain(e => e.Contains("no hay equipos disponibles"));
@@ -247,22 +315,25 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     [Test]
     public async Task UpdateStatus_ApproveAfterExpectedStart_ReturnsError()
     {
-        var createResult = await Sut.Create(BuildValidPrestamo(
-            Carnet,
-            GrupoId,
-            DateTime.UtcNow.AddHours(-2),
-            DateTime.UtcNow.AddHours(1)
-        ));
-        var prestamoId = createResult.Value.Id!.Value;
+        var loan = new Prestamo
+        {
+            Carnet = Carnet,
+            EstadoPrestamo = EstadoPrestamo.Pendiente,
+            FechaSolicitud = DateTime.UtcNow.AddHours(-3),
+            FechaPrestamoEsperada = DateTime.UtcNow.AddHours(-2),
+            FechaDevolucionEsperada = DateTime.UtcNow.AddHours(1),
+        };
+        Db.Prestamos.Add(loan);
+        await Db.SaveChangesAsync();
 
-        var result = await Sut.UpdateStatus(prestamoId, "aprobado");
+        var result = await Sut.UpdateStatus(loan.Id, "aprobado");
 
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().Contain(error => error.Contains("ya venció"));
     }
 
     [Test]
-    public async Task UpdateStatus_ApprovalWritesAssignedEquipmentIntoContract()
+    public async Task Create_WritesAssignedEquipmentIntoContractImmediately()
     {
         const string contract = """
             <table><tr>
@@ -280,9 +351,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         dto.Contrato = contract;
         var createResult = await Sut.Create(dto);
 
-        var result = await Sut.UpdateStatus(createResult.Value.Id!.Value, "aprobado");
-
-        result.IsSuccess.Should().BeTrue();
+        createResult.IsSuccess.Should().BeTrue();
         var savedContract = Db.Contratos.Single().ContratoHtml;
         savedContract.Should().Contain(">1</td>");
         savedContract.Should().Contain(">UCB-001</td>");
@@ -291,9 +360,123 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     }
 
     [Test]
+    public async Task Create_WritesEveryPhysicalCodeForMultipleUnits()
+    {
+        Db.Equipos.Add(new Equipo
+        {
+            Id = 2,
+            IdGrupoEquipo = GrupoId,
+            CodigoImt = 2,
+            CodigoUcb = null,
+            NumeroSerial = "SER-002",
+            EstadoEquipo = EstadoEquipo.Operativo,
+            FechaIngresoEquipo = DateOnly.FromDateTime(DateTime.Today),
+        });
+        await Db.SaveChangesAsync();
+        const string contract = """
+            <table><tbody><tr>
+              <td class="imt-code" data-grupo-id="1">Por definirse</td>
+              <td class="ucb-code" data-grupo-id="1">Por definirse</td>
+              <td class="serial-code" data-grupo-id="1">Por definirse</td>
+            </tr></tbody></table>
+            """;
+        var dto = BuildValidPrestamo(
+            Carnet,
+            GrupoId,
+            DateTime.UtcNow.AddDays(1),
+            DateTime.UtcNow.AddDays(3)
+        );
+        dto.GrupoEquipoId = [GrupoId, GrupoId];
+        dto.Contrato = contract;
+
+        var result = await Sut.Create(dto);
+
+        result.IsSuccess.Should().BeTrue();
+        var savedContract = Db.Contratos.Single().ContratoHtml;
+        savedContract.Should().Contain(">1, 2</td>");
+        savedContract.Should().Contain(">UCB-001, No registrado</td>");
+        savedContract.Should().Contain(">SER-001, SER-002</td>");
+    }
+
+    [Test]
+    public async Task CreateForUser_OverridesSpoofedCarnet()
+    {
+        Db.Usuarios.Add(new Usuario
+        {
+            Carnet = "U002",
+            Nombre = "Other",
+            ApellidoPaterno = "User",
+            Email = "u002@ucb.edu.bo",
+            Contrasena = "hashed",
+        });
+        await Db.SaveChangesAsync();
+        var dto = BuildValidPrestamo(
+            "U002",
+            GrupoId,
+            DateTime.UtcNow.AddDays(1),
+            DateTime.UtcNow.AddDays(3)
+        );
+
+        var result = await Sut.CreateForUser(dto, Carnet);
+
+        result.IsSuccess.Should().BeTrue();
+        Db.Prestamos.Single().Carnet.Should().Be(Carnet);
+    }
+
+    [Test]
+    public async Task GetAuthorized_HidesAnotherUsersLoan()
+    {
+        var createResult = await Sut.Create(
+            BuildValidPrestamo(
+                Carnet,
+                GrupoId,
+                DateTime.UtcNow.AddDays(1),
+                DateTime.UtcNow.AddDays(3)
+            )
+        );
+        var id = createResult.Value.Id!.Value;
+
+        var unauthorized = await Sut.GetAuthorized(id, "U002", false);
+        var admin = await Sut.GetAuthorized(id, "U002", true);
+
+        unauthorized.Status.Should().Be(Ardalis.Result.ResultStatus.NotFound);
+        admin.IsSuccess.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task Create_SanitizesUnsafeContractMarkup()
+    {
+        var dto = BuildValidPrestamo(
+            Carnet,
+            GrupoId,
+            DateTime.UtcNow.AddDays(1),
+            DateTime.UtcNow.AddDays(3)
+        );
+        dto.Contrato = """
+            <div onclick="alert(1)"><script>alert(1)</script>
+              <img src="javascript:alert(1)" onerror="alert(2)">
+              <table><tbody><tr>
+                <td class="imt-code" data-grupo-id="1">Por definirse</td>
+              </tr></tbody></table>
+            </div>
+            """;
+
+        var result = await Sut.Create(dto);
+
+        result.IsSuccess.Should().BeTrue();
+        var savedContract = Db.Contratos.Single().ContratoHtml;
+        savedContract.Should().NotContain("script");
+        savedContract.Should().NotContain("onclick");
+        savedContract.Should().NotContain("onerror");
+        savedContract.Should().NotContain("javascript:");
+        savedContract.Should().Contain(">1</td>");
+    }
+
+    [Test]
     public async Task GetHistory_ByCarnet_ReturnsOnlyThatUsersPrestamos()
     {
-        await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.Today, DateTime.Today.AddDays(3)));
+        var start = DateTime.UtcNow.AddDays(1);
+        await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
 
         var result = await Sut.GetHistory(Carnet, "todos");
 
@@ -304,7 +487,8 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     [Test]
     public async Task GetHistory_FilterByEstado_ReturnsFiltered()
     {
-        await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.Today, DateTime.Today.AddDays(3)));
+        var start = DateTime.UtcNow.AddDays(1);
+        await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
 
         var result = await Sut.GetHistory(Carnet, "pendiente");
 
@@ -315,7 +499,8 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     [Test]
     public async Task GetFiltered_WithoutCarnet_FiltersAllLoansByStatus()
     {
-        await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.Today, DateTime.Today.AddDays(3)));
+        var start = DateTime.UtcNow.AddDays(1);
+        await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
 
         var result = await Sut.GetFiltered(null, "pendiente");
 

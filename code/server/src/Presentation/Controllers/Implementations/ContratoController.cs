@@ -15,27 +15,47 @@ public class ContratoController : Controller
         _contratoService = contratoService;
 
     [HttpPost]
+    [Authorize(Roles = "administrador")]
     [Consumes("multipart/form-data")]
+    [RequestSizeLimit(ContractHtmlProcessor.MaxHtmlLength + 64_000)]
     public async Task<IActionResult> Create([FromForm] int? prestamoId, IFormFile? archivo)
     {
-        string? htmlContent = null;
+        if (archivo == null || archivo.Length == 0)
+            return BadRequest("Archivo HTML requerido");
 
-        if (archivo != null)
-        {
-            using var reader = new StreamReader(archivo.OpenReadStream());
-            htmlContent = await reader.ReadToEndAsync();
-        }
+        if (archivo.Length > ContractHtmlProcessor.MaxHtmlLength)
+            return BadRequest("El contrato supera el tamaño máximo permitido");
 
-        var result = await _contratoService.CreateForPrestamo(prestamoId ?? 0, htmlContent ?? "");
+        if (
+            !string.Equals(archivo.ContentType, "text/html", StringComparison.OrdinalIgnoreCase)
+            || !string.Equals(
+                Path.GetExtension(archivo.FileName),
+                ".html",
+                StringComparison.OrdinalIgnoreCase
+            )
+        )
+            return BadRequest("El contrato debe ser un archivo HTML");
+
+        using var reader = new StreamReader(archivo.OpenReadStream());
+        var htmlContent = await reader.ReadToEndAsync();
+
+        var result = await _contratoService.CreateForPrestamo(prestamoId ?? 0, htmlContent);
 
         return ToResponse(result);
     }
 
-    [HttpGet("{prestamoId}")]
+    [HttpGet("{prestamoId:int}")]
     public async Task<IActionResult> GetByPrestamoId(int prestamoId) =>
-        ToResponse(await _contratoService.GetByPrestamoId(prestamoId));
+        ToResponse(
+            await _contratoService.GetByPrestamoId(
+                prestamoId,
+                User.Identity?.Name ?? string.Empty,
+                User.IsInRole("administrador")
+            )
+        );
 
-    [HttpDelete("{prestamoId}")]
+    [Authorize(Roles = "administrador")]
+    [HttpDelete("{prestamoId:int}")]
     public async Task<IActionResult> Delete(int prestamoId) =>
         ToDeleteResponse(await _contratoService.Delete(prestamoId));
 }

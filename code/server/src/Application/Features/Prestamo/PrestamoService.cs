@@ -14,7 +14,6 @@ namespace IMT_Reservas.Server.Application.Features.Prestamo;
 
 public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, PrestamoDto>
 {
-    private readonly PrestamoMapper _mapper;
     private readonly NotificacionService _notifications;
     private readonly UsuarioRepository _usuarioRepository;
     private readonly AvisoDisponibilidadRepository _availabilityWatches;
@@ -30,7 +29,6 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
     )
         : base(repository, validator, mapper, audit)
     {
-        _mapper = mapper;
         _notifications = notifications;
         _usuarioRepository = usuarioRepository;
         _availabilityWatches = availabilityWatches;
@@ -56,28 +54,17 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         entity.FechaDevolucionEsperada = dto.FechaDevolucionEsperada ?? DateTime.UtcNow.AddMinutes(30);
         entity.EstadoPrestamo = EstadoPrestamo.Pendiente;
 
-        foreach (var grupo in (dto.GrupoEquipoId ?? []).GroupBy(id => id))
-        {
-            var available = await Repository.HasAvailableEquipos(
-                grupo.Key,
-                grupo.Count(),
-                entity.FechaPrestamoEsperada,
-                entity.FechaDevolucionEsperada
+        var createResult = await Repository.CreateReservation(
+            entity,
+            dto.GrupoEquipoId ?? [],
+            dto.Contrato
+        );
+
+        if (!createResult.IsSuccess)
+            return Result<PrestamoDto>.Error(
+                createResult.Errors.FirstOrDefault() ?? "No se pudo crear la reserva"
             );
 
-            if (!available)
-            {
-                var grupoEquipoNombre = await Repository.GetGrupoEquipoNombre(grupo.Key);
-
-                return Result<PrestamoDto>.Error(
-                    $"'{grupoEquipoNombre ?? grupo.Key.ToString(CultureInfo.InvariantCulture)}' no tiene suficientes unidades disponibles en el horario seleccionado"
-                );
-            }
-        }
-
-        await Repository.SavePrestamo(entity);
-        await Repository.SaveGrupoEquipoReservations(entity.Id, dto.GrupoEquipoId);
-        await Repository.SaveContrato(entity, dto.Contrato);
         await Audit!.Log(
             AuditAccion.Crear,
             typeof(PrestamoEntity).Name,
@@ -96,23 +83,14 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         return await Repository.Get(entity.Id);
     }
 
-    public override async Task<Result<PrestamoDto>> Update(int id, PrestamoDto dto)
+    public Task<Result<PrestamoDto>> CreateForUser(PrestamoDto dto, string carnet)
     {
-        var validation = await Validator.ValidateAsync(dto);
-
-        if (!validation.IsValid)
-            return validation.ToResult<PrestamoDto>();
-
-        var entity = await Repository.FindById(id);
-
-        if (entity == null)
-            return Result<PrestamoDto>.NotFound();
-
-        _mapper.Update(dto, entity);
-        await Repository.UpdateTracked(entity);
-
-        return await Get(id);
+        dto.CarnetUsuario = carnet;
+        return Create(dto);
     }
+
+    public Task<Result<PrestamoDto>> GetAuthorized(int id, string carnet, bool isAdmin) =>
+        Repository.GetAuthorized(id, carnet, isAdmin);
 
     public async Task<Result<PrestamoDto>> UpdateStatus(
         int id,
@@ -154,7 +132,6 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
                     "No se puede aprobar: no hay equipos disponibles para uno o más grupos en las fechas solicitadas"
                 );
 
-            await Repository.UpdateContratoWithEquipos(id);
         }
 
         loan.EstadoPrestamo = parsedState.Value;

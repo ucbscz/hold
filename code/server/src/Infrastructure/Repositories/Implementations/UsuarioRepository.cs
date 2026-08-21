@@ -296,4 +296,46 @@ public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
         entity.RefreshTokenExpiry = expiry;
         await DbContext.SaveChangesAsync();
     }
+
+    public async Task<bool> RotateRefreshToken(
+        string carnet,
+        string currentTokenHash,
+        string newTokenHash,
+        DateTime expiry
+    )
+    {
+        if (!DbContext.Database.IsRelational())
+        {
+            var entity = await DbContext
+                .Usuarios.IgnoreQueryFilters()
+                .FirstOrDefaultAsync(user =>
+                    user.Carnet == carnet
+                    && user.RefreshToken == currentTokenHash
+                    && user.RefreshTokenExpiry >= DateTime.UtcNow
+                );
+
+            if (entity == null)
+                return false;
+
+            entity.RefreshToken = newTokenHash;
+            entity.RefreshTokenExpiry = expiry;
+            await DbContext.SaveChangesAsync();
+            return true;
+        }
+
+        var updated = await DbContext
+            .Usuarios.IgnoreQueryFilters()
+            .Where(user =>
+                user.Carnet == carnet
+                && user.RefreshToken == currentTokenHash
+                && user.RefreshTokenExpiry >= DateTime.UtcNow
+            )
+            .ExecuteUpdateAsync(update =>
+                update
+                    .SetProperty(user => user.RefreshToken, newTokenHash)
+                    .SetProperty(user => user.RefreshTokenExpiry, expiry)
+            );
+
+        return updated == 1;
+    }
 }

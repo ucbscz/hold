@@ -225,6 +225,9 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             return Result<LoginDto>.Unauthorized("Credenciales requeridas");
 
+        if (email.Length > 255 || password.Length > 72)
+            return Result<LoginDto>.Unauthorized("Credenciales inválidas");
+
         var (user, carreraNombre) = await Repository.GetByEmailWithCarrera(email);
 
         if (user == null)
@@ -245,7 +248,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         await Repository.UpdateRefreshToken(
             user.Carnet!,
-            refreshToken,
+            JwtService.HashRefreshToken(refreshToken),
             DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays)
         );
 
@@ -264,7 +267,11 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (string.IsNullOrWhiteSpace(refreshToken))
             return Result<LoginDto>.Unauthorized("Refresh token requerido");
 
-        var (user, carreraNombre) = await Repository.GetByRefreshTokenWithCarrera(refreshToken);
+        if (refreshToken.Length > 256)
+            return Result<LoginDto>.Unauthorized("Refresh token inválido");
+
+        var refreshTokenHash = JwtService.HashRefreshToken(refreshToken);
+        var (user, carreraNombre) = await Repository.GetByRefreshTokenWithCarrera(refreshTokenHash);
 
         if (user == null || user.RefreshTokenExpiry < DateTime.UtcNow)
             return Result<LoginDto>.Unauthorized("Refresh token inválido o expirado");
@@ -275,11 +282,15 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         var newAccessToken = _jwtService.GenerateAccessToken(dto);
         var newRefreshToken = JwtService.GenerateRefreshToken();
 
-        await Repository.UpdateRefreshToken(
+        var rotated = await Repository.RotateRefreshToken(
             user.Carnet!,
-            newRefreshToken,
+            refreshTokenHash,
+            JwtService.HashRefreshToken(newRefreshToken),
             DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays)
         );
+
+        if (!rotated)
+            return Result<LoginDto>.Unauthorized("Refresh token inválido o ya utilizado");
 
         return Result<LoginDto>.Success(
             new LoginDto

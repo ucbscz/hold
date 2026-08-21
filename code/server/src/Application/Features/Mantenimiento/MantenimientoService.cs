@@ -30,6 +30,11 @@ public class MantenimientoService
         if (!validation.IsValid)
             return validation.ToResult<MantenimientoDto>();
 
+        if (await HasScheduleConflict(dto))
+            return Result<MantenimientoDto>.Error(
+                "Uno o más equipos ya están reservados o en mantenimiento durante ese horario"
+            );
+
         var entity = MapToEntity(dto);
         var result = await CreateEntity(entity);
 
@@ -57,6 +62,11 @@ public class MantenimientoService
         var validation = await Validator.ValidateAsync(dto);
         if (!validation.IsValid)
             return validation.ToResult<MantenimientoDto>();
+
+        if (await HasScheduleConflict(dto, id))
+            return Result<MantenimientoDto>.Error(
+                "Uno o más equipos ya están reservados o en mantenimiento durante ese horario"
+            );
 
         dto.Id = id;
         var updateResult = await UpdateEntity(MapToEntity(dto));
@@ -92,4 +102,14 @@ public class MantenimientoService
 
         dto.IdEmpresa = await _empresaRepository.FindIdByNombre(dto.NombreEmpresaMantenimiento);
     }
+
+    private async Task<bool> HasScheduleConflict(MantenimientoDto dto, int? excludedId = null) =>
+        dto.FechaMantenimiento.HasValue
+        && dto.FechaFinalMantenimiento.HasValue
+        && await Repository.HasScheduleConflict(
+            dto.CodigoImt ?? [],
+            dto.FechaMantenimiento.Value,
+            dto.FechaFinalMantenimiento.Value,
+            excludedId
+        );
 }

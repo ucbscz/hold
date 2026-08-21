@@ -123,6 +123,10 @@ public class ApplicationDbContext : DbContext
                 .HasPrecision(10, 2)
                 .HasColumnName("costo_promedio");
             entity.Property(e => e.Cantidad).HasDefaultValue(0).HasColumnName("cantidad");
+            entity
+                .Property(e => e.TiempoMaximoPrestamoDias)
+                .HasDefaultValue(7)
+                .HasColumnName("tiempo_max_prestamo_dias");
             entity.Property(e => e.IdCategoria).HasColumnName("id_categoria");
             entity.Property(e => e.EstadoEliminado).HasColumnName(EstadoEliminadoCol);
             entity
@@ -205,7 +209,6 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Ubicacion).HasMaxLength(255).HasColumnName("ubicacion");
             entity.Property(e => e.Descripcion).HasMaxLength(2048).HasColumnName(DescripcionCol);
             entity.Property(e => e.CostoReferencia).HasColumnName("costo_referencia");
-            entity.Property(e => e.TiempoMaximoPrestamo).HasColumnName("tiempo_max_prestamo");
             entity.Property(e => e.Procedencia).HasMaxLength(255).HasColumnName("procedencia");
             entity
                 .Property(e => e.FechaIngresoEquipo)

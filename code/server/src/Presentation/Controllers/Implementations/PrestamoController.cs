@@ -33,7 +33,14 @@ public class PrestamoController : Controller
     }
 
     [HttpGet("{id:int}")]
-    public async Task<IActionResult> Get(int id) => ToResponse(await _service.Get(id));
+    public async Task<IActionResult> Get(int id) =>
+        ToResponse(
+            await _service.GetAuthorized(
+                id,
+                User.Identity?.Name ?? string.Empty,
+                User.IsInRole("administrador")
+            )
+        );
 
     [HttpGet("elegibilidad")]
     public async Task<IActionResult> GetReservationStatus() =>
@@ -42,13 +49,12 @@ public class PrestamoController : Controller
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] PrestamoDto request)
     {
-        var result = await _service.Create(request);
+        var result = await _service.CreateForUser(
+            request,
+            User.Identity?.Name ?? string.Empty
+        );
         return ToCreatedResponse(result, nameof(Get), new { id = result.Value?.Id });
     }
-
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, [FromBody] PrestamoDto dto) =>
-        ToResponse(await _service.Update(id, dto));
 
     [Authorize(Roles = "administrador")]
     [HttpPatch("{id:int}/estado")]
@@ -66,6 +72,7 @@ public class PrestamoController : Controller
             )
         );
 
+    [Authorize(Roles = "administrador")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id) => ToDeleteResponse(await _service.Delete(id));
 

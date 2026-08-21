@@ -57,4 +57,10 @@ public class JwtService
 
         return Convert.ToBase64String(randomBytes);
     }
+
+    public static string HashRefreshToken(string refreshToken)
+    {
+        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(refreshToken));
+        return Convert.ToBase64String(bytes);
+    }
 }

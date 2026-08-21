@@ -18,8 +18,12 @@ public abstract class Controller : ControllerBase
             ResultStatus.NotFound => NotFound(
                 new Response<object> { Status = 404, Errors = result.Errors.ToList() }
             ),
-            ResultStatus.Unauthorized or ResultStatus.Forbidden => Unauthorized(
+            ResultStatus.Unauthorized => Unauthorized(
                 new Response<object> { Status = 401, Errors = result.Errors.ToList() }
+            ),
+            ResultStatus.Forbidden => StatusCode(
+                StatusCodes.Status403Forbidden,
+                new Response<object> { Status = 403, Errors = result.Errors.ToList() }
             ),
             ResultStatus.Invalid => BadRequest(
                 new Response<object>

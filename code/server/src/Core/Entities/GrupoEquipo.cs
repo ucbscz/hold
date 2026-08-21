@@ -14,6 +14,7 @@ public class GrupoEquipo : Entity
     public string? UrlDataSheet { get; set; }
     public int Cantidad { get; set; }
     public decimal? CostoPromedio { get; set; }
+    public int TiempoMaximoPrestamoDias { get; set; } = 7;
 
     [ForeignKey("IdCategoria")]
     public Categoria? Categoria { get; set; }

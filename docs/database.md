@@ -13,7 +13,7 @@ UCB Hold uses PostgreSQL 14+ with Entity Framework Core 8. The database name use
 | `usuarios` | User identity, contact data and role. | Yes |
 | `prestamos` | Loan lifecycle, user ownership and date range. | Yes |
 | `detalles_prestamos` | Equipment groups requested in each loan. | Yes |
-| `grupos_equipos` | Catalog-level grouping for equivalent equipment units. | Yes |
+| `grupos_equipos` | Catalog-level grouping, including the maximum loan duration shared by equivalent units. | Yes |
 | `equipos` | Physical equipment units with `codigo_imt` and condition. | Yes |
 | `categorias` | Equipment classification. | Yes |
 | `carreras` | Academic programs associated with users. | Yes |
@@ -49,11 +49,11 @@ The backend maps PostgreSQL enums with `PgName` and `NpgsqlDataSourceBuilder.Map
 
 Derived values exist to speed up administrative screens. Business logic should still validate critical decisions, especially availability, at the service layer.
 
-## Availability Rule
+## Availability and Duration Rules
 
-An equipment unit is unavailable when another loan for the same equipment group overlaps the requested date range and is in `aprobado` or `activo` state.
+An equipment unit is unavailable when an overlapping loan is `pendiente`, `aprobado`, `activo`, or `atrasado`, or when an overlapping maintenance record includes that unit. Availability is checked again inside a serializable transaction when a reservation is created.
 
-Pending requests do not block inventory capacity. Approval must re-check availability to avoid conflicts caused by concurrent requests.
+`grupos_equipos.tiempo_max_prestamo_dias` is the single source of truth for maximum loan duration. The allowed interval is 1 to 365 days. A request containing multiple groups uses the most restrictive maximum, and both availability queries and reservation creation validate the exact timestamp duration rather than calendar-day boundaries.
 
 ## Indexes
 
