@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Net;
 using System.Text.RegularExpressions;
 using Ardalis.Result;
 using IMT_Reservas.Server.Application.Features.Prestamo;
@@ -348,8 +349,14 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                 ", ",
                 equipment.Select(item => item.CodigoImt.ToString(CultureInfo.InvariantCulture))
             );
-            var ucbCodes = string.Join(", ", equipment.Select(item => item.CodigoUcb ?? "-"));
-            var serials = string.Join(", ", equipment.Select(item => item.NumeroSerial ?? "-"));
+            var ucbCodes = string.Join(
+                ", ",
+                equipment.Select(item => FormatContractCode(item.CodigoUcb))
+            );
+            var serials = string.Join(
+                ", ",
+                equipment.Select(item => FormatContractCode(item.NumeroSerial))
+            );
 
             html = Regex.Replace(
                 html,
@@ -376,10 +383,18 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
             );
         }
 
+        if (html == contract.ContratoHtml)
+            return;
+
         contract.ContratoHtml = html;
         DbContext.Contratos.Update(contract);
         await DbContext.SaveChangesAsync();
     }
+
+    private static string FormatContractCode(string? value) =>
+        WebUtility.HtmlEncode(
+            string.IsNullOrWhiteSpace(value) ? "No registrado" : value.Trim()
+        );
 
     public async Task<string?> GetGrupoEquipoNombre(int grupoEquipoId) =>
         await DbContext

@@ -68,6 +68,8 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
             Id = EquipoId,
             IdGrupoEquipo = GrupoId,
             CodigoImt = 1,
+            CodigoUcb = "UCB-001",
+            NumeroSerial = "SER-001",
             EstadoEquipo = EstadoEquipo.Operativo,
             FechaIngresoEquipo = DateOnly.FromDateTime(DateTime.Today),
             EstadoEliminado = false
@@ -183,8 +185,8 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     [Test]
     public async Task UpdateStatus_ApproveWithConflict_ReturnsError()
     {
-        var fechaInicio = DateTime.Today;
-        var fechaFin = DateTime.Today.AddDays(3);
+        var fechaInicio = DateTime.UtcNow.AddDays(1);
+        var fechaFin = DateTime.UtcNow.AddDays(3);
 
         var createResult = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, fechaInicio, fechaFin));
         var prestamoId = createResult.Value.Id!.Value;
@@ -200,7 +202,12 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     [Test]
     public async Task UpdateStatus_ApproveWithoutConflict_Succeeds()
     {
-        var createResult = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.Today, DateTime.Today.AddDays(3)));
+        var createResult = await Sut.Create(BuildValidPrestamo(
+            Carnet,
+            GrupoId,
+            DateTime.UtcNow.AddDays(1),
+            DateTime.UtcNow.AddDays(3)
+        ));
         var prestamoId = createResult.Value.Id!.Value;
 
         var result = await Sut.UpdateStatus(prestamoId, "aprobado");
@@ -213,7 +220,12 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     public async Task UpdateStatus_ManualApproval_UsesActorNameAsNotificationEmitter()
     {
         var createResult = await Sut.Create(
-            BuildValidPrestamo(Carnet, GrupoId, DateTime.Today, DateTime.Today.AddDays(3))
+            BuildValidPrestamo(
+                Carnet,
+                GrupoId,
+                DateTime.UtcNow.AddDays(1),
+                DateTime.UtcNow.AddDays(3)
+            )
         );
         var prestamoId = createResult.Value.Id!.Value;
 
@@ -230,6 +242,52 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         );
         using var detail = JsonDocument.Parse(notification.Detalle!);
         detail.RootElement.GetProperty("emisor").GetString().Should().Be("Test User");
+    }
+
+    [Test]
+    public async Task UpdateStatus_ApproveAfterExpectedStart_ReturnsError()
+    {
+        var createResult = await Sut.Create(BuildValidPrestamo(
+            Carnet,
+            GrupoId,
+            DateTime.UtcNow.AddHours(-2),
+            DateTime.UtcNow.AddHours(1)
+        ));
+        var prestamoId = createResult.Value.Id!.Value;
+
+        var result = await Sut.UpdateStatus(prestamoId, "aprobado");
+
+        result.IsSuccess.Should().BeFalse();
+        result.Errors.Should().Contain(error => error.Contains("ya venció"));
+    }
+
+    [Test]
+    public async Task UpdateStatus_ApprovalWritesAssignedEquipmentIntoContract()
+    {
+        const string contract = """
+            <table><tr>
+              <td class="imt-code" data-grupo-id="1">Pendiente de asignación</td>
+              <td class="ucb-code" data-grupo-id="1">Pendiente de asignación</td>
+              <td class="serial-code" data-grupo-id="1">Pendiente de asignación</td>
+            </tr></table>
+            """;
+        var dto = BuildValidPrestamo(
+            Carnet,
+            GrupoId,
+            DateTime.UtcNow.AddDays(1),
+            DateTime.UtcNow.AddDays(3)
+        );
+        dto.Contrato = contract;
+        var createResult = await Sut.Create(dto);
+
+        var result = await Sut.UpdateStatus(createResult.Value.Id!.Value, "aprobado");
+
+        result.IsSuccess.Should().BeTrue();
+        var savedContract = Db.Contratos.Single().ContratoHtml;
+        savedContract.Should().Contain(">1</td>");
+        savedContract.Should().Contain(">UCB-001</td>");
+        savedContract.Should().Contain(">SER-001</td>");
+        savedContract.Should().NotContain("Pendiente de asignación");
     }
 
     [Test]

@@ -220,14 +220,14 @@ export class FormularioComponent implements OnInit {
         .map(
           ([key, item]) => `
         <tr>
-          <td class="imt-code" data-grupo-id="${escapeHtmlValue(key)}">Por definirse</td>
-          <td class="ucb-code" data-grupo-id="${escapeHtmlValue(key)}">Por definirse</td>
+          <td class="imt-code" data-grupo-id="${escapeHtmlValue(key)}">Pendiente de asignación</td>
+          <td class="ucb-code" data-grupo-id="${escapeHtmlValue(key)}">Pendiente de asignación</td>
           <td>
           <strong>${escapeHtmlValue(item.nombre ?? '')}</strong>
           <p>Marca: ${escapeHtmlValue(item.marca ?? '')} </p>
           <p>Modelo: ${escapeHtmlValue(item.modelo ?? '')} </p>
           </td>
-          <td class="serial-code" data-grupo-id="${escapeHtmlValue(key)}">Por definirse</td>
+          <td class="serial-code" data-grupo-id="${escapeHtmlValue(key)}">Pendiente de asignación</td>
           <td>${item.cantidad}</td>
         </tr>
       `,
@@ -245,14 +245,14 @@ export class FormularioComponent implements OnInit {
         .map(
           ([key, item]) => `
         <tr>
-          <td class="imt-code" data-grupo-id="${escapeHtmlValue(key)}">Por definirse</td>
-          <td class="ucb-code" data-grupo-id="${escapeHtmlValue(key)}">Por definirse</td>
+          <td class="imt-code" data-grupo-id="${escapeHtmlValue(key)}">Pendiente de asignación</td>
+          <td class="ucb-code" data-grupo-id="${escapeHtmlValue(key)}">Pendiente de asignación</td>
           <td>
           <strong>${escapeHtmlValue(item.nombre ?? '')}</strong>
           <p>Marca: ${escapeHtmlValue(item.marca ?? '')} </p>
           <p>Modelo: ${escapeHtmlValue(item.modelo ?? '')} </p>
           </td>
-          <td class="serial-code" data-grupo-id="${escapeHtmlValue(key)}">Por definirse</td>
+          <td class="serial-code" data-grupo-id="${escapeHtmlValue(key)}">Pendiente de asignación</td>
           <td>${item.cantidad}</td>
           <td>${item.precio}</td>
           <td>${item.precio * item.cantidad}</td>

@@ -137,6 +137,14 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
                 $"Transición '{PrestamoState.ToText(loan.EstadoPrestamo)}' → '{newStatus}' no permitida"
             );
 
+        if (
+            parsedState.Value == EstadoPrestamo.Aprobado
+            && loan.FechaPrestamoEsperada <= DateTime.UtcNow
+        )
+            return Result<PrestamoDto>.Error(
+                "No se puede aprobar una reserva cuyo horario de inicio ya venció"
+            );
+
         if (parsedState.Value == EstadoPrestamo.Aprobado)
         {
             var assigned = await Repository.AssignEquiposOnApproval(id);

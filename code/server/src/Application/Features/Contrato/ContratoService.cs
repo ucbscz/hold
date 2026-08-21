@@ -8,12 +8,15 @@ namespace IMT_Reservas.Server.Application.Features.Contrato;
 
 public class ContratoService : Service<ContratoEntity, ContratoRepository, ContratoDto>
 {
+    private readonly PrestamoRepository _prestamos;
+
     public ContratoService(
         ContratoRepository repository,
         ContratoMapper mapper,
-        IValidator<ContratoDto> validator
+        IValidator<ContratoDto> validator,
+        PrestamoRepository prestamos
     )
-        : base(repository, validator, mapper) { }
+        : base(repository, validator, mapper) => _prestamos = prestamos;
 
     public async Task<Result<ContratoDto>> CreateForPrestamo(int prestamoId, string htmlContent)
     {
@@ -47,6 +50,7 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
 
     public async Task<Result<ContratoDto>> GetByPrestamoId(int prestamoId)
     {
+        await _prestamos.UpdateContratoWithEquipos(prestamoId);
         var result = await Repository.GetEntityByPrestamoId(prestamoId);
 
         if (!result.IsSuccess)
