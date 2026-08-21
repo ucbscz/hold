@@ -123,24 +123,24 @@ create index idx_empresas_mantenimiento
 
 create table grupos_equipos
 (
-    id_grupo_equipo  integer generated always as identity
+    id_grupo_equipo          integer generated always as identity
         constraint "Grupo_Equipo_pk"
             primary key,
-    nombre           varchar(256)                 not null,
-    modelo           varchar(512)                 not null,
-    url_data_sheet   text,
-    cantidad         integer        default 0     not null,
-    marca            varchar(256)                 not null,
-    id_categoria     integer                      not null
+    nombre                   varchar(256)                 not null,
+    modelo                   varchar(512)                 not null,
+    url_data_sheet           text,
+    cantidad                 integer        default 0     not null,
+    marca                    varchar(256)                 not null,
+    id_categoria             integer                      not null
         constraint "Grupo_Categoria_fk"
             references categorias,
-    estado_eliminado boolean        default false not null,
-    url_imagen       text                         not null,
-    descripcion      text                         not null,
-    costo_promedio   numeric(10, 2) default 0,
-    tiempo_max_prestamo_dias integer default 7 not null
+    estado_eliminado         boolean        default false not null,
+    url_imagen               text                         not null,
+    descripcion              text                         not null,
+    costo_promedio           numeric(10, 2) default 0,
+    tiempo_max_prestamo_dias integer        default 7     not null
         constraint ck_grupos_equipos_tiempo_max_prestamo
-            check (tiempo_max_prestamo_dias between 1 and 365),
+            check ((tiempo_max_prestamo_dias >= 1) AND (tiempo_max_prestamo_dias <= 365)),
     constraint unique_grupos_equipos_nombre_modelo_marca
         unique (nombre, modelo, marca)
 );
@@ -242,6 +242,7 @@ create table equipos
     numero_serial        varchar(255),
     ubicacion            varchar(255),
     costo_referencia     double precision default 0,
+    tiempo_max_prestamo  integer          default 9999,
     procedencia          varchar(255),
     id_gavetero          integer
         constraint "Equipo_Gavetero_fk"
@@ -1545,6 +1546,7 @@ BEGIN
            ubicacion           = COALESCE(p_ubicacion_nueva, ubicacion),
            procedencia         = COALESCE(p_procedencia_nueva, procedencia),
            costo_referencia    = COALESCE(p_costo_referencia_nuevo, costo_referencia),
+           tiempo_max_prestamo = COALESCE(p_tiempo_maximo_prestamo_nuevo, tiempo_max_prestamo),
            estado_equipo       = COALESCE(CAST(lower(p_estado_equipo_nuevo) AS public.estado_equipo), estado_equipo) -- CORRECCIÓN AQUÍ
      WHERE id_equipo = p_id_equipo_actualizar;
 
@@ -2712,6 +2714,7 @@ BEGIN
         ubicacion,
         procedencia,
         costo_referencia,
+        tiempo_max_prestamo,
         id_gavetero,
         id_grupo_equipo,
         estado_eliminado
@@ -2724,6 +2727,7 @@ BEGIN
         p_ubicacion,
         p_procedencia,
         p_costo_referencia,
+        p_tiempo_maximo_prestamo,
         v_id_gavetero,
         v_id_grupo_equipo,
         FALSE
@@ -3098,13 +3102,10 @@ BEGIN
         SELECT e.id_equipo
           INTO equipo_tmp
           FROM public.equipos e
-          JOIN public.grupos_equipos ge
-            ON ge.id_grupo_equipo = e.id_grupo_equipo
          WHERE e.id_grupo_equipo = id_grupo
            AND e.estado_eliminado = FALSE
            AND e.estado_equipo = 'operativo'
-           AND fecha_devolucion_esperada_input - fecha_prestamo_esperada_input
-               <= make_interval(days => ge.tiempo_max_prestamo_dias)
+           AND dias_solicitados <= e.tiempo_max_prestamo
            AND NOT EXISTS ( 
                SELECT 1
                  FROM public.detalles_prestamos dp
@@ -3168,13 +3169,10 @@ BEGIN
         SELECT e.id_equipo
           INTO id_equipo_disponible
           FROM public.equipos e
-          JOIN public.grupos_equipos ge
-            ON ge.id_grupo_equipo = e.id_grupo_equipo
          WHERE e.id_grupo_equipo = id_grupo
            AND e.estado_eliminado = FALSE
            AND e.estado_equipo = 'operativo'
-           AND fecha_devolucion_esperada_input - fecha_prestamo_esperada_input
-               <= make_interval(days => ge.tiempo_max_prestamo_dias)
+           AND dias_solicitados <= e.tiempo_max_prestamo
            AND (equipos_ya_asignados_a_este_prestamo IS NULL OR NOT (e.id_equipo = ANY(equipos_ya_asignados_a_este_prestamo)))
            AND NOT EXISTS ( 
                SELECT 1
@@ -3365,13 +3363,10 @@ BEGIN
         SELECT e.id_equipo
         INTO id_equipo_disponible
         FROM public.equipos e
-        JOIN public.grupos_equipos ge
-          ON ge.id_grupo_equipo = e.id_grupo_equipo
         WHERE e.id_grupo_equipo = id_grupo_actual
           AND e.estado_eliminado = FALSE
           AND e.estado_equipo = 'operativo'
-          AND fecha_devolucion_ajustada - fecha_prestamo_ajustada
-              <= make_interval(days => ge.tiempo_max_prestamo_dias)
+          AND dias_solicitados <= COALESCE(e.tiempo_max_prestamo, 9999)
           -- Excluir equipos ya asignados en este préstamo
           AND NOT (e.id_equipo = ANY(equipos_asignados))
           -- Excluir equipos ocupados en otros préstamos (verificación diaria)
@@ -3599,13 +3594,10 @@ BEGIN
             SELECT COUNT(*)
             INTO disponibilidad
             FROM public.equipos e
-            JOIN public.grupos_equipos ge
-              ON ge.id_grupo_equipo = e.id_grupo_equipo
             WHERE e.id_grupo_equipo = grupo_id
               AND e.estado_eliminado = FALSE
               AND e.estado_equipo = 'operativo'
-              AND fecha_fin - fecha_inicio
-                  <= make_interval(days => ge.tiempo_max_prestamo_dias)
+              AND dias_solicitados <= COALESCE(e.tiempo_max_prestamo, 9999)
               -- Excluir equipos ocupados en reservas activas ese día
               AND NOT EXISTS (
                   SELECT 1
@@ -3662,7 +3654,7 @@ $$;
 alter function obtener_empresas_mantenimiento() owner to postgres;
 
 create function obtener_equipos()
-    returns TABLE(id_equipo integer, nombre_grupo_equipo character varying, modelo_equipo character varying, marca_equipo character varying, codigo_imt_equipo integer, codigo_ucb_equipo character varying, numero_serial_equipo character varying, estado_equipo_equipo estado_equipo, ubicacion_equipo character varying, nombre_gavetero_equipo character varying, costo_referencia_equipo double precision, descripcion_equipo text, tiempo_max_prestamo_grupo integer, procedencia_equipo character varying)
+    returns TABLE(id_equipo integer, nombre_grupo_equipo character varying, modelo_equipo character varying, marca_equipo character varying, codigo_imt_equipo integer, codigo_ucb_equipo character varying, numero_serial_equipo character varying, estado_equipo_equipo estado_equipo, ubicacion_equipo character varying, nombre_gavetero_equipo character varying, costo_referencia_equipo double precision, descripcion_equipo text, tiempo_max_prestamo_equipo integer, procedencia_equipo character varying)
     language plpgsql
 as
 $$
@@ -3681,7 +3673,7 @@ BEGIN
         g.nombre AS nombre_gavetero_equipo, 
         e.costo_referencia AS costo_referencia_equipo,
         e.descripcion AS descripcion_equipo,
-        ge.tiempo_max_prestamo_dias AS tiempo_max_prestamo_grupo,
+        e.tiempo_max_prestamo AS tiempo_max_prestamo_equipo,
         e.procedencia AS procedencia_equipo
     FROM
         public.equipos AS e
@@ -3776,13 +3768,10 @@ BEGIN
                 -- Obtener todos los equipos activos del grupo que cumplen restricción de tiempo
                 SELECT e.id_equipo
                 FROM public.equipos e
-                JOIN public.grupos_equipos ge
-                  ON ge.id_grupo_equipo = e.id_grupo_equipo
                 WHERE e.id_grupo_equipo = grupo_key::integer
                   AND e.estado_eliminado = FALSE
                   AND e.estado_equipo = 'operativo'
-                  AND fecha_fin - fecha_inicio
-                      <= make_interval(days => ge.tiempo_max_prestamo_dias)
+                  AND dias_solicitados <= e.tiempo_max_prestamo
                 
                 EXCEPT
                 
