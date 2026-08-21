@@ -198,8 +198,13 @@
                     ) {
                       <button
                         class="btn-action btn-accept"
-                        title="Aceptar"
+                        [title]="
+                          puedeAprobar(prestamo.value)
+                            ? 'Aceptar'
+                            : 'El horario de inicio ya venció'
+                        "
                         aria-label="Aceptar"
+                        [disabled]="!puedeAprobar(prestamo.value)"
                         (click)="validaraprobacion(prestamo.key)"
                       >
                         <i class="fas fa-check"></i>

@@ -100,14 +100,24 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   exportarPrestamos(): void {
     this.exportarCsv(
       'prestamos',
-      ['ID', 'Estudiante', 'Carnet', 'Equipos', 'Inicio', 'Fin', 'Estado'],
-      this.prestamosTabla.map(({ key, value }) => [
-        key,
+      [
+        'Usuario',
+        'Carnet',
+        'Teléfono',
+        'Equipos',
+        'Fecha Solicitud',
+        'Fecha Préstamo Esperada',
+        'Fecha Devolución Esperada',
+        'Estado',
+      ],
+      this.prestamosTabla.map(({ value }) => [
         `${value.datosgrupo.NombreUsuario ?? ''} ${value.datosgrupo.ApellidoPaternoUsuario ?? ''}`.trim(),
         value.datosgrupo.CarnetUsuario,
+        value.datosgrupo.TelefonoUsuario,
         this.detalleEquipos(value),
-        value.datosgrupo.FechaPrestamoEsperada?.toISOString() ?? '',
-        value.datosgrupo.FechaDevolucionEsperada?.toISOString() ?? '',
+        this.formatearFechaImpresion(value.datosgrupo.FechaSolicitud),
+        this.formatearFechaImpresion(value.datosgrupo.FechaPrestamoEsperada),
+        this.formatearFechaImpresion(value.datosgrupo.FechaDevolucionEsperada),
         this.getEstadoCalculado(value),
       ]),
     );
@@ -437,9 +447,18 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     return estadoOrig;
   }
   validaraprobacion(key: number) {
+    const prestamo = this.prestamos.get(key);
+    if (!prestamo || !this.puedeAprobar(prestamo)) return;
+
     this.mensajeaviso = '¿Está seguro de aprobar el préstamo seleccionado?';
     this.prestamoKeySeleccionado = key;
     this.aviso.set(true);
+  }
+
+  puedeAprobar(prestamo: PrestamoAgrupados): boolean {
+    const inicio = prestamo.datosgrupo.FechaPrestamoEsperada;
+
+    return !!inicio && inicio.getTime() > Date.now();
   }
   aprobarprestamo(key: number) {
     this.prestamosapi

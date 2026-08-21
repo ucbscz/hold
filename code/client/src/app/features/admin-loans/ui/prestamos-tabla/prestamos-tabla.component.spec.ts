@@ -90,6 +90,58 @@ describe('PrestamosTablaComponent', () => {
     );
   });
 
+  it('does not allow approving a loan after its expected start', () => {
+    const prestamo = new PrestamoAgrupados([
+      crearPrestamo({
+        id: 6,
+        nombre: 'Usuario',
+        fechaPrestamoEsperada: '2020-06-13T00:00:00',
+      }),
+    ]);
+
+    expect(component.puedeAprobar(prestamo)).toBeFalse();
+  });
+
+  it('exports the same data columns shown in the loan table', () => {
+    cargarPrestamos([
+      crearPrestamo({
+        id: 7,
+        nombre: 'Fernando',
+        carnet: '12890061',
+        telefono: '799430792',
+      }),
+    ]);
+    const exportSpy = spyOn(component, 'exportarCsv');
+
+    component.exportarPrestamos();
+
+    expect(exportSpy).toHaveBeenCalledWith(
+      'prestamos',
+      [
+        'Usuario',
+        'Carnet',
+        'Teléfono',
+        'Equipos',
+        'Fecha Solicitud',
+        'Fecha Préstamo Esperada',
+        'Fecha Devolución Esperada',
+        'Estado',
+      ],
+      [
+        [
+          'Fernando',
+          '12890061',
+          '799430792',
+          'Mini Dron',
+          jasmine.any(String),
+          jasmine.any(String),
+          jasmine.any(String),
+          'pendiente',
+        ],
+      ],
+    );
+  });
+
   function cargarPrestamos(prestamos: PrestamoDto[]): void {
     component.sortColumn = 'Fecha Solicitud';
     component.sortDirection = 'desc';
