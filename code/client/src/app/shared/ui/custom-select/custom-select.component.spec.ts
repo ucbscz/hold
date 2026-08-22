@@ -88,11 +88,35 @@ describe('CustomSelectComponent', () => {
 
     const options = document.body.querySelector('.cs-options') as HTMLElement;
     options.dispatchEvent(new Event('scroll', { bubbles: true }));
-    for (let index = 0; index < 5; index++) component.onResize();
+    for (let index = 0; index < 5; index++)
+      window.dispatchEvent(new Event('resize'));
     tick(32);
 
     expect(focusSpy).toHaveBeenCalledTimes(1);
     expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
     expect(component.menuMaxHeight).toBe(initialHeight);
   }));
+
+  it('should remove duplicate option values before rendering', () => {
+    component.opciones = [
+      { value: 264, label: 'Préstamo 264' },
+      { value: 264, label: 'Préstamo duplicado' },
+    ];
+    fixture.detectChanges();
+
+    expect(component.opcionesNormalizadas).toEqual([
+      { value: 264, label: 'Préstamo 264' },
+    ]);
+  });
+
+  it('should open immediately and close from an outside click', () => {
+    component.opciones = ['Activo', 'Finalizado'];
+    fixture.detectChanges();
+
+    fixture.debugElement.query(By.css('.cs-trigger')).nativeElement.click();
+    expect(component.abierto).toBeTrue();
+
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(component.abierto).toBeFalse();
+  });
 });

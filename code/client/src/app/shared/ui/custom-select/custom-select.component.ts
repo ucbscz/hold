@@ -1,12 +1,14 @@
 import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   ElementRef,
   forwardRef,
   HostBinding,
-  HostListener,
   Input,
+  NgZone,
   OnDestroy,
   ViewChild,
 } from '@angular/core';
@@ -19,6 +21,7 @@ import { OpcionSelect } from './opcion-select';
   imports: [CommonModule],
   templateUrl: './custom-select.component.html',
   styleUrl: './custom-select.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush,
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -40,17 +43,18 @@ export class CustomSelectComponent
   @Input() searchThreshold = 6;
   @Input() menuPosition: 'auto' | 'top' | 'bottom' = 'auto';
   @Input() set opciones(valor: Array<OpcionSelect | string>) {
-    const opciones = (valor ?? []).map((o) =>
-      typeof o === 'string' ? { value: o, label: o } : o,
-    );
+    const opciones = this.normalizarOpciones(valor ?? []);
 
     if (this.sonLasMismasOpciones(opciones)) return;
 
     this.opcionesNormalizadas = opciones;
+    this.actualizarOpcionesFiltradas();
     if (this.abierto) this.programarPosicionMenu();
+    this.changeDetector.markForCheck();
   }
 
   opcionesNormalizadas: OpcionSelect[] = [];
+  opcionesFiltradas: OpcionSelect[] = [];
   abierto = false;
   disabled = false;
   valor: unknown = null;
@@ -66,6 +70,20 @@ export class CustomSelectComponent
   private onTouched: () => void = () => {};
   private animationFrameId?: number;
   private enfocarBusquedaAlPosicionar = false;
+  private listenersActivos = false;
+  private destruido = false;
+  private readonly onDocumentClick = (evento: Event) => {
+    if (
+      evento.target instanceof Node &&
+      !this.elementRef.nativeElement.contains(evento.target) &&
+      !this.menuRef.nativeElement.contains(evento.target)
+    ) {
+      this.ngZone.run(() => this.cerrar());
+    }
+  };
+  private readonly onDocumentKeydown = (evento: KeyboardEvent) => {
+    if (evento.key === 'Escape') this.ngZone.run(() => this.cerrar());
+  };
   private readonly onViewportScroll = (evento: Event) => {
     const menu = this.menuRef?.nativeElement;
     if (menu && evento.target instanceof Node && menu.contains(evento.target)) {
@@ -73,10 +91,13 @@ export class CustomSelectComponent
     }
     this.programarPosicionMenu(true);
   };
+  private readonly onViewportResize = () => this.programarPosicionMenu(true);
 
-  constructor(private readonly elementRef: ElementRef<HTMLElement>) {
-    document.addEventListener('scroll', this.onViewportScroll, true);
-  }
+  constructor(
+    private readonly elementRef: ElementRef<HTMLElement>,
+    private readonly changeDetector: ChangeDetectorRef,
+    private readonly ngZone: NgZone,
+  ) {}
 
   ngAfterViewInit(): void {
     document.body.appendChild(this.menuRef.nativeElement);
@@ -102,70 +123,36 @@ export class CustomSelectComponent
     return this.opcionesNormalizadas.length >= this.searchThreshold;
   }
 
-  get opcionesFiltradas(): OpcionSelect[] {
-    const busquedaNormalizada = this.normalizarTexto(this.busqueda);
-
-    if (!busquedaNormalizada) return this.opcionesNormalizadas;
-
-    return this.opcionesNormalizadas.filter((opcion) =>
-      this.normalizarTexto(opcion.label).includes(busquedaNormalizada),
-    );
-  }
-
   alternar(): void {
     if (this.disabled) return;
-    this.abierto = !this.abierto;
     if (this.abierto) {
-      this.onTouched();
-      this.menuPosicionado = false;
-      this.enfocarBusquedaAlPosicionar = true;
-      this.programarPosicionMenu();
-    } else {
-      this.limpiarBusqueda();
+      this.cerrar();
+      return;
     }
+
+    this.abierto = true;
+    this.onTouched();
+    this.menuPosicionado = false;
+    this.enfocarBusquedaAlPosicionar = true;
+    this.activarListenersGlobales();
+    this.programarPosicionMenu();
   }
 
   seleccionar(opcion: OpcionSelect): void {
     this.valor = opcion.value;
     this.onChange(this.valor);
-    this.abierto = false;
-    this.enfocarBusquedaAlPosicionar = false;
-    this.limpiarBusqueda();
+    this.cerrar();
   }
 
   buscar(evento: Event): void {
     this.busqueda = (evento.target as HTMLInputElement).value;
-  }
-
-  @HostListener('document:click', ['$event'])
-  onClickFuera(evento: Event): void {
-    if (
-      this.abierto &&
-      evento.target instanceof Node &&
-      !this.elementRef.nativeElement.contains(evento.target) &&
-      !this.menuRef.nativeElement.contains(evento.target)
-    ) {
-      this.abierto = false;
-      this.enfocarBusquedaAlPosicionar = false;
-      this.limpiarBusqueda();
-    }
-  }
-
-  @HostListener('document:keydown.escape')
-  onEscape(): void {
-    if (!this.abierto) return;
-    this.abierto = false;
-    this.enfocarBusquedaAlPosicionar = false;
-    this.limpiarBusqueda();
-  }
-
-  @HostListener('window:resize')
-  onResize(): void {
+    this.actualizarOpcionesFiltradas();
     this.programarPosicionMenu();
   }
 
   writeValue(valor: unknown): void {
     this.valor = valor;
+    this.changeDetector.markForCheck();
   }
   registerOnChange(fn: (valor: unknown) => void): void {
     this.onChange = fn;
@@ -175,10 +162,12 @@ export class CustomSelectComponent
   }
   setDisabledState(disabled: boolean): void {
     this.disabled = disabled;
+    this.changeDetector.markForCheck();
   }
 
   ngOnDestroy(): void {
-    document.removeEventListener('scroll', this.onViewportScroll, true);
+    this.destruido = true;
+    this.desactivarListenersGlobales();
     if (this.animationFrameId !== undefined)
       cancelAnimationFrame(this.animationFrameId);
     this.menuRef.nativeElement.remove();
@@ -189,9 +178,11 @@ export class CustomSelectComponent
     if (this.animationFrameId !== undefined)
       cancelAnimationFrame(this.animationFrameId);
 
-    this.animationFrameId = requestAnimationFrame(() => {
-      this.animationFrameId = undefined;
-      this.posicionarMenu(conservarAltura);
+    this.ngZone.runOutsideAngular(() => {
+      this.animationFrameId = requestAnimationFrame(() => {
+        this.animationFrameId = undefined;
+        this.posicionarMenu(conservarAltura);
+      });
     });
   }
 
@@ -242,6 +233,7 @@ export class CustomSelectComponent
         )
       : triggerRect.bottom + menuGap;
     this.menuPosicionado = true;
+    if (!this.destruido) this.changeDetector.detectChanges();
 
     if (this.debeMostrarBusqueda && this.enfocarBusquedaAlPosicionar) {
       this.enfocarBusquedaAlPosicionar = false;
@@ -256,6 +248,59 @@ export class CustomSelectComponent
   private limpiarBusqueda(): void {
     this.busqueda = '';
     this.menuPosicionado = false;
+    this.actualizarOpcionesFiltradas();
+  }
+
+  private cerrar(): void {
+    if (!this.abierto) return;
+    this.abierto = false;
+    this.enfocarBusquedaAlPosicionar = false;
+    this.limpiarBusqueda();
+    this.desactivarListenersGlobales();
+    this.changeDetector.markForCheck();
+  }
+
+  private activarListenersGlobales(): void {
+    if (this.listenersActivos) return;
+    this.listenersActivos = true;
+    this.ngZone.runOutsideAngular(() => {
+      document.addEventListener('click', this.onDocumentClick, true);
+      document.addEventListener('keydown', this.onDocumentKeydown, true);
+      document.addEventListener('scroll', this.onViewportScroll, true);
+      window.addEventListener('resize', this.onViewportResize);
+    });
+  }
+
+  private desactivarListenersGlobales(): void {
+    if (!this.listenersActivos) return;
+    this.listenersActivos = false;
+    document.removeEventListener('click', this.onDocumentClick, true);
+    document.removeEventListener('keydown', this.onDocumentKeydown, true);
+    document.removeEventListener('scroll', this.onViewportScroll, true);
+    window.removeEventListener('resize', this.onViewportResize);
+  }
+
+  private actualizarOpcionesFiltradas(): void {
+    const busquedaNormalizada = this.normalizarTexto(this.busqueda);
+    this.opcionesFiltradas = busquedaNormalizada
+      ? this.opcionesNormalizadas.filter((opcion) =>
+          this.normalizarTexto(opcion.label).includes(busquedaNormalizada),
+        )
+      : this.opcionesNormalizadas;
+  }
+
+  private normalizarOpciones(
+    valor: Array<OpcionSelect | string>,
+  ): OpcionSelect[] {
+    const unicas = new Map<unknown, OpcionSelect>();
+    for (const opcion of valor) {
+      const normalizada =
+        typeof opcion === 'string' ? { value: opcion, label: opcion } : opcion;
+      if (!unicas.has(normalizada.value)) {
+        unicas.set(normalizada.value, normalizada);
+      }
+    }
+    return [...unicas.values()];
   }
 
   private sonLasMismasOpciones(opciones: OpcionSelect[]): boolean {

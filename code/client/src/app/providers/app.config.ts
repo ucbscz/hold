@@ -5,7 +5,11 @@ import {
   withInterceptorsFromDi,
 } from '@angular/common/http';
 import localeEs from '@angular/common/locales/es';
-import { ApplicationConfig, LOCALE_ID } from '@angular/core';
+import {
+  ApplicationConfig,
+  LOCALE_ID,
+  provideZoneChangeDetection,
+} from '@angular/core';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { HttpCacheInterceptor } from '@app/providers/http-interceptors/http-cache.interceptor';
 import { JwtInterceptor } from '@app/providers/http-interceptors/jwt.interceptor';
@@ -16,6 +20,10 @@ registerLocaleData(localeEs);
 
 export const appConfig: ApplicationConfig = {
   providers: [
+    provideZoneChangeDetection({
+      eventCoalescing: true,
+      runCoalescing: true,
+    }),
     provideRouter(
       routes,
       withInMemoryScrolling({

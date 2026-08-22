@@ -63,26 +63,22 @@ export class AuditPanelComponent implements OnChanges {
   filtroAdmin = '';
   paginaActual = 1;
   readonly filasPorPagina = 10;
+  opcionesAccion: OpcionSelect[] = [];
+  logsPaginados: AuditLogDto[] = [];
+  private readonly detalleCache = new Map<
+    string,
+    AuditObservationDetail | null
+  >();
 
   get acciones(): string[] {
     return (
       ACCIONES_POR_ENTIDAD[this.entidad] ?? ['Crear', 'Editar', 'Eliminar']
     );
   }
-  get opcionesAccion(): OpcionSelect[] {
-    return [
-      { value: '', label: 'Todas las acciones' },
-      ...this.acciones.map((accion) => ({ value: accion, label: accion })),
-    ];
-  }
-  get logsPaginados(): AuditLogDto[] {
-    const inicio = (this.paginaActual - 1) * this.filasPorPagina;
-    return this.logs.slice(inicio, inicio + this.filasPorPagina);
-  }
-
   constructor(private readonly auditService: AuditLogApiService) {}
 
   ngOnChanges(changes: SimpleChanges) {
+    if (changes['entidad']) this.actualizarOpcionesAccion();
     if (changes['entidad'] || changes['refreshTrigger']) this.cargar();
   }
 
@@ -109,8 +105,9 @@ export class AuditPanelComponent implements OnChanges {
       .subscribe({
         next: (data) => {
           this.logs = data;
+          this.detalleCache.clear();
           this.aplicarOrdenActual();
-          this.paginaActual = 1;
+          this.cambiarPagina(1);
           this.cargando = false;
         },
         error: () => {
@@ -122,6 +119,12 @@ export class AuditPanelComponent implements OnChanges {
   seleccionarAccion(a: string) {
     this.filtroAccion = a;
     this.cargar();
+  }
+
+  cambiarPagina(pagina: number): void {
+    this.paginaActual = pagina;
+    const inicio = (pagina - 1) * this.filasPorPagina;
+    this.logsPaginados = this.logs.slice(inicio, inicio + this.filasPorPagina);
   }
 
   limpiarFiltroAdmin() {
@@ -198,6 +201,7 @@ export class AuditPanelComponent implements OnChanges {
         : 'asc';
     this.sortColumn = columnaOrdenable;
     this.aplicarOrdenActual();
+    this.cambiarPagina(this.paginaActual);
   }
 
   esColumnaOrdenada(columna: string): boolean {
@@ -214,6 +218,9 @@ export class AuditPanelComponent implements OnChanges {
 
   parseDetalle(detalle?: string): AuditObservationDetail | null {
     if (!detalle) return null;
+    if (this.detalleCache.has(detalle)) {
+      return this.detalleCache.get(detalle) ?? null;
+    }
 
     const parsedDetail = parseJsonResult<unknown>(detalle);
 
@@ -221,10 +228,13 @@ export class AuditPanelComponent implements OnChanges {
       parsedDetail.isOk() &&
       this.isAuditObservationDetail(parsedDetail.value)
     ) {
+      this.detalleCache.set(detalle, parsedDetail.value);
       return parsedDetail.value;
     }
 
-    return { texto: detalle };
+    const resultado = { texto: detalle };
+    this.detalleCache.set(detalle, resultado);
+    return resultado;
   }
 
   private isAuditObservationDetail(
@@ -333,6 +343,13 @@ export class AuditPanelComponent implements OnChanges {
         this.auditSortValue(b, this.sortColumn),
       ),
     );
+  }
+
+  private actualizarOpcionesAccion(): void {
+    this.opcionesAccion = [
+      { value: '', label: 'Todas las acciones' },
+      ...this.acciones.map((accion) => ({ value: accion, label: accion })),
+    ];
   }
 
   private inicioDelDia(fecha: Date): Date {

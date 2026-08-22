@@ -136,7 +136,7 @@
       [totalItems]="logs.length"
       [page]="paginaActual"
       [pageSize]="filasPorPagina"
-      (pageChange)="paginaActual = $event"
+      (pageChange)="cambiarPagina($event)"
     ></app-table-pagination>
   }
 </div>
