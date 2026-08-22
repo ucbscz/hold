@@ -108,6 +108,7 @@
   </div>
 
   <section
+    #comentariosSection
     class="comentarios-equipo"
     aria-labelledby="comentarios-equipo-title"
   >
@@ -375,6 +376,17 @@
       }
     </div>
   </section>
+  @if (mostrarBotonSubir()) {
+    <button
+      type="button"
+      class="comentarios-subir"
+      (click)="subirAComentarios()"
+      aria-label="Volver al inicio de los comentarios"
+      title="Volver al inicio de los comentarios"
+    >
+      <i class="fas fa-arrow-up" aria-hidden="true"></i>
+    </button>
+  }
 } @else {
   <div class="objeto-loading" aria-label="Cargando equipo">
     <div class="objeto-loading__image"></div>

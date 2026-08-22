@@ -1,5 +1,14 @@
 import { CommonModule, NgOptimizedImage } from '@angular/common';
-import { Component, OnDestroy, signal, WritableSignal } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  NgZone,
+  OnDestroy,
+  signal,
+  ViewChild,
+  WritableSignal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -43,7 +52,10 @@ const MAX_COMMENT_LENGTH = 1024;
   templateUrl: './objeto.component.html',
   styleUrl: './objeto.component.css',
 })
-export class ObjetoComponent implements OnDestroy {
+export class ObjetoComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('comentariosSection')
+  private comentariosSection?: ElementRef<HTMLElement>;
+
   readonly minimumCartQuantity = MINIMUM_CART_QUANTITY;
   readonly maxCommentLength = MAX_COMMENT_LENGTH;
   readonly skeletonComentarios = [0, 1, 2];
@@ -84,8 +96,24 @@ export class ObjetoComponent implements OnDestroy {
   publicandoComentario = false;
   publicandoRespuestaId: number | null = null;
   eliminandoComentarioId: number | null = null;
+  readonly mostrarBotonSubir = signal(false);
   private readonly likePendienteIds = new Set<number>();
   private readonly carritoSubscription: Subscription;
+  private scrollAnimationFrame: number | null = null;
+  private readonly actualizarBotonSubir = (): void => {
+    if (this.scrollAnimationFrame !== null) return;
+
+    this.scrollAnimationFrame = window.requestAnimationFrame(() => {
+      this.scrollAnimationFrame = null;
+      const section = this.comentariosSection?.nativeElement;
+      const rect = section?.getBoundingClientRect();
+      const visible = !!rect && rect.top < -240 && rect.bottom > 96;
+
+      if (visible !== this.mostrarBotonSubir()) {
+        this.ngZone.run(() => this.mostrarBotonSubir.set(visible));
+      }
+    });
+  };
 
   constructor(
     private readonly route: ActivatedRoute,
@@ -94,6 +122,7 @@ export class ObjetoComponent implements OnDestroy {
     private readonly disponibilidadService: DisponibilidadService,
     private readonly avisoDisponibilidad: AvisoDisponibilidadService,
     private readonly imageCache: ImageCacheService,
+    private readonly ngZone: NgZone,
   ) {
     this.carritoSubscription = this.carrito.carrito$.subscribe(() => {
       if (!this.producto.id) return;
@@ -103,8 +132,35 @@ export class ObjetoComponent implements OnDestroy {
     });
   }
 
+  ngAfterViewInit(): void {
+    if (typeof window === 'undefined') return;
+
+    this.ngZone.runOutsideAngular(() => {
+      window.addEventListener('scroll', this.actualizarBotonSubir, {
+        passive: true,
+      });
+    });
+    this.actualizarBotonSubir();
+  }
+
   ngOnDestroy(): void {
     this.carritoSubscription.unsubscribe();
+    if (typeof window === 'undefined') return;
+
+    window.removeEventListener('scroll', this.actualizarBotonSubir);
+    if (this.scrollAnimationFrame !== null) {
+      window.cancelAnimationFrame(this.scrollAnimationFrame);
+    }
+  }
+
+  subirAComentarios(): void {
+    const reducirMovimiento = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+    this.comentariosSection?.nativeElement.scrollIntoView({
+      behavior: reducirMovimiento ? 'auto' : 'smooth',
+      block: 'start',
+    });
   }
 
   ngOnInit(): void {

@@ -17,4 +17,19 @@ describe('ObjetoComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('muestra el acceso para volver al inicio de comentarios cuando corresponde', () => {
+    component.cargando = false;
+    component.mostrarBotonSubir.set(true);
+    fixture.detectChanges();
+
+    const button = fixture.nativeElement.querySelector(
+      '.comentarios-subir',
+    ) as HTMLButtonElement | null;
+
+    expect(button).not.toBeNull();
+    expect(button?.getAttribute('aria-label')).toBe(
+      'Volver al inicio de los comentarios',
+    );
+  });
 });
