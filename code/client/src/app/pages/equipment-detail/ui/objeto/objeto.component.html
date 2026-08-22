@@ -41,19 +41,24 @@
 
       <div class="seccion-compra">
         <p class="disponibilidad-texto">
-          <i class="fas fa-check-circle"></i>
-          {{ cantidadDisponible }} unidad{{
-            cantidadDisponible !== 1 ? "es" : ""
-          }}
-          disponible{{ cantidadDisponible !== 1 ? "s" : "" }} hoy
+          @if (consultandoDisponibilidad) {
+            <i class="fas fa-spinner fa-spin"></i>
+            Consultando disponibilidad...
+          } @else {
+            <i class="fas fa-check-circle"></i>
+            {{ cantidadDisponible }} unidad{{
+              cantidadDisponible !== 1 ? "es" : ""
+            }}
+            disponible{{ cantidadDisponible !== 1 ? "s" : "" }}
+          }
         </p>
 
-        @if (sinUnidadesOperativas) {
+        @if (!consultandoDisponibilidad && sinUnidadesOperativas) {
           <p class="sin-operativas">
             <i class="fas fa-times-circle"></i> Sin unidades operativas
             disponibles
           </p>
-        } @else if (!deshabilitarBoton) {
+        } @else if (!consultandoDisponibilidad && !deshabilitarBoton) {
           <div class="cantidad-selector">
             <span class="cantidad-label">Cantidad:</span>
             <div class="stepper">

@@ -255,7 +255,23 @@ export class ListaObjetosComponent
   private siguienteBloqueDeMediaHora(): Date {
     const fecha = new Date();
     fecha.setSeconds(0, 0);
+
+    if (fecha.getHours() < 8) {
+      fecha.setHours(8, 0, 0, 0);
+      return fecha;
+    }
+
+    if (fecha.getHours() >= 20) {
+      fecha.setDate(fecha.getDate() + 1);
+      fecha.setHours(8, 0, 0, 0);
+      return fecha;
+    }
+
     fecha.setMinutes(Math.ceil((fecha.getMinutes() + 1) / 30) * 30);
+    if (fecha.getHours() >= 20) {
+      fecha.setDate(fecha.getDate() + 1);
+      fecha.setHours(8, 0, 0, 0);
+    }
     return fecha;
   }
 

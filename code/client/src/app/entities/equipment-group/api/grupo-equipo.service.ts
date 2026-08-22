@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
 import { ApiResponse, extractApiValue } from '@shared/api';
-import { map, Observable, of, tap } from 'rxjs';
+import { finalize, map, Observable, of, shareReplay, tap } from 'rxjs';
 import {
   ComentarioEquipo,
   ComentarioEquipoOrden,
@@ -33,12 +33,19 @@ export class GrupoequipoService {
     Respuestas: [],
   };
   private readonly cache = new Map<string, GrupoEquipo[]>();
+  private readonly cachePorId = new Map<number, GrupoEquipo>();
+  private readonly solicitudesPorId = new Map<
+    number,
+    Observable<GrupoEquipo>
+  >();
   paginaGuardada: number = 0;
   cantidadObjetosGuardada: number = 21;
   constructor(private readonly http: HttpClient) {}
 
   invalidarCache() {
     this.cache.clear();
+    this.cachePorId.clear();
+    this.solicitudesPorId.clear();
   }
 
   private mapearGrupoEquipo(item: GrupoEquipoApiItem): GrupoEquipo {
@@ -131,21 +138,33 @@ export class GrupoequipoService {
       ),
       tap((result) => {
         this.cache.set(cacheKey, result);
+        this.guardarGruposPorId(result);
       }),
     );
   }
 
   getproducto(id: string): Observable<GrupoEquipo> {
+    const idNumerico = Number(id);
+    const cached = this.cachePorId.get(idNumerico);
+    if (cached) return of({ ...cached });
+
+    const solicitudExistente = this.solicitudesPorId.get(idNumerico);
+    if (solicitudExistente) return solicitudExistente;
+
     const url = `${this.apiUrl}/${id}`;
-    return this.http
-      .get<ApiResponse<GrupoEquipoApiItem>>(url)
-      .pipe(
-        map((data) =>
-          this.mapearGrupoEquipo(
-            extractApiValue(data, this.grupoEquipoApiVacio),
-          ),
-        ),
-      );
+    const solicitud = this.http.get<ApiResponse<GrupoEquipoApiItem>>(url).pipe(
+      map((data) =>
+        this.mapearGrupoEquipo(extractApiValue(data, this.grupoEquipoApiVacio)),
+      ),
+      tap((grupo) => {
+        if (grupo.id) this.cachePorId.set(grupo.id, { ...grupo });
+      }),
+      finalize(() => this.solicitudesPorId.delete(idNumerico)),
+      shareReplay({ bufferSize: 1, refCount: false }),
+    );
+
+    this.solicitudesPorId.set(idNumerico, solicitud);
+    return solicitud;
   }
 
   obtenerComentarios(
@@ -236,5 +255,11 @@ export class GrupoequipoService {
     return this.http
       .delete<unknown>(`${this.apiUrl}/${id}`)
       .pipe(tap(() => this.invalidarCache()));
+  }
+
+  private guardarGruposPorId(grupos: GrupoEquipo[]): void {
+    for (const grupo of grupos) {
+      if (grupo.id) this.cachePorId.set(grupo.id, { ...grupo });
+    }
   }
 }

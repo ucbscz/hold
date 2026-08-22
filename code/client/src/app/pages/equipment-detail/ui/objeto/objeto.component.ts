@@ -52,6 +52,7 @@ export class ObjetoComponent implements OnDestroy {
   cantidadDisponible: number = 0;
   totalOperativo: number = 0;
   cargando: boolean = true;
+  consultandoDisponibilidad = false;
   addedToCart = false;
   error: WritableSignal<boolean> = signal(false);
   mensajeerror: string = '';
@@ -132,6 +133,7 @@ export class ObjetoComponent implements OnDestroy {
               tiempoMaximoPrestamoDias: this.producto.TiempoMaximoPrestamoDias,
             },
           };
+          this.cargando = false;
           this.obtenerDisponibilidad();
           this.cargarComentarios();
         } else {
@@ -149,12 +151,11 @@ export class ObjetoComponent implements OnDestroy {
   }
 
   obtenerDisponibilidad(): void {
+    const inicio = this.siguienteHorarioConsultable();
+    const fin = new Date(inicio.getTime() + 30 * 60 * 1000);
+    this.consultandoDisponibilidad = true;
     this.disponibilidadService
-      .obtenerDisponibilidad(
-        new Date(),
-        new Date(Date.now() + 30 * 60 * 1000),
-        [this.producto.id],
-      )
+      .obtenerDisponibilidad(inicio, fin, [this.producto.id])
       .subscribe({
         next: (data) => {
           if (data?.length > 0) {
@@ -167,13 +168,13 @@ export class ObjetoComponent implements OnDestroy {
             this.deshabilitarBoton = true;
           }
 
-          this.cargando = false;
+          this.consultandoDisponibilidad = false;
         },
         error: () => {
           this.mensajeerror =
             'No se pudo obtener la disponibilidad del equipo. Por favor, intenta más tarde.';
           this.error.set(true);
-          this.cargando = false;
+          this.consultandoDisponibilidad = false;
         },
       });
   }
@@ -481,5 +482,28 @@ export class ObjetoComponent implements OnDestroy {
       return;
 
     this.carrito.editarCantidad(this.producto.id, this.cantidad);
+  }
+
+  private siguienteHorarioConsultable(): Date {
+    const inicio = new Date();
+    inicio.setSeconds(0, 0);
+
+    if (inicio.getHours() < 8) {
+      inicio.setHours(8, 0, 0, 0);
+      return inicio;
+    }
+
+    if (inicio.getHours() >= 20) {
+      inicio.setDate(inicio.getDate() + 1);
+      inicio.setHours(8, 0, 0, 0);
+      return inicio;
+    }
+
+    inicio.setMinutes(Math.ceil((inicio.getMinutes() + 1) / 30) * 30);
+    if (inicio.getHours() >= 20) {
+      inicio.setDate(inicio.getDate() + 1);
+      inicio.setHours(8, 0, 0, 0);
+    }
+    return inicio;
   }
 }
