@@ -32,6 +32,7 @@ export class PantallaMainComponent implements OnInit, OnDestroy {
   showCategories = false;
   solicitud = '';
   categoriasSeleccionadas: Set<string> = new Set();
+  categoriasArray: string[] = [];
   items: Categorias[] = [];
   error: WritableSignal<boolean> = signal(false);
   mensajeerror = '';
@@ -54,6 +55,7 @@ export class PantallaMainComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.categoriasSeleccionadas = this.filtrosService.categoriasSeleccionadas;
+    this.actualizarCategoriasArray();
     this.solicitud = this.filtrosService.solicitud;
 
     this.categorias.obtenercategorias().subscribe({
@@ -76,6 +78,7 @@ export class PantallaMainComponent implements OnInit, OnDestroy {
   limpiar(): void {
     this.solicitud = '';
     this.categoriasSeleccionadas.clear();
+    this.actualizarCategoriasArray();
     this.filtrosService.limpiar();
   }
 
@@ -103,13 +106,14 @@ export class PantallaMainComponent implements OnInit, OnDestroy {
       }
       this.categoriasSeleccionadas.add(categoria);
     }
+    this.actualizarCategoriasArray();
   }
 
   estaCategoriaSeleccionada(categoria: string): boolean {
     return this.categoriasSeleccionadas.has(categoria);
   }
 
-  get categoriasArray(): string[] {
-    return Array.from(this.categoriasSeleccionadas);
+  private actualizarCategoriasArray(): void {
+    this.categoriasArray = Array.from(this.categoriasSeleccionadas);
   }
 }

@@ -63,8 +63,8 @@ export abstract class Tabla extends BaseTablaComponent {
       1,
       Math.ceil(items.length / this.filasPorPagina),
     );
-    if (this.paginaActual > totalPaginas) this.paginaActual = totalPaginas;
-    const inicio = (this.paginaActual - 1) * this.filasPorPagina;
+    const pagina = Math.min(Math.max(1, this.paginaActual), totalPaginas);
+    const inicio = (pagina - 1) * this.filasPorPagina;
     return items.slice(inicio, inicio + this.filasPorPagina);
   }
 

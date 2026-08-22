@@ -57,6 +57,15 @@ describe('CustomSelectComponent', () => {
     expect(menu?.isConnected).toBeFalse();
   });
 
+  it('should preserve normalized options when an equivalent list is rebound', () => {
+    component.opciones = ['Todos', 'Activo'];
+    const normalizedOptions = component.opcionesNormalizadas;
+
+    component.opciones = ['Todos', 'Activo'];
+
+    expect(component.opcionesNormalizadas).toBe(normalizedOptions);
+  });
+
   it('should focus search only once and ignore its own scrolling', fakeAsync(() => {
     component.opciones = [
       'Preventivo',

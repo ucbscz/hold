@@ -17,4 +17,13 @@ describe('PantallaMainComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('should keep a stable category input between change detection cycles', () => {
+    const categories = component.categoriasArray;
+
+    fixture.detectChanges();
+    fixture.detectChanges();
+
+    expect(component.categoriasArray).toBe(categories);
+  });
 });

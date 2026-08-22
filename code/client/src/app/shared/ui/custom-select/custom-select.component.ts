@@ -40,9 +40,13 @@ export class CustomSelectComponent
   @Input() searchThreshold = 6;
   @Input() menuPosition: 'auto' | 'top' | 'bottom' = 'auto';
   @Input() set opciones(valor: Array<OpcionSelect | string>) {
-    this.opcionesNormalizadas = (valor ?? []).map((o) =>
+    const opciones = (valor ?? []).map((o) =>
       typeof o === 'string' ? { value: o, label: o } : o,
     );
+
+    if (this.sonLasMismasOpciones(opciones)) return;
+
+    this.opcionesNormalizadas = opciones;
     if (this.abierto) this.programarPosicionMenu();
   }
 
@@ -67,7 +71,7 @@ export class CustomSelectComponent
     if (menu && evento.target instanceof Node && menu.contains(evento.target)) {
       return;
     }
-    this.programarPosicionMenu();
+    this.programarPosicionMenu(true);
   };
 
   constructor(private readonly elementRef: ElementRef<HTMLElement>) {
@@ -180,18 +184,18 @@ export class CustomSelectComponent
     this.menuRef.nativeElement.remove();
   }
 
-  private programarPosicionMenu(): void {
+  private programarPosicionMenu(conservarAltura = false): void {
     if (!this.abierto) return;
     if (this.animationFrameId !== undefined)
       cancelAnimationFrame(this.animationFrameId);
 
     this.animationFrameId = requestAnimationFrame(() => {
       this.animationFrameId = undefined;
-      this.posicionarMenu();
+      this.posicionarMenu(conservarAltura);
     });
   }
 
-  private posicionarMenu(): void {
+  private posicionarMenu(conservarAltura = false): void {
     const trigger =
       this.elementRef.nativeElement.querySelector<HTMLElement>('.cs-trigger');
     const menu = this.menuRef.nativeElement;
@@ -207,10 +211,13 @@ export class CustomSelectComponent
       0,
       viewportHeight - triggerRect.bottom - viewportPadding - menuGap,
     );
-    const desiredHeight = Math.min(
-      this.calcularAlturaNaturalMenu(),
-      viewportHeight - viewportPadding * 2,
-    );
+    const desiredHeight =
+      conservarAltura && this.menuPosicionado
+        ? this.menuMaxHeight
+        : Math.min(
+            this.calcularAlturaNaturalMenu(),
+            viewportHeight - viewportPadding * 2,
+          );
 
     this.abreHaciaArriba =
       this.menuPosition === 'top' ||
@@ -249,6 +256,16 @@ export class CustomSelectComponent
   private limpiarBusqueda(): void {
     this.busqueda = '';
     this.menuPosicionado = false;
+  }
+
+  private sonLasMismasOpciones(opciones: OpcionSelect[]): boolean {
+    return (
+      opciones.length === this.opcionesNormalizadas.length &&
+      opciones.every((opcion, indice) => {
+        const actual = this.opcionesNormalizadas[indice];
+        return opcion.value === actual.value && opcion.label === actual.label;
+      })
+    );
   }
 
   private calcularAlturaNaturalMenu(): number {

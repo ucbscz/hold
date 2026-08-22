@@ -237,7 +237,7 @@ export class ListaObjetosComponent
 
     if (ids.length === 0) return;
 
-    const inicio = new Date();
+    const inicio = this.siguienteBloqueDeMediaHora();
     const fin = new Date(inicio.getTime() + 30 * 60 * 1000);
 
     this.disponibilidad.obtenerDisponibilidad(inicio, fin, ids).subscribe({
@@ -246,7 +246,17 @@ export class ListaObjetosComponent
           this.totalOperativo[d.IdGrupoEquipo] = d.TotalOperativo ?? 0;
         }
       },
+      error: () => {
+        this.totalOperativo = {};
+      },
     });
+  }
+
+  private siguienteBloqueDeMediaHora(): Date {
+    const fecha = new Date();
+    fecha.setSeconds(0, 0);
+    fecha.setMinutes(Math.ceil((fecha.getMinutes() + 1) / 30) * 30);
+    return fecha;
   }
 
   private normalizeText(text: unknown): string {

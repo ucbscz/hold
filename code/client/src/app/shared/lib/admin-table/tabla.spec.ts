@@ -92,4 +92,14 @@ describe('Tabla', () => {
     expect(Array.from(bytes.slice(0, 3))).toEqual([0xef, 0xbb, 0xbf]);
     expect(new TextDecoder().decode(bytes)).toContain('"—"');
   });
+
+  it('should not mutate the current page while rendering a page slice', () => {
+    tabla.paginaActual = 99;
+    const items = Array.from({ length: 12 }, (_, index) => index + 1);
+
+    const page = tabla.paginar(items);
+
+    expect(page).toEqual([11, 12]);
+    expect(tabla.paginaActual).toBe(99);
+  });
 });
