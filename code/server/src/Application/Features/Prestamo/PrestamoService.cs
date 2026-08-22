@@ -6,6 +6,7 @@ using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Application.Features.AuditLog;
 using IMT_Reservas.Server.Application.Features.Notificacion;
 using IMT_Reservas.Server.Application.Features.Prestamo.State;
+using IMT_Reservas.Server.Application.Features.Usuario;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using PrestamoEntity = IMT_Reservas.Server.Core.Entities.Prestamo;
@@ -65,13 +66,24 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
                 createResult.Errors.FirstOrDefault() ?? "No se pudo crear la reserva"
             );
 
+        var createdLoan = await Repository.Get(entity.Id);
+        if (!createdLoan.IsSuccess)
+            return createdLoan;
+
+        var userDisplayName = await Repository.GetUsuarioDisplayName(entity.Carnet!);
+        var equipmentNames = createdLoan.Value.NombreGrupoEquipo
+            ?? string.Join(", ", dto.GrupoEquipoId ?? []);
+        var loanDetail = JsonSerializer.Serialize(new
+        {
+            texto = $"Usuario: {userDisplayName} ({entity.Carnet}). Equipos: {equipmentNames}. Inicio: {entity.FechaPrestamoEsperada:yyyy-MM-dd HH:mm} UTC. Devolución: {entity.FechaDevolucionEsperada:yyyy-MM-dd HH:mm} UTC.",
+        });
+
         await Audit!.Log(
             AuditAccion.Crear,
             typeof(PrestamoEntity).Name,
-            entity.Id.ToString(CultureInfo.InvariantCulture)
+            entity.Id.ToString(CultureInfo.InvariantCulture),
+            loanDetail
         );
-
-        var userDisplayName = await Repository.GetUsuarioDisplayName(entity.Carnet!);
 
         await _notifications.CreateForAdmins(
             TipoNotificacion.AdminNuevoPrestamo,
@@ -80,7 +92,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             userDisplayName
         );
 
-        return await Repository.Get(entity.Id);
+        return createdLoan;
     }
 
     public Task<Result<PrestamoDto>> CreateForUser(PrestamoDto dto, string carnet)
@@ -155,6 +167,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             equipmentObservationMessage = returnResult.UserMessage;
             hasDamagedEquipment = returnResult.HasDamagedEquipment;
         }
+        else if (!string.IsNullOrWhiteSpace(observacion))
+            auditDetail = JsonSerializer.Serialize(new { observacion });
 
         var auditAction = parsedState.Value switch
         {
@@ -204,10 +218,22 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         if (await Repository.HasAtrasadoPrestamo(carnet))
             return;
 
-        if (!await Repository.IsUserBlocked(carnet))
+        var blockReason = await Repository.GetBlockReason(carnet);
+
+        if (!string.Equals(
+            blockReason,
+            AutomaticBlockReasons.OverdueLoan,
+            StringComparison.Ordinal
+        ))
             return;
 
         await _usuarioRepository.SetBlockedStatus([carnet], false, null);
+        await Audit!.LogAsSystem(
+            AuditAccion.Desbloquear,
+            "Usuario",
+            carnet,
+            "Cuenta desbloqueada automáticamente al regularizar los préstamos atrasados"
+        );
         await _notifications.Create(
             carnet,
             TipoNotificacion.UsuarioDesbloqueado,

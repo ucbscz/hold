@@ -3,8 +3,10 @@ using System.Text.Json;
 using IMT_Reservas.Server.Application.Features.AuditLog;
 using IMT_Reservas.Server.Application.Features.Notificacion;
 using IMT_Reservas.Server.Application.Features.Prestamo;
+using IMT_Reservas.Server.Application.Features.Usuario;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using PrestamoEntity = IMT_Reservas.Server.Core.Entities.Prestamo;
+using UsuarioEntity = IMT_Reservas.Server.Core.Entities.Usuario;
 
 namespace IMT_Reservas.Server.Infrastructure.Jobs;
 
@@ -49,17 +51,19 @@ public class EstadoPrestamoJob
             return;
 
         await _prestamoRepository.MarkAsOverdue(overdue.Select(GetLoanId).ToList());
+        var affectedCarnets = overdue.Select(loan => loan.CarnetUsuario ?? string.Empty)
+            .Where(carnet => !string.IsNullOrWhiteSpace(carnet))
+            .Distinct()
+            .ToList();
+        var newlyBlockedCarnets = await _usuarioRepository.GetUnblockedCarnets(affectedCarnets);
+
         await _usuarioRepository.SetBlockedStatus(
-            overdue.Select(loan => loan.CarnetUsuario ?? string.Empty)
-                .Where(carnet => !string.IsNullOrWhiteSpace(carnet))
-                .Distinct()
-                .ToList(),
+            newlyBlockedCarnets,
             true,
-            "Cuenta bloqueada automáticamente por préstamo atrasado."
+            AutomaticBlockReasons.OverdueLoan
         );
 
-        await _audit.LogMany(
-            overdue
+        var loanEntries = overdue
                 .Select(loan => new AuditEntry(
                     AuditAccion.AtrasadoAutomatico,
                     nameof(PrestamoEntity),
@@ -69,9 +73,16 @@ public class EstadoPrestamoJob
                         "Bloqueo automático por préstamo vencido.",
                         loan.FechaDevolucionEsperada
                     )
-                ))
-                .ToList()
-        );
+                ));
+        var userEntries = newlyBlockedCarnets
+            .Select(carnet => new AuditEntry(
+                AuditAccion.Bloquear,
+                nameof(UsuarioEntity),
+                carnet,
+                AutomaticBlockReasons.OverdueLoan
+            ));
+
+        await _audit.LogMany(loanEntries.Concat(userEntries).ToList());
 
         await _notifications.CreateMany(
             overdue

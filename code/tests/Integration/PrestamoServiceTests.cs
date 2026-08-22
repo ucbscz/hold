@@ -9,6 +9,7 @@ using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using IMT_Reservas.Tests.Helpers;
+using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 namespace IMT_Reservas.Tests.Integration;
 
@@ -333,6 +334,42 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     }
 
     [Test]
+    public async Task UpdateStatus_Finalized_PreservesManualUserBlock()
+    {
+        const string manualReason = "Bloqueo administrativo vigente";
+        var loanId = await SeedOverdueLoan(manualReason);
+
+        var result = await Sut.UpdateStatus(loanId, "finalizado");
+
+        result.IsSuccess.Should().BeTrue();
+        var user = await Db.Usuarios.AsNoTracking().SingleAsync(u => u.Carnet == Carnet);
+        user.Bloqueado.Should().BeTrue();
+        user.MotivoBloqueo.Should().Be(manualReason);
+        Db.AuditLogs.Should().NotContain(log =>
+            log.Entidad == "Usuario" && log.Accion == AuditAccion.Desbloquear.ToString()
+        );
+    }
+
+    [Test]
+    public async Task UpdateStatus_Finalized_RemovesAndAuditsAutomaticUserBlock()
+    {
+        var loanId = await SeedOverdueLoan(AutomaticBlockReasons.OverdueLoan);
+
+        var result = await Sut.UpdateStatus(loanId, "finalizado");
+
+        result.IsSuccess.Should().BeTrue();
+        var user = await Db.Usuarios.AsNoTracking().SingleAsync(u => u.Carnet == Carnet);
+        user.Bloqueado.Should().BeFalse();
+        user.MotivoBloqueo.Should().BeNull();
+        Db.AuditLogs.Should().ContainSingle(log =>
+            log.Entidad == "Usuario"
+            && log.EntidadId == Carnet
+            && log.Accion == AuditAccion.Desbloquear.ToString()
+            && log.AdminNombre == "Sistema"
+        );
+    }
+
+    [Test]
     public async Task Create_WritesAssignedEquipmentIntoContractImmediately()
     {
         const string contract = """
@@ -541,6 +578,27 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         });
 
         await Db.SaveChangesAsync();
+    }
+
+    private async Task<int> SeedOverdueLoan(string blockReason)
+    {
+        var user = await Db.Usuarios.SingleAsync(u => u.Carnet == Carnet);
+        user.Bloqueado = true;
+        user.MotivoBloqueo = blockReason;
+
+        var loan = new Prestamo
+        {
+            Carnet = Carnet,
+            EstadoPrestamo = EstadoPrestamo.Atrasado,
+            FechaSolicitud = DateTime.UtcNow.AddHours(-3),
+            FechaPrestamoEsperada = DateTime.UtcNow.AddHours(-2),
+            FechaDevolucionEsperada = DateTime.UtcNow.AddHours(-1),
+            EstadoEliminado = false
+        };
+        Db.Prestamos.Add(loan);
+        await Db.SaveChangesAsync();
+
+        return loan.Id;
     }
 
     private async Task SeedActiveLoanForEquipo(int equipoId, EstadoPrestamo estado, DateTime inicio, DateTime fin)

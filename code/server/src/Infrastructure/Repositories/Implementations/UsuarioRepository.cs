@@ -205,6 +205,14 @@ public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
 
     public Task SaveChanges() => DbContext.SaveChangesAsync();
 
+    public async Task<List<string>> GetUnblockedCarnets(
+        IReadOnlyCollection<string> carnets
+    ) => await DbContext
+        .Usuarios.AsNoTracking()
+        .Where(user => carnets.Contains(user.Carnet) && !user.Bloqueado)
+        .Select(user => user.Carnet)
+        .ToListAsync();
+
     public async Task SetBlockedStatus(
         IReadOnlyCollection<string> carnets,
         bool isBlocked,
@@ -213,6 +221,22 @@ public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
     {
         if (carnets.Count == 0)
             return;
+
+        if (!DbContext.Database.IsRelational())
+        {
+            var users = await DbContext
+                .Usuarios.Where(user => carnets.Contains(user.Carnet))
+                .ToListAsync();
+
+            foreach (var user in users)
+            {
+                user.Bloqueado = isBlocked;
+                user.MotivoBloqueo = isBlocked ? reason : null;
+            }
+
+            await DbContext.SaveChangesAsync();
+            return;
+        }
 
         await DbContext
             .Usuarios.Where(user => carnets.Contains(user.Carnet))
