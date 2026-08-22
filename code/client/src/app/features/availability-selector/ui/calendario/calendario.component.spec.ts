@@ -20,9 +20,9 @@ describe('CalendarioComponent', () => {
 
   it('renders an in-place calendar with 30-minute time options', () => {
     expect(component.diasDelMes.length % 7).toBe(0);
-    expect(component.horas).toHaveSize(41);
-    expect(component.horas[0].value).toBe('00:00');
-    expect(component.horas[40].value).toBe('20:00');
+    expect(component.horas).toHaveSize(21);
+    expect(component.horas[0].value).toBe('08:00');
+    expect(component.horas[20].value).toBe('18:00');
     expect(
       fixture.nativeElement.querySelectorAll('.availability-selector__day')
         .length,
@@ -43,9 +43,11 @@ describe('CalendarioComponent', () => {
     expect(component.fechaFinSeleccionada()?.getMinutes()).toBe(0);
   });
 
-  it('does not allow a start time later than 19:30', () => {
-    expect(component.horaDeshabilitada('inicio', '20:00')).toBeTrue();
-    expect(component.horaDeshabilitada('inicio', '19:30')).toBeFalse();
+  it('limits reservations to the 08:00 through 18:00 service window', () => {
+    expect(component.horaDeshabilitada('inicio', '07:30')).toBeTrue();
+    expect(component.horaDeshabilitada('inicio', '17:30')).toBeFalse();
+    expect(component.horaDeshabilitada('inicio', '18:00')).toBeTrue();
+    expect(component.horaDeshabilitada('fin', '18:00')).toBeFalse();
   });
 
   it('disables dates and times beyond the selected groups maximum duration', () => {

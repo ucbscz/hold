@@ -1,4 +1,5 @@
 using Ardalis.Result;
+using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
 namespace IMT_Reservas.Server.Application.Features.Carrito;
@@ -52,6 +53,9 @@ public class CarritoService
             return Result<List<CarritoDto>>.Error(
                 "La duracion minima de un prestamo es de 30 minutos"
             );
+
+        if (!HorarioReserva.EsValido(fechaInicio, fechaFin))
+            return Result<List<CarritoDto>>.Error(HorarioReserva.Mensaje);
 
         var limits = await _repository.GetLoanLimitsByGroups(groupIds);
         var duration = fechaFin - fechaInicio;

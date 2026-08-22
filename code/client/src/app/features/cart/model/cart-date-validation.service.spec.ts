@@ -47,4 +47,32 @@ describe('CartDateValidationService', () => {
 
     expect(result.isValid).toBeTrue();
   });
+
+  it('accepts the exact service-hour boundaries', () => {
+    const result = service.validate(
+      new Date('2026-08-12T17:30:00'),
+      new Date('2026-08-12T18:00:00'),
+      currentDate,
+    );
+
+    expect(result.isValid).toBeTrue();
+  });
+
+  it('rejects reservations before opening or after closing', () => {
+    const beforeOpening = service.validate(
+      new Date('2026-08-13T07:30:00'),
+      new Date('2026-08-13T08:00:00'),
+      currentDate,
+    );
+    const afterClosing = service.validate(
+      new Date('2026-08-13T17:30:00'),
+      new Date('2026-08-13T18:30:00'),
+      currentDate,
+    );
+
+    expect(beforeOpening.isValid).toBeFalse();
+    expect(afterClosing.isValid).toBeFalse();
+    expect(beforeOpening.message).toContain('08:00 a 18:00');
+    expect(afterClosing.message).toContain('08:00 a 18:00');
+  });
 });

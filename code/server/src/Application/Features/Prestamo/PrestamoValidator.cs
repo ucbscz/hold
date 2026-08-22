@@ -64,5 +64,16 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
                     >= TimeSpan.FromMinutes(30)
             )
             .WithMessage("El préstamo debe tener una duración mínima de 30 minutos");
+
+        RuleFor(p => p)
+            .Must(p =>
+                !p.FechaPrestamoEsperada.HasValue
+                || !p.FechaDevolucionEsperada.HasValue
+                || HorarioReserva.EsValido(
+                    p.FechaPrestamoEsperada.Value,
+                    p.FechaDevolucionEsperada.Value
+                )
+            )
+            .WithMessage(HorarioReserva.Mensaje);
     }
 }

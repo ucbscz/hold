@@ -261,14 +261,14 @@ export class ListaObjetosComponent
       return fecha;
     }
 
-    if (fecha.getHours() >= 20) {
+    if (fecha.getHours() >= 18) {
       fecha.setDate(fecha.getDate() + 1);
       fecha.setHours(8, 0, 0, 0);
       return fecha;
     }
 
     fecha.setMinutes(Math.ceil((fecha.getMinutes() + 1) / 30) * 30);
-    if (fecha.getHours() >= 20) {
+    if (fecha.getHours() >= 18) {
       fecha.setDate(fecha.getDate() + 1);
       fecha.setHours(8, 0, 0, 0);
     }

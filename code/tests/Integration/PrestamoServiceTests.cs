@@ -94,6 +94,34 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     }
 
     [Test]
+    public async Task Create_OutsideServiceHours_ReturnsError()
+    {
+        var dto = BuildValidPrestamo(
+            Carnet,
+            GrupoId,
+            DateTime.UtcNow.AddDays(1),
+            DateTime.UtcNow.AddDays(1).AddMinutes(30)
+        );
+        dto.FechaPrestamoEsperada = DateTime.SpecifyKind(
+            DateTime.UtcNow.Date.AddDays(1).AddHours(11).AddMinutes(30),
+            DateTimeKind.Utc
+        );
+        dto.FechaDevolucionEsperada = DateTime.SpecifyKind(
+            DateTime.UtcNow.Date.AddDays(1).AddHours(12),
+            DateTimeKind.Utc
+        );
+
+        var result = await Sut.Create(dto);
+
+        result.IsSuccess.Should().BeFalse();
+        result.ValidationErrors
+            .Select(error => error.ErrorMessage)
+            .Should()
+            .Contain(error => error.Contains("08:00 a 18:00"));
+        Db.Prestamos.Should().BeEmpty();
+    }
+
+    [Test]
     public async Task Create_WhenDurationExceedsGroupMaximum_ReturnsError()
     {
         var group = await Db.GruposEquipos.FindAsync(GrupoId);
@@ -625,11 +653,25 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         await Db.SaveChangesAsync();
     }
 
-    private static PrestamoDto BuildValidPrestamo(string carnet, int grupoId, DateTime inicio, DateTime fin) => new()
+    private static PrestamoDto BuildValidPrestamo(
+        string carnet,
+        int grupoId,
+        DateTime inicio,
+        DateTime fin
+    )
     {
-        CarnetUsuario = carnet,
-        GrupoEquipoId = [grupoId],
-        FechaPrestamoEsperada = inicio,
-        FechaDevolucionEsperada = fin
-    };
+        var duration = fin - inicio;
+        var normalizedStart = DateTime.SpecifyKind(
+            inicio.Date.AddHours(13),
+            DateTimeKind.Utc
+        );
+
+        return new PrestamoDto
+        {
+            CarnetUsuario = carnet,
+            GrupoEquipoId = [grupoId],
+            FechaPrestamoEsperada = normalizedStart,
+            FechaDevolucionEsperada = normalizedStart + duration,
+        };
+    }
 }

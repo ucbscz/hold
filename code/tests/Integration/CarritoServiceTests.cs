@@ -72,6 +72,44 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
     }
 
     [Test]
+    public async Task GetDisponibilidad_OutsideServiceHours_ReturnsError()
+    {
+        var beforeOpening = await Sut.GetDisponibilidad(
+            new CarritoDto
+            {
+                ArrayIds = [GrupoId],
+                FechaInicio = DateTime.SpecifyKind(
+                    DateTime.UtcNow.Date.AddDays(1).AddHours(11).AddMinutes(30),
+                    DateTimeKind.Utc
+                ),
+                FechaFin = DateTime.SpecifyKind(
+                    DateTime.UtcNow.Date.AddDays(1).AddHours(12),
+                    DateTimeKind.Utc
+                ),
+            }
+        );
+        var afterClosing = await Sut.GetDisponibilidad(
+            new CarritoDto
+            {
+                ArrayIds = [GrupoId],
+                FechaInicio = DateTime.SpecifyKind(
+                    DateTime.UtcNow.Date.AddDays(1).AddHours(21).AddMinutes(30),
+                    DateTimeKind.Utc
+                ),
+                FechaFin = DateTime.SpecifyKind(
+                    DateTime.UtcNow.Date.AddDays(1).AddHours(22).AddMinutes(30),
+                    DateTimeKind.Utc
+                ),
+            }
+        );
+
+        beforeOpening.IsSuccess.Should().BeFalse();
+        afterClosing.IsSuccess.Should().BeFalse();
+        beforeOpening.Errors.Should().Contain(error => error.Contains("08:00 a 18:00"));
+        afterClosing.Errors.Should().Contain(error => error.Contains("08:00 a 18:00"));
+    }
+
+    [Test]
     public async Task GetDisponibilidad_OneActiveLoan_ReducesCapacity()
     {
         var fechaInicio = DateTime.Today;
@@ -187,10 +225,23 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
         await Db.SaveChangesAsync();
     }
 
-    private static CarritoDto BuildRequest(List<int> grupoIds, DateTime inicio, DateTime fin) => new()
+    private static CarritoDto BuildRequest(List<int> grupoIds, DateTime inicio, DateTime fin)
     {
-        ArrayIds = grupoIds,
-        FechaInicio = inicio,
-        FechaFin = fin
-    };
+        var duration = fin - inicio;
+        var startMinutes = inicio.Hour * 60 + inicio.Minute;
+        var endMinutes = fin.Hour * 60 + fin.Minute;
+        var isWithinServiceHours =
+            startMinutes >= 8 * 60
+            && startMinutes <= 17 * 60 + 30
+            && endMinutes >= 8 * 60
+            && endMinutes <= 18 * 60;
+        var normalizedStart = isWithinServiceHours ? inicio : inicio.Date.AddHours(9);
+
+        return new CarritoDto
+        {
+            ArrayIds = grupoIds,
+            FechaInicio = normalizedStart,
+            FechaFin = normalizedStart + duration,
+        };
+    }
 }

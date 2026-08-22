@@ -1,4 +1,5 @@
 using Ardalis.Result;
+using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
 namespace IMT_Reservas.Server.Application.Features.AvisoDisponibilidad;
@@ -17,6 +18,9 @@ public class AvisoDisponibilidadService
 
         if (dto.Fecha <= DateTime.UtcNow)
             return Result<object>.Error("La fecha y hora del aviso debe ser futura");
+
+        if (!HorarioReserva.EsValido(dto.Fecha.Value, dto.Fecha.Value.AddMinutes(30)))
+            return Result<object>.Error(HorarioReserva.Mensaje);
 
         await _repository.Add(carnet, dto);
 

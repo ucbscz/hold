@@ -493,14 +493,14 @@ export class ObjetoComponent implements OnDestroy {
       return inicio;
     }
 
-    if (inicio.getHours() >= 20) {
+    if (inicio.getHours() >= 18) {
       inicio.setDate(inicio.getDate() + 1);
       inicio.setHours(8, 0, 0, 0);
       return inicio;
     }
 
     inicio.setMinutes(Math.ceil((inicio.getMinutes() + 1) / 30) * 30);
-    if (inicio.getHours() >= 20) {
+    if (inicio.getHours() >= 18) {
       inicio.setDate(inicio.getDate() + 1);
       inicio.setHours(8, 0, 0, 0);
     }

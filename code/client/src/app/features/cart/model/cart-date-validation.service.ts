@@ -49,6 +49,21 @@ export class CartDateValidationService {
       };
     }
 
+    const startMinutes = startDate.getHours() * 60 + startDate.getMinutes();
+    const endMinutes = endDate.getHours() * 60 + endDate.getMinutes();
+    if (
+      startMinutes < 8 * 60 ||
+      startMinutes > 17 * 60 + 30 ||
+      endMinutes < 8 * 60 ||
+      endMinutes > 18 * 60
+    ) {
+      return {
+        isValid: false,
+        message:
+          'Error: El horario de atención para reservas es de 08:00 a 18:00',
+      };
+    }
+
     if (
       maximumLoanDays != null &&
       endDate.getTime() - startDate.getTime() >

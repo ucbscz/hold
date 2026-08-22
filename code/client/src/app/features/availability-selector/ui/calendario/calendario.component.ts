@@ -15,7 +15,8 @@ import { CustomSelectComponent, MostrarerrorComponent } from '@shared/ui';
 
 const MINIMUM_DURATION_MINUTES = 30;
 const MILLISECONDS_PER_MINUTE = 60 * 1000;
-const MAXIMUM_END_TIME_MINUTES = 20 * 60;
+const MINIMUM_START_TIME_MINUTES = 8 * 60;
+const MAXIMUM_END_TIME_MINUTES = 18 * 60;
 type CampoFecha = 'inicio' | 'fin';
 
 interface HoraOpcion {
@@ -276,12 +277,13 @@ export class CalendarioComponent {
 
   horaDeshabilitada(campo: CampoFecha, hora: string): boolean {
     const [horas, minutos] = hora.split(':').map(Number);
-    const minutosDelDia = horas * MINIMUM_DURATION_MINUTES * 2 + minutos;
+    const minutosDelDia = horas * 60 + minutos;
     const limite =
       campo === 'inicio'
         ? MAXIMUM_END_TIME_MINUTES - MINIMUM_DURATION_MINUTES
         : MAXIMUM_END_TIME_MINUTES;
-    if (minutosDelDia > limite) return true;
+    if (minutosDelDia < MINIMUM_START_TIME_MINUTES || minutosDelDia > limite)
+      return true;
 
     const fecha = new Date(this.obtenerFecha(campo) ?? this.minimoInicio);
     fecha.setHours(horas, minutos, 0, 0);
@@ -392,15 +394,19 @@ export class CalendarioComponent {
   }
 
   private crearHoras(): HoraOpcion[] {
-    return Array.from(
-      { length: MAXIMUM_END_TIME_MINUTES / MINIMUM_DURATION_MINUTES + 1 },
-      (_, indice) => {
-        const horas = Math.floor(indice / 2);
-        const minutos = (indice % 2) * MINIMUM_DURATION_MINUTES;
-        const value = `${this.dosDigitos(horas)}:${this.dosDigitos(minutos)}`;
-        return { value, label: value };
-      },
-    );
+    const cantidadOpciones =
+      (MAXIMUM_END_TIME_MINUTES - MINIMUM_START_TIME_MINUTES) /
+        MINIMUM_DURATION_MINUTES +
+      1;
+
+    return Array.from({ length: cantidadOpciones }, (_, indice) => {
+      const minutosDelDia =
+        MINIMUM_START_TIME_MINUTES + indice * MINIMUM_DURATION_MINUTES;
+      const horas = Math.floor(minutosDelDia / 60);
+      const minutos = minutosDelDia % 60;
+      const value = `${this.dosDigitos(horas)}:${this.dosDigitos(minutos)}`;
+      return { value, label: value };
+    });
   }
 
   private combinarDiaYHora(dia: Date, hora: Date): Date {
@@ -427,9 +433,15 @@ export class CalendarioComponent {
   private esRangoValido(inicio: Date, fin: Date): boolean {
     const duration = fin.getTime() - inicio.getTime();
     const maximumDays = this.maximoDiasPrestamo;
+    const inicioMinutos = inicio.getHours() * 60 + inicio.getMinutes();
+    const finMinutos = fin.getHours() * 60 + fin.getMinutes();
 
     return (
       duration >= MINIMUM_DURATION_MINUTES * MILLISECONDS_PER_MINUTE &&
+      inicioMinutos >= MINIMUM_START_TIME_MINUTES &&
+      inicioMinutos <= MAXIMUM_END_TIME_MINUTES - MINIMUM_DURATION_MINUTES &&
+      finMinutos >= MINIMUM_START_TIME_MINUTES &&
+      finMinutos <= MAXIMUM_END_TIME_MINUTES &&
       (maximumDays == null ||
         duration <= maximumDays * 24 * 60 * MILLISECONDS_PER_MINUTE)
     );
@@ -470,7 +482,7 @@ export class CalendarioComponent {
   private inicioDelSiguienteDia(fecha: Date): Date {
     const siguienteDia = new Date(fecha);
     siguienteDia.setDate(siguienteDia.getDate() + 1);
-    siguienteDia.setHours(0, 0, 0, 0);
+    siguienteDia.setHours(8, 0, 0, 0);
     return siguienteDia;
   }
 
@@ -481,6 +493,12 @@ export class CalendarioComponent {
   private siguienteBloque(): Date {
     const fecha = new Date();
     fecha.setSeconds(0, 0);
+
+    if (fecha.getHours() < 8) {
+      fecha.setHours(8, 0, 0, 0);
+      return fecha;
+    }
+
     fecha.setMinutes(
       Math.ceil(fecha.getMinutes() / MINIMUM_DURATION_MINUTES) *
         MINIMUM_DURATION_MINUTES,
