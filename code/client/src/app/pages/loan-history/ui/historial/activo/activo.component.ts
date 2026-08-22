@@ -2,6 +2,7 @@ import { CommonModule, DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { PrestamosAPIService, VistaPrestamosComponent } from '@entities/loan';
 import { UsuarioService } from '@entities/user';
+import { TablePaginationComponent } from '@shared/lib/admin-table';
 import { AvisoExitoComponent } from '@shared/ui';
 import { HistorialBase } from '../base/historial-base';
 @Component({
@@ -11,6 +12,7 @@ import { HistorialBase } from '../base/historial-base';
     DatePipe,
     VistaPrestamosComponent,
     AvisoExitoComponent,
+    TablePaginationComponent,
   ],
   templateUrl: './activo.component.html',
   styleUrl: '../historial-list.shared.css',

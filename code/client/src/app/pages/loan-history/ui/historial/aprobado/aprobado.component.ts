@@ -3,13 +3,20 @@ import { Component, signal, WritableSignal } from '@angular/core';
 import { PrestamoDto } from '@entities/admin';
 import { PrestamosAPIService, VistaPrestamosComponent } from '@entities/loan';
 import { UsuarioService } from '@entities/user';
+import { TablePaginationComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
 import { Aviso, AvisoExitoComponent } from '@shared/ui';
 import { HistorialBase } from '../base/historial-base';
 @Component({
   selector: 'app-aprobado',
   standalone: true,
-  imports: [CommonModule, Aviso, VistaPrestamosComponent, AvisoExitoComponent],
+  imports: [
+    CommonModule,
+    Aviso,
+    VistaPrestamosComponent,
+    AvisoExitoComponent,
+    TablePaginationComponent,
+  ],
   templateUrl: './aprobado.component.html',
   styleUrl: '../historial-list.shared.css',
 })

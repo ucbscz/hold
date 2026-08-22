@@ -4,6 +4,7 @@ import { PrestamoDto } from '@entities/admin';
 import { PrestamosAPIService, VistaPrestamosComponent } from '@entities/loan';
 import { UsuarioService } from '@entities/user';
 import { extractErrorMessage } from '@shared/lib/error';
+import { TablePaginationComponent } from '@shared/lib/admin-table';
 import { Aviso, AvisoExitoComponent, MostrarerrorComponent } from '@shared/ui';
 import { HistorialBase } from '../base/historial-base';
 @Component({
@@ -14,6 +15,7 @@ import { HistorialBase } from '../base/historial-base';
     VistaPrestamosComponent,
     MostrarerrorComponent,
     AvisoExitoComponent,
+    TablePaginationComponent,
   ],
   templateUrl: './pendiente.component.html',
   styleUrl: '../historial-list.shared.css',

@@ -1,6 +1,6 @@
 <div class="prestamos-container">
   <div class="prestamos-list">
-    @for (item of datosFiltrados | keyvalue: keepOrder; track item.key) {
+    @for (item of datosPaginados | keyvalue: keepOrder; track item.key) {
       <div class="prestamo-item prestamo-atrasado">
         <div class="item-header">
           <div class="usuario-info">
@@ -91,6 +91,12 @@
       </div>
     }
   </div>
+  <app-table-pagination
+    [totalItems]="totalRegistros"
+    [page]="paginaActual"
+    [pageSize]="tamanoPagina"
+    (pageChange)="cambiarPagina($event)"
+  ></app-table-pagination>
 </div>
 @if (abrirVistaPrestamos) {
   <app-vista-prestamos

@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { PrestamoDto } from '@entities/admin';
 import { withDefaultTestingProviders } from '@shared/lib/testing';
 import { ActivoComponent } from './activo.component';
 describe('ActivoComponent', () => {
@@ -16,5 +17,22 @@ describe('ActivoComponent', () => {
   });
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('pagina el historial sin alterar el total filtrado', () => {
+    const prestamos = Array.from({ length: 13 }, (_, index) =>
+      Object.assign(new PrestamoDto(), {
+        Id: index + 1,
+        NombreGrupoEquipo: `Equipo ${index + 1}`,
+      }),
+    );
+
+    component.agruparPrestamos(prestamos);
+
+    expect(component.totalRegistros).toBe(13);
+    expect(component.datosPaginados.size).toBe(6);
+
+    component.paginaActual = 3;
+    expect(component.datosPaginados.size).toBe(1);
   });
 });

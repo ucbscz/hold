@@ -24,6 +24,8 @@ export abstract class HistorialBase implements OnChanges {
   mensajeerror: string = '';
   exito: WritableSignal<boolean> = signal(false);
   mensajeexito: string = '';
+  paginaActual = 1;
+  readonly tamanoPagina = 6;
   protected abstract estado: string;
 
   keepOrder = (_a: unknown, _b: unknown): number => 0;
@@ -33,6 +35,14 @@ export abstract class HistorialBase implements OnChanges {
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
+    if (
+      changes['filtroTexto'] ||
+      changes['fechaDesde'] ||
+      changes['fechaHasta']
+    ) {
+      this.paginaActual = 1;
+    }
+
     if (changes['refreshTrigger'] && !changes['refreshTrigger'].firstChange) {
       this.cargarDatos();
     }
@@ -64,6 +74,30 @@ export abstract class HistorialBase implements OnChanges {
       filtrado.set(id, grupo);
     }
     return filtrado;
+  }
+  get totalRegistros(): number {
+    return this.datosFiltrados.size;
+  }
+  get datosPaginados(): Map<number, PrestamoAgrupados> {
+    const inicio = (this.paginaActual - 1) * this.tamanoPagina;
+    return new Map(
+      Array.from(this.datosFiltrados.entries()).slice(
+        inicio,
+        inicio + this.tamanoPagina,
+      ),
+    );
+  }
+  cambiarPagina(pagina: number): void {
+    this.paginaActual = pagina;
+
+    if (typeof document === 'undefined') return;
+    const reducirMovimiento = window.matchMedia(
+      '(prefers-reduced-motion: reduce)',
+    ).matches;
+    document.querySelector('.items-wrapper')?.scrollIntoView({
+      behavior: reducirMovimiento ? 'auto' : 'smooth',
+      block: 'start',
+    });
   }
   cargarDatos() {
     if (!this.usuario.estaVacio()) {
@@ -97,6 +131,11 @@ export abstract class HistorialBase implements OnChanges {
       }
     }
     this.datos = nuevo;
+    const totalPaginas = Math.max(
+      1,
+      Math.ceil(this.totalRegistros / this.tamanoPagina),
+    );
+    this.paginaActual = Math.min(this.paginaActual, totalPaginas);
   }
   abrirVista(item: PrestamoDto[]) {
     this.prestamosVista = item;
