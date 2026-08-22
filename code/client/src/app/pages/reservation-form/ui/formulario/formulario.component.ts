@@ -9,11 +9,10 @@ import {
   WritableSignal,
   signal,
 } from '@angular/core';
-import { Router } from '@angular/router';
 import { Carrito } from '@entities/cart';
 import { PrestamosAPIService } from '@entities/loan';
 import { UsuarioService } from '@entities/user';
-import { CarritoService } from '@features/cart';
+import { CarritoService, LoanReturnNavigationService } from '@features/cart';
 import { FirmaComponent } from '@features/signature';
 import { extractErrorMessage } from '@shared/lib/error';
 import { escapeHtmlValue } from '@shared/lib/html';
@@ -64,9 +63,9 @@ export class FormularioComponent implements OnInit {
     private readonly http: HttpClient,
     private readonly renderer: Renderer2,
     private readonly carrito: CarritoService,
-    private readonly router: Router,
     private readonly usuario: UsuarioService,
     private readonly mandarprestamo: PrestamosAPIService,
+    private readonly loanReturnNavigation: LoanReturnNavigationService,
   ) {}
 
   ngOnInit(): void {
@@ -198,8 +197,8 @@ export class FormularioComponent implements OnInit {
       });
   }
 
-  irhome() {
-    this.router.navigate(['/inicio']);
+  redirigirAnterior(): void {
+    void this.loanReturnNavigation.returnToPreviousPage();
   }
 
   guardarfirma(signatureData: string): void {

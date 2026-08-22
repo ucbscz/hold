@@ -12,7 +12,11 @@ import { Carrito } from '@entities/cart';
 import { PrestamosAPIService } from '@entities/loan';
 import { UsuarioService } from '@entities/user';
 import { CalendarioComponent } from '@features/availability-selector';
-import { CarritoService, CartDateValidationService } from '@features/cart';
+import {
+  CarritoService,
+  CartDateValidationService,
+  LoanReturnNavigationService,
+} from '@features/cart';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   Aviso,
@@ -76,6 +80,7 @@ export class CarritoComponent implements OnDestroy {
     private readonly usuarioService: UsuarioService,
     private readonly prestamosApiService: PrestamosAPIService,
     private readonly cartDateValidationService: CartDateValidationService,
+    private readonly loanReturnNavigation: LoanReturnNavigationService,
   ) {
     this.carrito = this.carritoService.obtenerCarrito();
     this.actualizarCarrito(this.carrito);
@@ -156,8 +161,8 @@ export class CarritoComponent implements OnDestroy {
       });
   }
 
-  redirigirHome(): void {
-    this.router.navigate(['/inicio']);
+  redirigirAnterior(): void {
+    void this.loanReturnNavigation.returnToPreviousPage();
   }
 
   carritoEstaVacio(): boolean {

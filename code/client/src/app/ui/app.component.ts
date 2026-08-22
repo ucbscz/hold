@@ -8,6 +8,7 @@ import {
   Router,
   RouterOutlet,
 } from '@angular/router';
+import { LoanReturnNavigationService } from '@features/cart';
 import { PantallaCargaComponent } from '@shared/ui';
 import { NavbarComponent } from '@widgets/navigation';
 
@@ -25,7 +26,10 @@ import { NavbarComponent } from '@widgets/navigation';
 export class AppComponent {
   cargando: WritableSignal<boolean> = signal(false);
 
-  constructor(private readonly router: Router) {
+  constructor(
+    private readonly router: Router,
+    private readonly loanReturnNavigation: LoanReturnNavigationService,
+  ) {
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {
         this.cargando.set(true);
@@ -35,6 +39,10 @@ export class AppComponent {
         event instanceof NavigationError
       ) {
         this.cargando.set(false);
+
+        if (event instanceof NavigationEnd) {
+          this.loanReturnNavigation.track(event.urlAfterRedirects);
+        }
       }
     });
   }
