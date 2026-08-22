@@ -15,6 +15,7 @@
 
 .container {
   width: min(1000px, 100%);
+  height: min(760px, calc(100dvh - 2rem));
   max-height: min(760px, calc(100dvh - 2rem));
   display: flex;
   flex-direction: column;
@@ -26,7 +27,6 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-xl);
-  animation: modalIn 180ms ease-out both;
 }
 
 .search-container {
@@ -273,23 +273,13 @@
   }
 }
 
-@keyframes modalIn {
-  from {
-    opacity: 0;
-    transform: translateY(8px) scale(0.98);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-
 @media (max-width: 768px) {
   :host {
     padding: 0.75rem;
   }
 
   .container {
+    height: calc(100dvh - 1.5rem);
     max-height: calc(100dvh - 1.5rem);
     padding: 1rem;
   }
@@ -309,6 +299,7 @@
   }
 
   .container {
+    height: calc(100dvh - 1rem);
     max-height: calc(100dvh - 1rem);
     padding: 0.75rem;
   }
