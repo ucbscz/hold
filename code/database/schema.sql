@@ -250,8 +250,6 @@ create table equipos
     estado_eliminado     boolean          default false                      not null,
     fecha_ingreso_equipo date             default CURRENT_DATE               not null,
     codigo_ucb           varchar
-        constraint unique_codigo_ucb
-            unique
 );
 
 alter table equipos
@@ -315,6 +313,9 @@ create index idx_componentes
 
 create index idx_equipos_identificadores
     on equipos (id_grupo_equipo, codigo_imt, estado_eliminado);
+
+create unique index unique_codigo_ucb
+    on equipos (codigo_ucb);
 
 create index idx_gaveteros_identificadores
     on gaveteros (nombre, id_mueble, estado_eliminado);
