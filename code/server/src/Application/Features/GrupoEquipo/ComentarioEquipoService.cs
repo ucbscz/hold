@@ -1,4 +1,5 @@
 using Ardalis.Result;
+using IMT_Reservas.Server.Application.Features.AuditLog;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
 namespace IMT_Reservas.Server.Application.Features.GrupoEquipo;
@@ -9,8 +10,16 @@ public class ComentarioEquipoService
     private const string OrdenAntiguos = "antiguos";
     private const string OrdenLikes = "likes";
     private readonly ComentarioEquipoRepository _repository;
+    private readonly AuditLogService _audit;
 
-    public ComentarioEquipoService(ComentarioEquipoRepository repository) => _repository = repository;
+    public ComentarioEquipoService(
+        ComentarioEquipoRepository repository,
+        AuditLogService audit
+    )
+    {
+        _repository = repository;
+        _audit = audit;
+    }
 
     public async Task<Result<List<ComentarioEquipoDto>>> GetByGrupo(
         int grupoId,
@@ -94,6 +103,12 @@ public class ComentarioEquipoService
             return Result<object>.Forbidden();
 
         await _repository.DeleteTree(comentarioId, grupoId);
+        await _audit.Log(
+            AuditAccion.EliminarComentario,
+            "GrupoEquipo",
+            grupoId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            $"Comentario {comentarioId} eliminado. Autor: {comentario.CarnetUsuario}"
+        );
 
         return Result<object>.Success(null!);
     }

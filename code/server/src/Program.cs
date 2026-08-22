@@ -166,16 +166,64 @@ builder.Services.AddScoped<ContratoService>();
 
 builder.Services.AddScoped<
     Service<CarreraEntity, Repository<CarreraEntity, CarreraDto>, CarreraDto>
->();
+>(sp =>
+    new Service<CarreraEntity, Repository<CarreraEntity, CarreraDto>, CarreraDto>(
+        sp.GetRequiredService<Repository<CarreraEntity, CarreraDto>>(),
+        sp.GetRequiredService<IValidator<CarreraDto>>(),
+        sp.GetRequiredService<IMapper<CarreraEntity, CarreraDto>>(),
+        sp.GetRequiredService<AuditLogService>()
+    )
+);
 builder.Services.AddScoped<
     Service<CategoriaEntity, Repository<CategoriaEntity, CategoriaDto>, CategoriaDto>
->();
-builder.Services.AddScoped<Service<MuebleEntity, Repository<MuebleEntity, MuebleDto>, MuebleDto>>();
+>(sp =>
+    new Service<CategoriaEntity, Repository<CategoriaEntity, CategoriaDto>, CategoriaDto>(
+        sp.GetRequiredService<Repository<CategoriaEntity, CategoriaDto>>(),
+        sp.GetRequiredService<IValidator<CategoriaDto>>(),
+        sp.GetRequiredService<IMapper<CategoriaEntity, CategoriaDto>>(),
+        sp.GetRequiredService<AuditLogService>()
+    )
+);
+builder.Services.AddScoped<
+    Service<MuebleEntity, Repository<MuebleEntity, MuebleDto>, MuebleDto>
+>(sp =>
+    new Service<MuebleEntity, Repository<MuebleEntity, MuebleDto>, MuebleDto>(
+        sp.GetRequiredService<Repository<MuebleEntity, MuebleDto>>(),
+        sp.GetRequiredService<IValidator<MuebleDto>>(),
+        sp.GetRequiredService<IMapper<MuebleEntity, MuebleDto>>(),
+        sp.GetRequiredService<AuditLogService>()
+    )
+);
 builder.Services.AddScoped<
     Service<EmpresaMantenimientoEntity, EmpresaMantenimientoRepository, EmpresaMantenimientoDto>
->();
-builder.Services.AddScoped<Service<Accesorio, AccesorioRepository, AccesorioDto>>();
-builder.Services.AddScoped<Service<Componente, ComponenteRepository, ComponenteDto>>();
+>(sp =>
+    new Service<
+        EmpresaMantenimientoEntity,
+        EmpresaMantenimientoRepository,
+        EmpresaMantenimientoDto
+    >(
+        sp.GetRequiredService<EmpresaMantenimientoRepository>(),
+        sp.GetRequiredService<IValidator<EmpresaMantenimientoDto>>(),
+        sp.GetRequiredService<IMapper<EmpresaMantenimientoEntity, EmpresaMantenimientoDto>>(),
+        sp.GetRequiredService<AuditLogService>()
+    )
+);
+builder.Services.AddScoped<Service<Accesorio, AccesorioRepository, AccesorioDto>>(sp =>
+    new Service<Accesorio, AccesorioRepository, AccesorioDto>(
+        sp.GetRequiredService<AccesorioRepository>(),
+        sp.GetRequiredService<IValidator<AccesorioDto>>(),
+        sp.GetRequiredService<IMapper<Accesorio, AccesorioDto>>(),
+        sp.GetRequiredService<AuditLogService>()
+    )
+);
+builder.Services.AddScoped<Service<Componente, ComponenteRepository, ComponenteDto>>(sp =>
+    new Service<Componente, ComponenteRepository, ComponenteDto>(
+        sp.GetRequiredService<ComponenteRepository>(),
+        sp.GetRequiredService<IValidator<ComponenteDto>>(),
+        sp.GetRequiredService<IMapper<Componente, ComponenteDto>>(),
+        sp.GetRequiredService<AuditLogService>()
+    )
+);
 
 builder.Services.AddSingleton<UsuarioMapper>();
 builder.Services.AddSingleton<PrestamoMapper>();

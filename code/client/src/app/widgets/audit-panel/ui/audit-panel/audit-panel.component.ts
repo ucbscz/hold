@@ -10,10 +10,21 @@ import { parseJsonResult } from '@shared/lib/result';
 import { AuditObservationDetail } from '../../model/audit-observation-detail';
 
 const ACCIONES_POR_ENTIDAD: Record<string, string[]> = {
-  Prestamo: ['Aprobar', 'Rechazar', 'Recoger', 'Devolver', 'Cancelar'],
-  Usuario: ['Crear', 'Editar', 'Eliminar'],
+  Prestamo: [
+    'Crear',
+    'Aprobar',
+    'Rechazar',
+    'Recoger',
+    'Devolver',
+    'Cancelar',
+    'AtrasadoAutomatico',
+    'RegistrarContrato',
+    'EliminarContrato',
+    'Eliminar',
+  ],
+  Usuario: ['Crear', 'Editar', 'Bloquear', 'Desbloquear', 'Eliminar'],
   Equipo: ['Crear', 'Editar', 'Eliminar'],
-  GrupoEquipo: ['Crear', 'Editar', 'Eliminar'],
+  GrupoEquipo: ['Crear', 'Editar', 'EliminarComentario', 'Eliminar'],
   Accesorio: ['Crear', 'Editar', 'Eliminar'],
   Componente: ['Crear', 'Editar', 'Eliminar'],
   Gavetero: ['Crear', 'Editar', 'Eliminar'],
@@ -76,12 +87,12 @@ export class AuditPanelComponent implements OnChanges {
   }
 
   onFechaDesde(dates: Date[]) {
-    this.fechaDesde = dates[0] ? dates[0].toISOString().split('T')[0] : '';
+    this.fechaDesde = dates[0] ? this.inicioDelDia(dates[0]).toISOString() : '';
     this.cargar();
   }
 
   onFechaHasta(dates: Date[]) {
-    this.fechaHasta = dates[0] ? dates[0].toISOString().split('T')[0] : '';
+    this.fechaHasta = dates[0] ? this.finDelDia(dates[0]).toISOString() : '';
     this.cargar();
   }
 
@@ -91,17 +102,13 @@ export class AuditPanelComponent implements OnChanges {
       .getAuditLog(
         this.entidad,
         this.filtroAdmin || undefined,
+        this.filtroAccion || undefined,
         this.fechaDesde || undefined,
         this.fechaHasta || undefined,
       )
       .subscribe({
         next: (data) => {
-          this.logs = this.filtroAccion
-            ? data.filter(
-                (l) =>
-                  l.Accion?.toLowerCase() === this.filtroAccion.toLowerCase(),
-              )
-            : data;
+          this.logs = data;
           this.aplicarOrdenActual();
           this.paginaActual = 1;
           this.cargando = false;
@@ -132,7 +139,7 @@ export class AuditPanelComponent implements OnChanges {
       log.EntidadId,
       this.resumenObs(log),
     ]);
-    const csv = [['Fecha', 'Administrador', 'Acción', 'ID', 'Detalle'], ...rows]
+    const csv = [['Fecha', 'Actor', 'Acción', 'ID', 'Detalle'], ...rows]
       .map((row) =>
         row
           .map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`)
@@ -149,22 +156,15 @@ export class AuditPanelComponent implements OnChanges {
   }
 
   imprimir(): void {
-    const incluyeDetalle = this.entidad === 'Prestamo';
     printTable({
       title: `Auditoría: ${this.entidad}`,
-      headers: [
-        'Fecha',
-        'Administrador',
-        'Acción',
-        'ID',
-        ...(incluyeDetalle ? ['Detalle'] : []),
-      ],
+      headers: ['Fecha', 'Actor', 'Acción', 'ID', 'Detalle'],
       rows: this.logs.map((log) => [
         this.formatearFechaImpresion(log.Timestamp),
         log.AdminNombre || log.AdminCarnet,
         log.Accion,
         log.EntidadId,
-        ...(incluyeDetalle ? [this.resumenObs(log)] : []),
+        this.resumenObs(log),
       ]),
     });
   }
@@ -303,6 +303,10 @@ export class AuditPanelComponent implements OnChanges {
         return 'badge-rechazado';
       case 'atrasadoautomatico':
         return 'badge-atrasado';
+      case 'registrarcontrato':
+        return 'badge-aprobado';
+      case 'eliminarcontrato':
+        return 'badge-rechazado';
       default:
         return 'badge-cancelado';
     }
@@ -311,7 +315,7 @@ export class AuditPanelComponent implements OnChanges {
   private auditSortValue(log: AuditLogDto, columna: string): unknown {
     const values: Record<string, unknown> = {
       Fecha: log.Timestamp,
-      Administrador: log.AdminNombre || log.AdminCarnet,
+      Actor: log.AdminNombre || log.AdminCarnet,
       Acción: log.Accion,
       ID: log.EntidadId,
       Observación: this.resumenObs(log),
@@ -329,6 +333,18 @@ export class AuditPanelComponent implements OnChanges {
         this.auditSortValue(b, this.sortColumn),
       ),
     );
+  }
+
+  private inicioDelDia(fecha: Date): Date {
+    const inicio = new Date(fecha);
+    inicio.setHours(0, 0, 0, 0);
+    return inicio;
+  }
+
+  private finDelDia(fecha: Date): Date {
+    const fin = new Date(fecha);
+    fin.setHours(23, 59, 59, 999);
+    return fin;
   }
 
   private compareAuditValues(

@@ -6,7 +6,7 @@
         type="text"
         [(ngModel)]="filtroAdmin"
         (keyup.enter)="cargar()"
-        placeholder="Buscar admin..."
+        placeholder="Buscar actor..."
         class="admin-search"
       />
       @if (filtroAdmin) {
@@ -90,12 +90,10 @@
         <thead>
           <tr>
             <th scope="col">Fecha</th>
-            <th scope="col">Administrador</th>
+            <th scope="col">Actor</th>
             <th scope="col">Acción</th>
             <th scope="col">ID</th>
-            @if (entidad === "Prestamo") {
-              <th scope="col">Observación</th>
-            }
+            <th scope="col">Detalle</th>
           </tr>
         </thead>
         <tbody>
@@ -118,18 +116,16 @@
                 }}</span>
               </td>
               <td class="id-col">{{ log.EntidadId }}</td>
-              @if (entidad === "Prestamo") {
-                @if (tieneDetalle(log)) {
-                  <td
-                    class="detail-col detail-clickable"
-                    (click)="abrirObs(log)"
-                    title="Ver observación completa"
-                  >
-                    {{ resumenObs(log) }}
-                  </td>
-                } @else {
-                  <td class="detail-col">—</td>
-                }
+              @if (tieneDetalle(log)) {
+                <td
+                  class="detail-col detail-clickable"
+                  (click)="abrirObs(log)"
+                  title="Ver detalle completo"
+                >
+                  {{ resumenObs(log) }}
+                </td>
+              } @else {
+                <td class="detail-col">—</td>
               }
             </tr>
           }
@@ -151,7 +147,7 @@
       <button class="obs-close" (click)="cerrarObs()" aria-label="Cerrar">
         <img src="assets/x.png" alt="Cerrar" />
       </button>
-      <h3 class="obs-title">Observación</h3>
+      <h3 class="obs-title">Detalle de auditoría</h3>
       <p class="obs-text">
         {{ obsAbierta.observacion || obsAbierta.texto || "Sin observación" }}
       </p>

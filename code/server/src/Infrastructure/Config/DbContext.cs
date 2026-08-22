@@ -509,6 +509,13 @@ public class ApplicationDbContext : DbContext
                 e.EntidadId,
                 e.EstadoEliminado,
             });
+            entity.HasIndex(e => new
+            {
+                e.Entidad,
+                e.Accion,
+                e.Timestamp,
+                e.EstadoEliminado,
+            });
             entity.HasQueryFilter(e => !e.EstadoEliminado);
         });
 

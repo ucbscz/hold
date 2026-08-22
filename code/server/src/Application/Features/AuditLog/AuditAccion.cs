@@ -13,4 +13,7 @@ public enum AuditAccion
     AtrasadoAutomatico,
     Bloquear,
     Desbloquear,
+    RegistrarContrato,
+    EliminarContrato,
+    EliminarComentario,
 }

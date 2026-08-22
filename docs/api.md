@@ -129,39 +129,41 @@ Equipment group payloads expose `TiempoMaximoPrestamoDias` (1 to 365). This grou
 
 ## Loans, Availability, and Contracts
 
-| Method   | Route                            | Purpose                                                           |
-| -------- | -------------------------------- | ----------------------------------------------------------------- |
-| `GET`    | `/api/prestamos`                 | List all loans for administrators or own loans for regular users. |
-| `GET`    | `/api/prestamos/{id}`            | Get a loan.                                                       |
-| `POST`   | `/api/prestamos`                 | Create a loan request.                                            |
-| `PATCH`  | `/api/prestamos/{id}/estado`     | Change a loan state. Administrator only.                          |
-| `DELETE` | `/api/prestamos/{id}`            | Soft-delete a loan.                                               |
-| `GET`    | `/api/prestamos/elegibilidad`    | Get reservation eligibility for the authenticated user.           |
-| `GET`    | `/api/prestamos?carnet=&estado=` | Filter loans; non-admin users are restricted to their own carnet. |
-| `POST`   | `/api/contratos`                 | Upload or create a contract for a loan. Multipart form data.      |
-| `GET`    | `/api/contratos/{prestamoId}`    | Get a contract by loan id.                                        |
-| `DELETE` | `/api/contratos/{prestamoId}`    | Delete a contract.                                                |
+| Method   | Route                            | Purpose                                                                |
+| -------- | -------------------------------- | ---------------------------------------------------------------------- |
+| `GET`    | `/api/prestamos`                 | List all loans for administrators or own loans for regular users.      |
+| `GET`    | `/api/prestamos/{id}`            | Get a loan.                                                            |
+| `POST`   | `/api/prestamos`                 | Create a loan request.                                                 |
+| `PATCH`  | `/api/prestamos/{id}/estado`     | Change a loan state. Administrator only.                               |
+| `DELETE` | `/api/prestamos/{id}`            | Soft-delete a loan.                                                    |
+| `GET`    | `/api/prestamos/elegibilidad`    | Get reservation eligibility for the authenticated user.                |
+| `GET`    | `/api/prestamos?carnet=&estado=` | Filter loans; non-admin users are restricted to their own carnet.      |
+| `POST`   | `/api/contratos`                 | Upload or create a contract for a loan. Multipart form data.           |
+| `GET`    | `/api/contratos/{prestamoId}`    | Get a contract by loan id.                                             |
+| `DELETE` | `/api/contratos/{prestamoId}`    | Delete a contract.                                                     |
 | `POST`   | `/api/carrito/disponibilidad`    | Calculate availability after validating each group's maximum duration. |
-| `POST`   | `/api/avisos`                    | Create an availability watch for the authenticated user.          |
+| `POST`   | `/api/avisos`                    | Create an availability watch for the authenticated user.               |
 
 ## Audit and Health
 
-| Method | Route            | Purpose                                                                                      |
-| ------ | ---------------- | -------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/auditoria` | Query audit entries. Administrator only. Supports `entidad`, `carnet`, `desde`, and `hasta`. |
-| `GET`  | `/api/health`    | Health check for the API and database.                                                       |
+| Method | Route            | Purpose                                                                                                                |
+| ------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/auditoria` | Query audit entries. Administrator only. Supports `entidad`, `actor` (name or carnet), `accion`, `desde`, and `hasta`. |
+| `GET`  | `/api/health`    | Health check for the API and database.                                                                                 |
 
 ## Business Rules
 
-| Area         | Rule                                                                                                       |
-| ------------ | ---------------------------------------------------------------------------------------------------------- |
-| Users        | `Carnet` and `Email` are required and unique. `Telefono` is unique when provided.                          |
-| Passwords    | Minimum 8 characters, at least one uppercase letter, one number, and one special character.                |
-| Equipment    | `CodigoImt` is assigned when the unit is created and cannot be changed later.                              |
-| Loans        | Users, equipment groups, start date, and return date are required.                                         |
-| Availability | Only loans in `aprobado` or `activo` state block capacity.                                                 |
-| Approval     | Availability is revalidated before a pending loan can be approved.                                         |
-| Blocking     | A blocked user cannot create a loan because the reservation validation reads the current PostgreSQL state. |
+| Area               | Rule                                                                                                                                               |
+| ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Users              | `Carnet` and `Email` are required and unique. `Telefono` is unique when provided.                                                                  |
+| Passwords          | Minimum 8 characters, at least one uppercase letter, one number, and one special character.                                                        |
+| Equipment          | `CodigoImt` is assigned when the unit is created and cannot be changed later.                                                                      |
+| Loans              | Users, equipment groups, start date, and return date are required.                                                                                 |
+| Availability       | Only loans in `aprobado` or `activo` state block capacity.                                                                                         |
+| Approval           | Availability is revalidated before a pending loan can be approved.                                                                                 |
+| Blocking           | A blocked user cannot create a loan because the reservation validation reads the current PostgreSQL state.                                         |
+| Audit              | Administrative and loan workflow mutations record actor, action, entity, timestamp, and relevant detail. Automatic actions use `Sistema` as actor. |
+| Automatic blocking | Overdue loans only add or remove their own automatic block; an existing administrative block and its reason are preserved.                         |
 
 ```text
 pendiente -> aprobado -> activo -> finalizado

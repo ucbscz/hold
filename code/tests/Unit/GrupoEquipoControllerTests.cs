@@ -20,7 +20,7 @@ public class GrupoEquipoControllerTests
     public void SetUp()
     {
         _serviceMock = new Mock<GrupoEquipoService>(null!, null!, null!, null!, null!, null!);
-        _comentariosMock = new Mock<ComentarioEquipoService>(null!);
+        _comentariosMock = new Mock<ComentarioEquipoService>(null!, null!);
         _controller = new GrupoEquipoController(_serviceMock.Object, _comentariosMock.Object);
     }
 

@@ -58,7 +58,8 @@ public class AuditLogRepository
 
     public async Task<List<AuditLogDto>> GetFiltered(
         string? entidad,
-        string? carnet,
+        string? actor,
+        string? accion,
         DateTime? desde,
         DateTime? hasta
     )
@@ -67,8 +68,16 @@ public class AuditLogRepository
 
         if (!string.IsNullOrWhiteSpace(entidad))
             query = query.Where(a => a.Entidad == entidad);
-        if (!string.IsNullOrWhiteSpace(carnet))
-            query = query.Where(a => a.AdminCarnet == carnet);
+        if (!string.IsNullOrWhiteSpace(actor))
+        {
+            var normalizedActor = actor.Trim().ToLower();
+            query = query.Where(a =>
+                a.AdminCarnet.ToLower().Contains(normalizedActor)
+                || a.AdminNombre.ToLower().Contains(normalizedActor)
+            );
+        }
+        if (!string.IsNullOrWhiteSpace(accion))
+            query = query.Where(a => a.Accion == accion);
         if (desde.HasValue)
             query = query.Where(a => a.Timestamp >= desde.Value.ToUniversalTime());
         if (hasta.HasValue)

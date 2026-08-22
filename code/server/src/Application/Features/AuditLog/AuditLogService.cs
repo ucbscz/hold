@@ -43,21 +43,40 @@ public class AuditLogService
         await _repository.WriteMany(entries, actor.Carnet, actor.Nombre);
     }
 
+    public async Task LogAsSystem(
+        AuditAccion accion,
+        string entidad,
+        string? entidadId,
+        string? detalle = null
+    ) => await _repository.WriteLog(
+        accion,
+        entidad,
+        entidadId,
+        detalle,
+        "sistema",
+        "Sistema"
+    );
+
     public async Task<Result<List<AuditLogDto>>> GetFiltered(
         string? entidad,
-        string? carnet,
+        string? actor,
+        string? accion,
         DateTime? desde,
         DateTime? hasta
     )
     {
-        var logs = await _repository.GetFiltered(entidad, carnet, desde, hasta);
+        var logs = await _repository.GetFiltered(entidad, actor, accion, desde, hasta);
 
         return Result<List<AuditLogDto>>.Success(logs);
     }
 
-    private (string Carnet, string Nombre) GetActor() =>
-        (
-            _httpContextAccessor.HttpContext?.User.FindFirst("sub")?.Value ?? "sistema",
-            _httpContextAccessor.HttpContext?.User.FindFirst("nombre")?.Value ?? string.Empty
-        );
+    private (string Carnet, string Nombre) GetActor()
+    {
+        var user = _httpContextAccessor.HttpContext?.User;
+        var carnet = user?.FindFirst("sub")?.Value;
+
+        return string.IsNullOrWhiteSpace(carnet)
+            ? ("sistema", "Sistema")
+            : (carnet, user?.FindFirst("nombre")?.Value ?? carnet);
+    }
 }

@@ -17,8 +17,9 @@ public class AuditLogController : Controller
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] string? entidad,
-        [FromQuery] string? carnet,
+        [FromQuery] string? actor,
+        [FromQuery] string? accion,
         [FromQuery] DateTime? desde,
         [FromQuery] DateTime? hasta
-    ) => ToResponse(await _service.GetFiltered(entidad, carnet, desde, hasta));
+    ) => ToResponse(await _service.GetFiltered(entidad, actor, accion, desde, hasta));
 }

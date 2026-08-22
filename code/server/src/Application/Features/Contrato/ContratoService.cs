@@ -1,6 +1,7 @@
 using Ardalis.Result;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
+using IMT_Reservas.Server.Application.Features.AuditLog;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using ContratoEntity = IMT_Reservas.Server.Core.Entities.Contrato;
 
@@ -10,18 +11,21 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
 {
     private readonly PrestamoRepository _prestamos;
     private readonly ContractHtmlProcessor _contractHtml;
+    private readonly AuditLogService _audit;
 
     public ContratoService(
         ContratoRepository repository,
         ContratoMapper mapper,
         IValidator<ContratoDto> validator,
         PrestamoRepository prestamos,
-        ContractHtmlProcessor contractHtml
+        ContractHtmlProcessor contractHtml,
+        AuditLogService audit
     )
-        : base(repository, validator, mapper)
+        : base(repository, validator, mapper, audit)
     {
         _prestamos = prestamos;
         _contractHtml = contractHtml;
+        _audit = audit;
     }
 
     public async Task<Result<ContratoDto>> CreateForPrestamo(int prestamoId, string htmlContent)
@@ -61,6 +65,27 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
 
         loan.IdContrato = result.Value.Id;
         await Repository.SavePrestamo(loan);
+        await _audit.Log(
+            AuditAccion.RegistrarContrato,
+            "Prestamo",
+            prestamoId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            "Contrato registrado para el préstamo"
+        );
+
+        return result;
+    }
+
+    public override async Task<Result<object>> Delete(int prestamoId)
+    {
+        var result = await Repository.Delete(prestamoId);
+
+        if (result.IsSuccess)
+            await _audit.Log(
+                AuditAccion.EliminarContrato,
+                "Prestamo",
+                prestamoId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+                "Contrato eliminado del préstamo"
+            );
 
         return result;
     }

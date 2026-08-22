@@ -496,6 +496,9 @@ create index idx_audit_admin
 create index idx_audit_entidad
     on audit_logs (entidad, entidad_id, estado_eliminado);
 
+create index idx_audit_entidad_accion_fecha
+    on audit_logs (entidad, accion, timestamp desc, estado_eliminado);
+
 create table notificaciones
 (
     id_notificacion  integer generated always as identity
