@@ -497,7 +497,7 @@ create index idx_audit_entidad
     on audit_logs (entidad, entidad_id, estado_eliminado);
 
 create index idx_audit_entidad_accion_fecha
-    on audit_logs (entidad, accion, timestamp desc, estado_eliminado);
+    on audit_logs (entidad asc, accion asc, timestamp desc, estado_eliminado asc);
 
 create table notificaciones
 (
