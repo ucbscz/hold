@@ -47,6 +47,29 @@ internal class EquipoServiceTests : ServiceTest<EquipoService>
     }
 
     [Test]
+    public async Task Create_WithoutCodigoUcb_AssignsGeneratedUniqueCode()
+    {
+        await Sut.Create(BuildValidEquipo(GrupoId));
+        await Sut.Create(BuildValidEquipo(GrupoId));
+
+        var codes = Db.Equipos.Select(e => e.CodigoUcb).ToList();
+
+        codes.Should().OnlyHaveUniqueItems();
+        codes.Should().AllSatisfy(code => code.Should().MatchRegex("^UCB-[0-9]{6}$"));
+    }
+
+    [Test]
+    public async Task Create_WithCodigoUcb_PreservesProvidedCode()
+    {
+        var dto = BuildValidEquipo(GrupoId);
+        dto.CodigoUcb = " UCB-INVENTARIO-01 ";
+
+        await Sut.Create(dto);
+
+        Db.Equipos.Single().CodigoUcb.Should().Be("UCB-INVENTARIO-01");
+    }
+
+    [Test]
     public async Task Create_SecondEquipo_AssignsNextCodigoImt()
     {
         await Sut.Create(BuildValidEquipo(GrupoId));
@@ -100,6 +123,33 @@ internal class EquipoServiceTests : ServiceTest<EquipoService>
         await NewSut().Update(equipo.Id, BuildValidEquipo(GrupoId));
 
         Db.Equipos.AsNoTracking().Single(e => e.Id == equipo.Id).FechaIngresoEquipo.Should().Be(originalFecha);
+    }
+
+    [Test]
+    public async Task Update_WithoutCodigoUcb_PreservesGeneratedCode()
+    {
+        await Sut.Create(BuildValidEquipo(GrupoId));
+        var equipo = Db.Equipos.AsNoTracking().Single();
+
+        await NewSut().Update(equipo.Id, BuildValidEquipo(GrupoId));
+
+        Db.Equipos.AsNoTracking().Single().CodigoUcb.Should().Be(equipo.CodigoUcb);
+    }
+
+    [Test]
+    public async Task Create_WithDuplicateCodigoUcb_ReturnsError()
+    {
+        var first = BuildValidEquipo(GrupoId);
+        first.CodigoUcb = "UCB-000001";
+        var duplicate = BuildValidEquipo(GrupoId2);
+        duplicate.CodigoUcb = "UCB-000001";
+        await Sut.Create(first);
+
+        var result = await Sut.Create(duplicate);
+
+        result.IsSuccess.Should().BeFalse();
+        result.Errors.Should().Contain("Código UCB ya registrado");
+        Db.Equipos.Should().ContainSingle();
     }
 
     [Test]

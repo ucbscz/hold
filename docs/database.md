@@ -14,7 +14,7 @@ UCB Hold uses PostgreSQL 14+ with Entity Framework Core 8. The database name use
 | `prestamos` | Loan lifecycle, user ownership and date range. | Yes |
 | `detalles_prestamos` | Equipment groups requested in each loan. | Yes |
 | `grupos_equipos` | Catalog-level grouping, including the maximum loan duration shared by equivalent units. | Yes |
-| `equipos` | Physical equipment units with `codigo_imt` and condition. | Yes |
+| `equipos` | Physical equipment units with unique `codigo_imt` and `codigo_ucb` identifiers, serial number and condition. | Yes |
 | `categorias` | Equipment classification. | Yes |
 | `carreras` | Academic programs associated with users. | Yes |
 | `muebles` | Storage furniture. | Yes |

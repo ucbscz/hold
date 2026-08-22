@@ -205,6 +205,10 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Id).HasColumnName(IdEquipoCol);
             entity.Property(e => e.CodigoImt).IsRequired().HasColumnName("codigo_imt");
             entity.Property(e => e.CodigoUcb).HasMaxLength(256).HasColumnName("codigo_ucb");
+            entity
+                .HasIndex(e => e.CodigoUcb)
+                .IsUnique()
+                .HasDatabaseName("unique_codigo_ucb");
             entity.Property(e => e.NumeroSerial).HasMaxLength(255).HasColumnName("numero_serial");
             entity.Property(e => e.Ubicacion).HasMaxLength(255).HasColumnName("ubicacion");
             entity.Property(e => e.Descripcion).HasMaxLength(2048).HasColumnName(DescripcionCol);

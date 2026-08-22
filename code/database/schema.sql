@@ -250,6 +250,8 @@ create table equipos
     estado_eliminado     boolean          default false                      not null,
     fecha_ingreso_equipo date             default CURRENT_DATE               not null,
     codigo_ucb           varchar
+        constraint unique_codigo_ucb
+            unique
 );
 
 alter table equipos

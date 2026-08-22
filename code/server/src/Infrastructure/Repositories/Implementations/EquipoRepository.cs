@@ -21,6 +21,11 @@ public class EquipoRepository : Repository<EquipoEntity, EquipoDto>
             e.CodigoImt == codigoImt && !e.EstadoEliminado && e.Id != excludeId
         );
 
+    public async Task<bool> ExistsByCodigoUcb(string codigoUcb, int? excludeId = null) =>
+        await DbContext
+            .Equipos.IgnoreQueryFilters()
+            .AnyAsync(e => e.CodigoUcb == codigoUcb && e.Id != excludeId);
+
     public async Task<EquipoEntity?> FindById(int id) =>
         await DbContext
             .Equipos.AsNoTracking()
