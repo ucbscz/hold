@@ -49,6 +49,13 @@ export class CartDateValidationService {
       };
     }
 
+    if (startDate.getDay() === 0 || endDate.getDay() === 0) {
+      return {
+        isValid: false,
+        message: 'Error: El horario de atención es de lunes a sábado',
+      };
+    }
+
     const startMinutes = startDate.getHours() * 60 + startDate.getMinutes();
     const endMinutes = endDate.getHours() * 60 + endDate.getMinutes();
     if (
@@ -60,7 +67,7 @@ export class CartDateValidationService {
       return {
         isValid: false,
         message:
-          'Error: El horario de atención para reservas es de 08:00 a 18:00',
+          'Error: El horario de atención para reservas es de lunes a sábado, de 08:00 a 18:00',
       };
     }
 

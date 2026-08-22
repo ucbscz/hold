@@ -122,6 +122,28 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     }
 
     [Test]
+    public async Task Create_OnSunday_ReturnsError()
+    {
+        var sunday = DateTime.UtcNow.Date.AddDays(1);
+        while (sunday.DayOfWeek != DayOfWeek.Sunday)
+            sunday = sunday.AddDays(1);
+
+        var start = DateTime.SpecifyKind(sunday.AddHours(13), DateTimeKind.Utc);
+        var dto = BuildValidPrestamo(Carnet, GrupoId, start, start.AddMinutes(30));
+        dto.FechaPrestamoEsperada = start;
+        dto.FechaDevolucionEsperada = start.AddMinutes(30);
+
+        var result = await Sut.Create(dto);
+
+        result.IsSuccess.Should().BeFalse();
+        result.ValidationErrors
+            .Select(error => error.ErrorMessage)
+            .Should()
+            .Contain(error => error.Contains("lunes a sábado"));
+        Db.Prestamos.Should().BeEmpty();
+    }
+
+    [Test]
     public async Task Create_WhenDurationExceedsGroupMaximum_ReturnsError()
     {
         var group = await Db.GruposEquipos.FindAsync(GrupoId);
@@ -661,8 +683,15 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     )
     {
         var duration = fin - inicio;
+        var localDate = inicio.Date;
+        while (
+            localDate.DayOfWeek == DayOfWeek.Sunday
+            || localDate.Add(duration).DayOfWeek == DayOfWeek.Sunday
+        )
+            localDate = localDate.AddDays(1);
+
         var normalizedStart = DateTime.SpecifyKind(
-            inicio.Date.AddHours(13),
+            localDate.AddHours(13),
             DateTimeKind.Utc
         );
 

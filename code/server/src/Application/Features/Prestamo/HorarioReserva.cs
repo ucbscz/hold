@@ -5,7 +5,7 @@ public static class HorarioReserva
     public const int HoraApertura = 8;
     public const int HoraCierre = 18;
     public const string Mensaje =
-        "El horario de atención para reservas es de 08:00 a 18:00 (hora de Bolivia)";
+        "El horario de atención para reservas es de lunes a sábado, de 08:00 a 18:00 (hora de Bolivia)";
 
     private static readonly TimeZoneInfo BoliviaTimeZone = ResolveBoliviaTimeZone();
 
@@ -16,7 +16,9 @@ public static class HorarioReserva
         var apertura = TimeSpan.FromHours(HoraApertura);
         var cierre = TimeSpan.FromHours(HoraCierre);
 
-        return inicioLocal.TimeOfDay >= apertura
+        return inicioLocal.DayOfWeek != DayOfWeek.Sunday
+            && finLocal.DayOfWeek != DayOfWeek.Sunday
+            && inicioLocal.TimeOfDay >= apertura
             && inicioLocal.TimeOfDay < cierre
             && finLocal.TimeOfDay >= apertura
             && finLocal.TimeOfDay <= cierre;

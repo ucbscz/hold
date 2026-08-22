@@ -75,4 +75,15 @@ describe('CartDateValidationService', () => {
     expect(beforeOpening.message).toContain('08:00 a 18:00');
     expect(afterClosing.message).toContain('08:00 a 18:00');
   });
+
+  it('rejects reservations starting or ending on Sunday', () => {
+    const result = service.validate(
+      new Date('2026-08-16T09:00:00'),
+      new Date('2026-08-16T09:30:00'),
+      currentDate,
+    );
+
+    expect(result.isValid).toBeFalse();
+    expect(result.message).toContain('lunes a sábado');
+  });
 });

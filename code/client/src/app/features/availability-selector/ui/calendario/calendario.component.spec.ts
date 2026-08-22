@@ -50,6 +50,11 @@ describe('CalendarioComponent', () => {
     expect(component.horaDeshabilitada('fin', '18:00')).toBeFalse();
   });
 
+  it('disables Sundays in the calendar', () => {
+    expect(component.esDiaDeshabilitado(new Date(2030, 0, 6))).toBeTrue();
+    expect(component.esDiaDeshabilitado(new Date(2030, 0, 7))).toBeFalse();
+  });
+
   it('disables dates and times beyond the selected groups maximum duration', () => {
     component.entradaCarrito = {
       1: {

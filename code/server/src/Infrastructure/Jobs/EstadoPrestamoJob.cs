@@ -182,6 +182,9 @@ public class EstadoPrestamoJob
         {
             var date = watch.Fecha;
 
+            if (!HorarioReserva.EsValido(date, date.AddMinutes(30)))
+                continue;
+
             if (await _prestamoRepository.HasAvailableEquipo(
                 watch.IdGrupoEquipo,
                 date,

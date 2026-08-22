@@ -120,6 +120,9 @@ export class CalendarioComponent {
     const fin = this.fechaFinSeleccionada();
     const maximoDias = this.maximoDiasPrestamo;
 
+    if ((inicio && this.esDomingo(inicio)) || (fin && this.esDomingo(fin)))
+      return 'No se atienden reservas los domingos.';
+
     if (
       inicio &&
       fin &&
@@ -236,6 +239,8 @@ export class CalendarioComponent {
   }
 
   esDiaDeshabilitado(dia: Date): boolean {
+    if (this.esDomingo(dia)) return true;
+
     const minimo =
       this.campoActivo === 'inicio'
         ? this.minimoInicio
@@ -438,6 +443,8 @@ export class CalendarioComponent {
 
     return (
       duration >= MINIMUM_DURATION_MINUTES * MILLISECONDS_PER_MINUTE &&
+      !this.esDomingo(inicio) &&
+      !this.esDomingo(fin) &&
       inicioMinutos >= MINIMUM_START_TIME_MINUTES &&
       inicioMinutos <= MAXIMUM_END_TIME_MINUTES - MINIMUM_DURATION_MINUTES &&
       finMinutos >= MINIMUM_START_TIME_MINUTES &&
@@ -481,9 +488,15 @@ export class CalendarioComponent {
 
   private inicioDelSiguienteDia(fecha: Date): Date {
     const siguienteDia = new Date(fecha);
-    siguienteDia.setDate(siguienteDia.getDate() + 1);
+    do {
+      siguienteDia.setDate(siguienteDia.getDate() + 1);
+    } while (this.esDomingo(siguienteDia));
     siguienteDia.setHours(8, 0, 0, 0);
     return siguienteDia;
+  }
+
+  private esDomingo(fecha: Date): boolean {
+    return fecha.getDay() === 0;
   }
 
   private dosDigitos(valor: number): string {
@@ -493,6 +506,8 @@ export class CalendarioComponent {
   private siguienteBloque(): Date {
     const fecha = new Date();
     fecha.setSeconds(0, 0);
+
+    if (this.esDomingo(fecha)) return this.inicioDelSiguienteDia(fecha);
 
     if (fecha.getHours() < 8) {
       fecha.setHours(8, 0, 0, 0);

@@ -262,6 +262,9 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         {
             var date = watch.Fecha;
 
+            if (!HorarioReserva.EsValido(date, date.AddMinutes(30)))
+                continue;
+
             if (!await Repository.HasAvailableEquipo(
                 watch.IdGrupoEquipo,
                 date,

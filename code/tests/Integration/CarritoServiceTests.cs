@@ -13,6 +13,15 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
     private const int GrupoId = 1;
     private const int EquipoId = 1;
     private const int Total = 2;
+    private static readonly DateTime BusinessStart = new(
+        2030,
+        1,
+        7,
+        9,
+        0,
+        0,
+        DateTimeKind.Unspecified
+    );
 
     protected override CarritoService CreateService(ApplicationDbContext db)
     {
@@ -45,8 +54,8 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
     [Test]
     public async Task GetDisponibilidad_NoLoans_ReturnsFullCapacityEveryDay()
     {
-        var fechaInicio = DateTime.Today;
-        var fechaFin = DateTime.Today.AddDays(2);
+        var fechaInicio = BusinessStart;
+        var fechaFin = BusinessStart.AddDays(2);
         var request = BuildRequest([GrupoId], fechaInicio, fechaFin);
 
         var result = await Sut.GetDisponibilidad(request);
@@ -61,7 +70,7 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
         var group = await Db.GruposEquipos.FindAsync(GrupoId);
         group!.TiempoMaximoPrestamoDias = 1;
         await Db.SaveChangesAsync();
-        var start = DateTime.Today.AddHours(8);
+        var start = BusinessStart;
 
         var result = await Sut.GetDisponibilidad(
             BuildRequest([GrupoId], start, start.AddDays(1).AddMinutes(1))
@@ -110,10 +119,23 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
     }
 
     [Test]
+    public async Task GetDisponibilidad_OnSunday_ReturnsError()
+    {
+        var sunday = new DateTime(2030, 1, 6, 9, 0, 0, DateTimeKind.Unspecified);
+
+        var result = await Sut.GetDisponibilidad(
+            BuildRequest([GrupoId], sunday, sunday.AddMinutes(30))
+        );
+
+        result.IsSuccess.Should().BeFalse();
+        result.Errors.Should().Contain(error => error.Contains("lunes a sábado"));
+    }
+
+    [Test]
     public async Task GetDisponibilidad_OneActiveLoan_ReducesCapacity()
     {
-        var fechaInicio = DateTime.Today;
-        var fechaFin = DateTime.Today.AddDays(2);
+        var fechaInicio = BusinessStart;
+        var fechaFin = BusinessStart.AddDays(2);
         await SeedLoan(EstadoPrestamo.Activo, EquipoId, fechaInicio, fechaFin);
         var request = BuildRequest([GrupoId], fechaInicio, fechaFin);
 
@@ -126,8 +148,8 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
     [Test]
     public async Task GetDisponibilidad_AprobadoLoan_ReducesCapacity()
     {
-        var fechaInicio = DateTime.Today;
-        var fechaFin = DateTime.Today.AddDays(2);
+        var fechaInicio = BusinessStart;
+        var fechaFin = BusinessStart.AddDays(2);
         await SeedLoan(EstadoPrestamo.Aprobado, EquipoId, fechaInicio, fechaFin);
         var request = BuildRequest([GrupoId], fechaInicio, fechaFin);
 
@@ -140,8 +162,8 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
     [Test]
     public async Task GetDisponibilidad_PendienteLoan_ReducesCapacity()
     {
-        var fechaInicio = DateTime.Today;
-        var fechaFin = DateTime.Today.AddDays(2);
+        var fechaInicio = BusinessStart;
+        var fechaFin = BusinessStart.AddDays(2);
         await SeedLoan(EstadoPrestamo.Pendiente, EquipoId, fechaInicio, fechaFin);
         var request = BuildRequest([GrupoId], fechaInicio, fechaFin);
 
@@ -154,8 +176,13 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
     [Test]
     public async Task GetDisponibilidad_LoanOutsideDateRange_DoesNotReduceCapacity()
     {
-        await SeedLoan(EstadoPrestamo.Aprobado, EquipoId, DateTime.Today.AddDays(10), DateTime.Today.AddDays(15));
-        var request = BuildRequest([GrupoId], DateTime.Today, DateTime.Today.AddDays(3));
+        await SeedLoan(
+            EstadoPrestamo.Aprobado,
+            EquipoId,
+            BusinessStart.AddDays(10),
+            BusinessStart.AddDays(15)
+        );
+        var request = BuildRequest([GrupoId], BusinessStart, BusinessStart.AddDays(3));
 
         var result = await Sut.GetDisponibilidad(request);
 
@@ -166,7 +193,7 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
     [Test]
     public async Task GetDisponibilidad_EmptyIds_ReturnsEmptyList()
     {
-        var request = BuildRequest([], DateTime.Today, DateTime.Today.AddDays(2));
+        var request = BuildRequest([], BusinessStart, BusinessStart.AddDays(2));
 
         var result = await Sut.GetDisponibilidad(request);
 
@@ -196,7 +223,7 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
         Db.Equipos.Add(new Equipo { Id = EquipoId3, IdGrupoEquipo = GrupoId2, CodigoImt = 3, EstadoEquipo = EstadoEquipo.Operativo, FechaIngresoEquipo = DateOnly.FromDateTime(DateTime.Today), EstadoEliminado = false });
         await Db.SaveChangesAsync();
 
-        var fechaInicio = DateTime.Today.AddHours(8);
+        var fechaInicio = BusinessStart;
         var fechaFin = fechaInicio.AddMinutes(30);
         await SeedLoan(EstadoPrestamo.Activo, EquipoId, fechaInicio, fechaFin);
         var request = BuildRequest([GrupoId, GrupoId2], fechaInicio, fechaFin);
@@ -235,7 +262,10 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
             && startMinutes <= 17 * 60 + 30
             && endMinutes >= 8 * 60
             && endMinutes <= 18 * 60;
-        var normalizedStart = isWithinServiceHours ? inicio : inicio.Date.AddHours(9);
+        var normalizedStart = DateTime.SpecifyKind(
+            isWithinServiceHours ? inicio : inicio.Date.AddHours(9),
+            DateTimeKind.Unspecified
+        );
 
         return new CarritoDto
         {
