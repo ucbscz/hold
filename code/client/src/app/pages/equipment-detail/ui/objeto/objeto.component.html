@@ -4,12 +4,11 @@
       <div class="contenedor-imagen">
         @if (obtenerImagenProducto(); as imageUrl) {
           <img
-            [ngSrc]="imageUrl"
+            [src]="imageUrl"
             alt="{{ producto.nombre }}"
             class="imagen-producto"
-            fill
-            sizes="(max-width: 992px) 80vw, 30vw"
-            priority
+            loading="eager"
+            fetchpriority="high"
             decoding="async"
             (error)="ocultarImagenProducto()"
           />

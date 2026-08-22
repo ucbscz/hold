@@ -1,4 +1,4 @@
-import { CommonModule, NgOptimizedImage } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import {
   AfterViewInit,
   Component,
@@ -46,7 +46,6 @@ const MAX_COMMENT_LENGTH = 1024;
     EquipmentImagePlaceholderComponent,
     CalendarioComponent,
     FormsModule,
-    NgOptimizedImage,
     CustomSelectComponent,
   ],
   templateUrl: './objeto.component.html',
