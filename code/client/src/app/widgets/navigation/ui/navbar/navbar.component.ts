@@ -168,6 +168,7 @@ export class NavbarComponent {
     motivo: string | null;
     emisor: string | null;
     fecha: string | null;
+    etiquetaFecha: string | null;
   } | null {
     if (!notificacion.Detalle) return null;
 
@@ -186,6 +187,10 @@ export class NavbarComponent {
           }))
       : [];
 
+    const fechaEvento =
+      typeof data['fecha'] === 'string' ? data['fecha'] : null;
+    const esFechaLimite = notificacion.Tipo === 'PrestamoAtrasado';
+
     return {
       observacion:
         typeof data['observacion'] === 'string' ? data['observacion'] : null,
@@ -197,7 +202,12 @@ export class NavbarComponent {
           : typeof data['origen'] === 'string'
             ? data['origen']
             : null,
-      fecha: typeof data['fecha'] === 'string' ? data['fecha'] : null,
+      fecha: fechaEvento,
+      etiquetaFecha: fechaEvento
+        ? esFechaLimite
+          ? 'Fecha límite de devolución'
+          : 'Fecha de la acción'
+        : null,
     };
   }
 
