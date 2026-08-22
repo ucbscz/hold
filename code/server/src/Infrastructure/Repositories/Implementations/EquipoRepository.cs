@@ -85,7 +85,8 @@ public class EquipoRepository : Repository<EquipoEntity, EquipoDto>
                 (x, u) =>
                     new
                     {
-                        x.p.Id,
+                        IdPrestamo = x.p.Id,
+                        IdDetalle = x.d.Id,
                         u.Carnet,
                         u.Nombre,
                         u.ApellidoPaterno,
@@ -100,20 +101,22 @@ public class EquipoRepository : Repository<EquipoEntity, EquipoDto>
             .OrderByDescending(r => r.FechaPrestamo)
             .ToListAsync();
 
-        return rows.Select(r => new HistorialEquipoDto
-        {
-            IdPrestamo = r.Id,
-            Carnet = r.Carnet,
-            NombreUsuario = r.Nombre + " " + r.ApellidoPaterno,
-            FechaPrestamo = r.FechaPrestamo,
-            FechaDevolucionEsperada = r.FechaDevolucionEsperada,
-            FechaDevolucion = r.FechaDevolucion,
-            EstadoPrestamo = r.EstadoPrestamo.ToString().ToLowerInvariant(),
-            EstadoEquipo = r.EstadoEquipoRetorno.HasValue
-                    ? ToPostgresEstadoEquipo(r.EstadoEquipoRetorno.Value)
-                    : null,
-            Observacion = r.Observacion,
-        })
+        return rows.GroupBy(r => r.IdPrestamo)
+            .Select(group => group.OrderByDescending(r => r.IdDetalle).First())
+            .Select(r => new HistorialEquipoDto
+            {
+                IdPrestamo = r.IdPrestamo,
+                Carnet = r.Carnet,
+                NombreUsuario = r.Nombre + " " + r.ApellidoPaterno,
+                FechaPrestamo = r.FechaPrestamo,
+                FechaDevolucionEsperada = r.FechaDevolucionEsperada,
+                FechaDevolucion = r.FechaDevolucion,
+                EstadoPrestamo = r.EstadoPrestamo.ToString().ToLowerInvariant(),
+                EstadoEquipo = r.EstadoEquipoRetorno.HasValue
+                        ? ToPostgresEstadoEquipo(r.EstadoEquipoRetorno.Value)
+                        : null,
+                Observacion = r.Observacion,
+            })
             .ToList();
     }
 

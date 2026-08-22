@@ -109,7 +109,7 @@ const ESTADOS_PRESTAMO = [
               </tr>
             </thead>
             <tbody>
-              @for (h of itemsFiltrados; track h.IdPrestamo) {
+              @for (h of itemsFiltrados; track h.IdPrestamo + ':' + $index) {
                 <tr>
                   <td>#{{ h.IdPrestamo }}</td>
                   <td>{{ h.NombreUsuario }}</td>
