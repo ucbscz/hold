@@ -256,6 +256,12 @@ export class ListaObjetosComponent
     const fecha = new Date();
     fecha.setSeconds(0, 0);
 
+    if (fecha.getDay() === 0) {
+      fecha.setDate(fecha.getDate() + 1);
+      fecha.setHours(8, 0, 0, 0);
+      return fecha;
+    }
+
     if (fecha.getHours() < 8) {
       fecha.setHours(8, 0, 0, 0);
       return fecha;
@@ -263,6 +269,7 @@ export class ListaObjetosComponent
 
     if (fecha.getHours() >= 18) {
       fecha.setDate(fecha.getDate() + 1);
+      if (fecha.getDay() === 0) fecha.setDate(fecha.getDate() + 1);
       fecha.setHours(8, 0, 0, 0);
       return fecha;
     }
@@ -270,6 +277,7 @@ export class ListaObjetosComponent
     fecha.setMinutes(Math.ceil((fecha.getMinutes() + 1) / 30) * 30);
     if (fecha.getHours() >= 18) {
       fecha.setDate(fecha.getDate() + 1);
+      if (fecha.getDay() === 0) fecha.setDate(fecha.getDate() + 1);
       fecha.setHours(8, 0, 0, 0);
     }
     return fecha;

@@ -543,6 +543,12 @@ export class ObjetoComponent implements AfterViewInit, OnDestroy {
     const inicio = new Date();
     inicio.setSeconds(0, 0);
 
+    if (inicio.getDay() === 0) {
+      inicio.setDate(inicio.getDate() + 1);
+      inicio.setHours(8, 0, 0, 0);
+      return inicio;
+    }
+
     if (inicio.getHours() < 8) {
       inicio.setHours(8, 0, 0, 0);
       return inicio;
@@ -550,6 +556,7 @@ export class ObjetoComponent implements AfterViewInit, OnDestroy {
 
     if (inicio.getHours() >= 18) {
       inicio.setDate(inicio.getDate() + 1);
+      if (inicio.getDay() === 0) inicio.setDate(inicio.getDate() + 1);
       inicio.setHours(8, 0, 0, 0);
       return inicio;
     }
@@ -557,6 +564,7 @@ export class ObjetoComponent implements AfterViewInit, OnDestroy {
     inicio.setMinutes(Math.ceil((inicio.getMinutes() + 1) / 30) * 30);
     if (inicio.getHours() >= 18) {
       inicio.setDate(inicio.getDate() + 1);
+      if (inicio.getDay() === 0) inicio.setDate(inicio.getDate() + 1);
       inicio.setHours(8, 0, 0, 0);
     }
     return inicio;

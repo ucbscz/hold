@@ -17,4 +17,14 @@ describe('ListaObjetosComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+
+  it('consulta el lunes al cerrar el sábado', () => {
+    jasmine.clock().install();
+    jasmine.clock().mockDate(new Date(2026, 7, 22, 19, 0, 0));
+
+    const siguienteHorario = component['siguienteBloqueDeMediaHora']();
+
+    expect(siguienteHorario).toEqual(new Date(2026, 7, 24, 8, 0, 0));
+    jasmine.clock().uninstall();
+  });
 });
