@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
-public class AvisoDisponibilidadRepository
+public class AvisoDisponibilidadRepository : IAvisoDisponibilidadRepository
 {
     private readonly ApplicationDbContext _db;
 

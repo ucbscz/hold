@@ -2,20 +2,19 @@ using Ardalis.Result;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
 namespace IMT_Reservas.Server.Application.Features.Configuracion;
 
 public class ConfiguracionService
 {
-    private readonly ConfiguracionRepository _repository;
+    private readonly IConfiguracionRepository _repository;
     private readonly IValidator<ConfiguracionDto> _validator;
-    private readonly IMapper<ConfiguracionSistema, ConfiguracionDto> _mapper;
+    private readonly IUpdateMapper<ConfiguracionSistema, ConfiguracionDto> _mapper;
 
     public ConfiguracionService(
-        ConfiguracionRepository repository,
+        IConfiguracionRepository repository,
         IValidator<ConfiguracionDto> validator,
-        IMapper<ConfiguracionSistema, ConfiguracionDto> mapper)
+        IUpdateMapper<ConfiguracionSistema, ConfiguracionDto> mapper)
     {
         _repository = repository;
         _validator = validator;
@@ -35,10 +34,9 @@ public class ConfiguracionService
             return validationResult.ToResult<ConfiguracionDto>();
 
         var config = await _repository.GetConfiguracion();
-        _mapper.ToEntity(dto);
+        _mapper.UpdateEntity(dto, config);
 
         await _repository.Update(config);
-        await _repository.InvalidateCache();
 
         return Result<ConfiguracionDto>.Success(_mapper.ToDto(config));
     }

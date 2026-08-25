@@ -1,14 +1,13 @@
 using Ardalis.Result;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
 namespace IMT_Reservas.Server.Application.Features.AuditLog;
 
 public class AuditLogService
 {
-    private readonly AuditLogRepository _repository;
+    private readonly IAuditLogRepository _repository;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public AuditLogService(AuditLogRepository repository, IHttpContextAccessor httpContextAccessor)
+    public AuditLogService(IAuditLogRepository repository, IHttpContextAccessor httpContextAccessor)
     {
         _repository = repository;
         _httpContextAccessor = httpContextAccessor;

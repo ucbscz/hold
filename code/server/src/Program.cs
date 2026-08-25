@@ -164,69 +164,23 @@ builder.Services.AddScoped<GrupoEquipoService>();
 builder.Services.AddScoped<MantenimientoService>();
 builder.Services.AddScoped<GaveteroService>();
 builder.Services.AddScoped<ContratoService>();
-builder.Services.AddScoped<ConfiguracionRepository>();
+builder.Services.AddScoped<IConfiguracionRepository, ConfiguracionRepository>();
 builder.Services.AddScoped<ConfiguracionService>();
 
 builder.Services.AddScoped<
     Service<CarreraEntity, Repository<CarreraEntity, CarreraDto>, CarreraDto>
->(sp =>
-    new Service<CarreraEntity, Repository<CarreraEntity, CarreraDto>, CarreraDto>(
-        sp.GetRequiredService<Repository<CarreraEntity, CarreraDto>>(),
-        sp.GetRequiredService<IValidator<CarreraDto>>(),
-        sp.GetRequiredService<IMapper<CarreraEntity, CarreraDto>>(),
-        sp.GetRequiredService<AuditLogService>()
-    )
-);
+>();
 builder.Services.AddScoped<
     Service<CategoriaEntity, Repository<CategoriaEntity, CategoriaDto>, CategoriaDto>
->(sp =>
-    new Service<CategoriaEntity, Repository<CategoriaEntity, CategoriaDto>, CategoriaDto>(
-        sp.GetRequiredService<Repository<CategoriaEntity, CategoriaDto>>(),
-        sp.GetRequiredService<IValidator<CategoriaDto>>(),
-        sp.GetRequiredService<IMapper<CategoriaEntity, CategoriaDto>>(),
-        sp.GetRequiredService<AuditLogService>()
-    )
-);
+>();
 builder.Services.AddScoped<
     Service<MuebleEntity, Repository<MuebleEntity, MuebleDto>, MuebleDto>
->(sp =>
-    new Service<MuebleEntity, Repository<MuebleEntity, MuebleDto>, MuebleDto>(
-        sp.GetRequiredService<Repository<MuebleEntity, MuebleDto>>(),
-        sp.GetRequiredService<IValidator<MuebleDto>>(),
-        sp.GetRequiredService<IMapper<MuebleEntity, MuebleDto>>(),
-        sp.GetRequiredService<AuditLogService>()
-    )
-);
+>();
 builder.Services.AddScoped<
     Service<EmpresaMantenimientoEntity, EmpresaMantenimientoRepository, EmpresaMantenimientoDto>
->(sp =>
-    new Service<
-        EmpresaMantenimientoEntity,
-        EmpresaMantenimientoRepository,
-        EmpresaMantenimientoDto
-    >(
-        sp.GetRequiredService<EmpresaMantenimientoRepository>(),
-        sp.GetRequiredService<IValidator<EmpresaMantenimientoDto>>(),
-        sp.GetRequiredService<IMapper<EmpresaMantenimientoEntity, EmpresaMantenimientoDto>>(),
-        sp.GetRequiredService<AuditLogService>()
-    )
-);
-builder.Services.AddScoped<Service<Accesorio, AccesorioRepository, AccesorioDto>>(sp =>
-    new Service<Accesorio, AccesorioRepository, AccesorioDto>(
-        sp.GetRequiredService<AccesorioRepository>(),
-        sp.GetRequiredService<IValidator<AccesorioDto>>(),
-        sp.GetRequiredService<IMapper<Accesorio, AccesorioDto>>(),
-        sp.GetRequiredService<AuditLogService>()
-    )
-);
-builder.Services.AddScoped<Service<Componente, ComponenteRepository, ComponenteDto>>(sp =>
-    new Service<Componente, ComponenteRepository, ComponenteDto>(
-        sp.GetRequiredService<ComponenteRepository>(),
-        sp.GetRequiredService<IValidator<ComponenteDto>>(),
-        sp.GetRequiredService<IMapper<Componente, ComponenteDto>>(),
-        sp.GetRequiredService<AuditLogService>()
-    )
-);
+>();
+builder.Services.AddScoped<Service<Accesorio, AccesorioRepository, AccesorioDto>>();
+builder.Services.AddScoped<Service<Componente, ComponenteRepository, ComponenteDto>>();
 
 builder.Services.AddSingleton<UsuarioMapper>();
 builder.Services.AddSingleton<PrestamoMapper>();
@@ -285,7 +239,13 @@ builder.Services.AddSingleton<IMapper<Contrato, ContratoDto>>(sp =>
 builder.Services.AddScoped<IValidator<AccesorioDto>, AccesorioValidator>();
 builder.Services.AddScoped<IValidator<CarreraDto>, CarreraValidator>();
 builder.Services.AddScoped<IValidator<ConfiguracionDto>, ConfiguracionValidator>();
-builder.Services.AddScoped<IMapper<ConfiguracionSistema, ConfiguracionDto>, ConfiguracionMapper>();
+builder.Services.AddScoped<ConfiguracionMapper>();
+builder.Services.AddScoped<IMapper<ConfiguracionSistema, ConfiguracionDto>>(sp =>
+    sp.GetRequiredService<ConfiguracionMapper>()
+);
+builder.Services.AddScoped<IUpdateMapper<ConfiguracionSistema, ConfiguracionDto>>(sp =>
+    sp.GetRequiredService<ConfiguracionMapper>()
+);
 builder.Services.AddScoped<IValidator<CategoriaDto>, CategoriaValidator>();
 builder.Services.AddScoped<IValidator<ComponenteDto>, ComponenteValidator>();
 builder.Services.AddScoped<IValidator<ContratoDto>, ContratoValidator>();
@@ -337,11 +297,11 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<AuditLogRepository>();
+builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
 builder.Services.AddScoped<AuditLogService>();
-builder.Services.AddScoped<NotificacionRepository>();
+builder.Services.AddScoped<INotificacionRepository, NotificacionRepository>();
 builder.Services.AddScoped<NotificacionService>();
-builder.Services.AddScoped<AvisoDisponibilidadRepository>();
+builder.Services.AddScoped<IAvisoDisponibilidadRepository, AvisoDisponibilidadRepository>();
 builder.Services.AddScoped<AvisoDisponibilidadService>();
 builder.Services.AddScoped<ComentarioEquipoRepository>();
 builder.Services.AddScoped<ComentarioEquipoService>();

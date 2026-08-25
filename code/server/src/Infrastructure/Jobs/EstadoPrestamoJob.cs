@@ -1,6 +1,8 @@
 using System.Globalization;
 using System.Text.Json;
 using IMT_Reservas.Server.Application.Features.AuditLog;
+using IMT_Reservas.Server.Application.Features.AvisoDisponibilidad;
+using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Application.Features.Notificacion;
 using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Application.Features.Usuario;
@@ -16,16 +18,16 @@ public class EstadoPrestamoJob
     private readonly AuditLogService _audit;
     private readonly PrestamoRepository _prestamoRepository;
     private readonly UsuarioRepository _usuarioRepository;
-    private readonly AvisoDisponibilidadRepository _availabilityWatches;
-    private readonly ConfiguracionRepository _configuracionRepository;
+    private readonly IAvisoDisponibilidadRepository _availabilityWatches;
+    private readonly IConfiguracionRepository _configuracionRepository;
 
     public EstadoPrestamoJob(
         NotificacionService notifications,
         AuditLogService audit,
         PrestamoRepository prestamoRepository,
         UsuarioRepository usuarioRepository,
-        AvisoDisponibilidadRepository availabilityWatches,
-        ConfiguracionRepository configuracionRepository
+        IAvisoDisponibilidadRepository availabilityWatches,
+        IConfiguracionRepository configuracionRepository
     )
     {
         _notifications = notifications;
@@ -179,7 +181,7 @@ public class EstadoPrestamoJob
 
         if (pending.Count == 0)
             return;
-            
+
         var config = await _configuracionRepository.GetConfiguracion();
 
         var notified = new List<int>();

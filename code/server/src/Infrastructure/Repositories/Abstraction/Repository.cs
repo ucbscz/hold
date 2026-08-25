@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 
-public class Repository<TEntity, TDto>
+public class Repository<TEntity, TDto> : IRepository<TEntity, TDto>
     where TEntity : Entity
     where TDto : class
 {
@@ -26,6 +26,7 @@ public class Repository<TEntity, TDto>
 
     public virtual async Task<Result<TDto>> Create(TEntity entity)
     {
+        entity.EstadoEliminado = false;
         DbContext.Add(entity);
         await DbContext.SaveChangesAsync();
         return Result<TDto>.Created(MapToDto(entity));
@@ -33,9 +34,15 @@ public class Repository<TEntity, TDto>
 
     public virtual async Task<Result<TDto>> Update(TEntity entity)
     {
-        DbContext.Update(entity);
+        var existing = await DbContext.Set<TEntity>().FirstOrDefaultAsync(e => e.Id == entity.Id);
+
+        if (existing == null)
+            return Result<TDto>.NotFound();
+
+        DbContext.Entry(existing).CurrentValues.SetValues(entity);
+        existing.EstadoEliminado = false;
         await DbContext.SaveChangesAsync();
-        return Result<TDto>.Success(MapToDto(entity));
+        return Result<TDto>.Success(MapToDto(existing));
     }
 
     public virtual async Task<Result<object>> Delete(int id)

@@ -4,6 +4,8 @@ using Ardalis.Result;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Application.Features.AuditLog;
+using IMT_Reservas.Server.Application.Features.AvisoDisponibilidad;
+using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Application.Features.Notificacion;
 using IMT_Reservas.Server.Application.Features.Prestamo.State;
 using IMT_Reservas.Server.Application.Features.Usuario;
@@ -17,8 +19,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
 {
     private readonly NotificacionService _notifications;
     private readonly UsuarioRepository _usuarioRepository;
-    private readonly AvisoDisponibilidadRepository _availabilityWatches;
-    private readonly ConfiguracionRepository _configuracionRepository;
+    private readonly IAvisoDisponibilidadRepository _availabilityWatches;
+    private readonly IConfiguracionRepository _configuracionRepository;
 
     public PrestamoService(
         PrestamoRepository repository,
@@ -27,8 +29,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         AuditLogService audit,
         NotificacionService notifications,
         UsuarioRepository usuarioRepository,
-        AvisoDisponibilidadRepository availabilityWatches,
-        ConfiguracionRepository configuracionRepository
+        IAvisoDisponibilidadRepository availabilityWatches,
+        IConfiguracionRepository configuracionRepository
     )
         : base(repository, validator, mapper, audit)
     {

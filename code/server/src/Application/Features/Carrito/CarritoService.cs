@@ -1,4 +1,5 @@
 using Ardalis.Result;
+using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
@@ -9,9 +10,13 @@ public class CarritoService
     private const int MaxGroupsPerRequest = 100;
     private readonly CarritoRepository _repository;
     private readonly ILogger<CarritoService> _logger;
-    private readonly ConfiguracionRepository _configuracionRepository;
+    private readonly IConfiguracionRepository _configuracionRepository;
 
-    public CarritoService(CarritoRepository repository, ILogger<CarritoService> logger, ConfiguracionRepository configuracionRepository)
+    public CarritoService(
+        CarritoRepository repository,
+        ILogger<CarritoService> logger,
+        IConfiguracionRepository configuracionRepository
+    )
     {
         _repository = repository;
         _logger = logger;

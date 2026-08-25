@@ -5,7 +5,7 @@ using Riok.Mapperly.Abstractions;
 namespace IMT_Reservas.Server.Application.Features.Configuracion;
 
 [Mapper]
-public partial class ConfiguracionMapper : IMapper<ConfiguracionSistema, ConfiguracionDto>
+public partial class ConfiguracionMapper : IUpdateMapper<ConfiguracionSistema, ConfiguracionDto>
 {
     public partial ConfiguracionDto ToDto(ConfiguracionSistema entity);
 

@@ -5,7 +5,7 @@ using AuditLogEntity = IMT_Reservas.Server.Core.Entities.AuditLog;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
-public class AuditLogRepository
+public class AuditLogRepository : IAuditLogRepository
 {
     private readonly ApplicationDbContext _db;
 

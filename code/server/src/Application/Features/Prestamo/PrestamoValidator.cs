@@ -1,15 +1,17 @@
 using FluentValidation;
+using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
-
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
 namespace IMT_Reservas.Server.Application.Features.Prestamo;
 
 public class PrestamoValidator : AbstractValidator<PrestamoDto>
 {
-    public PrestamoValidator(ApplicationDbContext dbContext, ConfiguracionRepository configRepository)
+    public PrestamoValidator(
+        ApplicationDbContext dbContext,
+        IConfiguracionRepository configRepository
+    )
     {
         RuleFor(p => p.CarnetUsuario)
             .Cascade(CascadeMode.Stop)
@@ -62,13 +64,13 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
             .MustAsync(async (p, cancellationToken) =>
             {
                 if (!p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue) return true;
-                
+
                 var config = await configRepository.GetConfiguracion();
                 var duracion = p.FechaDevolucionEsperada.Value - p.FechaPrestamoEsperada.Value;
-                
+
                 if (duracion < TimeSpan.FromMinutes(config.TiempoMinimoReservaMinutos))
                     return false;
-                    
+
                 return true;
             })
             .WithMessage(p => "El préstamo no cumple la duración mínima requerida");
@@ -77,7 +79,7 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
             .MustAsync(async (p, cancellationToken) =>
             {
                 if (!p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue) return true;
-                
+
                 var config = await configRepository.GetConfiguracion();
                 return HorarioReserva.EsValido(
                     p.FechaPrestamoEsperada.Value,

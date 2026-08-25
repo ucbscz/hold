@@ -3,31 +3,19 @@ using Ardalis.Result;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Features.AuditLog;
 using IMT_Reservas.Server.Core.Abstraction;
-using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 
 namespace IMT_Reservas.Server.Application.Abstraction;
 
 public class Service<TEntity, TRepository, TDto>
     where TEntity : Entity
-    where TRepository : Repository<TEntity, TDto>
+    where TRepository : IRepository<TEntity, TDto>
     where TDto : class
 {
     private readonly IMapper<TEntity, TDto> _mapper;
 
     protected TRepository Repository { get; }
     protected IValidator<TDto> Validator { get; }
-    protected AuditLogService? Audit { get; }
-
-    public Service(
-        TRepository repository,
-        IValidator<TDto> validator,
-        IMapper<TEntity, TDto> mapper
-    )
-    {
-        Repository = repository;
-        Validator = validator;
-        _mapper = mapper;
-    }
+    protected AuditLogService Audit { get; }
 
     public Service(
         TRepository repository,
@@ -35,7 +23,12 @@ public class Service<TEntity, TRepository, TDto>
         IMapper<TEntity, TDto> mapper,
         AuditLogService audit
     )
-        : this(repository, validator, mapper) => Audit = audit;
+    {
+        Repository = repository;
+        Validator = validator;
+        _mapper = mapper;
+        Audit = audit;
+    }
 
     protected TEntity MapToEntity(TDto dto) => _mapper.ToEntity(dto);
 
@@ -51,7 +44,7 @@ public class Service<TEntity, TRepository, TDto>
     {
         var result = await ValidateAndCreate(dto);
 
-        if (result.IsSuccess && Audit != null)
+        if (result.IsSuccess)
         {
             var id = Convert.ToString(
                 typeof(TDto).GetProperty("Id")?.GetValue(result.Value),
@@ -67,7 +60,7 @@ public class Service<TEntity, TRepository, TDto>
     {
         var result = await ValidateAndUpdate(id, dto);
 
-        if (result.IsSuccess && Audit != null)
+        if (result.IsSuccess)
             await Audit.Log(
                 AuditAccion.Editar,
                 typeof(TEntity).Name,
@@ -81,7 +74,7 @@ public class Service<TEntity, TRepository, TDto>
     {
         var result = await Repository.Delete(id);
 
-        if (result.IsSuccess && Audit != null)
+        if (result.IsSuccess)
             await Audit.Log(
                 AuditAccion.Eliminar,
                 typeof(TEntity).Name,

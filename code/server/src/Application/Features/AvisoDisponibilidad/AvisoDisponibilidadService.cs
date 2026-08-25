@@ -1,15 +1,15 @@
 using Ardalis.Result;
+using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Application.Features.Prestamo;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
 namespace IMT_Reservas.Server.Application.Features.AvisoDisponibilidad;
 
 public class AvisoDisponibilidadService
 {
-    private readonly AvisoDisponibilidadRepository _repository;
-    private readonly ConfiguracionRepository _configRepo;
+    private readonly IAvisoDisponibilidadRepository _repository;
+    private readonly IConfiguracionRepository _configRepo;
 
-    public AvisoDisponibilidadService(AvisoDisponibilidadRepository repository, ConfiguracionRepository configRepo)
+    public AvisoDisponibilidadService(IAvisoDisponibilidadRepository repository, IConfiguracionRepository configRepo)
     {
         _repository = repository;
         _configRepo = configRepo;

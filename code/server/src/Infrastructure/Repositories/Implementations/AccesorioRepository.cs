@@ -15,16 +15,20 @@ public class AccesorioRepository : Repository<AccesorioEntity, AccesorioDto>
 
     public override async Task<Result<AccesorioDto>> Create(AccesorioEntity entity)
     {
-        DbContext.Add(entity);
-        await DbContext.SaveChangesAsync();
+        var result = await base.Create(entity);
+
+        if (!result.IsSuccess)
+            return result;
 
         return await Get(entity.Id);
     }
 
     public override async Task<Result<AccesorioDto>> Update(AccesorioEntity entity)
     {
-        DbContext.Update(entity);
-        await DbContext.SaveChangesAsync();
+        var result = await base.Update(entity);
+
+        if (!result.IsSuccess)
+            return result;
 
         return await Get(entity.Id);
     }

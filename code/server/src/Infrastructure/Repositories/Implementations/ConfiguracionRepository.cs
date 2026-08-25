@@ -1,10 +1,11 @@
+using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
-public class ConfiguracionRepository
+public class ConfiguracionRepository : IConfiguracionRepository
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly CacheRepository _cache;
@@ -38,12 +39,13 @@ public class ConfiguracionRepository
 
     public async Task Update(ConfiguracionSistema config)
     {
-        _dbContext.ConfiguracionesSistema.Update(config);
-        await _dbContext.SaveChangesAsync();
-    }
+        var existing = await _dbContext.ConfiguracionesSistema.FirstOrDefaultAsync(c => c.Id == config.Id);
 
-    public async Task InvalidateCache()
-    {
+        if (existing == null)
+            throw new InvalidOperationException("No existe una configuración del sistema para actualizar.");
+
+        _dbContext.Entry(existing).CurrentValues.SetValues(config);
+        await _dbContext.SaveChangesAsync();
         await _cache.Remove(CacheKey);
     }
 }
