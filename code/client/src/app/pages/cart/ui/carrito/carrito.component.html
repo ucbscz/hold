@@ -81,6 +81,34 @@
           <i class="fas fa-ban"></i> {{ motivoBloqueo() }}
         </div>
       }
+      <div class="cart__destination">
+        <p class="cart__destination-title">¿Dónde usarás los equipos?</p>
+        <div class="cart__destination-options">
+          @if (esDocente) {
+            <label>
+              <input type="radio" name="destino" value="Universidad" [(ngModel)]="destinoPrestamo" />
+              En el laboratorio (Uso personal)
+            </label>
+            <label>
+              <input type="radio" name="destino" value="Casa" [(ngModel)]="destinoPrestamo" />
+              Fuera del laboratorio (Uso personal)
+            </label>
+            <label>
+              <input type="radio" name="destino" value="Clase" [(ngModel)]="destinoPrestamo" />
+              Para dar clases
+            </label>
+          } @else {
+            <label>
+              <input type="radio" name="destino" value="Universidad" [(ngModel)]="destinoPrestamo" />
+              En la Universidad (Laboratorio)
+            </label>
+            <label>
+              <input type="radio" name="destino" value="Casa" [(ngModel)]="destinoPrestamo" />
+              Para llevar a casa
+            </label>
+          }
+        </div>
+      </div>
       <button
         (click)="confirmarSolicitud()"
         class="cart__button"
@@ -97,25 +125,6 @@
     }
   </div>
 
-  @if (confirmacionVisible()) {
-    <app-aviso
-      [cerrar]="confirmacionVisible"
-      [mensaje]="'¿Está seguro que desea realizar el préstamo de los equipos seleccionados?'"
-      (aceptar)="realizarPrestamo()"
-    ></app-aviso>
-  }
-
-  @if (exitoVisible()) {
-    <app-aviso-exito
-      [exito]="exitoVisible"
-      [mensaje]="'El préstamo se ha realizado con éxito!'"
-      (accion)="redirigirAnterior()"
-    ></app-aviso-exito>
-  }
-
-  @if (cargando) {
-    <app-pantalla-carga></app-pantalla-carga>
-  }
 } @else {
   <div class="cart-empty">
     <img
@@ -130,4 +139,23 @@
     <p class="cart-empty__title">Tu carrito está vacío</p>
     <p class="cart-empty__subtitle">Agrega equipos para hacer una reserva</p>
   </div>
+}
+
+@if (confirmacionVisible()) {
+  <app-aviso
+    [cerrar]="confirmacionVisible"
+    [mensaje]="'¿Está seguro que desea realizar el préstamo de los equipos seleccionados?'"
+    (aceptar)="realizarPrestamo()"
+  ></app-aviso>
+}
+
+@if (exitoVisible()) {
+  <app-aviso-exito
+    [exito]="exitoVisible"
+    [mensaje]="'El préstamo se ha realizado con éxito!'"
+    (accion)="redirigirAnterior()"
+  ></app-aviso-exito>
+}
+@if (cargando) {
+  <app-pantalla-carga></app-pantalla-carga>
 }

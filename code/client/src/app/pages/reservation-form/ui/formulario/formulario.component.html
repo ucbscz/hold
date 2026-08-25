@@ -1,4 +1,28 @@
 <div class="contrato-container">
+  @if (destinoPrestamo === 'Clase') {
+    <div class="form-container-docente">
+      <div class="form-group">
+        <label>Carrera</label>
+        <app-custom-select
+          name="carrera"
+          [(ngModel)]="idCarrera"
+          (ngModelChange)="actualizarContrato()"
+          [opciones]="carrerasOpciones"
+          placeholder="Seleccione una carrera"
+        ></app-custom-select>
+      </div>
+      <div class="form-group">
+        <label>Materia</label>
+        <input 
+          type="text" 
+          class="form-input" 
+          [(ngModel)]="nombreMateria" 
+          (ngModelChange)="actualizarContrato()"
+          placeholder="Ingrese la materia"
+        />
+      </div>
+    </div>
+  }
   <div #contratoContainer class="formulario" [innerHTML]="contenidoHtml"></div>
   <div class="botones-container">
     <button class="boton boton-firmar" (click)="firmar()">

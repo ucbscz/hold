@@ -13,6 +13,7 @@ using IMT_Reservas.Server.Application.Features.Carrera;
 using IMT_Reservas.Server.Application.Features.Carrito;
 using IMT_Reservas.Server.Application.Features.Categoria;
 using IMT_Reservas.Server.Application.Features.Componente;
+using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Application.Features.EmpresaMantenimiento;
 using IMT_Reservas.Server.Application.Features.Equipo;
@@ -163,6 +164,8 @@ builder.Services.AddScoped<GrupoEquipoService>();
 builder.Services.AddScoped<MantenimientoService>();
 builder.Services.AddScoped<GaveteroService>();
 builder.Services.AddScoped<ContratoService>();
+builder.Services.AddScoped<ConfiguracionRepository>();
+builder.Services.AddScoped<ConfiguracionService>();
 
 builder.Services.AddScoped<
     Service<CarreraEntity, Repository<CarreraEntity, CarreraDto>, CarreraDto>
@@ -281,6 +284,8 @@ builder.Services.AddSingleton<IMapper<Contrato, ContratoDto>>(sp =>
 
 builder.Services.AddScoped<IValidator<AccesorioDto>, AccesorioValidator>();
 builder.Services.AddScoped<IValidator<CarreraDto>, CarreraValidator>();
+builder.Services.AddScoped<ConfiguracionValidator>();
+builder.Services.AddScoped<ConfiguracionMapper>();
 builder.Services.AddScoped<IValidator<CategoriaDto>, CategoriaValidator>();
 builder.Services.AddScoped<IValidator<ComponenteDto>, ComponenteValidator>();
 builder.Services.AddScoped<IValidator<ContratoDto>, ContratoValidator>();

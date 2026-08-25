@@ -9,12 +9,12 @@ public static class HorarioReserva
 
     private static readonly TimeZoneInfo BoliviaTimeZone = ResolveBoliviaTimeZone();
 
-    public static bool EsValido(DateTime inicio, DateTime fin)
+    public static bool EsValido(DateTime inicio, DateTime fin, int aperturaMinutos, int cierreMinutos)
     {
         var inicioLocal = EnBolivia(inicio);
         var finLocal = EnBolivia(fin);
-        var apertura = TimeSpan.FromHours(HoraApertura);
-        var cierre = TimeSpan.FromHours(HoraCierre);
+        var apertura = TimeSpan.FromMinutes(aperturaMinutos);
+        var cierre = TimeSpan.FromMinutes(cierreMinutos);
 
         return inicioLocal.DayOfWeek != DayOfWeek.Sunday
             && finLocal.DayOfWeek != DayOfWeek.Sunday

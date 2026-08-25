@@ -1,10 +1,12 @@
 services:
   ucb_db:
     container_name: ucb_db
-    image: postgres:16-alpine
+    image: postgres:alpine
     restart: on-failure
     env_file:
       - server.env
+    environment:
+      - PGDATA=/var/lib/postgresql/data/pgdata
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s

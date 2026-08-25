@@ -7,9 +7,13 @@ namespace IMT_Reservas.Server.Application.Features.AvisoDisponibilidad;
 public class AvisoDisponibilidadService
 {
     private readonly AvisoDisponibilidadRepository _repository;
+    private readonly ConfiguracionRepository _configRepo;
 
-    public AvisoDisponibilidadService(AvisoDisponibilidadRepository repository) =>
+    public AvisoDisponibilidadService(AvisoDisponibilidadRepository repository, ConfiguracionRepository configRepo)
+    {
         _repository = repository;
+        _configRepo = configRepo;
+    }
 
     public async Task<Result<object>> Create(string carnet, AvisoDisponibilidadDto dto)
     {
@@ -19,7 +23,8 @@ public class AvisoDisponibilidadService
         if (dto.Fecha <= DateTime.UtcNow)
             return Result<object>.Error("La fecha y hora del aviso debe ser futura");
 
-        if (!HorarioReserva.EsValido(dto.Fecha.Value, dto.Fecha.Value.AddMinutes(30)))
+        var config = await _configRepo.GetConfiguracion();
+        if (!HorarioReserva.EsValido(dto.Fecha.Value, dto.Fecha.Value.AddMinutes(config.TiempoMinimoReservaMinutos), config.HorarioInicioMinutos, config.HorarioFinMinutos))
             return Result<object>.Error(HorarioReserva.Mensaje);
 
         await _repository.Add(carnet, dto);

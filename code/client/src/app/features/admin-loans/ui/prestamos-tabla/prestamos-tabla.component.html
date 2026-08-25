@@ -34,7 +34,16 @@
         [ngModelOptions]="{ standalone: true }"
         [opciones]="estadoFiltroOpciones"
         icon="fas fa-filter"
-        placeholder="Filtrar"
+        placeholder="Filtrar Estado"
+      ></app-custom-select>
+      <app-custom-select
+        class="admin-filter-select"
+        [ngModel]="rolSeleccionado"
+        (ngModelChange)="seleccionarRol($event)"
+        [ngModelOptions]="{ standalone: true }"
+        [opciones]="rolesFiltroOpciones"
+        icon="fas fa-user-shield"
+        placeholder="Todos los roles"
       ></app-custom-select>
       <button
         type="button"
@@ -118,6 +127,7 @@
                   </span>
                 </td>
                 <td>{{ prestamo.value.datosgrupo.CarnetUsuario }}</td>
+                <td>{{ prestamo.value.datosgrupo.TipoUsuario | titlecase }}</td>
                 <td>{{ prestamo.value.datosgrupo.TelefonoUsuario }}</td>
                 <td class="equipos-cell">
                   <div class="equipos-info">

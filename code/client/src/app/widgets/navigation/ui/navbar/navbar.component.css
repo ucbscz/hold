@@ -175,9 +175,7 @@
 
 @media (min-width: 1921px) {
   .navbar-container {
-    max-width: 1800px;
-    margin: 0 auto;
-    padding: 0 3rem;
+    padding: 0 8rem;
   }
 }
 

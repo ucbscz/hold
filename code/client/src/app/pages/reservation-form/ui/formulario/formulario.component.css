@@ -1,3 +1,36 @@
+.form-container-docente {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.form-group label {
+  font-weight: 500;
+  color: var(--ink);
+  font-size: 0.9rem;
+}
+.form-input {
+  padding: 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  transition: border-color 0.2s;
+  background-color: var(--surface);
+  color: var(--ink);
+}
+.form-input:focus {
+  outline: none;
+  border-color: var(--brand);
+}
+
 .contrato-container {
   background: var(--surface);
   border-radius: var(--radius-xl);

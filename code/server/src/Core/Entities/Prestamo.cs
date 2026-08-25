@@ -13,5 +13,12 @@ public class Prestamo : Entity
     public EstadoPrestamo EstadoPrestamo { get; set; }
     public string? Observacion { get; set; }
     public int? IdContrato { get; set; }
-    public bool RecordatorioEnviado { get; set; }
+    public bool RecordatorioEnviado { get; set; } = false;
+    public string DestinoPrestamo { get; set; } = "Universidad";
+    public int? IdCarrera { get; set; }
+    public string? NombreMateria { get; set; }
+
+    public Usuario? Usuario { get; set; }
+    public Contrato? Contrato { get; set; }
+    public Carrera? Carrera { get; set; }
 }

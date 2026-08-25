@@ -17,13 +17,15 @@ public class EstadoPrestamoJob
     private readonly PrestamoRepository _prestamoRepository;
     private readonly UsuarioRepository _usuarioRepository;
     private readonly AvisoDisponibilidadRepository _availabilityWatches;
+    private readonly ConfiguracionRepository _configuracionRepository;
 
     public EstadoPrestamoJob(
         NotificacionService notifications,
         AuditLogService audit,
         PrestamoRepository prestamoRepository,
         UsuarioRepository usuarioRepository,
-        AvisoDisponibilidadRepository availabilityWatches
+        AvisoDisponibilidadRepository availabilityWatches,
+        ConfiguracionRepository configuracionRepository
     )
     {
         _notifications = notifications;
@@ -31,21 +33,24 @@ public class EstadoPrestamoJob
         _prestamoRepository = prestamoRepository;
         _usuarioRepository = usuarioRepository;
         _availabilityWatches = availabilityWatches;
+        _configuracionRepository = configuracionRepository;
     }
 
     public async Task Execute()
     {
         var now = DateTime.UtcNow;
+        var config = await _configuracionRepository.GetConfiguracion();
 
-        await ProcessOverdue(now);
+        await ProcessOverdue(now, config.MinutosGraciaAtraso);
         await ProcessExpired(now);
-        await ProcessReminders(now);
+        await ProcessReminders(now, config.TiempoRecordatorioPrevioMinutos);
         await ProcessAvailabilityWatches();
     }
 
-    private async Task ProcessOverdue(DateTime now)
+    private async Task ProcessOverdue(DateTime now, int minutosGracia)
     {
-        var overdue = await _prestamoRepository.GetOverdueLoans(now);
+        var threshold = now.AddMinutes(-minutosGracia);
+        var overdue = await _prestamoRepository.GetOverdueLoans(threshold);
 
         if (overdue.Count == 0)
             return;
@@ -143,11 +148,11 @@ public class EstadoPrestamoJob
         );
     }
 
-    private async Task ProcessReminders(DateTime now)
+    private async Task ProcessReminders(DateTime now, int reminderMinutes)
     {
         var dueSoon = await _prestamoRepository.GetLoansDueForReminder(
             now,
-            now.AddMinutes(30)
+            now.AddMinutes(reminderMinutes)
         );
 
         if (dueSoon.Count == 0)
@@ -174,6 +179,8 @@ public class EstadoPrestamoJob
 
         if (pending.Count == 0)
             return;
+            
+        var config = await _configuracionRepository.GetConfiguracion();
 
         var notified = new List<int>();
         var notifications = new List<NotificacionDto>();
@@ -182,13 +189,13 @@ public class EstadoPrestamoJob
         {
             var date = watch.Fecha;
 
-            if (!HorarioReserva.EsValido(date, date.AddMinutes(30)))
+            if (!HorarioReserva.EsValido(date, date.AddMinutes(config.TiempoMinimoReservaMinutos), config.HorarioInicioMinutos, config.HorarioFinMinutos))
                 continue;
 
             if (await _prestamoRepository.HasAvailableEquipo(
                 watch.IdGrupoEquipo,
                 date,
-                date.AddMinutes(30)
+                date.AddMinutes(config.TiempoMinimoReservaMinutos)
             ))
             {
                 notifications.Add(

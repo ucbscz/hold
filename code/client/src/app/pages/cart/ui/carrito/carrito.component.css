@@ -227,6 +227,33 @@
   opacity: 0.5;
   pointer-events: none;
 }
+.cart__destination {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  background-color: var(--surface);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+}
+.cart__destination-title {
+  font-family: var(--font);
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  font-size: 1rem;
+  color: var(--ink);
+}
+.cart__destination-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.cart__destination-options label {
+  font-family: var(--font);
+  font-size: 0.95rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
 
 @media (max-width: 768px) {
   .cart {

@@ -1,3 +1,4 @@
+import { ConfiguracionService } from '@app/entities/configuracion/api/configuracion.service';
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
@@ -21,8 +22,13 @@ import {
   AvisoExitoComponent,
   MostrarerrorComponent,
   PantallaCargaComponent,
+  CustomSelectComponent,
+  OpcionSelect
 } from '@shared/ui';
 import { finalize } from 'rxjs';
+import { ActivatedRoute } from '@angular/router';
+import { CarreraService } from '@entities/career';
+import { FormsModule } from '@angular/forms';
 
 const CONFLICT_STATUS = 409;
 const UNPROCESSABLE_ENTITY_STATUS = 422;
@@ -34,10 +40,12 @@ const SERVER_ERROR_STATUS = 500;
   imports: [
     FirmaComponent,
     CommonModule,
+    FormsModule,
     MostrarerrorComponent,
     PantallaCargaComponent,
     Aviso,
     AvisoExitoComponent,
+    CustomSelectComponent,
   ],
   templateUrl: './formulario.component.html',
   styleUrl: './formulario.component.css',
@@ -59,6 +67,11 @@ export class FormularioComponent implements OnInit {
   mensajeexito: string =
     'Aviso de exito desconocido , si ve esto es un error , avise al soporte si puede o intente mas tarde';
 
+  destinoPrestamo: string = 'Casa';
+  carrerasOpciones: OpcionSelect[] = [];
+  idCarrera: number | null = null;
+  nombreMateria: string = '';
+
   constructor(
     private readonly http: HttpClient,
     private readonly renderer: Renderer2,
@@ -66,9 +79,95 @@ export class FormularioComponent implements OnInit {
     private readonly usuario: UsuarioService,
     private readonly mandarprestamo: PrestamosAPIService,
     private readonly loanReturnNavigation: LoanReturnNavigationService,
+    private readonly route: ActivatedRoute,
+    private readonly carreraService: CarreraService,
+    private readonly configuracionService: ConfiguracionService,
   ) {}
 
+  templateCrudo: string = '';
+
+  actualizarContrato() {
+    if (!this.templateCrudo) return;
+    
+    const fechaInicioReserva = this.carrito.obtenerFechaInicio();
+    const fechaFinalReserva = this.carrito.obtenerFechaFinal();
+    
+    if (!fechaInicioReserva || !fechaFinalReserva) return;
+    
+    const fechaInicio = new Date(fechaInicioReserva);
+    const fechaFinal = new Date(fechaFinalReserva);
+    const duracionMinutos = Math.round(
+      (fechaFinal.getTime() - fechaInicio.getTime()) / 60_000,
+    );
+
+    let detallesClase = '';
+    if (this.destinoPrestamo === 'Clase') {
+      const nombreCarrera = this.carrerasOpciones.find(c => c.value === this.idCarrera?.toString())?.label || '[Carrera no seleccionada]';
+      const materia = this.nombreMateria || '[Materia no ingresada]';
+      detallesClase = `, los cuales serán utilizados para la clase de ${materia} de la carrera de ${nombreCarrera}`;
+    }
+
+    const u = this.usuario.obtenerUsuario();
+    const nombreUsuario = [u.nombre, u.apellido_paterno, u.apellido_materno].filter(Boolean).join(' ');
+    
+    const rol = u.rol ? u.rol.charAt(0).toUpperCase() + u.rol.slice(1).toLowerCase() : 'Estudiante';
+    let rolCarrera = rol;
+    if (u.carrera) {
+      rolCarrera = `${rol} de ${u.carrera}`;
+    }
+
+
+    const config = this.configuracionService.configuracionActual();
+    
+    
+    const base64Firma = config?.FirmaJefeCarreraBase64 ?? '';
+    const firmaSrc = base64Firma.startsWith('data:') ? base64Firma : `data:image/png;base64,${base64Firma}`;
+
+    const processedTemplate = this.reemplazarMarcadores(this.templateCrudo, {
+      nombre_jefe_carrera: escapeHtmlValue(config?.NombreJefeCarrera ?? 'Job Angel Ledezma Dr.Ing'),
+      firma_jefe_carrera: firmaSrc,
+
+
+      dia: new Date().getDate().toString(),
+      mesliteral: new Intl.DateTimeFormat('es-ES', {
+        month: 'long',
+      }).format(new Date()),
+      año: new Date().getFullYear().toString(),
+      usuario: escapeHtmlValue(nombreUsuario),
+      rol_carrera: escapeHtmlValue(rolCarrera),
+      usuario_ci: escapeHtmlValue(
+        u.carnet ?? '',
+      ),
+      tablaprimera: this.primeradelobjeto(this.carrito.obtenerCarrito()),
+      fechaMaxima: this.formatearDuracion(duracionMinutos),
+      precio: this.carrito.calcularPrecioTotal().toString(),
+      tablasegunda: this.quintavalordebienes(this.carrito.obtenerCarrito()),
+      dia_devolucion: fechaFinal.getDate().toString(),
+      mes_devolucion: new Intl.DateTimeFormat('es-ES', {
+        month: 'long',
+      }).format(fechaFinal),
+      año_devolucion: fechaFinal.getFullYear().toString(),
+      detalles_clase: detallesClase,
+    });
+    this.contenidoHtml = processedTemplate;
+  }
+
   ngOnInit(): void {
+    this.carreraService.obtenerCarreras().subscribe((carreras) => {
+      this.carrerasOpciones = carreras.map((c) => ({
+        value: c.Id.toString(),
+        label: c.Nombre ?? 'Desconocido',
+      }));
+      this.actualizarContrato();
+    });
+
+    this.route.queryParams.subscribe(params => {
+      if (params['destino']) {
+        this.destinoPrestamo = params['destino'];
+        this.actualizarContrato();
+      }
+    });
+
     const fechaInicioReserva = this.carrito.obtenerFechaInicio();
     const fechaFinalReserva = this.carrito.obtenerFechaFinal();
 
@@ -79,34 +178,10 @@ export class FormularioComponent implements OnInit {
       return;
     }
 
-    const fechaInicio = new Date(fechaInicioReserva);
-    const fechaFinal = new Date(fechaFinalReserva);
-    const duracionMinutos = Math.round(
-      (fechaFinal.getTime() - fechaInicio.getTime()) / 60_000,
-    );
-    this.http.get('assets/contrato.html', { responseType: 'text' }).subscribe({
+    this.http.get('assets/contrato.html?v=' + new Date().getTime(), { responseType: 'text' }).subscribe({
       next: (data: string) => {
-        const processedTemplate = this.reemplazarMarcadores(data, {
-          dia: new Date().getDate().toString(),
-          mesliteral: new Intl.DateTimeFormat('es-ES', {
-            month: 'long',
-          }).format(new Date()),
-          año: new Date().getFullYear().toString(),
-          usuario: escapeHtmlValue(this.usuario.obtenerUsuario().nombre ?? ''),
-          usuario_ci: escapeHtmlValue(
-            this.usuario.obtenerUsuario().carnet ?? '',
-          ),
-          tablaprimera: this.primeradelobjeto(this.carrito.obtenerCarrito()),
-          fechaMaxima: this.formatearDuracion(duracionMinutos),
-          precio: this.carrito.calcularPrecioTotal().toString(),
-          tablasegunda: this.quintavalordebienes(this.carrito.obtenerCarrito()),
-          dia_devolucion: fechaFinal.getDate().toString(),
-          mes_devolucion: new Intl.DateTimeFormat('es-ES', {
-            month: 'long',
-          }).format(fechaFinal),
-          año_devolucion: fechaFinal.getFullYear().toString(),
-        });
-        this.contenidoHtml = processedTemplate;
+        this.templateCrudo = data;
+        this.actualizarContrato();
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -170,6 +245,9 @@ export class FormularioComponent implements OnInit {
         this.carrito.obtenerCarrito(),
         this.usuario.obtenerUsuario().carnet!,
         contratoTexto,
+        this.destinoPrestamo,
+        this.idCarrera ? Number(this.idCarrera) : undefined,
+        this.nombreMateria
       )
       .pipe(finalize(() => (this.cargando = false)))
       .subscribe({

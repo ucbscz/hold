@@ -28,6 +28,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<Contrato> Contratos { get; set; }
     public DbSet<AuditLog> AuditLogs { get; set; }
     public DbSet<Notificacion> Notificaciones { get; set; }
+    public DbSet<ConfiguracionSistema> ConfiguracionesSistema { get; set; }
     public DbSet<AvisoDisponibilidad> AvisosDisponibilidad { get; set; }
     public DbSet<ComentarioEquipo> ComentariosEquipos { get; set; }
 
@@ -434,9 +435,17 @@ public class ApplicationDbContext : DbContext
                 .Property(e => e.RecordatorioEnviado)
                 .HasColumnName("recordatorio_enviado")
                 .HasDefaultValue(false);
+            entity
+                .Property(e => e.DestinoPrestamo)
+                .HasMaxLength(50)
+                .HasColumnName("destino_prestamo")
+                .HasDefaultValue("Universidad");
+            entity.Property(e => e.IdCarrera).HasColumnName("id_carrera");
+            entity.Property(e => e.NombreMateria).HasMaxLength(255).HasColumnName("nombre_materia");
             entity.Property(e => e.EstadoEliminado).HasColumnName(EstadoEliminadoCol);
-            entity.HasOne<Usuario>().WithMany().HasForeignKey(e => e.Carnet).IsRequired();
-            entity.HasOne<Contrato>().WithMany().HasForeignKey(e => e.IdContrato);
+            entity.HasOne(e => e.Usuario).WithMany().HasForeignKey(e => e.Carnet).IsRequired();
+            entity.HasOne(e => e.Contrato).WithMany().HasForeignKey(e => e.IdContrato);
+            entity.HasOne(e => e.Carrera).WithMany().HasForeignKey(e => e.IdCarrera);
             entity.HasIndex(e => e.IdContrato);
             entity.HasIndex(e => new
             {
@@ -601,6 +610,23 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.EstadoEliminado).HasColumnName(EstadoEliminadoCol);
             entity.HasIndex(e => new { e.Notificado, e.EstadoEliminado });
             entity.HasQueryFilter(e => !e.EstadoEliminado);
+        });
+        modelBuilder.Entity<ConfiguracionSistema>(entity =>
+        {
+            entity.ToTable("configuraciones_sistema");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Id).HasColumnName("id_configuracion");
+            entity.Property(e => e.MontoMinimoContrato).HasColumnName("monto_minimo_contrato").HasColumnType("numeric(18,2)");
+            entity.Property(e => e.HorarioInicioMinutos).HasColumnName("horario_inicio_minutos");
+            entity.Property(e => e.HorarioFinMinutos).HasColumnName("horario_fin_minutos");
+            entity.Property(e => e.NombreJefeCarrera).HasColumnName("nombre_jefe_carrera").HasMaxLength(255);
+            entity.Property(e => e.FirmaJefeCarreraBase64).HasColumnName("firma_jefe_carrera_base64");
+            entity.Property(e => e.TiempoMinimoReservaMinutos).HasColumnName("tiempo_minimo_reserva_minutos");
+            entity.Property(e => e.TiempoRecordatorioPrevioMinutos).HasColumnName("tiempo_recordatorio_previo_minutos");
+            entity.Property(e => e.MinutosGraciaAtraso).HasColumnName("minutos_gracia_atraso");
+            entity.Property(e => e.EstadoEliminado).HasColumnName(EstadoEliminadoCol);
+            
+            entity.HasData(ConfiguracionSeed.Default);
         });
     }
 }

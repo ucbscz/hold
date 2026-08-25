@@ -179,6 +179,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   override columnas: string[] = [
     'Usuario',
     'Carnet',
+    'Rol',
     'Teléfono',
     'Equipos',
     'Fecha Solicitud',
@@ -201,6 +202,12 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       value: estado,
       label: estado.charAt(0).toUpperCase() + estado.slice(1),
     })),
+  ];
+  rolSeleccionado: string = '';
+  readonly rolesFiltroOpciones: OpcionSelect[] = [
+    { value: '', label: 'Todos los roles' },
+    { value: 'docente', label: 'Docente' },
+    { value: 'estudiante', label: 'Estudiante' },
   ];
   fechaPrestamoDesde = '';
   fechaPrestamoHasta = '';
@@ -225,11 +232,21 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   cargarPrestamos() {
     this.prestamosapi.obtenerPrestamos().subscribe({
       next: (data: PrestamoDto[]) => {
-        data.sort(
-          (a, b) =>
-            new Date(b.FechaSolicitud ?? 0).getTime() -
-            new Date(a.FechaSolicitud ?? 0).getTime(),
-        );
+        data.sort((a, b) => {
+          const inactives = ['finalizado', 'cancelado', 'rechazado'];
+          const aEstado = (a.EstadoPrestamo ?? '').toString().toLowerCase();
+          const bEstado = (b.EstadoPrestamo ?? '').toString().toLowerCase();
+          const aInactivo = inactives.includes(aEstado);
+          const bInactivo = inactives.includes(bEstado);
+          if (aInactivo !== bInactivo) return aInactivo ? 1 : -1;
+
+          const aIsDocente = (a.TipoUsuario ?? '').toString().toLowerCase() === 'docente';
+          const bIsDocente = (b.TipoUsuario ?? '').toString().toLowerCase() === 'docente';
+          if (aIsDocente && !bIsDocente) return -1;
+          if (!aIsDocente && bIsDocente) return 1;
+
+          return new Date(b.FechaSolicitud ?? 0).getTime() - new Date(a.FechaSolicitud ?? 0).getTime();
+        });
         this.agruparPrestamos(data);
         this.seleccionarEstado(this.estadoSeleccionado);
       },
@@ -303,6 +320,11 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     this.fechaPrestamoHasta = dates[0]?.toISOString().slice(0, 10) ?? '';
     this.aplicarFiltros();
   }
+  seleccionarRol(rol: string) {
+    this.rolSeleccionado = rol;
+    this.aplicarFiltros();
+  }
+
   aplicarFiltros(event?: [string, string]) {
     if (event) this.busquedaActual = event;
     let prestamosFiltrados = Array.from(this.prestamoscopia.entries());
@@ -381,6 +403,13 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
           this.getEstadoCalculado(prestamo).toLowerCase() === buscado,
       );
     }
+    if (this.rolSeleccionado !== '') {
+      const rol = this.rolSeleccionado.toLowerCase();
+      prestamosFiltrados = prestamosFiltrados.filter(
+        ([_, prestamo]) =>
+          prestamo.datosgrupo.TipoUsuario?.toLowerCase() === rol,
+      );
+    }
     if (this.fechaPrestamoDesde || this.fechaPrestamoHasta) {
       const desde = this.fechaPrestamoDesde
         ? new Date(`${this.fechaPrestamoDesde}T00:00:00`)
@@ -408,6 +437,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
         Usuario: ([, prestamo]) =>
           `${prestamo.datosgrupo.NombreUsuario ?? ''} ${prestamo.datosgrupo.ApellidoPaternoUsuario ?? ''}`,
         Carnet: ([, prestamo]) => prestamo.datosgrupo.CarnetUsuario,
+        Rol: ([, prestamo]) => prestamo.datosgrupo.TipoUsuario,
         Teléfono: ([, prestamo]) => prestamo.datosgrupo.TelefonoUsuario,
         Equipos: ([, prestamo]) => prestamo.datosgrupo.NombreGrupoEquipo,
         'Fecha Solicitud': ([, prestamo]) => prestamo.datosgrupo.FechaSolicitud,
@@ -418,6 +448,23 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
         Estado: ([, prestamo]) => this.getEstadoCalculado(prestamo),
       },
     );
+
+    prestamosOrdenados.sort((a, b) => {
+          const inactives = ['finalizado', 'cancelado', 'rechazado'];
+          const aEstado = (a[1].datosgrupo.EstadoPrestamo ?? '').toString().toLowerCase();
+          const bEstado = (b[1].datosgrupo.EstadoPrestamo ?? '').toString().toLowerCase();
+          const aInactivo = inactives.includes(aEstado);
+          const bInactivo = inactives.includes(bEstado);
+          if (aInactivo !== bInactivo) return aInactivo ? 1 : -1;
+
+          const aIsDocente = (a[1].datosgrupo.TipoUsuario ?? '').toString().toLowerCase() === 'docente';
+          const bIsDocente = (b[1].datosgrupo.TipoUsuario ?? '').toString().toLowerCase() === 'docente';
+          if (aIsDocente && !bIsDocente) return -1;
+          if (!aIsDocente && bIsDocente) return 1;
+
+          // Fallback to original column sorting handled by sortByColumn
+          return 0;
+        });
 
     this.prestamos = new Map<number, PrestamoAgrupados>(prestamosOrdenados);
   }

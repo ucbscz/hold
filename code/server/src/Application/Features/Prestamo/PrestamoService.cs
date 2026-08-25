@@ -18,6 +18,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
     private readonly NotificacionService _notifications;
     private readonly UsuarioRepository _usuarioRepository;
     private readonly AvisoDisponibilidadRepository _availabilityWatches;
+    private readonly ConfiguracionRepository _configuracionRepository;
 
     public PrestamoService(
         PrestamoRepository repository,
@@ -26,13 +27,15 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         AuditLogService audit,
         NotificacionService notifications,
         UsuarioRepository usuarioRepository,
-        AvisoDisponibilidadRepository availabilityWatches
+        AvisoDisponibilidadRepository availabilityWatches,
+        ConfiguracionRepository configuracionRepository
     )
         : base(repository, validator, mapper, audit)
     {
         _notifications = notifications;
         _usuarioRepository = usuarioRepository;
         _availabilityWatches = availabilityWatches;
+        _configuracionRepository = configuracionRepository;
     }
 
     public override async Task<Result<PrestamoDto>> Create(PrestamoDto dto)
@@ -251,6 +254,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
     private async Task NotifyAvailabilityWatches()
     {
         var pending = await _availabilityWatches.GetPending();
+        var config = await _configuracionRepository.GetConfiguracion();
 
         if (pending.Count == 0)
             return;
@@ -262,13 +266,13 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         {
             var date = watch.Fecha;
 
-            if (!HorarioReserva.EsValido(date, date.AddMinutes(30)))
+            if (!HorarioReserva.EsValido(date, date.AddMinutes(config.TiempoMinimoReservaMinutos), config.HorarioInicioMinutos, config.HorarioFinMinutos))
                 continue;
 
             if (!await Repository.HasAvailableEquipo(
                 watch.IdGrupoEquipo,
                 date,
-                date.AddMinutes(30)
+                date.AddMinutes(config.TiempoMinimoReservaMinutos)
             ))
                 continue;
 
