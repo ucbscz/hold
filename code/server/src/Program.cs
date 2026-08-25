@@ -284,8 +284,8 @@ builder.Services.AddSingleton<IMapper<Contrato, ContratoDto>>(sp =>
 
 builder.Services.AddScoped<IValidator<AccesorioDto>, AccesorioValidator>();
 builder.Services.AddScoped<IValidator<CarreraDto>, CarreraValidator>();
-builder.Services.AddScoped<ConfiguracionValidator>();
-builder.Services.AddScoped<ConfiguracionMapper>();
+builder.Services.AddScoped<IValidator<ConfiguracionDto>, ConfiguracionValidator>();
+builder.Services.AddScoped<IMapper<ConfiguracionSistema, ConfiguracionDto>, ConfiguracionMapper>();
 builder.Services.AddScoped<IValidator<CategoriaDto>, CategoriaValidator>();
 builder.Services.AddScoped<IValidator<ComponenteDto>, ComponenteValidator>();
 builder.Services.AddScoped<IValidator<ContratoDto>, ContratoValidator>();

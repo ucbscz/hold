@@ -1,7 +1,7 @@
 services:
   ucb_db:
     container_name: ucb_db
-    image: postgres:alpine
+    image: postgres:16-alpine
     restart: on-failure
     env_file:
       - server.env

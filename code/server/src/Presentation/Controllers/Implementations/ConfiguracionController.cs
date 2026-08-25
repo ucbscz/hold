@@ -1,12 +1,12 @@
 using IMT_Reservas.Server.Application.Features.Configuracion;
+using IMT_Reservas.Server.Presentation.Controllers.Abstraction;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
-[ApiController]
 [Route("api/[controller]")]
-public class ConfiguracionController : ControllerBase
+public class ConfiguracionController : Controller
 {
     private readonly ConfiguracionService _service;
 
@@ -28,11 +28,6 @@ public class ConfiguracionController : ControllerBase
     public async Task<IActionResult> Update([FromBody] ConfiguracionDto dto)
     {
         var result = await _service.UpdateConfiguracion(dto);
-        if (result.IsSuccess)
-        {
-            return Ok(result.Value);
-        }
-
-        return BadRequest(new { message = result.Errors });
+        return ToResponse(result);
     }
 }

@@ -124,24 +124,17 @@ secrets/
 
 code/server/publish/
 
-# --- Ignored files not needed for server deployment ---
-# Front‑end build artefacts
 Code/Client/dist/
-# Test outputs (but keep test source code)
 code/tests/coveragereport
 code/tests/TestResults/
-# Local IDE / tooling files (already covered but reinforced)
 .vscode/
 .idea/
-# Miscellaneous local files
 *.log
 *.tmp
 *.bak
 
-# Explicitly ignored per user request (not needed for cloud server)
 /Library/
 /Code/Server/Library/
 /DataBase/
 /package-lock.json
 /Code/base64_firma.txt
-
