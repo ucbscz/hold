@@ -123,3 +123,18 @@ secrets/
 **/https/*.key
 
 code/server/publish/
+
+Code/Client/dist/
+code/tests/coveragereport
+code/tests/TestResults/
+.vscode/
+.idea/
+*.log
+*.tmp
+*.bak
+
+/Library/
+/Code/Server/Library/
+/DataBase/
+/package-lock.json
+/Code/base64_firma.txt

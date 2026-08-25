@@ -39,6 +39,7 @@ export class UsuariosCrearComponent extends BaseTablaComponent {
   rolesOpciones: OpcionSelect[] = [
     { value: 'administrador', label: 'Administrador' },
     { value: 'estudiante', label: 'Estudiante' },
+    { value: 'docente', label: 'Docente' },
   ];
   constructor(private readonly usuarioApi: UsuarioServiceAPI) {
     super();

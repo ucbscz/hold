@@ -14,6 +14,7 @@ import { MantenimientosTablaComponent } from '@features/admin-maintenance';
 import { EmpresasMantenimientoTablaComponent } from '@features/admin-maintenance-companies';
 import { UsuariosTablaComponent } from '@features/admin-users';
 import { SidebarComponent } from '@widgets/admin-sidebar';
+import { AdminConfiguracionesComponent } from '../admin-configuraciones/admin-configuraciones.component';
 @Component({
   selector: 'app-administrador',
   standalone: true,
@@ -31,6 +32,7 @@ import { SidebarComponent } from '@widgets/admin-sidebar';
     MantenimientosTablaComponent,
     MueblesTablaComponent,
     PrestamosTablaComponent,
+    AdminConfiguracionesComponent,
   ],
   templateUrl: './administrador.component.html',
   styleUrls: ['./administrador.component.css'],
@@ -49,6 +51,7 @@ export class AdministradorComponent {
     'Mantenimientos',
     'Muebles',
     'Accesorios',
+    'Configuraciones',
   ];
   item: string = 'Prestamos';
   constructor(

@@ -22,9 +22,10 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
 
     protected override PrestamoService CreateService(ApplicationDbContext db)
     {
+        var configRepo = new ConfiguracionRepository(db, Cache);
         var mapper = new PrestamoMapper();
         var repo = new PrestamoRepository(db, mapper, new ContractHtmlProcessor());
-        var validator = new PrestamoValidator(db);
+        var validator = new PrestamoValidator(db, configRepo);
 
         var audit = new AuditLogService(new AuditLogRepository(db), new HttpContextAccessor());
         var notifications = new NotificacionService(new NotificacionRepository(db));
@@ -38,7 +39,8 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
             audit,
             notifications,
             userRepository,
-            availabilityRepository
+            availabilityRepository,
+            configRepo
         );
     }
 

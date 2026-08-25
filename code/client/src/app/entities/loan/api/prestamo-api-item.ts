@@ -14,6 +14,7 @@ export interface PrestamoApiItem {
   Observacion: string | null;
   EstadoPrestamo: string | null;
   IdContrato: string | null;
+  DestinoPrestamo: string;
   UbicacionEquipo?: string | null;
   Ubicacion_Equipo?: string | null;
   NombreGavetero?: string | null;
@@ -22,4 +23,7 @@ export interface PrestamoApiItem {
   Nombre_Mueble?: string | null;
   UbicacionMueble?: string | null;
   Ubicacion_Mueble?: string | null;
+  TipoUsuario?: string | null;
+  IdCarrera?: number | null;
+  NombreMateria?: string | null;
 }

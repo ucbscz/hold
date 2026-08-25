@@ -9,11 +9,13 @@ public class CarritoService
     private const int MaxGroupsPerRequest = 100;
     private readonly CarritoRepository _repository;
     private readonly ILogger<CarritoService> _logger;
+    private readonly ConfiguracionRepository _configuracionRepository;
 
-    public CarritoService(CarritoRepository repository, ILogger<CarritoService> logger)
+    public CarritoService(CarritoRepository repository, ILogger<CarritoService> logger, ConfiguracionRepository configuracionRepository)
     {
         _repository = repository;
         _logger = logger;
+        _configuracionRepository = configuracionRepository;
     }
 
     public async Task<Result<List<CarritoDto>>> GetDisponibilidad(CarritoDto request)
@@ -49,13 +51,16 @@ public class CarritoService
                 "La fecha y hora final debe ser posterior a la fecha y hora inicial"
             );
 
-        if (fechaFin - fechaInicio < TimeSpan.FromMinutes(30))
+        var config = await _configuracionRepository.GetConfiguracion();
+        if (fechaFin - fechaInicio < TimeSpan.FromMinutes(config.TiempoMinimoReservaMinutos))
             return Result<List<CarritoDto>>.Error(
-                "La duracion minima de un prestamo es de 30 minutos"
+                $"La duracion minima de un prestamo es de {config.TiempoMinimoReservaMinutos} minutos"
             );
 
-        if (!HorarioReserva.EsValido(fechaInicio, fechaFin))
-            return Result<List<CarritoDto>>.Error(HorarioReserva.Mensaje);
+        if (!HorarioReserva.EsValido(fechaInicio, fechaFin, config.HorarioInicioMinutos, config.HorarioFinMinutos))
+            return Result<List<CarritoDto>>.Error(
+                $"El horario de atención para reservas es de lunes a sábado, de {TimeSpan.FromMinutes(config.HorarioInicioMinutos):hh\\:mm} a {TimeSpan.FromMinutes(config.HorarioFinMinutos):hh\\:mm} (hora de Bolivia)"
+            );
 
         var limits = await _repository.GetLoanLimitsByGroups(groupIds);
         var duration = fechaFin - fechaInicio;

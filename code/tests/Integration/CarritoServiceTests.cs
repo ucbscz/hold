@@ -26,8 +26,9 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
     protected override CarritoService CreateService(ApplicationDbContext db)
     {
         var repo = new CarritoRepository(db);
+        var configRepo = new ConfiguracionRepository(db, Cache);
 
-        return new CarritoService(repo, NullLogger<CarritoService>.Instance);
+        return new CarritoService(repo, NullLogger<CarritoService>.Instance, configRepo);
     }
 
     [SetUp]

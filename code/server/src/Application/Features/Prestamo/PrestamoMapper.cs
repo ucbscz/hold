@@ -41,6 +41,7 @@ public partial class PrestamoMapper : IMapper<PrestamoEntity, PrestamoDto>
     [MapperIgnoreSource(nameof(PrestamoDto.EquiposRetorno))]
     public partial PrestamoEntity ToEntity(PrestamoDto dto);
 
+    [MapperIgnoreSource(nameof(PrestamoDto.Contrato))]
     [MapProperty(nameof(PrestamoDto.CarnetUsuario), nameof(PrestamoEntity.Carnet))]
     public partial void Update(PrestamoDto source, PrestamoEntity destination);
 

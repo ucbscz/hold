@@ -3,11 +3,13 @@ using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
 
+using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+
 namespace IMT_Reservas.Server.Application.Features.Prestamo;
 
 public class PrestamoValidator : AbstractValidator<PrestamoDto>
 {
-    public PrestamoValidator(ApplicationDbContext dbContext)
+    public PrestamoValidator(ApplicationDbContext dbContext, ConfiguracionRepository configRepository)
     {
         RuleFor(p => p.CarnetUsuario)
             .Cascade(CascadeMode.Stop)
@@ -57,23 +59,33 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
             .WithMessage("La fecha y hora de devolución debe ser posterior al inicio del préstamo");
 
         RuleFor(p => p)
-            .Must(p =>
-                !p.FechaPrestamoEsperada.HasValue
-                || !p.FechaDevolucionEsperada.HasValue
-                || p.FechaDevolucionEsperada.Value - p.FechaPrestamoEsperada.Value
-                    >= TimeSpan.FromMinutes(30)
-            )
-            .WithMessage("El préstamo debe tener una duración mínima de 30 minutos");
+            .MustAsync(async (p, cancellationToken) =>
+            {
+                if (!p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue) return true;
+                
+                var config = await configRepository.GetConfiguracion();
+                var duracion = p.FechaDevolucionEsperada.Value - p.FechaPrestamoEsperada.Value;
+                
+                if (duracion < TimeSpan.FromMinutes(config.TiempoMinimoReservaMinutos))
+                    return false;
+                    
+                return true;
+            })
+            .WithMessage(p => "El préstamo no cumple la duración mínima requerida");
 
         RuleFor(p => p)
-            .Must(p =>
-                !p.FechaPrestamoEsperada.HasValue
-                || !p.FechaDevolucionEsperada.HasValue
-                || HorarioReserva.EsValido(
+            .MustAsync(async (p, cancellationToken) =>
+            {
+                if (!p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue) return true;
+                
+                var config = await configRepository.GetConfiguracion();
+                return HorarioReserva.EsValido(
                     p.FechaPrestamoEsperada.Value,
-                    p.FechaDevolucionEsperada.Value
-                )
-            )
+                    p.FechaDevolucionEsperada.Value,
+                    config.HorarioInicioMinutos,
+                    config.HorarioFinMinutos
+                );
+            })
             .WithMessage(HorarioReserva.Mensaje);
     }
 }

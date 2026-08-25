@@ -25,4 +25,8 @@ public class PrestamoDto
     public string? Contrato { get; set; }
     public string? EstadoEquipo { get; set; }
     public List<PrestamoDto>? EquiposRetorno { get; set; }
+    public string DestinoPrestamo { get; set; } = "Universidad";
+    public int? IdCarrera { get; set; }
+    public string? NombreMateria { get; set; }
+    public string? TipoUsuario { get; set; }
 }

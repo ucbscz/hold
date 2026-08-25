@@ -567,7 +567,7 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
     private async Task<List<PrestamoDto>> GetPrestamoList(IQueryable<PrestamoEntity> source)
     {
         var rows = await (
-            from prestamo in source.OrderByDescending(p => p.FechaSolicitud)
+            from prestamo in source
             join usuario in DbContext.Usuarios.AsNoTracking().IgnoreQueryFilters()
                 on prestamo.Carnet equals usuario.Carnet
                 into usuarioJoin
@@ -595,6 +595,12 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                 on gavetero.IdMueble equals mueble.Id
                 into muebleJoin
             from mueble in muebleJoin.DefaultIfEmpty()
+            orderby 
+                (prestamo.EstadoPrestamo == EstadoPrestamo.Finalizado || 
+                 prestamo.EstadoPrestamo == EstadoPrestamo.Cancelado || 
+                 prestamo.EstadoPrestamo == EstadoPrestamo.Rechazado) ? 1 : 0,
+                usuario != null && usuario.Rol == TipoUsuario.Docente ? 0 : 1, 
+                prestamo.FechaSolicitud descending
             select new
             {
                 PrestamoId = prestamo.Id,
@@ -602,6 +608,7 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                 UsuarioNombre = usuario != null ? usuario.Nombre : null,
                 UsuarioApellido = usuario != null ? usuario.ApellidoPaterno : null,
                 UsuarioTelefono = usuario != null ? usuario.Telefono : null,
+                TipoUsuario = usuario != null ? usuario.Rol.ToString() : null,
                 prestamo.EstadoPrestamo,
                 prestamo.FechaSolicitud,
                 prestamo.FechaPrestamoEsperada,
@@ -610,6 +617,9 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                 prestamo.FechaDevolucion,
                 prestamo.Observacion,
                 prestamo.IdContrato,
+                prestamo.DestinoPrestamo,
+                prestamo.IdCarrera,
+                prestamo.NombreMateria,
                 NombreGrupoEquipo = grupoReserva != null ? grupoReserva.Nombre : null,
                 CodigoImt = equipo != null ? (int?)equipo.CodigoImt : null,
                 UbicacionEquipo = equipo != null ? equipo.Ubicacion : null,
@@ -626,6 +636,7 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
             NombreUsuario = r.UsuarioNombre,
             ApellidoPaternoUsuario = r.UsuarioApellido,
             TelefonoUsuario = r.UsuarioTelefono,
+            TipoUsuario = r.TipoUsuario,
             EstadoPrestamo = PrestamoState.ToText(r.EstadoPrestamo),
             FechaSolicitud = r.FechaSolicitud,
             FechaPrestamoEsperada = r.FechaPrestamoEsperada,
@@ -634,6 +645,9 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
             FechaDevolucion = r.FechaDevolucion,
             Observacion = r.Observacion,
             IdContrato = r.IdContrato,
+            DestinoPrestamo = r.DestinoPrestamo,
+            IdCarrera = r.IdCarrera,
+            NombreMateria = r.NombreMateria,
             NombreGrupoEquipo = r.NombreGrupoEquipo,
             CodigoImt = r.CodigoImt?.ToString(CultureInfo.InvariantCulture),
             UbicacionEquipo = r.UbicacionEquipo,

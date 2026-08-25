@@ -7,6 +7,7 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ConfiguracionService } from '@app/entities/configuracion/api/configuracion.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Carrito } from '@entities/cart';
 import { PrestamosAPIService } from '@entities/loan';
@@ -47,6 +48,8 @@ import { finalize, Subscription } from 'rxjs';
   styleUrl: './carrito.component.css',
 })
 export class CarritoComponent implements OnDestroy {
+  esDocente = false;
+  destinoPrestamo = 'Universidad';
   public step: number = 1;
   public errorSolicitudVisible: WritableSignal<boolean> = signal(false);
   public mensajeError: string = 'Datos insertados no validos';
@@ -81,9 +84,12 @@ export class CarritoComponent implements OnDestroy {
     private readonly prestamosApiService: PrestamosAPIService,
     private readonly cartDateValidationService: CartDateValidationService,
     private readonly loanReturnNavigation: LoanReturnNavigationService,
+    protected readonly configuracionService: ConfiguracionService,
   ) {
     this.carrito = this.carritoService.obtenerCarrito();
     this.actualizarCarrito(this.carrito);
+    this.esDocente =
+      this.usuarioService.obtenerUsuario()?.rol?.toLowerCase() === 'docente';
     this.carritoSubscription = this.carritoService.carrito$.subscribe(
       (carrito) => this.actualizarCarrito(carrito),
     );
@@ -146,7 +152,7 @@ export class CarritoComponent implements OnDestroy {
     const carnet = this.usuarioService.obtenerUsuario().carnet!;
 
     this.prestamosApiService
-      .crearPrestamo(this.carrito, carnet, null)
+      .crearPrestamo(this.carrito, carnet, undefined)
       .pipe(finalize(() => (this.cargando = false)))
       .subscribe({
         next: () => {

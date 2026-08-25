@@ -42,6 +42,9 @@ export class PrestamosAPIService {
       Nombre_Gavetero: item.NombreGavetero || item.Nombre_Gavetero || null,
       Nombre_Mueble: item.NombreMueble || item.Nombre_Mueble || null,
       Ubicacion_Mueble: item.UbicacionMueble || item.Ubicacion_Mueble || null,
+      TipoUsuario: item.TipoUsuario || null,
+      IdCarrera: item.IdCarrera || null,
+      NombreMateria: item.NombreMateria || null,
     };
   }
 
@@ -58,7 +61,14 @@ export class PrestamosAPIService {
       );
   }
 
-  crearPrestamo(carrito: Carrito, carnet: string, contrato: string | null) {
+  crearPrestamo(
+    carrito: Carrito,
+    carnet: string,
+    contrato?: string,
+    destinoPrestamo: string = 'Universidad',
+    idCarrera?: number,
+    nombreMateria?: string,
+  ) {
     const grupoid: number[] = [];
     for (const [key, item] of Object.entries(carrito)) {
       if (item.cantidad > 0) {
@@ -67,6 +77,7 @@ export class PrestamosAPIService {
         }
       }
     }
+
     const fechas = Object.values(carrito)[0];
     const body = {
       GrupoEquipoId: grupoid,
@@ -75,6 +86,9 @@ export class PrestamosAPIService {
       CarnetUsuario: carnet,
       Observacion: '',
       Contrato: contrato || null,
+      DestinoPrestamo: destinoPrestamo,
+      IdCarrera: idCarrera || null,
+      NombreMateria: nombreMateria || null,
     };
 
     return this.http.post(this.url, body);
