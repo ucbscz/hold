@@ -56,7 +56,10 @@ export class CalendarioComponent {
   horas: HoraOpcion[] = [];
   private minimoInicio!: Date;
 
-  constructor(private readonly apiDisponibilidad: DisponibilidadService, private readonly configuracionService: ConfiguracionService) {}
+  constructor(
+    private readonly apiDisponibilidad: DisponibilidadService,
+    private readonly configuracionService: ConfiguracionService,
+  ) {}
 
   ngOnInit(): void {
     this.minimoInicio = this.siguienteBloque();
@@ -207,7 +210,11 @@ export class CalendarioComponent {
       this.fechaFinSeleccionada.set(
         this.normalizarFin(
           fechaSeleccionada,
-          this.sumarMinutos(inicio, (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30)),
+          this.sumarMinutos(
+            inicio,
+            this.configuracionService.configuracionActual()
+              ?.TiempoMinimoReservaMinutos ?? 30,
+          ),
         ),
       );
     }
@@ -230,7 +237,11 @@ export class CalendarioComponent {
       this.fechaFinSeleccionada.set(
         this.normalizarFin(
           fechaConHora,
-          this.sumarMinutos(inicio, (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30)),
+          this.sumarMinutos(
+            inicio,
+            this.configuracionService.configuracionActual()
+              ?.TiempoMinimoReservaMinutos ?? 30,
+          ),
         ),
       );
     }
@@ -285,9 +296,18 @@ export class CalendarioComponent {
     const minutosDelDia = horas * 60 + minutos;
     const limite =
       campo === 'inicio'
-        ? (this.configuracionService.configuracionActual()?.HorarioFinMinutos ?? (18*60)) - (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30)
-        : (this.configuracionService.configuracionActual()?.HorarioFinMinutos ?? (18*60));
-    if (minutosDelDia < (this.configuracionService.configuracionActual()?.HorarioInicioMinutos ?? (8*60)) || minutosDelDia > limite)
+        ? (this.configuracionService.configuracionActual()?.HorarioFinMinutos ??
+            18 * 60) -
+          (this.configuracionService.configuracionActual()
+            ?.TiempoMinimoReservaMinutos ?? 30)
+        : (this.configuracionService.configuracionActual()?.HorarioFinMinutos ??
+          18 * 60);
+    if (
+      minutosDelDia <
+        (this.configuracionService.configuracionActual()
+          ?.HorarioInicioMinutos ?? 8 * 60) ||
+      minutosDelDia > limite
+    )
       return true;
 
     const fecha = new Date(this.obtenerFecha(campo) ?? this.minimoInicio);
@@ -297,7 +317,8 @@ export class CalendarioComponent {
         ? this.minimoInicio
         : this.sumarMinutos(
             this.fechaInicioSeleccionada() ?? this.minimoInicio,
-            (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30),
+            this.configuracionService.configuracionActual()
+              ?.TiempoMinimoReservaMinutos ?? 30,
           );
     if (fecha.getTime() < minimo.getTime()) return true;
 
@@ -329,7 +350,11 @@ export class CalendarioComponent {
     const inicio = this.minimoInicio;
     this.fechaInicioSeleccionada.set(inicio);
     this.fechaFinSeleccionada.set(
-      this.sumarMinutos(inicio, (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30)),
+      this.sumarMinutos(
+        inicio,
+        this.configuracionService.configuracionActual()
+          ?.TiempoMinimoReservaMinutos ?? 30,
+      ),
     );
   }
 
@@ -376,7 +401,10 @@ export class CalendarioComponent {
       fecha.getTime() < minimo.getTime() ? new Date(minimo) : new Date(fecha);
     const limite = this.limiteDelDia(
       normalizada,
-      (this.configuracionService.configuracionActual()?.HorarioFinMinutos ?? (18*60)) - (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30),
+      (this.configuracionService.configuracionActual()?.HorarioFinMinutos ??
+        18 * 60) -
+        (this.configuracionService.configuracionActual()
+          ?.TiempoMinimoReservaMinutos ?? 30),
     );
 
     return normalizada.getTime() > limite.getTime()
@@ -387,7 +415,11 @@ export class CalendarioComponent {
   private normalizarFin(fecha: Date, minimo: Date): Date {
     let normalizada =
       fecha.getTime() < minimo.getTime() ? new Date(minimo) : new Date(fecha);
-    const limite = this.limiteDelDia(normalizada, (this.configuracionService.configuracionActual()?.HorarioFinMinutos ?? (18*60)));
+    const limite = this.limiteDelDia(
+      normalizada,
+      this.configuracionService.configuracionActual()?.HorarioFinMinutos ??
+        18 * 60,
+    );
 
     if (normalizada.getTime() > limite.getTime()) normalizada = limite;
 
@@ -400,13 +432,21 @@ export class CalendarioComponent {
 
   private crearHoras(): HoraOpcion[] {
     const cantidadOpciones =
-      ((this.configuracionService.configuracionActual()?.HorarioFinMinutos ?? (18*60)) - (this.configuracionService.configuracionActual()?.HorarioInicioMinutos ?? (8*60))) /
-        (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30) +
+      ((this.configuracionService.configuracionActual()?.HorarioFinMinutos ??
+        18 * 60) -
+        (this.configuracionService.configuracionActual()
+          ?.HorarioInicioMinutos ?? 8 * 60)) /
+        (this.configuracionService.configuracionActual()
+          ?.TiempoMinimoReservaMinutos ?? 30) +
       1;
 
     return Array.from({ length: cantidadOpciones }, (_, indice) => {
       const minutosDelDia =
-        (this.configuracionService.configuracionActual()?.HorarioInicioMinutos ?? (8*60)) + indice * (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30);
+        (this.configuracionService.configuracionActual()
+          ?.HorarioInicioMinutos ?? 8 * 60) +
+        indice *
+          (this.configuracionService.configuracionActual()
+            ?.TiempoMinimoReservaMinutos ?? 30);
       const horas = Math.floor(minutosDelDia / 60);
       const minutos = minutosDelDia % 60;
       const value = `${this.dosDigitos(horas)}:${this.dosDigitos(minutos)}`;
@@ -442,13 +482,26 @@ export class CalendarioComponent {
     const finMinutos = fin.getHours() * 60 + fin.getMinutes();
 
     return (
-      duration >= (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30) * MILLISECONDS_PER_MINUTE &&
+      duration >=
+        (this.configuracionService.configuracionActual()
+          ?.TiempoMinimoReservaMinutos ?? 30) *
+          MILLISECONDS_PER_MINUTE &&
       !this.esDomingo(inicio) &&
       !this.esDomingo(fin) &&
-      inicioMinutos >= (this.configuracionService.configuracionActual()?.HorarioInicioMinutos ?? (8*60)) &&
-      inicioMinutos <= (this.configuracionService.configuracionActual()?.HorarioFinMinutos ?? (18*60)) - (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30) &&
-      finMinutos >= (this.configuracionService.configuracionActual()?.HorarioInicioMinutos ?? (8*60)) &&
-      finMinutos <= (this.configuracionService.configuracionActual()?.HorarioFinMinutos ?? (18*60)) &&
+      inicioMinutos >=
+        (this.configuracionService.configuracionActual()
+          ?.HorarioInicioMinutos ?? 8 * 60) &&
+      inicioMinutos <=
+        (this.configuracionService.configuracionActual()?.HorarioFinMinutos ??
+          18 * 60) -
+          (this.configuracionService.configuracionActual()
+            ?.TiempoMinimoReservaMinutos ?? 30) &&
+      finMinutos >=
+        (this.configuracionService.configuracionActual()
+          ?.HorarioInicioMinutos ?? 8 * 60) &&
+      finMinutos <=
+        (this.configuracionService.configuracionActual()?.HorarioFinMinutos ??
+          18 * 60) &&
       (maximumDays == null ||
         duration <= maximumDays * 24 * 60 * MILLISECONDS_PER_MINUTE)
     );
@@ -466,7 +519,11 @@ export class CalendarioComponent {
   }
 
   private ajustarFinAlInicio(inicio: Date): void {
-    const minimo = this.sumarMinutos(inicio, (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30));
+    const minimo = this.sumarMinutos(
+      inicio,
+      this.configuracionService.configuracionActual()
+        ?.TiempoMinimoReservaMinutos ?? 30,
+    );
     const fin = this.fechaFinSeleccionada() ?? minimo;
     this.fechaFinSeleccionada.set(this.normalizarFin(fin, minimo));
   }
@@ -515,15 +572,27 @@ export class CalendarioComponent {
     }
 
     fecha.setMinutes(
-      Math.ceil(fecha.getMinutes() / (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30)) *
-        (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30),
+      Math.ceil(
+        fecha.getMinutes() /
+          (this.configuracionService.configuracionActual()
+            ?.TiempoMinimoReservaMinutos ?? 30),
+      ) *
+        (this.configuracionService.configuracionActual()
+          ?.TiempoMinimoReservaMinutos ?? 30),
     );
     if (fecha <= new Date()) {
-      fecha.setMinutes(fecha.getMinutes() + (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30));
+      fecha.setMinutes(
+        fecha.getMinutes() +
+          (this.configuracionService.configuracionActual()
+            ?.TiempoMinimoReservaMinutos ?? 30),
+      );
     }
     if (
       fecha.getHours() * 60 + fecha.getMinutes() >
-      (this.configuracionService.configuracionActual()?.HorarioFinMinutos ?? (18*60)) - (this.configuracionService.configuracionActual()?.TiempoMinimoReservaMinutos ?? 30)
+      (this.configuracionService.configuracionActual()?.HorarioFinMinutos ??
+        18 * 60) -
+        (this.configuracionService.configuracionActual()
+          ?.TiempoMinimoReservaMinutos ?? 30)
     ) {
       return this.inicioDelSiguienteDia(fecha);
     }

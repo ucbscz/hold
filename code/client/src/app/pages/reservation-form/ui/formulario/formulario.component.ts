@@ -23,7 +23,7 @@ import {
   MostrarerrorComponent,
   PantallaCargaComponent,
   CustomSelectComponent,
-  OpcionSelect
+  OpcionSelect,
 } from '@shared/ui';
 import { finalize } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
@@ -88,12 +88,12 @@ export class FormularioComponent implements OnInit {
 
   actualizarContrato() {
     if (!this.templateCrudo) return;
-    
+
     const fechaInicioReserva = this.carrito.obtenerFechaInicio();
     const fechaFinalReserva = this.carrito.obtenerFechaFinal();
-    
+
     if (!fechaInicioReserva || !fechaFinalReserva) return;
-    
+
     const fechaInicio = new Date(fechaInicioReserva);
     const fechaFinal = new Date(fechaFinalReserva);
     const duracionMinutos = Math.round(
@@ -102,31 +102,39 @@ export class FormularioComponent implements OnInit {
 
     let detallesClase = '';
     if (this.destinoPrestamo === 'Clase') {
-      const nombreCarrera = this.carrerasOpciones.find(c => c.value === this.idCarrera?.toString())?.label || '[Carrera no seleccionada]';
+      const nombreCarrera =
+        this.carrerasOpciones.find(
+          (c) => c.value === this.idCarrera?.toString(),
+        )?.label || '[Carrera no seleccionada]';
       const materia = this.nombreMateria || '[Materia no ingresada]';
       detallesClase = `, los cuales serán utilizados para la clase de ${materia} de la carrera de ${nombreCarrera}`;
     }
 
     const u = this.usuario.obtenerUsuario();
-    const nombreUsuario = [u.nombre, u.apellido_paterno, u.apellido_materno].filter(Boolean).join(' ');
-    
-    const rol = u.rol ? u.rol.charAt(0).toUpperCase() + u.rol.slice(1).toLowerCase() : 'Estudiante';
+    const nombreUsuario = [u.nombre, u.apellido_paterno, u.apellido_materno]
+      .filter(Boolean)
+      .join(' ');
+
+    const rol = u.rol
+      ? u.rol.charAt(0).toUpperCase() + u.rol.slice(1).toLowerCase()
+      : 'Estudiante';
     let rolCarrera = rol;
     if (u.carrera) {
       rolCarrera = `${rol} de ${u.carrera}`;
     }
 
-
     const config = this.configuracionService.configuracionActual();
-    
-    
+
     const base64Firma = config?.FirmaJefeCarreraBase64 ?? '';
-    const firmaSrc = base64Firma.startsWith('data:') ? base64Firma : `data:image/png;base64,${base64Firma}`;
+    const firmaSrc = base64Firma.startsWith('data:')
+      ? base64Firma
+      : `data:image/png;base64,${base64Firma}`;
 
     const processedTemplate = this.reemplazarMarcadores(this.templateCrudo, {
-      nombre_jefe_carrera: escapeHtmlValue(config?.NombreJefeCarrera ?? 'Job Angel Ledezma Dr.Ing'),
+      nombre_jefe_carrera: escapeHtmlValue(
+        config?.NombreJefeCarrera ?? 'Job Angel Ledezma Dr.Ing',
+      ),
       firma_jefe_carrera: firmaSrc,
-
 
       dia: new Date().getDate().toString(),
       mesliteral: new Intl.DateTimeFormat('es-ES', {
@@ -135,9 +143,7 @@ export class FormularioComponent implements OnInit {
       año: new Date().getFullYear().toString(),
       usuario: escapeHtmlValue(nombreUsuario),
       rol_carrera: escapeHtmlValue(rolCarrera),
-      usuario_ci: escapeHtmlValue(
-        u.carnet ?? '',
-      ),
+      usuario_ci: escapeHtmlValue(u.carnet ?? ''),
       tablaprimera: this.primeradelobjeto(this.carrito.obtenerCarrito()),
       fechaMaxima: this.formatearDuracion(duracionMinutos),
       precio: this.carrito.calcularPrecioTotal().toString(),
@@ -161,7 +167,7 @@ export class FormularioComponent implements OnInit {
       this.actualizarContrato();
     });
 
-    this.route.queryParams.subscribe(params => {
+    this.route.queryParams.subscribe((params) => {
       if (params['destino']) {
         this.destinoPrestamo = params['destino'];
         this.actualizarContrato();
@@ -178,20 +184,24 @@ export class FormularioComponent implements OnInit {
       return;
     }
 
-    this.http.get('assets/contrato.html?v=' + new Date().getTime(), { responseType: 'text' }).subscribe({
-      next: (data: string) => {
-        this.templateCrudo = data;
-        this.actualizarContrato();
-      },
-      error: (error) => {
-        const errorMsg = extractErrorMessage(
-          error,
-          'Error al cargar el contrato, intente mas tarde',
-        );
-        this.mensajeerror = errorMsg;
-        this.error.set(true);
-      },
-    });
+    this.http
+      .get('assets/contrato.html?v=' + new Date().getTime(), {
+        responseType: 'text',
+      })
+      .subscribe({
+        next: (data: string) => {
+          this.templateCrudo = data;
+          this.actualizarContrato();
+        },
+        error: (error) => {
+          const errorMsg = extractErrorMessage(
+            error,
+            'Error al cargar el contrato, intente mas tarde',
+          );
+          this.mensajeerror = errorMsg;
+          this.error.set(true);
+        },
+      });
   }
 
   private reemplazarMarcadores(
@@ -247,7 +257,7 @@ export class FormularioComponent implements OnInit {
         contratoTexto,
         this.destinoPrestamo,
         this.idCarrera ? Number(this.idCarrera) : undefined,
-        this.nombreMateria
+        this.nombreMateria,
       )
       .pipe(finalize(() => (this.cargando = false)))
       .subscribe({

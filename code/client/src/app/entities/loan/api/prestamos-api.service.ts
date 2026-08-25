@@ -67,7 +67,7 @@ export class PrestamosAPIService {
     contrato?: string,
     destinoPrestamo: string = 'Universidad',
     idCarrera?: number,
-    nombreMateria?: string
+    nombreMateria?: string,
   ) {
     const grupoid: number[] = [];
     for (const [key, item] of Object.entries(carrito)) {

@@ -19,8 +19,9 @@ export interface ConfiguracionDto {
 })
 export class ConfiguracionService {
   private url = `${environment.apiUrl}/api/Configuracion`;
-  
-  public configuracionActual: WritableSignal<ConfiguracionDto | null> = signal(null);
+
+  public configuracionActual: WritableSignal<ConfiguracionDto | null> =
+    signal(null);
 
   constructor(private http: HttpClient) {}
 
@@ -28,15 +29,17 @@ export class ConfiguracionService {
     return this.http.get<ConfiguracionDto>(this.url).pipe(
       tap((config) => {
         this.configuracionActual.set(config);
-      })
+      }),
     );
   }
 
-  public updateConfiguracion(config: ConfiguracionDto): Observable<ConfiguracionDto> {
+  public updateConfiguracion(
+    config: ConfiguracionDto,
+  ): Observable<ConfiguracionDto> {
     return this.http.put<ConfiguracionDto>(this.url, config).pipe(
       tap((newConfig) => {
         this.configuracionActual.set(newConfig);
-      })
+      }),
     );
   }
 }

@@ -21,7 +21,9 @@ import { Observable } from 'rxjs';
 
 registerLocaleData(localeEs);
 
-function initializeAppFactory(configService: ConfiguracionService): () => Observable<any> {
+function initializeAppFactory(
+  configService: ConfiguracionService,
+): () => Observable<any> {
   return () => configService.loadConfiguracion();
 }
 

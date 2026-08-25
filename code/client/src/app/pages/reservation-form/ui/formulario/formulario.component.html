@@ -1,5 +1,5 @@
 <div class="contrato-container">
-  @if (destinoPrestamo === 'Clase') {
+  @if (destinoPrestamo === "Clase") {
     <div class="form-container-docente">
       <div class="form-group">
         <label>Carrera</label>
@@ -13,10 +13,10 @@
       </div>
       <div class="form-group">
         <label>Materia</label>
-        <input 
-          type="text" 
-          class="form-input" 
-          [(ngModel)]="nombreMateria" 
+        <input
+          type="text"
+          class="form-input"
+          [(ngModel)]="nombreMateria"
           (ngModelChange)="actualizarContrato()"
           placeholder="Ingrese la materia"
         />

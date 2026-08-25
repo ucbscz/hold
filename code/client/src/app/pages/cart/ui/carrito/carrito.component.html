@@ -86,24 +86,49 @@
         <div class="cart__destination-options">
           @if (esDocente) {
             <label>
-              <input type="radio" name="destino" value="Universidad" [(ngModel)]="destinoPrestamo" />
+              <input
+                type="radio"
+                name="destino"
+                value="Universidad"
+                [(ngModel)]="destinoPrestamo"
+              />
               En el laboratorio (Uso personal)
             </label>
             <label>
-              <input type="radio" name="destino" value="Casa" [(ngModel)]="destinoPrestamo" />
+              <input
+                type="radio"
+                name="destino"
+                value="Casa"
+                [(ngModel)]="destinoPrestamo"
+              />
               Fuera del laboratorio (Uso personal)
             </label>
             <label>
-              <input type="radio" name="destino" value="Clase" [(ngModel)]="destinoPrestamo" />
+              <input
+                type="radio"
+                name="destino"
+                value="Clase"
+                [(ngModel)]="destinoPrestamo"
+              />
               Para dar clases
             </label>
           } @else {
             <label>
-              <input type="radio" name="destino" value="Universidad" [(ngModel)]="destinoPrestamo" />
+              <input
+                type="radio"
+                name="destino"
+                value="Universidad"
+                [(ngModel)]="destinoPrestamo"
+              />
               En la Universidad (Laboratorio)
             </label>
             <label>
-              <input type="radio" name="destino" value="Casa" [(ngModel)]="destinoPrestamo" />
+              <input
+                type="radio"
+                name="destino"
+                value="Casa"
+                [(ngModel)]="destinoPrestamo"
+              />
               Para llevar a casa
             </label>
           }
@@ -124,7 +149,6 @@
       ></app-mostrarerror>
     }
   </div>
-
 } @else {
   <div class="cart-empty">
     <img

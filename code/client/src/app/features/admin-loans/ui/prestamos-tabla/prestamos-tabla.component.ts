@@ -240,12 +240,17 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
           const bInactivo = inactives.includes(bEstado);
           if (aInactivo !== bInactivo) return aInactivo ? 1 : -1;
 
-          const aIsDocente = (a.TipoUsuario ?? '').toString().toLowerCase() === 'docente';
-          const bIsDocente = (b.TipoUsuario ?? '').toString().toLowerCase() === 'docente';
+          const aIsDocente =
+            (a.TipoUsuario ?? '').toString().toLowerCase() === 'docente';
+          const bIsDocente =
+            (b.TipoUsuario ?? '').toString().toLowerCase() === 'docente';
           if (aIsDocente && !bIsDocente) return -1;
           if (!aIsDocente && bIsDocente) return 1;
 
-          return new Date(b.FechaSolicitud ?? 0).getTime() - new Date(a.FechaSolicitud ?? 0).getTime();
+          return (
+            new Date(b.FechaSolicitud ?? 0).getTime() -
+            new Date(a.FechaSolicitud ?? 0).getTime()
+          );
         });
         this.agruparPrestamos(data);
         this.seleccionarEstado(this.estadoSeleccionado);
@@ -450,21 +455,29 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     );
 
     prestamosOrdenados.sort((a, b) => {
-          const inactives = ['finalizado', 'cancelado', 'rechazado'];
-          const aEstado = (a[1].datosgrupo.EstadoPrestamo ?? '').toString().toLowerCase();
-          const bEstado = (b[1].datosgrupo.EstadoPrestamo ?? '').toString().toLowerCase();
-          const aInactivo = inactives.includes(aEstado);
-          const bInactivo = inactives.includes(bEstado);
-          if (aInactivo !== bInactivo) return aInactivo ? 1 : -1;
+      const inactives = ['finalizado', 'cancelado', 'rechazado'];
+      const aEstado = (a[1].datosgrupo.EstadoPrestamo ?? '')
+        .toString()
+        .toLowerCase();
+      const bEstado = (b[1].datosgrupo.EstadoPrestamo ?? '')
+        .toString()
+        .toLowerCase();
+      const aInactivo = inactives.includes(aEstado);
+      const bInactivo = inactives.includes(bEstado);
+      if (aInactivo !== bInactivo) return aInactivo ? 1 : -1;
 
-          const aIsDocente = (a[1].datosgrupo.TipoUsuario ?? '').toString().toLowerCase() === 'docente';
-          const bIsDocente = (b[1].datosgrupo.TipoUsuario ?? '').toString().toLowerCase() === 'docente';
-          if (aIsDocente && !bIsDocente) return -1;
-          if (!aIsDocente && bIsDocente) return 1;
+      const aIsDocente =
+        (a[1].datosgrupo.TipoUsuario ?? '').toString().toLowerCase() ===
+        'docente';
+      const bIsDocente =
+        (b[1].datosgrupo.TipoUsuario ?? '').toString().toLowerCase() ===
+        'docente';
+      if (aIsDocente && !bIsDocente) return -1;
+      if (!aIsDocente && bIsDocente) return 1;
 
-          // Fallback to original column sorting handled by sortByColumn
-          return 0;
-        });
+      // Fallback to original column sorting handled by sortByColumn
+      return 0;
+    });
 
     this.prestamos = new Map<number, PrestamoAgrupados>(prestamosOrdenados);
   }

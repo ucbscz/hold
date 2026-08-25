@@ -88,7 +88,8 @@ export class CarritoComponent implements OnDestroy {
   ) {
     this.carrito = this.carritoService.obtenerCarrito();
     this.actualizarCarrito(this.carrito);
-    this.esDocente = this.usuarioService.obtenerUsuario()?.rol?.toLowerCase() === 'docente';
+    this.esDocente =
+      this.usuarioService.obtenerUsuario()?.rol?.toLowerCase() === 'docente';
     this.carritoSubscription = this.carritoService.carrito$.subscribe(
       (carrito) => this.actualizarCarrito(carrito),
     );

@@ -3,23 +3,34 @@
     <h2 class="config-title">Configuración del Sistema</h2>
   </div>
 
-  <div *ngIf="cargando()" class="text-center" style="color: var(--ink-muted); padding: 2rem;">
+  <div
+    *ngIf="cargando()"
+    class="text-center"
+    style="color: var(--ink-muted); padding: 2rem"
+  >
     Cargando configuración...
   </div>
 
   <div *ngIf="!cargando() && config()" class="config-card">
-    
     <!-- Contratos -->
     <div class="config-section">
       <h3 class="section-title">Préstamos y Contratos</h3>
       <div class="config-grid">
         <div class="form-group">
           <label class="form-label">Monto Mínimo para Contrato (Bs)</label>
-          <input type="number" [(ngModel)]="config()!.MontoMinimoContrato" class="form-input">
+          <input
+            type="number"
+            [(ngModel)]="config()!.MontoMinimoContrato"
+            class="form-input"
+          />
         </div>
         <div class="form-group">
           <label class="form-label">Duración Mínima de Reserva (Minutos)</label>
-          <input type="number" [(ngModel)]="config()!.TiempoMinimoReservaMinutos" class="form-input">
+          <input
+            type="number"
+            [(ngModel)]="config()!.TiempoMinimoReservaMinutos"
+            class="form-input"
+          />
         </div>
       </div>
     </div>
@@ -31,17 +42,41 @@
         <div class="form-group">
           <label class="form-label">Hora de Apertura</label>
           <div class="time-inputs">
-            <input type="number" min="0" max="23" [(ngModel)]="horarioInicioHora" class="form-input time-input-box">
-            <span style="font-weight: bold; color: var(--ink);">:</span>
-            <input type="number" min="0" max="59" [(ngModel)]="horarioInicioMinuto" class="form-input time-input-box">
+            <input
+              type="number"
+              min="0"
+              max="23"
+              [(ngModel)]="horarioInicioHora"
+              class="form-input time-input-box"
+            />
+            <span style="font-weight: bold; color: var(--ink)">:</span>
+            <input
+              type="number"
+              min="0"
+              max="59"
+              [(ngModel)]="horarioInicioMinuto"
+              class="form-input time-input-box"
+            />
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">Hora de Cierre</label>
           <div class="time-inputs">
-            <input type="number" min="0" max="23" [(ngModel)]="horarioFinHora" class="form-input time-input-box">
-            <span style="font-weight: bold; color: var(--ink);">:</span>
-            <input type="number" min="0" max="59" [(ngModel)]="horarioFinMinuto" class="form-input time-input-box">
+            <input
+              type="number"
+              min="0"
+              max="23"
+              [(ngModel)]="horarioFinHora"
+              class="form-input time-input-box"
+            />
+            <span style="font-weight: bold; color: var(--ink)">:</span>
+            <input
+              type="number"
+              min="0"
+              max="59"
+              [(ngModel)]="horarioFinMinuto"
+              class="form-input time-input-box"
+            />
           </div>
         </div>
       </div>
@@ -52,56 +87,113 @@
       <h3 class="section-title">Notificaciones y Tiempos</h3>
       <div class="config-grid">
         <div class="form-group">
-          <label class="form-label">Recordatorio Previo (Minutos antes del fin)</label>
-          <input type="number" [(ngModel)]="config()!.TiempoRecordatorioPrevioMinutos" class="form-input">
+          <label class="form-label"
+            >Recordatorio Previo (Minutos antes del fin)</label
+          >
+          <input
+            type="number"
+            [(ngModel)]="config()!.TiempoRecordatorioPrevioMinutos"
+            class="form-input"
+          />
         </div>
         <div class="form-group">
-          <label class="form-label">Tiempo de Gracia para Atraso (Minutos)</label>
-          <input type="number" [(ngModel)]="config()!.MinutosGraciaAtraso" class="form-input">
+          <label class="form-label"
+            >Tiempo de Gracia para Atraso (Minutos)</label
+          >
+          <input
+            type="number"
+            [(ngModel)]="config()!.MinutosGraciaAtraso"
+            class="form-input"
+          />
         </div>
       </div>
     </div>
 
     <!-- Firma -->
-    <div class="config-section" style="border-bottom: none; padding-bottom: 0;">
+    <div class="config-section" style="border-bottom: none; padding-bottom: 0">
       <h3 class="section-title">Firma Jefe de Carrera</h3>
       <div class="config-grid">
         <div class="form-group">
           <label class="form-label">Nombre del Jefe de Carrera</label>
-          <input type="text" [(ngModel)]="config()!.NombreJefeCarrera" class="form-input">
+          <input
+            type="text"
+            [(ngModel)]="config()!.NombreJefeCarrera"
+            class="form-input"
+          />
         </div>
         <div class="form-group">
-          
           <label class="form-label">Firma (Dibuja la nueva firma aquí)</label>
-          <div style="border: 2px dashed var(--border); border-radius: var(--radius-lg); padding: 1rem; background: var(--bg); margin-top: 0.5rem;">
-            <app-firma *ngIf="clickfirma()" (firma)="guardarfirma($event)" [clickfirma]="clickfirma"></app-firma>
-            
-            <div style="display: flex; gap: 1rem; justify-content: center; margin-top: 1rem;">
-              <button class="boton-guardar" style="background: var(--surface); color: var(--ink-secondary); border: 1px solid var(--border);" (click)="limpiarFirma()">Limpiar lienzo</button>
+          <div
+            style="
+              border: 2px dashed var(--border);
+              border-radius: var(--radius-lg);
+              padding: 1rem;
+              background: var(--bg);
+              margin-top: 0.5rem;
+            "
+          >
+            <app-firma
+              *ngIf="clickfirma()"
+              (firma)="guardarfirma($event)"
+              [clickfirma]="clickfirma"
+            ></app-firma>
+
+            <div
+              style="
+                display: flex;
+                gap: 1rem;
+                justify-content: center;
+                margin-top: 1rem;
+              "
+            >
+              <button
+                class="boton-guardar"
+                style="
+                  background: var(--surface);
+                  color: var(--ink-secondary);
+                  border: 1px solid var(--border);
+                "
+                (click)="limpiarFirma()"
+              >
+                Limpiar lienzo
+              </button>
             </div>
           </div>
-          
+
           <div class="firma-preview" *ngIf="config()!.FirmaJefeCarreraBase64">
             <p>Firma actual guardada:</p>
-            <img [src]="config()!.FirmaJefeCarreraBase64.startsWith('data:') ? config()!.FirmaJefeCarreraBase64 : 'data:image/png;base64,' + config()!.FirmaJefeCarreraBase64" alt="Firma Jefe de Carrera">
+            <img
+              [src]="
+                config()!.FirmaJefeCarreraBase64.startsWith('data:')
+                  ? config()!.FirmaJefeCarreraBase64
+                  : 'data:image/png;base64,' + config()!.FirmaJefeCarreraBase64
+              "
+              alt="Firma Jefe de Carrera"
+            />
           </div>
-
         </div>
       </div>
     </div>
 
     <!-- Acciones -->
     <div class="config-actions">
-      <div *ngIf="mensaje()" class="mensaje-estado" [ngClass]="error() ? 'error' : 'exito'">
+      <div
+        *ngIf="mensaje()"
+        class="mensaje-estado"
+        [ngClass]="error() ? 'error' : 'exito'"
+      >
         {{ mensaje() }}
       </div>
       <!-- Empty div for flex spacing when message is empty -->
       <div *ngIf="!mensaje()"></div>
-      
-      <button class="boton-guardar" [disabled]="guardando()" (click)="guardar()">
-        {{ guardando() ? 'Guardando...' : 'Guardar Cambios' }}
+
+      <button
+        class="boton-guardar"
+        [disabled]="guardando()"
+        (click)="guardar()"
+      >
+        {{ guardando() ? "Guardando..." : "Guardar Cambios" }}
       </button>
     </div>
-
   </div>
 </div>
