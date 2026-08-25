@@ -22,7 +22,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
 
     protected override PrestamoService CreateService(ApplicationDbContext db)
     {
-        var configRepo = new ConfiguracionRepository(db);
+        var configRepo = new ConfiguracionRepository(db, Cache);
         var mapper = new PrestamoMapper();
         var repo = new PrestamoRepository(db, mapper, new ContractHtmlProcessor());
         var validator = new PrestamoValidator(db, configRepo);
