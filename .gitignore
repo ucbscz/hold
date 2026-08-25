@@ -123,3 +123,31 @@ secrets/
 **/https/*.key
 
 code/server/publish/
+
+# --- Ignored files not needed for server deployment ---
+# Client‑side code (Angular)
+Code/Client/
+Code/Client/**
+# Client package files
+Code/Client/package.json
+Code/Client/package-lock.json
+# Front‑end build artefacts
+Code/Client/dist/
+# Test projects and their outputs
+Code/Tests/
+Code/Tests/**
+# Local IDE / tooling files (already covered but reinforced)
+.vscode/
+.idea/
+# Miscellaneous local files
+*.log
+*.tmp
+*.bak
+
+# Explicitly ignored per user request (not needed for cloud server)
+/Library/
+/Code/Server/Library/
+/DataBase/
+/package-lock.json
+/Code/base64_firma.txt
+
