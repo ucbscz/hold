@@ -125,17 +125,11 @@ secrets/
 code/server/publish/
 
 # --- Ignored files not needed for server deployment ---
-# Client‑side code (Angular)
-Code/Client/
-Code/Client/**
-# Client package files
-Code/Client/package.json
-Code/Client/package-lock.json
 # Front‑end build artefacts
 Code/Client/dist/
-# Test projects and their outputs
-Code/Tests/
-Code/Tests/**
+# Test outputs (but keep test source code)
+code/tests/coveragereport
+code/tests/TestResults/
 # Local IDE / tooling files (already covered but reinforced)
 .vscode/
 .idea/
