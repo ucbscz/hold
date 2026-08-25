@@ -1,7 +1,7 @@
 using IMT_Reservas.Server.Application.Features.Configuracion;
-using IMT_Reservas.Server.Presentation.Controllers.Abstraction;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
 
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
