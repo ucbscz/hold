@@ -625,7 +625,7 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.TiempoRecordatorioPrevioMinutos).HasColumnName("tiempo_recordatorio_previo_minutos");
             entity.Property(e => e.MinutosGraciaAtraso).HasColumnName("minutos_gracia_atraso");
             entity.Property(e => e.EstadoEliminado).HasColumnName(EstadoEliminadoCol);
-            
+
             entity.HasData(ConfiguracionSeed.Default);
         });
     }

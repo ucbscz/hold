@@ -595,11 +595,11 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                 on gavetero.IdMueble equals mueble.Id
                 into muebleJoin
             from mueble in muebleJoin.DefaultIfEmpty()
-            orderby 
-                (prestamo.EstadoPrestamo == EstadoPrestamo.Finalizado || 
-                 prestamo.EstadoPrestamo == EstadoPrestamo.Cancelado || 
+            orderby
+                (prestamo.EstadoPrestamo == EstadoPrestamo.Finalizado ||
+                 prestamo.EstadoPrestamo == EstadoPrestamo.Cancelado ||
                  prestamo.EstadoPrestamo == EstadoPrestamo.Rechazado) ? 1 : 0,
-                usuario != null && usuario.Rol == TipoUsuario.Docente ? 0 : 1, 
+                usuario != null && usuario.Rol == TipoUsuario.Docente ? 0 : 1,
                 prestamo.FechaSolicitud descending
             select new
             {
