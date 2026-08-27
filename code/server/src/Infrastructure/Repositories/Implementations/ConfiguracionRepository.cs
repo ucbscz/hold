@@ -1,11 +1,10 @@
-using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
-public class ConfiguracionRepository : IConfiguracionRepository
+public class ConfiguracionRepository
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly CacheRepository _cache;

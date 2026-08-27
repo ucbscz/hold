@@ -1,4 +1,5 @@
 using IMT_Reservas.Server.Application.Features.Usuario;
+using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
@@ -15,7 +16,11 @@ public class UsuarioController : Controller
 
     [Authorize(Roles = "administrador")]
     [HttpGet]
-    public async Task<IActionResult> GetAll() => ToResponse(await _service.GetAll());
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = UsuarioConsultaRepository.MaxPageSize,
+        CancellationToken cancellationToken = default
+    ) => ToResponse(await _service.GetAll(pagina, tamanoPagina, cancellationToken));
 
     [HttpGet("{carnet}")]
     public async Task<IActionResult> Get(string carnet)
@@ -47,14 +52,19 @@ public class UsuarioController : Controller
 
     [Authorize(Roles = "administrador")]
     [HttpPatch("{carnet}/bloqueo")]
-    public async Task<IActionResult> SetBlocked(string carnet, [FromBody] UsuarioDto request) =>
+    public async Task<IActionResult> SetBlocked(
+        string carnet,
+        [FromBody] UsuarioDto request,
+        CancellationToken cancellationToken
+    ) =>
         ToResponse(
             await _service.SetBlocked(
                 carnet,
                 request.Bloqueado ?? false,
                 request.MotivoBloqueo,
                 User.IsInRole("administrador"),
-                User.Identity?.Name
+                User.Identity?.Name,
+                cancellationToken
             )
         );
 

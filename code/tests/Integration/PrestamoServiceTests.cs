@@ -24,12 +24,21 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     {
         var configRepo = new ConfiguracionRepository(db, Cache);
         var mapper = new PrestamoMapper();
-        var repo = new PrestamoRepository(db, mapper, new ContractHtmlProcessor());
+        var queries = new PrestamoConsultaRepository(db);
+        var states = new PrestamoEstadoRepository(db);
+        var repo = new PrestamoRepository(
+            db,
+            mapper,
+            new ContractHtmlProcessor(),
+            queries,
+            states
+        );
         var validator = new PrestamoValidator(db, configRepo);
 
         var audit = new AuditLogService(new AuditLogRepository(db), new HttpContextAccessor());
         var notifications = new NotificacionService(new NotificacionRepository(db));
-        var userRepository = new UsuarioRepository(db, new UsuarioMapper(), repo);
+        var userQueries = new UsuarioConsultaRepository(db);
+        var userRepository = new UsuarioRepository(db, new UsuarioMapper(), userQueries);
         var availabilityRepository = new AvisoDisponibilidadRepository(db);
 
         return new PrestamoService(
@@ -40,7 +49,9 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
             notifications,
             userRepository,
             availabilityRepository,
-            configRepo
+            configRepo,
+            queries,
+            states
         );
     }
 
@@ -80,6 +91,69 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         });
 
         await Db.SaveChangesAsync();
+    }
+
+    [Test]
+    public async Task QueryPage_LimitsLoansBeforeLoadingEquipmentDetails()
+    {
+        var loans = Enumerable.Range(1, PrestamoConsultaRepository.MaxPageSize + 1)
+            .Select(index => new Prestamo
+            {
+                Carnet = Carnet,
+                EstadoPrestamo = EstadoPrestamo.Pendiente,
+                FechaSolicitud = DateTime.UtcNow.AddMinutes(index),
+                FechaPrestamoEsperada = DateTime.UtcNow.AddDays(1),
+                FechaDevolucionEsperada = DateTime.UtcNow.AddDays(1).AddMinutes(30),
+            });
+        Db.Prestamos.AddRange(loans);
+        await Db.SaveChangesAsync();
+
+        var queries = new PrestamoConsultaRepository(Db);
+        var result = await queries.GetAll();
+        var secondPage = await queries.GetPage(
+            null,
+            null,
+            PrestamoConsultaRepository.MaxPageSize,
+            PrestamoConsultaRepository.MaxPageSize
+        );
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().HaveCount(PrestamoConsultaRepository.MaxPageSize);
+        result.Value.Max(loan => loan.Id).Should().Be(Db.Prestamos.Max(loan => loan.Id));
+        secondPage.Should().ContainSingle();
+    }
+
+    [Test]
+    public async Task AutomaticStateBatch_HasDeterministicMaximumSize()
+    {
+        Db.Prestamos.AddRange(
+            Enumerable.Range(1, PrestamoEstadoRepository.BatchSize + 1)
+                .Select(index => new Prestamo
+                {
+                    Carnet = Carnet,
+                    EstadoPrestamo = EstadoPrestamo.Activo,
+                    FechaSolicitud = DateTime.UtcNow.AddMinutes(-index),
+                    FechaPrestamoEsperada = DateTime.UtcNow.AddHours(-2),
+                    FechaDevolucionEsperada = DateTime.UtcNow.AddMinutes(-index),
+                })
+        );
+        await Db.SaveChangesAsync();
+
+        var result = await new PrestamoEstadoRepository(Db).GetOverdueLoans(DateTime.UtcNow);
+
+        result.Should().HaveCount(PrestamoEstadoRepository.BatchSize);
+        result.Select(loan => loan.Id).Should().OnlyHaveUniqueItems();
+    }
+
+    [Test]
+    public async Task QueryPage_WhenRequestIsCancelled_StopsDatabaseWork()
+    {
+        using var cancellation = new CancellationTokenSource();
+        cancellation.Cancel();
+
+        var action = () => new PrestamoConsultaRepository(Db).GetAll(cancellation.Token);
+
+        await action.Should().ThrowAsync<OperationCanceledException>();
     }
 
     [Test]

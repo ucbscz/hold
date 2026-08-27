@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 
-public class Repository<TEntity, TDto> : IRepository<TEntity, TDto>
+public class Repository<TEntity, TDto>
     where TEntity : Entity
     where TDto : class
 {

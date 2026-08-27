@@ -10,83 +10,38 @@ namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
 public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
 {
-    private readonly PrestamoRepository _prestamoRepository;
+    private readonly UsuarioConsultaRepository _queries;
 
     public UsuarioRepository(
         ApplicationDbContext dbContext,
         UsuarioMapper mapper,
-        PrestamoRepository prestamoRepository
+        UsuarioConsultaRepository queries
     )
-        : base(dbContext, mapper) => _prestamoRepository = prestamoRepository;
+        : base(dbContext, mapper) => _queries = queries;
 
-    public override async Task<Result<List<UsuarioDto>>> GetAll()
-    {
-        var dtos = await DbContext
-            .Usuarios.AsNoTracking()
-            .Join(
-                DbContext.Carreras,
-                usuario => usuario.IdCarrera,
-                carrera => carrera.Id,
-                (usuario, carrera) =>
-                    new UsuarioDto
-                    {
-                        Carnet = usuario.Carnet,
-                        Nombre = usuario.Nombre,
-                        ApellidoPaterno = usuario.ApellidoPaterno,
-                        ApellidoMaterno = usuario.ApellidoMaterno,
-                        Rol = usuario.Rol.ToString().ToLowerInvariant(),
-                        Email = usuario.Email,
-                        CarreraNombre = carrera.Nombre,
-                        IdCarrera = usuario.IdCarrera,
-                        Telefono = usuario.Telefono,
-                        TelefonoReferencia = usuario.TelefonoReferencia,
-                        NombreReferencia = usuario.NombreReferencia,
-                        EmailReferencia = usuario.EmailReferencia,
-                        Bloqueado = usuario.Bloqueado,
-                        MotivoBloqueo = usuario.MotivoBloqueo,
-                    }
-            )
-            .ToListAsync();
+    public override Task<Result<List<UsuarioDto>>> GetAll() => _queries.GetAll();
 
-        return Result<List<UsuarioDto>>.Success(dtos);
-    }
+    public Task<Result<List<UsuarioDto>>> GetAll(CancellationToken cancellationToken) =>
+        _queries.GetAll(cancellationToken);
 
-    public async Task<UsuarioEntity?> GetByCarnet(string carnet) =>
-        await DbContext
-            .Usuarios.AsNoTracking()
-            .FirstOrDefaultAsync(u => u.Carnet == carnet && !u.EstadoEliminado);
+    public Task<Result<List<UsuarioDto>>> GetPage(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken = default
+    ) => _queries.GetPage(page, pageSize, cancellationToken);
 
-    public async Task<UsuarioEntity?> GetTrackedByCarnet(string carnet) =>
-        await DbContext.Usuarios.FirstOrDefaultAsync(u => u.Carnet == carnet && !u.EstadoEliminado);
-
-    public async Task<string?> GetDisplayName(string carnet)
-    {
-        var user = await DbContext
-            .Usuarios.AsNoTracking()
-            .Where(user => user.Carnet == carnet && !user.EstadoEliminado)
-            .Select(user => new
-            {
-                user.Nombre,
-                user.ApellidoPaterno,
-                user.ApellidoMaterno,
-            })
-            .FirstOrDefaultAsync();
-
-        if (user == null)
-            return null;
-
-        return string.Join(
-            " ",
-            new[] { user.Nombre, user.ApellidoPaterno, user.ApellidoMaterno }.Where(part =>
-                !string.IsNullOrWhiteSpace(part)
-            )
-        );
-    }
+    public Task<UsuarioEntity?> GetTrackedByCarnet(
+        string carnet,
+        CancellationToken cancellationToken = default
+    ) => DbContext.Usuarios.FirstOrDefaultAsync(
+        user => user.Carnet == carnet && !user.EstadoEliminado,
+        cancellationToken
+    );
 
     public async Task<Result<object>> Delete(string carnet)
     {
-        var entity = await DbContext.Usuarios.FirstOrDefaultAsync(u =>
-            u.Carnet == carnet && !u.EstadoEliminado
+        var entity = await DbContext.Usuarios.FirstOrDefaultAsync(user =>
+            user.Carnet == carnet && !user.EstadoEliminado
         );
 
         if (entity == null)
@@ -94,129 +49,29 @@ public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
 
         await SoftDelete(entity);
         await DbContext.SaveChangesAsync();
-
         return Result<object>.Success(null!);
     }
 
-    protected override async Task CascadeDelete(UsuarioEntity user)
-    {
-        var loans = await DbContext
-            .Prestamos.Where(loan => loan.Carnet == user.Carnet)
-            .ToListAsync();
-
-        foreach (var loan in loans)
-        {
-            loan.EstadoPrestamo = EstadoPrestamo.Cancelado;
-            await _prestamoRepository.SoftDelete(loan);
-        }
-    }
-
-    public async Task<bool> ExistsByCarnet(string carnet) =>
-        await DbContext.Usuarios.IgnoreQueryFilters().AnyAsync(u => u.Carnet == carnet);
-
-    public async Task<bool> ExistsByEmail(string email) =>
-        await DbContext.Usuarios.IgnoreQueryFilters().AnyAsync(u => u.Email == email);
-
-    public async Task<bool> ExistsByTelefono(string telefono, string? excludeCarnet = null) =>
-        await DbContext
-            .Usuarios.IgnoreQueryFilters()
-            .AnyAsync(u => u.Telefono == telefono && u.Carnet != excludeCarnet);
-
-    public async Task<int?> FindCarreraIdByName(string name) =>
-        await DbContext
-            .Carreras.AsNoTracking()
-            .Where(c => c.Nombre == name && !c.EstadoEliminado)
-            .Select(c => (int?)c.Id)
-            .FirstOrDefaultAsync();
-
-    public async Task<string?> GetCarreraName(int idCarrera) =>
-        await DbContext
-            .Carreras.AsNoTracking()
-            .Where(c => c.Id == idCarrera)
-            .Select(c => c.Nombre)
-            .FirstOrDefaultAsync();
-
-    public async Task<(UsuarioEntity? Usuario, string? CarreraNombre)> GetByEmailWithCarrera(
-        string email
+    public Task UpdateEntity(
+        UsuarioEntity entity,
+        bool saveChanges = true,
+        CancellationToken cancellationToken = default
     )
     {
-        var result = await DbContext
-            .Usuarios.AsNoTracking()
-            .IgnoreQueryFilters()
-            .Where(u => u.Email == email && !u.EstadoEliminado)
-            .Join(
-                DbContext.Carreras.Where(c => !c.EstadoEliminado),
-                u => u.IdCarrera,
-                c => c.Id,
-                (u, c) =>
-                    new
-                    {
-                        u.Carnet,
-                        u.Nombre,
-                        u.ApellidoPaterno,
-                        u.ApellidoMaterno,
-                        u.Email,
-                        u.Contrasena,
-                        u.Rol,
-                        u.Telefono,
-                        u.TelefonoReferencia,
-                        u.NombreReferencia,
-                        u.EmailReferencia,
-                        u.IdCarrera,
-                        u.EstadoEliminado,
-                        u.RefreshToken,
-                        u.RefreshTokenExpiry,
-                        CarreraNombre = c.Nombre,
-                    }
-            )
-            .FirstOrDefaultAsync();
-
-        if (result == null)
-            return (null, null);
-
-        var entity = new UsuarioEntity
-        {
-            Carnet = result.Carnet,
-            Nombre = result.Nombre,
-            ApellidoPaterno = result.ApellidoPaterno,
-            ApellidoMaterno = result.ApellidoMaterno,
-            Email = result.Email,
-            Contrasena = result.Contrasena,
-            Rol = result.Rol,
-            Telefono = result.Telefono,
-            TelefonoReferencia = result.TelefonoReferencia,
-            NombreReferencia = result.NombreReferencia,
-            EmailReferencia = result.EmailReferencia,
-            IdCarrera = result.IdCarrera,
-            EstadoEliminado = result.EstadoEliminado,
-            RefreshToken = result.RefreshToken,
-            RefreshTokenExpiry = result.RefreshTokenExpiry,
-        };
-
-        return (entity, result.CarreraNombre);
-    }
-
-    public Task UpdateEntity(UsuarioEntity entity, bool saveChanges = true)
-    {
         DbContext.Usuarios.Update(entity);
-
-        return saveChanges ? DbContext.SaveChangesAsync() : Task.CompletedTask;
+        return saveChanges
+            ? DbContext.SaveChangesAsync(cancellationToken)
+            : Task.CompletedTask;
     }
 
-    public Task SaveChanges() => DbContext.SaveChangesAsync();
-
-    public async Task<List<string>> GetUnblockedCarnets(
-        IReadOnlyCollection<string> carnets
-    ) => await DbContext
-        .Usuarios.AsNoTracking()
-        .Where(user => carnets.Contains(user.Carnet) && !user.Bloqueado)
-        .Select(user => user.Carnet)
-        .ToListAsync();
+    public Task SaveChanges(CancellationToken cancellationToken = default) =>
+        DbContext.SaveChangesAsync(cancellationToken);
 
     public async Task SetBlockedStatus(
         IReadOnlyCollection<string> carnets,
         bool isBlocked,
-        string? reason
+        string? reason,
+        CancellationToken cancellationToken = default
     )
     {
         if (carnets.Count == 0)
@@ -226,7 +81,7 @@ public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
         {
             var users = await DbContext
                 .Usuarios.Where(user => carnets.Contains(user.Carnet))
-                .ToListAsync();
+                .ToListAsync(cancellationToken);
 
             foreach (var user in users)
             {
@@ -234,132 +89,38 @@ public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
                 user.MotivoBloqueo = isBlocked ? reason : null;
             }
 
-            await DbContext.SaveChangesAsync();
+            await DbContext.SaveChangesAsync(cancellationToken);
             return;
         }
 
         await DbContext
             .Usuarios.Where(user => carnets.Contains(user.Carnet))
-            .ExecuteUpdateAsync(update =>
-                update
-                    .SetProperty(user => user.Bloqueado, isBlocked)
-                    .SetProperty(user => user.MotivoBloqueo, isBlocked ? reason : null)
+            .ExecuteUpdateAsync(
+                update =>
+                    update
+                        .SetProperty(user => user.Bloqueado, isBlocked)
+                        .SetProperty(user => user.MotivoBloqueo, isBlocked ? reason : null),
+                cancellationToken
             );
     }
 
-    public async Task<(UsuarioEntity? Usuario, string? CarreraNombre)> GetByRefreshTokenWithCarrera(
-        string token
-    )
+    protected override async Task CascadeDelete(UsuarioEntity user)
     {
-        var result = await DbContext
-            .Usuarios.AsNoTracking()
-            .IgnoreQueryFilters()
-            .Where(u => u.RefreshToken == token)
-            .Join(
-                DbContext.Carreras.Where(c => !c.EstadoEliminado),
-                u => u.IdCarrera,
-                c => c.Id,
-                (u, c) =>
-                    new
-                    {
-                        u.Carnet,
-                        u.Nombre,
-                        u.ApellidoPaterno,
-                        u.ApellidoMaterno,
-                        u.Email,
-                        u.Contrasena,
-                        u.Rol,
-                        u.Telefono,
-                        u.TelefonoReferencia,
-                        u.NombreReferencia,
-                        u.EmailReferencia,
-                        u.IdCarrera,
-                        u.EstadoEliminado,
-                        u.RefreshToken,
-                        u.RefreshTokenExpiry,
-                        CarreraNombre = c.Nombre,
-                    }
-            )
-            .FirstOrDefaultAsync();
+        var loans = await DbContext
+            .Prestamos.Where(loan => loan.Carnet == user.Carnet)
+            .ToListAsync();
+        var loanIds = loans.Select(loan => loan.Id).ToArray();
+        var details = await DbContext
+            .DetallesPrestamos.Where(detail => loanIds.Contains(detail.IdPrestamo))
+            .ToListAsync();
 
-        if (result == null)
-            return (null, null);
-
-        var entity = new UsuarioEntity
+        foreach (var loan in loans)
         {
-            Carnet = result.Carnet,
-            Nombre = result.Nombre,
-            ApellidoPaterno = result.ApellidoPaterno,
-            ApellidoMaterno = result.ApellidoMaterno,
-            Email = result.Email,
-            Contrasena = result.Contrasena,
-            Rol = result.Rol,
-            Telefono = result.Telefono,
-            TelefonoReferencia = result.TelefonoReferencia,
-            NombreReferencia = result.NombreReferencia,
-            EmailReferencia = result.EmailReferencia,
-            IdCarrera = result.IdCarrera,
-            EstadoEliminado = result.EstadoEliminado,
-            RefreshToken = result.RefreshToken,
-            RefreshTokenExpiry = result.RefreshTokenExpiry,
-        };
-
-        return (entity, result.CarreraNombre);
-    }
-
-    public async Task UpdateRefreshToken(string carnet, string? token, DateTime? expiry)
-    {
-        var entity = await DbContext
-            .Usuarios.IgnoreQueryFilters()
-            .FirstOrDefaultAsync(u => u.Carnet == carnet);
-
-        if (entity == null)
-            return;
-
-        entity.RefreshToken = token;
-        entity.RefreshTokenExpiry = expiry;
-        await DbContext.SaveChangesAsync();
-    }
-
-    public async Task<bool> RotateRefreshToken(
-        string carnet,
-        string currentTokenHash,
-        string newTokenHash,
-        DateTime expiry
-    )
-    {
-        if (!DbContext.Database.IsRelational())
-        {
-            var entity = await DbContext
-                .Usuarios.IgnoreQueryFilters()
-                .FirstOrDefaultAsync(user =>
-                    user.Carnet == carnet
-                    && user.RefreshToken == currentTokenHash
-                    && user.RefreshTokenExpiry >= DateTime.UtcNow
-                );
-
-            if (entity == null)
-                return false;
-
-            entity.RefreshToken = newTokenHash;
-            entity.RefreshTokenExpiry = expiry;
-            await DbContext.SaveChangesAsync();
-            return true;
+            loan.EstadoPrestamo = EstadoPrestamo.Cancelado;
+            loan.EstadoEliminado = true;
         }
 
-        var updated = await DbContext
-            .Usuarios.IgnoreQueryFilters()
-            .Where(user =>
-                user.Carnet == carnet
-                && user.RefreshToken == currentTokenHash
-                && user.RefreshTokenExpiry >= DateTime.UtcNow
-            )
-            .ExecuteUpdateAsync(update =>
-                update
-                    .SetProperty(user => user.RefreshToken, newTokenHash)
-                    .SetProperty(user => user.RefreshTokenExpiry, expiry)
-            );
-
-        return updated == 1;
+        foreach (var detail in details)
+            detail.EstadoEliminado = true;
     }
 }

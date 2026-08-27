@@ -1,13 +1,14 @@
 using Ardalis.Result;
 using System.Text.Json;
+using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
 namespace IMT_Reservas.Server.Application.Features.Notificacion;
 
 public class NotificacionService
 {
-    private readonly INotificacionRepository _repository;
+    private readonly NotificacionRepository _repository;
 
-    public NotificacionService(INotificacionRepository repository) => _repository = repository;
+    public NotificacionService(NotificacionRepository repository) => _repository = repository;
 
     public async Task Create(
         string carnet,

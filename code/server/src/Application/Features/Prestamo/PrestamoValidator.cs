@@ -1,7 +1,7 @@
 using FluentValidation;
-using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Infrastructure.Config;
+using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
 
 namespace IMT_Reservas.Server.Application.Features.Prestamo;
@@ -10,7 +10,7 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
 {
     public PrestamoValidator(
         ApplicationDbContext dbContext,
-        IConfiguracionRepository configRepository
+        ConfiguracionRepository configRepository
     )
     {
         RuleFor(p => p.CarnetUsuario)

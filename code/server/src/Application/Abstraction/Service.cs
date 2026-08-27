@@ -3,12 +3,13 @@ using Ardalis.Result;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Features.AuditLog;
 using IMT_Reservas.Server.Core.Abstraction;
+using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 
 namespace IMT_Reservas.Server.Application.Abstraction;
 
 public class Service<TEntity, TRepository, TDto>
     where TEntity : Entity
-    where TRepository : IRepository<TEntity, TDto>
+    where TRepository : Repository<TEntity, TDto>
     where TDto : class
 {
     private readonly IMapper<TEntity, TDto> _mapper;

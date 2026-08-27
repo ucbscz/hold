@@ -142,7 +142,11 @@ builder
     });
 
 builder.Services.AddScoped<UsuarioRepository>();
+builder.Services.AddScoped<UsuarioAuthRepository>();
+builder.Services.AddScoped<UsuarioConsultaRepository>();
 builder.Services.AddScoped<PrestamoRepository>();
+builder.Services.AddScoped<PrestamoConsultaRepository>();
+builder.Services.AddScoped<PrestamoEstadoRepository>();
 builder.Services.AddScoped<EquipoRepository>();
 builder.Services.AddScoped<AccesorioRepository>();
 builder.Services.AddScoped<GrupoEquipoRepository>();
@@ -164,7 +168,7 @@ builder.Services.AddScoped<GrupoEquipoService>();
 builder.Services.AddScoped<MantenimientoService>();
 builder.Services.AddScoped<GaveteroService>();
 builder.Services.AddScoped<ContratoService>();
-builder.Services.AddScoped<IConfiguracionRepository, ConfiguracionRepository>();
+builder.Services.AddScoped<ConfiguracionRepository>();
 builder.Services.AddScoped<ConfiguracionService>();
 
 builder.Services.AddScoped<
@@ -243,9 +247,6 @@ builder.Services.AddScoped<ConfiguracionMapper>();
 builder.Services.AddScoped<IMapper<ConfiguracionSistema, ConfiguracionDto>>(sp =>
     sp.GetRequiredService<ConfiguracionMapper>()
 );
-builder.Services.AddScoped<IUpdateMapper<ConfiguracionSistema, ConfiguracionDto>>(sp =>
-    sp.GetRequiredService<ConfiguracionMapper>()
-);
 builder.Services.AddScoped<IValidator<CategoriaDto>, CategoriaValidator>();
 builder.Services.AddScoped<IValidator<ComponenteDto>, ComponenteValidator>();
 builder.Services.AddScoped<IValidator<ContratoDto>, ContratoValidator>();
@@ -297,11 +298,11 @@ builder.Services.Configure<CookiePolicyOptions>(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IAuditLogRepository, AuditLogRepository>();
+builder.Services.AddScoped<AuditLogRepository>();
 builder.Services.AddScoped<AuditLogService>();
-builder.Services.AddScoped<INotificacionRepository, NotificacionRepository>();
+builder.Services.AddScoped<NotificacionRepository>();
 builder.Services.AddScoped<NotificacionService>();
-builder.Services.AddScoped<IAvisoDisponibilidadRepository, AvisoDisponibilidadRepository>();
+builder.Services.AddScoped<AvisoDisponibilidadRepository>();
 builder.Services.AddScoped<AvisoDisponibilidadService>();
 builder.Services.AddScoped<ComentarioEquipoRepository>();
 builder.Services.AddScoped<ComentarioEquipoService>();
@@ -409,7 +410,7 @@ app.UseHangfireDashboard(
 );
 RecurringJob.AddOrUpdate<EstadoPrestamoJob>(
     "estado-prestamo",
-    job => job.Execute(),
+    job => job.Execute(CancellationToken.None),
     "*/10 * * * *"
 );
 

@@ -1,8 +1,6 @@
 using System.Globalization;
 using System.Text.Json;
 using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Application.Features.AvisoDisponibilidad;
-using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Application.Features.Notificacion;
 using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Application.Features.Usuario;
@@ -16,58 +14,79 @@ public class EstadoPrestamoJob
 {
     private readonly NotificacionService _notifications;
     private readonly AuditLogService _audit;
-    private readonly PrestamoRepository _prestamoRepository;
+    private readonly PrestamoEstadoRepository _prestamoRepository;
     private readonly UsuarioRepository _usuarioRepository;
-    private readonly IAvisoDisponibilidadRepository _availabilityWatches;
-    private readonly IConfiguracionRepository _configuracionRepository;
+    private readonly UsuarioConsultaRepository _usuarioQueries;
+    private readonly AvisoDisponibilidadRepository _availabilityWatches;
+    private readonly ConfiguracionRepository _configuracionRepository;
 
     public EstadoPrestamoJob(
         NotificacionService notifications,
         AuditLogService audit,
-        PrestamoRepository prestamoRepository,
+        PrestamoEstadoRepository prestamoRepository,
         UsuarioRepository usuarioRepository,
-        IAvisoDisponibilidadRepository availabilityWatches,
-        IConfiguracionRepository configuracionRepository
+        UsuarioConsultaRepository usuarioQueries,
+        AvisoDisponibilidadRepository availabilityWatches,
+        ConfiguracionRepository configuracionRepository
     )
     {
         _notifications = notifications;
         _audit = audit;
         _prestamoRepository = prestamoRepository;
         _usuarioRepository = usuarioRepository;
+        _usuarioQueries = usuarioQueries;
         _availabilityWatches = availabilityWatches;
         _configuracionRepository = configuracionRepository;
     }
 
-    public async Task Execute()
+    public async Task Execute(CancellationToken cancellationToken = default)
     {
         var now = DateTime.UtcNow;
         var config = await _configuracionRepository.GetConfiguracion();
 
-        await ProcessOverdue(now, config.MinutosGraciaAtraso);
-        await ProcessExpired(now);
-        await ProcessReminders(now, config.TiempoRecordatorioPrevioMinutos);
-        await ProcessAvailabilityWatches();
+        await ProcessOverdue(now, config.MinutosGraciaAtraso, cancellationToken);
+        await ProcessExpired(now, cancellationToken);
+        await ProcessReminders(
+            now,
+            config.TiempoRecordatorioPrevioMinutos,
+            cancellationToken
+        );
+        await ProcessAvailabilityWatches(cancellationToken);
     }
 
-    private async Task ProcessOverdue(DateTime now, int minutosGracia)
+    private async Task ProcessOverdue(
+        DateTime now,
+        int minutosGracia,
+        CancellationToken cancellationToken
+    )
     {
         var threshold = now.AddMinutes(-minutosGracia);
-        var overdue = await _prestamoRepository.GetOverdueLoans(threshold);
+        var overdue = await _prestamoRepository.GetOverdueLoans(
+            threshold,
+            cancellationToken
+        );
 
         if (overdue.Count == 0)
             return;
 
-        await _prestamoRepository.MarkAsOverdue(overdue.Select(GetLoanId).ToList());
+        await _prestamoRepository.MarkAsOverdue(
+            overdue.Select(GetLoanId).ToList(),
+            cancellationToken
+        );
         var affectedCarnets = overdue.Select(loan => loan.CarnetUsuario ?? string.Empty)
             .Where(carnet => !string.IsNullOrWhiteSpace(carnet))
             .Distinct()
             .ToList();
-        var newlyBlockedCarnets = await _usuarioRepository.GetUnblockedCarnets(affectedCarnets);
+        var newlyBlockedCarnets = await _usuarioQueries.GetUnblockedCarnets(
+            affectedCarnets,
+            cancellationToken
+        );
 
         await _usuarioRepository.SetBlockedStatus(
             newlyBlockedCarnets,
             true,
-            AutomaticBlockReasons.OverdueLoan
+            AutomaticBlockReasons.OverdueLoan,
+            cancellationToken
         );
 
         var loanEntries = overdue
@@ -116,14 +135,20 @@ public class EstadoPrestamoJob
         );
     }
 
-    private async Task ProcessExpired(DateTime now)
+    private async Task ProcessExpired(DateTime now, CancellationToken cancellationToken)
     {
-        var expired = await _prestamoRepository.GetExpiredPendingLoans(now);
+        var expired = await _prestamoRepository.GetExpiredPendingLoans(
+            now,
+            cancellationToken
+        );
 
         if (expired.Count == 0)
             return;
 
-        await _prestamoRepository.MarkAsRejected(expired.Select(GetLoanId).ToList());
+        await _prestamoRepository.MarkAsRejected(
+            expired.Select(GetLoanId).ToList(),
+            cancellationToken
+        );
 
         await _audit.LogMany(
             expired
@@ -150,17 +175,25 @@ public class EstadoPrestamoJob
         );
     }
 
-    private async Task ProcessReminders(DateTime now, int reminderMinutes)
+    private async Task ProcessReminders(
+        DateTime now,
+        int reminderMinutes,
+        CancellationToken cancellationToken
+    )
     {
         var dueSoon = await _prestamoRepository.GetLoansDueForReminder(
             now,
-            now.AddMinutes(reminderMinutes)
+            now.AddMinutes(reminderMinutes),
+            cancellationToken
         );
 
         if (dueSoon.Count == 0)
             return;
 
-        await _prestamoRepository.MarkReminderSent(dueSoon.Select(GetLoanId).ToList());
+        await _prestamoRepository.MarkReminderSent(
+            dueSoon.Select(GetLoanId).ToList(),
+            cancellationToken
+        );
 
         await _notifications.CreateMany(
             dueSoon
@@ -175,7 +208,7 @@ public class EstadoPrestamoJob
         );
     }
 
-    private async Task ProcessAvailabilityWatches()
+    private async Task ProcessAvailabilityWatches(CancellationToken cancellationToken)
     {
         var pending = await _availabilityWatches.GetPending();
 
@@ -197,7 +230,8 @@ public class EstadoPrestamoJob
             if (await _prestamoRepository.HasAvailableEquipo(
                 watch.IdGrupoEquipo,
                 date,
-                date.AddMinutes(config.TiempoMinimoReservaMinutos)
+                date.AddMinutes(config.TiempoMinimoReservaMinutos),
+                cancellationToken
             ))
             {
                 notifications.Add(

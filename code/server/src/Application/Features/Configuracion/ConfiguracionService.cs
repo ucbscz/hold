@@ -2,19 +2,20 @@ using Ardalis.Result;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Core.Entities;
+using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
 namespace IMT_Reservas.Server.Application.Features.Configuracion;
 
 public class ConfiguracionService
 {
-    private readonly IConfiguracionRepository _repository;
+    private readonly ConfiguracionRepository _repository;
     private readonly IValidator<ConfiguracionDto> _validator;
-    private readonly IUpdateMapper<ConfiguracionSistema, ConfiguracionDto> _mapper;
+    private readonly ConfiguracionMapper _mapper;
 
     public ConfiguracionService(
-        IConfiguracionRepository repository,
+        ConfiguracionRepository repository,
         IValidator<ConfiguracionDto> validator,
-        IUpdateMapper<ConfiguracionSistema, ConfiguracionDto> mapper)
+        ConfiguracionMapper mapper)
     {
         _repository = repository;
         _validator = validator;

@@ -46,11 +46,9 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     {
         var jwtOptions = Options.Create(TestJwtSettings);
         var mapper = new UsuarioMapper();
-        var repo = new UsuarioRepository(
-            db,
-            mapper,
-            new PrestamoRepository(db, new PrestamoMapper(), new ContractHtmlProcessor())
-        );
+        var queries = new UsuarioConsultaRepository(db);
+        var repo = new UsuarioRepository(db, mapper, queries);
+        var authRepository = new UsuarioAuthRepository(db);
         var validator = new UsuarioValidator(db);
         var jwt = new JwtService(jwtOptions);
         var cacheService = new CacheRepository(
@@ -69,7 +67,9 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
             jwtOptions,
             cacheService,
             audit,
-            notifications
+            notifications,
+            authRepository,
+            queries
         );
     }
 
@@ -78,6 +78,50 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     {
         Db.Set<CarreraEntity>().Add(new CarreraEntity { Id = 1, Nombre = "Ingeniería" });
         await Db.SaveChangesAsync();
+    }
+
+    [Test]
+    public async Task GetAll_LimitsTheNumberOfUsersReturned()
+    {
+        Db.Usuarios.AddRange(
+            Enumerable.Range(1, UsuarioConsultaRepository.MaxPageSize + 1)
+                .Select(index => new Usuario
+                {
+                    Carnet = $"U{index:0000}",
+                    Nombre = $"Usuario {index}",
+                    Email = $"user{index}@ucb.edu.bo",
+                    Contrasena = "hashed",
+                    IdCarrera = 1,
+                })
+        );
+        await Db.SaveChangesAsync();
+
+        var queries = new UsuarioConsultaRepository(Db);
+        var result = await queries.GetAll();
+        var secondPage = await queries.GetPage(
+            2,
+            UsuarioConsultaRepository.MaxPageSize
+        );
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().HaveCount(UsuarioConsultaRepository.MaxPageSize);
+        secondPage.Value.Should().ContainSingle();
+    }
+
+    [Test]
+    public async Task Login_DeletedUserCannotAuthenticate()
+    {
+        var user = BuildValidUsuario("U001", "deleted@ucb.edu.bo");
+        user.Contrasena = BCryptLib.HashPassword("Test@1234");
+        var entity = new UsuarioMapper().ToEntity(user);
+        entity.EstadoEliminado = true;
+        Db.Usuarios.Add(entity);
+        await Db.SaveChangesAsync();
+
+        var result = await Sut.Login("deleted@ucb.edu.bo", "Test@1234");
+
+        result.IsSuccess.Should().BeFalse();
+        result.Status.Should().Be(Ardalis.Result.ResultStatus.Unauthorized);
     }
 
     [Test]

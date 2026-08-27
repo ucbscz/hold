@@ -21,6 +21,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
     private readonly JwtSettings _jwtSettings;
     private readonly CacheRepository _cacheRepository;
     private readonly NotificacionService _notifications;
+    private readonly UsuarioAuthRepository _authRepository;
+    private readonly UsuarioConsultaRepository _queries;
 
     public UsuarioService(
         UsuarioRepository repository,
@@ -30,7 +32,9 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         IOptions<JwtSettings> jwtSettings,
         CacheRepository cacheRepository,
         AuditLogService audit,
-        NotificacionService notifications
+        NotificacionService notifications,
+        UsuarioAuthRepository authRepository,
+        UsuarioConsultaRepository queries
     )
         : base(repository, validator, mapper, audit)
     {
@@ -39,6 +43,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         _jwtSettings = jwtSettings.Value;
         _cacheRepository = cacheRepository;
         _notifications = notifications;
+        _authRepository = authRepository;
+        _queries = queries;
     }
 
     public async Task<Result<object>> SetBlocked(
@@ -46,20 +52,25 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         bool isBlocked,
         string? blockReason,
         bool isAdmin,
-        string? actorCarnet = null
+        string? actorCarnet = null,
+        CancellationToken cancellationToken = default
     )
     {
         if (!isAdmin)
             return Result<object>.Forbidden();
 
-        var user = await Repository.GetTrackedByCarnet(carnet);
+        var user = await Repository.GetTrackedByCarnet(carnet, cancellationToken);
 
         if (user == null)
             return Result<object>.NotFound();
 
         user.Bloqueado = isBlocked;
         user.MotivoBloqueo = isBlocked ? blockReason : null;
-        await Repository.UpdateEntity(user, saveChanges: false);
+        await Repository.UpdateEntity(
+            user,
+            saveChanges: false,
+            cancellationToken: cancellationToken
+        );
 
         await Audit!.Log(
             isBlocked ? AuditAccion.Bloquear : AuditAccion.Desbloquear,
@@ -71,7 +82,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         var actorName = string.IsNullOrWhiteSpace(actorCarnet)
             ? null
-            : await Repository.GetDisplayName(actorCarnet);
+            : await _queries.GetDisplayName(actorCarnet, cancellationToken);
         var notificationType = isBlocked
             ? TipoNotificacion.UsuarioBloqueado
             : TipoNotificacion.UsuarioDesbloqueado;
@@ -101,11 +112,17 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             saveChanges: false
         );
 
-        await Repository.SaveChanges();
+        await Repository.SaveChanges(cancellationToken);
         _ = _cacheRepository.Remove(CacheKeys.Usuario(carnet));
 
         return Result<object>.Success(null!);
     }
+
+    public Task<Result<List<UsuarioDto>>> GetAll(
+        int page,
+        int pageSize,
+        CancellationToken cancellationToken
+    ) => Repository.GetPage(page, pageSize, cancellationToken);
 
     public override async Task<Result<UsuarioDto>> Create(UsuarioDto dto) =>
         await Create(dto, isAdmin: false);
@@ -125,15 +142,15 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (!validation.IsValid)
             return validation.ToResult<UsuarioDto>();
 
-        if (await Repository.ExistsByCarnet(dto.Carnet!))
+        if (await _queries.ExistsByCarnet(dto.Carnet!))
             return Result<UsuarioDto>.Error("Carnet ya existe");
 
-        if (await Repository.ExistsByEmail(dto.Email!))
+        if (await _queries.ExistsByEmail(dto.Email!))
             return Result<UsuarioDto>.Error("Email ya existe");
 
         if (
             !string.IsNullOrWhiteSpace(dto.Telefono)
-            && await Repository.ExistsByTelefono(dto.Telefono)
+            && await _queries.ExistsByTelefono(dto.Telefono)
         )
             return Result<UsuarioDto>.Error("Teléfono ya registrado");
 
@@ -143,7 +160,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         if (result.IsSuccess && result.Value != null)
         {
-            result.Value.CarreraNombre = await Repository.GetCarreraName(entity.IdCarrera);
+            result.Value.CarreraNombre = await _queries.GetCarreraName(entity.IdCarrera);
             await Audit!.Log(AuditAccion.Crear, typeof(UsuarioEntity).Name, entity.Carnet);
         }
 
@@ -172,7 +189,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         if (
             !string.IsNullOrWhiteSpace(dto.Telefono)
-            && await Repository.ExistsByTelefono(dto.Telefono, carnet)
+            && await _queries.ExistsByTelefono(dto.Telefono, carnet)
         )
             return Result<UsuarioDto>.Error("Teléfono ya registrado");
 
@@ -191,7 +208,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         await Repository.UpdateEntity(existing);
 
         var resultDto = _mapper.ToDto(existing);
-        resultDto.CarreraNombre = await Repository.GetCarreraName(existing.IdCarrera);
+        resultDto.CarreraNombre = await _queries.GetCarreraName(existing.IdCarrera);
 
         _ = await _cacheRepository.Remove(CacheKeys.Usuario(carnet));
         await Audit!.Log(AuditAccion.Editar, typeof(UsuarioEntity).Name, carnet);
@@ -207,20 +224,24 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (cacheResult.IsSuccess)
             return Result<UsuarioDto>.Success(cacheResult.Value);
 
-        var user = await Repository.GetByCarnet(carnet);
+        var user = await _queries.GetByCarnet(carnet);
 
         if (user == null)
             return Result<UsuarioDto>.NotFound();
 
         var dto = _mapper.ToDto(user);
-        dto.CarreraNombre = await Repository.GetCarreraName(user.IdCarrera);
+        dto.CarreraNombre = await _queries.GetCarreraName(user.IdCarrera);
 
         _ = await _cacheRepository.Set(cacheKey, dto, UsuarioCacheTtl);
 
         return Result<UsuarioDto>.Success(dto);
     }
 
-    public async Task<Result<LoginDto>> Login(string email, string password)
+    public async Task<Result<LoginDto>> Login(
+        string email,
+        string password,
+        CancellationToken cancellationToken = default
+    )
     {
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             return Result<LoginDto>.Unauthorized("Credenciales requeridas");
@@ -228,7 +249,10 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (email.Length > 255 || password.Length > 72)
             return Result<LoginDto>.Unauthorized("Credenciales inválidas");
 
-        var (user, carreraNombre) = await Repository.GetByEmailWithCarrera(email);
+        var (user, carreraNombre) = await _authRepository.GetByEmailWithCarrera(
+            email,
+            cancellationToken
+        );
 
         if (user == null)
             return Result<LoginDto>.Unauthorized("Credenciales inválidas");
@@ -246,10 +270,11 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         var accessToken = _jwtService.GenerateAccessToken(dto);
         var refreshToken = JwtService.GenerateRefreshToken();
 
-        await Repository.UpdateRefreshToken(
+        await _authRepository.UpdateRefreshToken(
             user.Carnet!,
             JwtService.HashRefreshToken(refreshToken),
-            DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays)
+            DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
+            cancellationToken
         );
 
         return Result<LoginDto>.Success(
@@ -262,7 +287,10 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         );
     }
 
-    public async Task<Result<LoginDto>> Refresh(string refreshToken)
+    public async Task<Result<LoginDto>> Refresh(
+        string refreshToken,
+        CancellationToken cancellationToken = default
+    )
     {
         if (string.IsNullOrWhiteSpace(refreshToken))
             return Result<LoginDto>.Unauthorized("Refresh token requerido");
@@ -271,7 +299,10 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             return Result<LoginDto>.Unauthorized("Refresh token inválido");
 
         var refreshTokenHash = JwtService.HashRefreshToken(refreshToken);
-        var (user, carreraNombre) = await Repository.GetByRefreshTokenWithCarrera(refreshTokenHash);
+        var (user, carreraNombre) = await _authRepository.GetByRefreshTokenWithCarrera(
+            refreshTokenHash,
+            cancellationToken
+        );
 
         if (user == null || user.RefreshTokenExpiry < DateTime.UtcNow)
             return Result<LoginDto>.Unauthorized("Refresh token inválido o expirado");
@@ -282,11 +313,12 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         var newAccessToken = _jwtService.GenerateAccessToken(dto);
         var newRefreshToken = JwtService.GenerateRefreshToken();
 
-        var rotated = await Repository.RotateRefreshToken(
+        var rotated = await _authRepository.RotateRefreshToken(
             user.Carnet!,
             refreshTokenHash,
             JwtService.HashRefreshToken(newRefreshToken),
-            DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays)
+            DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
+            cancellationToken
         );
 
         if (!rotated)
@@ -323,6 +355,6 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (string.IsNullOrWhiteSpace(dto.CarreraNombre))
             return;
 
-        dto.IdCarrera = await Repository.FindCarreraIdByName(dto.CarreraNombre);
+        dto.IdCarrera = await _queries.FindCarreraIdByName(dto.CarreraNombre);
     }
 }

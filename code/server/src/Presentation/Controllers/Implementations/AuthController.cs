@@ -17,12 +17,21 @@ public class AuthController : Controller
     public AuthController(UsuarioService service) => _service = service;
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] UsuarioDto request) =>
+    public async Task<IActionResult> Login(
+        [FromBody] UsuarioDto request,
+        CancellationToken cancellationToken
+    ) =>
         ToResponse(
-            await _service.Login(request.Email ?? string.Empty, request.Contrasena ?? string.Empty)
+            await _service.Login(
+                request.Email ?? string.Empty,
+                request.Contrasena ?? string.Empty,
+                cancellationToken
+            )
         );
 
     [HttpPost("refresh")]
-    public async Task<IActionResult> Refresh([FromBody] RefreshDto request) =>
-        ToResponse(await _service.Refresh(request.RefreshToken));
+    public async Task<IActionResult> Refresh(
+        [FromBody] RefreshDto request,
+        CancellationToken cancellationToken
+    ) => ToResponse(await _service.Refresh(request.RefreshToken, cancellationToken));
 }

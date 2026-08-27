@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
-public class NotificacionRepository : INotificacionRepository
+public class NotificacionRepository
 {
     private readonly ApplicationDbContext _db;
 

@@ -6,10 +6,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace IMT_Reservas.Server.src.Infrastructure.Config.Migrations
 {
-    /// <inheritdoc />
     public partial class AddConfiguracionSistema : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(
@@ -251,7 +249,6 @@ namespace IMT_Reservas.Server.src.Infrastructure.Config.Migrations
                 principalColumn: "id_carrera");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
