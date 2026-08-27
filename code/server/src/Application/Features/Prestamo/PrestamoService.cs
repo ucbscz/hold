@@ -19,8 +19,9 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
     private readonly UsuarioRepository _usuarioRepository;
     private readonly AvisoDisponibilidadRepository _availabilityWatches;
     private readonly ConfiguracionRepository _configuracionRepository;
-    private readonly PrestamoConsultaRepository _queries;
+    private readonly PrestamoReadRepository _queries;
     private readonly PrestamoEstadoRepository _states;
+    private readonly PrestamoDisponibilidadRepository _availability;
 
     public PrestamoService(
         PrestamoRepository repository,
@@ -31,8 +32,9 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         UsuarioRepository usuarioRepository,
         AvisoDisponibilidadRepository availabilityWatches,
         ConfiguracionRepository configuracionRepository,
-        PrestamoConsultaRepository queries,
-        PrestamoEstadoRepository states
+        PrestamoReadRepository queries,
+        PrestamoEstadoRepository states,
+        PrestamoDisponibilidadRepository availability
     )
         : base(repository, validator, mapper, audit)
     {
@@ -42,6 +44,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         _configuracionRepository = configuracionRepository;
         _queries = queries;
         _states = states;
+        _availability = availability;
     }
 
     public override Task<Result<PrestamoDto>> Create(PrestamoDto dto) =>
@@ -165,7 +168,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
 
         if (parsedState.Value == EstadoPrestamo.Aprobado)
         {
-            var assigned = await _states.AssignEquiposOnApproval(id, cancellationToken);
+            var assigned = await _availability.AssignEquiposOnApproval(id, cancellationToken);
 
             if (!assigned)
                 return Result<PrestamoDto>.Error(
@@ -302,7 +305,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             if (!HorarioReserva.EsValido(date, date.AddMinutes(config.TiempoMinimoReservaMinutos), config.HorarioInicioMinutos, config.HorarioFinMinutos))
                 continue;
 
-            if (!await _states.HasAvailableEquipo(
+            if (!await _availability.HasAvailableEquipo(
                 watch.IdGrupoEquipo,
                 date,
                 date.AddMinutes(config.TiempoMinimoReservaMinutos)
@@ -492,7 +495,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         string carnetUsuario,
         string estadoPrestamo,
         int page = 1,
-        int pageSize = PrestamoConsultaRepository.MaxPageSize,
+        int pageSize = PrestamoReadRepository.MaxPageSize,
         CancellationToken cancellationToken = default
     )
     {
@@ -512,7 +515,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         string? carnetUsuario,
         string estadoPrestamo,
         int page = 1,
-        int pageSize = PrestamoConsultaRepository.MaxPageSize,
+        int pageSize = PrestamoReadRepository.MaxPageSize,
         CancellationToken cancellationToken = default
     )
     {

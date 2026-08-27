@@ -24,20 +24,21 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     {
         var configRepo = new ConfiguracionRepository(db, Cache);
         var mapper = new PrestamoMapper();
-        var queries = new PrestamoConsultaRepository(db);
+        var queries = new PrestamoReadRepository(db);
         var states = new PrestamoEstadoRepository(db);
+        var availability = new PrestamoDisponibilidadRepository(db);
         var repo = new PrestamoRepository(
             db,
             mapper,
             new ContractHtmlProcessor(),
             queries,
-            states
+            availability
         );
         var validator = new PrestamoValidator(db, configRepo);
 
         var audit = new AuditLogService(new AuditLogRepository(db), new HttpContextAccessor());
         var notifications = new NotificacionService(new NotificacionRepository(db));
-        var userQueries = new UsuarioConsultaRepository(db);
+        var userQueries = new UsuarioReadRepository(db);
         var userRepository = new UsuarioRepository(db, new UsuarioMapper(), userQueries);
         var availabilityRepository = new AvisoDisponibilidadRepository(db);
 
@@ -51,7 +52,8 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
             availabilityRepository,
             configRepo,
             queries,
-            states
+            states,
+            availability
         );
     }
 
@@ -96,7 +98,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     [Test]
     public async Task QueryPage_LimitsLoansBeforeLoadingEquipmentDetails()
     {
-        var loans = Enumerable.Range(1, PrestamoConsultaRepository.MaxPageSize + 1)
+        var loans = Enumerable.Range(1, PrestamoReadRepository.MaxPageSize + 1)
             .Select(index => new Prestamo
             {
                 Carnet = Carnet,
@@ -108,17 +110,17 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         Db.Prestamos.AddRange(loans);
         await Db.SaveChangesAsync();
 
-        var queries = new PrestamoConsultaRepository(Db);
+        var queries = new PrestamoReadRepository(Db);
         var result = await queries.GetAll();
         var secondPage = await queries.GetPage(
             null,
             null,
-            PrestamoConsultaRepository.MaxPageSize,
-            PrestamoConsultaRepository.MaxPageSize
+            PrestamoReadRepository.MaxPageSize,
+            PrestamoReadRepository.MaxPageSize
         );
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().HaveCount(PrestamoConsultaRepository.MaxPageSize);
+        result.Value.Should().HaveCount(PrestamoReadRepository.MaxPageSize);
         result.Value.Max(loan => loan.Id).Should().Be(Db.Prestamos.Max(loan => loan.Id));
         secondPage.Should().ContainSingle();
     }
@@ -151,7 +153,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         using var cancellation = new CancellationTokenSource();
         cancellation.Cancel();
 
-        var action = () => new PrestamoConsultaRepository(Db).GetAll(cancellation.Token);
+        var action = () => new PrestamoReadRepository(Db).GetAll(cancellation.Token);
 
         await action.Should().ThrowAsync<OperationCanceledException>();
     }

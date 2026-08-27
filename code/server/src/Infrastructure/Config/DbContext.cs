@@ -217,7 +217,7 @@ public class ApplicationDbContext : DbContext
             entity.Property(e => e.Procedencia).HasMaxLength(255).HasColumnName("procedencia");
             entity
                 .Property(e => e.FechaIngresoEquipo)
-                .HasDefaultValue(DateOnly.FromDateTime(DateTime.UtcNow))
+                .HasDefaultValueSql("CURRENT_DATE")
                 .HasColumnName("fecha_ingreso_equipo");
             entity
                 .Property(e => e.EstadoEquipo)
@@ -237,6 +237,12 @@ public class ApplicationDbContext : DbContext
             {
                 e.IdGrupoEquipo,
                 e.CodigoImt,
+                e.EstadoEliminado,
+            });
+            entity.HasIndex(e => new
+            {
+                e.IdGrupoEquipo,
+                e.EstadoEquipo,
                 e.EstadoEliminado,
             });
             entity.HasIndex(e => e.CodigoImt).IsUnique();
@@ -341,6 +347,7 @@ public class ApplicationDbContext : DbContext
                 .IsRequired();
             entity.HasOne<Equipo>().WithMany().HasForeignKey(e => e.IdEquipo).IsRequired();
             entity.HasIndex(e => new { e.IdMantenimiento, e.EstadoEliminado });
+            entity.HasIndex(e => new { e.IdEquipo, e.EstadoEliminado });
             entity.HasQueryFilter(e => !e.EstadoEliminado);
         });
 
@@ -388,6 +395,7 @@ public class ApplicationDbContext : DbContext
                 .Property(e => e.Rol)
                 .HasColumnType("tipo_usuario")
                 .HasDefaultValue(TipoUsuario.Estudiante)
+                .HasSentinel((TipoUsuario)(-1))
                 .HasColumnName("rol");
             entity.Property(e => e.IdCarrera).HasColumnName("id_carrera");
             entity.Property(e => e.Bloqueado).HasColumnName("bloqueado");
@@ -460,6 +468,31 @@ public class ApplicationDbContext : DbContext
                 e.EstadoPrestamo,
                 e.EstadoEliminado,
             });
+            entity.HasIndex(e => new
+            {
+                e.EstadoPrestamo,
+                e.EstadoEliminado,
+                e.FechaDevolucionEsperada,
+            });
+            entity.HasIndex(e => new
+            {
+                e.EstadoPrestamo,
+                e.EstadoEliminado,
+                e.FechaPrestamoEsperada,
+            });
+            entity.HasIndex(e => new
+            {
+                e.EstadoPrestamo,
+                e.RecordatorioEnviado,
+                e.EstadoEliminado,
+                e.FechaDevolucionEsperada,
+            });
+            entity.HasIndex(e => new
+            {
+                e.EstadoEliminado,
+                e.FechaSolicitud,
+                e.Id,
+            });
             entity.HasQueryFilter(e => !e.EstadoEliminado);
         });
 
@@ -494,6 +527,12 @@ public class ApplicationDbContext : DbContext
                 .IsRequired();
             entity.HasIndex(e => new { e.IdPrestamo, e.EstadoEliminado });
             entity.HasIndex(e => e.IdEquipo);
+            entity.HasIndex(e => new
+            {
+                e.IdGrupoEquipo,
+                e.IdEquipo,
+                e.EstadoEliminado,
+            });
             entity.HasQueryFilter(e => !e.EstadoEliminado);
         });
 

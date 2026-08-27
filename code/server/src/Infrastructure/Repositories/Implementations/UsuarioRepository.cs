@@ -10,12 +10,12 @@ namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
 public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
 {
-    private readonly UsuarioConsultaRepository _queries;
+    private readonly UsuarioReadRepository _queries;
 
     public UsuarioRepository(
         ApplicationDbContext dbContext,
         UsuarioMapper mapper,
-        UsuarioConsultaRepository queries
+        UsuarioReadRepository queries
     )
         : base(dbContext, mapper) => _queries = queries;
 

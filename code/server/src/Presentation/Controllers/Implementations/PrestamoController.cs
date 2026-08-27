@@ -19,7 +19,7 @@ public class PrestamoController : Controller
         [FromQuery] string? carnet = null,
         [FromQuery] string? estado = null,
         [FromQuery] int pagina = 1,
-        [FromQuery] int tamanoPagina = PrestamoConsultaRepository.MaxPageSize,
+        [FromQuery] int tamanoPagina = PrestamoReadRepository.MaxPageSize,
         CancellationToken cancellationToken = default
     )
     {

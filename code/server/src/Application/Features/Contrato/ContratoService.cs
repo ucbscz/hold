@@ -9,7 +9,7 @@ namespace IMT_Reservas.Server.Application.Features.Contrato;
 
 public class ContratoService : Service<ContratoEntity, ContratoRepository, ContratoDto>
 {
-    private readonly PrestamoConsultaRepository _prestamos;
+    private readonly PrestamoReadRepository _prestamos;
     private readonly ContractHtmlProcessor _contractHtml;
     private readonly AuditLogService _audit;
 
@@ -17,7 +17,7 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
         ContratoRepository repository,
         ContratoMapper mapper,
         IValidator<ContratoDto> validator,
-        PrestamoConsultaRepository prestamos,
+        PrestamoReadRepository prestamos,
         ContractHtmlProcessor contractHtml,
         AuditLogService audit
     )

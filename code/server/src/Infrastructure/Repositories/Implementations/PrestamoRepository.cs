@@ -15,21 +15,21 @@ namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
 {
     private readonly ContractHtmlProcessor _contractHtml;
-    private readonly PrestamoConsultaRepository _queries;
-    private readonly PrestamoEstadoRepository _states;
+    private readonly PrestamoReadRepository _queries;
+    private readonly PrestamoDisponibilidadRepository _availability;
 
     public PrestamoRepository(
         ApplicationDbContext dbContext,
         PrestamoMapper mapper,
         ContractHtmlProcessor contractHtml,
-        PrestamoConsultaRepository queries,
-        PrestamoEstadoRepository states
+        PrestamoReadRepository queries,
+        PrestamoDisponibilidadRepository availability
     )
         : base(dbContext, mapper)
     {
         _contractHtml = contractHtml;
         _queries = queries;
-        _states = states;
+        _availability = availability;
     }
 
     public override Task<Result<List<PrestamoDto>>> GetAll() => _queries.GetAll();
@@ -91,7 +91,7 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
             );
             await DbContext.SaveChangesAsync(cancellationToken);
 
-            if (!await _states.AssignEquiposOnApproval(entity.Id, cancellationToken))
+            if (!await _availability.AssignEquiposOnApproval(entity.Id, cancellationToken))
             {
                 await RollbackCreate(transaction, entity.Id, cancellationToken);
                 return Result<PrestamoEntity>.Error(

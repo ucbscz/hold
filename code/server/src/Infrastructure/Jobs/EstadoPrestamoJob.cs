@@ -15,8 +15,9 @@ public class EstadoPrestamoJob
     private readonly NotificacionService _notifications;
     private readonly AuditLogService _audit;
     private readonly PrestamoEstadoRepository _prestamoRepository;
+    private readonly PrestamoDisponibilidadRepository _availability;
     private readonly UsuarioRepository _usuarioRepository;
-    private readonly UsuarioConsultaRepository _usuarioQueries;
+    private readonly UsuarioReadRepository _usuarioQueries;
     private readonly AvisoDisponibilidadRepository _availabilityWatches;
     private readonly ConfiguracionRepository _configuracionRepository;
 
@@ -24,8 +25,9 @@ public class EstadoPrestamoJob
         NotificacionService notifications,
         AuditLogService audit,
         PrestamoEstadoRepository prestamoRepository,
+        PrestamoDisponibilidadRepository availability,
         UsuarioRepository usuarioRepository,
-        UsuarioConsultaRepository usuarioQueries,
+        UsuarioReadRepository usuarioQueries,
         AvisoDisponibilidadRepository availabilityWatches,
         ConfiguracionRepository configuracionRepository
     )
@@ -33,6 +35,7 @@ public class EstadoPrestamoJob
         _notifications = notifications;
         _audit = audit;
         _prestamoRepository = prestamoRepository;
+        _availability = availability;
         _usuarioRepository = usuarioRepository;
         _usuarioQueries = usuarioQueries;
         _availabilityWatches = availabilityWatches;
@@ -227,7 +230,7 @@ public class EstadoPrestamoJob
             if (!HorarioReserva.EsValido(date, date.AddMinutes(config.TiempoMinimoReservaMinutos), config.HorarioInicioMinutos, config.HorarioFinMinutos))
                 continue;
 
-            if (await _prestamoRepository.HasAvailableEquipo(
+            if (await _availability.HasAvailableEquipo(
                 watch.IdGrupoEquipo,
                 date,
                 date.AddMinutes(config.TiempoMinimoReservaMinutos),

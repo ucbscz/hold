@@ -10,12 +10,12 @@ using PrestamoEntity = IMT_Reservas.Server.Core.Entities.Prestamo;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
-public sealed class PrestamoConsultaRepository
+public sealed class PrestamoReadRepository
 {
     public const int MaxPageSize = 500;
     private readonly ApplicationDbContext _dbContext;
 
-    public PrestamoConsultaRepository(ApplicationDbContext dbContext) => _dbContext = dbContext;
+    public PrestamoReadRepository(ApplicationDbContext dbContext) => _dbContext = dbContext;
 
     public async Task<Result<List<PrestamoDto>>> GetAll(
         CancellationToken cancellationToken = default

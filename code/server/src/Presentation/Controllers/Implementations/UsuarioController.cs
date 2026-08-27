@@ -18,7 +18,7 @@ public class UsuarioController : Controller
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] int pagina = 1,
-        [FromQuery] int tamanoPagina = UsuarioConsultaRepository.MaxPageSize,
+        [FromQuery] int tamanoPagina = UsuarioReadRepository.MaxPageSize,
         CancellationToken cancellationToken = default
     ) => ToResponse(await _service.GetAll(pagina, tamanoPagina, cancellationToken));
 

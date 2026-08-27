@@ -46,7 +46,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     {
         var jwtOptions = Options.Create(TestJwtSettings);
         var mapper = new UsuarioMapper();
-        var queries = new UsuarioConsultaRepository(db);
+        var queries = new UsuarioReadRepository(db);
         var repo = new UsuarioRepository(db, mapper, queries);
         var authRepository = new UsuarioAuthRepository(db);
         var validator = new UsuarioValidator(db);
@@ -84,7 +84,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     public async Task GetAll_LimitsTheNumberOfUsersReturned()
     {
         Db.Usuarios.AddRange(
-            Enumerable.Range(1, UsuarioConsultaRepository.MaxPageSize + 1)
+            Enumerable.Range(1, UsuarioReadRepository.MaxPageSize + 1)
                 .Select(index => new Usuario
                 {
                     Carnet = $"U{index:0000}",
@@ -96,15 +96,15 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         );
         await Db.SaveChangesAsync();
 
-        var queries = new UsuarioConsultaRepository(Db);
+        var queries = new UsuarioReadRepository(Db);
         var result = await queries.GetAll();
         var secondPage = await queries.GetPage(
             2,
-            UsuarioConsultaRepository.MaxPageSize
+            UsuarioReadRepository.MaxPageSize
         );
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().HaveCount(UsuarioConsultaRepository.MaxPageSize);
+        result.Value.Should().HaveCount(UsuarioReadRepository.MaxPageSize);
         secondPage.Value.Should().ContainSingle();
     }
 

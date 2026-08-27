@@ -22,7 +22,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
     private readonly CacheRepository _cacheRepository;
     private readonly NotificacionService _notifications;
     private readonly UsuarioAuthRepository _authRepository;
-    private readonly UsuarioConsultaRepository _queries;
+    private readonly UsuarioReadRepository _queries;
 
     public UsuarioService(
         UsuarioRepository repository,
@@ -34,7 +34,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         AuditLogService audit,
         NotificacionService notifications,
         UsuarioAuthRepository authRepository,
-        UsuarioConsultaRepository queries
+        UsuarioReadRepository queries
     )
         : base(repository, validator, mapper, audit)
     {

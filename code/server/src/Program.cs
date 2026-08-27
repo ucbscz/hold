@@ -143,10 +143,11 @@ builder
 
 builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<UsuarioAuthRepository>();
-builder.Services.AddScoped<UsuarioConsultaRepository>();
+builder.Services.AddScoped<UsuarioReadRepository>();
 builder.Services.AddScoped<PrestamoRepository>();
-builder.Services.AddScoped<PrestamoConsultaRepository>();
+builder.Services.AddScoped<PrestamoReadRepository>();
 builder.Services.AddScoped<PrestamoEstadoRepository>();
+builder.Services.AddScoped<PrestamoDisponibilidadRepository>();
 builder.Services.AddScoped<EquipoRepository>();
 builder.Services.AddScoped<AccesorioRepository>();
 builder.Services.AddScoped<GrupoEquipoRepository>();

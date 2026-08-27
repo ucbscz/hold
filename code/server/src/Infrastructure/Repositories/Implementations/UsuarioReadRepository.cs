@@ -6,12 +6,12 @@ using UsuarioEntity = IMT_Reservas.Server.Core.Entities.Usuario;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
-public sealed class UsuarioConsultaRepository
+public sealed class UsuarioReadRepository
 {
     public const int MaxPageSize = 500;
     private readonly ApplicationDbContext _dbContext;
 
-    public UsuarioConsultaRepository(ApplicationDbContext dbContext) => _dbContext = dbContext;
+    public UsuarioReadRepository(ApplicationDbContext dbContext) => _dbContext = dbContext;
 
     public async Task<Result<List<UsuarioDto>>> GetAll(
         CancellationToken cancellationToken = default
