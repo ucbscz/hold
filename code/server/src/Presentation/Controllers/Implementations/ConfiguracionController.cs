@@ -5,7 +5,7 @@ using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Cont
 
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
-[Route("api/[controller]")]
+[Route("api/configuracion")]
 public class ConfiguracionController : Controller
 {
     private readonly ConfiguracionService _service;
@@ -17,17 +17,20 @@ public class ConfiguracionController : Controller
 
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Get()
+    public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
-        var result = await _service.GetConfiguracion();
+        var result = await _service.GetConfiguracion(cancellationToken);
         return Ok(result);
     }
 
     [HttpPut]
     [Authorize(Roles = "administrador")]
-    public async Task<IActionResult> Update([FromBody] ConfiguracionDto dto)
+    public async Task<IActionResult> Update(
+        [FromBody] ConfiguracionDto dto,
+        CancellationToken cancellationToken
+    )
     {
-        var result = await _service.UpdateConfiguracion(dto);
+        var result = await _service.UpdateConfiguracion(dto, cancellationToken);
         return ToResponse(result);
     }
 }

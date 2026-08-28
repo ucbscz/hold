@@ -15,11 +15,14 @@ public class CacheRepository
         _logger = logger;
     }
 
-    public async Task<Result<T>> Get<T>(string cacheKey)
+    public async Task<Result<T>> Get<T>(
+        string cacheKey,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
-            var cachedJson = await _cache.GetStringAsync(cacheKey);
+            var cachedJson = await _cache.GetStringAsync(cacheKey, cancellationToken);
 
             if (cachedJson is null)
                 return Result<T>.NotFound();
@@ -28,6 +31,10 @@ public class CacheRepository
 
             return cachedValue is null ? Result<T>.NotFound() : Result<T>.Success(cachedValue);
         }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
         catch (Exception exception)
         {
             _logger.LogWarning(exception, "No se pudo leer la clave de caché {CacheKey}", cacheKey);
@@ -35,7 +42,12 @@ public class CacheRepository
         }
     }
 
-    public async Task<Result> Set<T>(string cacheKey, T value, TimeSpan timeToLive)
+    public async Task<Result> Set<T>(
+        string cacheKey,
+        T value,
+        TimeSpan timeToLive,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
@@ -43,9 +55,18 @@ public class CacheRepository
             {
                 AbsoluteExpirationRelativeToNow = timeToLive,
             };
-            await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(value), entryOptions);
+            await _cache.SetStringAsync(
+                cacheKey,
+                JsonSerializer.Serialize(value),
+                entryOptions,
+                cancellationToken
+            );
 
             return Result.Success();
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception exception)
         {
@@ -54,13 +75,20 @@ public class CacheRepository
         }
     }
 
-    public async Task<Result> Remove(string cacheKey)
+    public async Task<Result> Remove(
+        string cacheKey,
+        CancellationToken cancellationToken = default
+    )
     {
         try
         {
-            await _cache.RemoveAsync(cacheKey);
+            await _cache.RemoveAsync(cacheKey, cancellationToken);
 
             return Result.Success();
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception exception)
         {

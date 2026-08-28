@@ -9,6 +9,7 @@ public class ConfiguracionRepository
     private readonly ApplicationDbContext _dbContext;
     private readonly CacheRepository _cache;
     private const string CacheKey = "ConfiguracionGlobal";
+    private const int DefaultConfigurationId = 1;
 
     public ConfiguracionRepository(ApplicationDbContext dbContext, CacheRepository cache)
     {
@@ -16,35 +17,46 @@ public class ConfiguracionRepository
         _cache = cache;
     }
 
-    public async Task<ConfiguracionSistema> GetConfiguracion()
+    public async Task<ConfiguracionSistema> GetConfiguracion(
+        CancellationToken cancellationToken = default
+    )
     {
-        var cached = await _cache.Get<ConfiguracionSistema>(CacheKey);
+        var cached = await _cache.Get<ConfiguracionSistema>(CacheKey, cancellationToken);
         if (cached.IsSuccess && cached.Value != null)
         {
             return cached.Value;
         }
 
-        var config = await _dbContext.ConfiguracionesSistema.FirstOrDefaultAsync();
+        var config = await _dbContext.ConfiguracionesSistema.SingleOrDefaultAsync(
+            current => current.Id == DefaultConfigurationId,
+            cancellationToken
+        );
         if (config == null)
         {
             config = ConfiguracionSeed.Default;
             _dbContext.ConfiguracionesSistema.Add(config);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(cancellationToken);
         }
 
-        await _cache.Set(CacheKey, config, TimeSpan.FromDays(1));
+        await _cache.Set(CacheKey, config, TimeSpan.FromDays(1), cancellationToken);
         return config;
     }
 
-    public async Task Update(ConfiguracionSistema config)
+    public async Task Update(
+        ConfiguracionSistema config,
+        CancellationToken cancellationToken = default
+    )
     {
-        var existing = await _dbContext.ConfiguracionesSistema.FirstOrDefaultAsync(c => c.Id == config.Id);
+        var existing = await _dbContext.ConfiguracionesSistema.FirstOrDefaultAsync(
+            current => current.Id == config.Id,
+            cancellationToken
+        );
 
         if (existing == null)
             throw new InvalidOperationException("No existe una configuración del sistema para actualizar.");
 
         _dbContext.Entry(existing).CurrentValues.SetValues(config);
-        await _dbContext.SaveChangesAsync();
-        await _cache.Remove(CacheKey);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+        await _cache.Remove(CacheKey, cancellationToken);
     }
 }
