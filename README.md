@@ -129,8 +129,7 @@ docker compose up -d ucb_db ucb_redis
 ```
 
 ```bash
-dotnet tool restore
-dotnet ef database update --project code/server/IMT_Reservas.Server.csproj
+psql -U postgres -d IMT_Reservas -f code/database/update.sql
 dotnet run --project code/server/IMT_Reservas.Server.csproj
 ```
 
