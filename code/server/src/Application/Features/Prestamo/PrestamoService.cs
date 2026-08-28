@@ -97,7 +97,11 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             ?? string.Join(", ", dto.GrupoEquipoId ?? []);
         var loanDetail = JsonSerializer.Serialize(new
         {
-            texto = $"Usuario: {userDisplayName} ({entity.Carnet}). Equipos: {equipmentNames}. Inicio: {entity.FechaPrestamoEsperada:yyyy-MM-dd HH:mm} UTC. Devolución: {entity.FechaDevolucionEsperada:yyyy-MM-dd HH:mm} UTC.",
+            usuarioNombre = userDisplayName,
+            usuarioCarnet = entity.Carnet,
+            equiposPrestamo = equipmentNames,
+            fechaInicio = entity.FechaPrestamoEsperada,
+            fechaDevolucion = entity.FechaDevolucionEsperada,
         });
 
         await Audit!.Log(

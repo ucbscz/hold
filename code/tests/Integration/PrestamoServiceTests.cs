@@ -126,6 +126,58 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     }
 
     [Test]
+    public async Task QueryPage_PrioritizesTeachersAndKeepsNewestFirst()
+    {
+        const string teacherCarnet = "D001";
+        Db.Usuarios.Add(new Usuario
+        {
+            Carnet = teacherCarnet,
+            Nombre = "Docente",
+            ApellidoPaterno = "Prioritario",
+            Email = "docente@ucb.edu.bo",
+            Contrasena = "hashed",
+            Rol = TipoUsuario.Docente,
+            EstadoEliminado = false
+        });
+
+        var baseDate = DateTime.UtcNow.AddHours(-3);
+        var newestStudent = new Prestamo
+        {
+            Carnet = Carnet,
+            EstadoPrestamo = EstadoPrestamo.Pendiente,
+            FechaSolicitud = baseDate.AddHours(2),
+            FechaPrestamoEsperada = DateTime.UtcNow.AddDays(1),
+            FechaDevolucionEsperada = DateTime.UtcNow.AddDays(1).AddMinutes(30),
+        };
+        var olderTeacher = new Prestamo
+        {
+            Carnet = teacherCarnet,
+            EstadoPrestamo = EstadoPrestamo.Pendiente,
+            FechaSolicitud = baseDate,
+            FechaPrestamoEsperada = DateTime.UtcNow.AddDays(1),
+            FechaDevolucionEsperada = DateTime.UtcNow.AddDays(1).AddMinutes(30),
+        };
+        var newerTeacher = new Prestamo
+        {
+            Carnet = teacherCarnet,
+            EstadoPrestamo = EstadoPrestamo.Pendiente,
+            FechaSolicitud = baseDate.AddHours(1),
+            FechaPrestamoEsperada = DateTime.UtcNow.AddDays(1),
+            FechaDevolucionEsperada = DateTime.UtcNow.AddDays(1).AddMinutes(30),
+        };
+        Db.Prestamos.AddRange(newestStudent, olderTeacher, newerTeacher);
+        await Db.SaveChangesAsync();
+
+        var result = await new PrestamoReadRepository(Db).GetPage(null, null, 0, 10);
+
+        result.Select(loan => loan.Id).Should().ContainInOrder(
+            newerTeacher.Id,
+            olderTeacher.Id,
+            newestStudent.Id
+        );
+    }
+
+    [Test]
     public async Task AutomaticStateBatch_HasDeterministicMaximumSize()
     {
         Db.Prestamos.AddRange(
@@ -169,6 +221,13 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         result.IsSuccess.Should().BeTrue();
         Db.DetallesPrestamos.Should().HaveCount(1);
         Db.DetallesPrestamos.Single().IdEquipo.Should().Be(EquipoId);
+
+        var auditEntry = Db.AuditLogs.Single(entry => entry.Entidad == nameof(Prestamo));
+        using var auditDetail = JsonDocument.Parse(auditEntry.Detalle!);
+        auditDetail.RootElement.GetProperty("usuarioNombre").GetString().Should().Be("Test User");
+        auditDetail.RootElement.GetProperty("usuarioCarnet").GetString().Should().Be(Carnet);
+        auditDetail.RootElement.GetProperty("equiposPrestamo").GetString().Should().Be("Grupo Test");
+        auditDetail.RootElement.TryGetProperty("texto", out _).Should().BeFalse();
     }
 
     [Test]

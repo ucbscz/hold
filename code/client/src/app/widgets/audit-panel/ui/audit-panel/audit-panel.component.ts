@@ -228,11 +228,15 @@ export class AuditPanelComponent implements OnChanges {
       parsedDetail.isOk() &&
       this.isAuditObservationDetail(parsedDetail.value)
     ) {
-      this.detalleCache.set(detalle, parsedDetail.value);
-      return parsedDetail.value;
+      const structuredDetail = parsedDetail.value.texto
+        ? (this.parseLegacyLoanDetail(parsedDetail.value.texto) ??
+          parsedDetail.value)
+        : parsedDetail.value;
+      this.detalleCache.set(detalle, structuredDetail);
+      return structuredDetail;
     }
 
-    const resultado = { texto: detalle };
+    const resultado = this.parseLegacyLoanDetail(detalle) ?? { texto: detalle };
     this.detalleCache.set(detalle, resultado);
     return resultado;
   }
@@ -247,7 +251,9 @@ export class AuditPanelComponent implements OnChanges {
     return Boolean(
       possibleDetail.observacion ||
       possibleDetail.texto ||
-      possibleDetail.equipos,
+      possibleDetail.equipos ||
+      possibleDetail.usuarioNombre ||
+      possibleDetail.equiposPrestamo,
     );
   }
 
@@ -257,13 +263,17 @@ export class AuditPanelComponent implements OnChanges {
     return (
       p.observacion ||
       p.texto ||
+      (p.equiposPrestamo ? `Reserva de ${p.equiposPrestamo}` : undefined) ||
       (p.equipos?.length ? 'Ver estados de equipos' : '—')
     );
   }
 
   tieneDetalle(log: AuditLogDto): boolean {
     const p = this.parseDetalle(log.Detalle);
-    return !!p && !!(p.observacion || p.texto || p.equipos?.length);
+    return (
+      !!p &&
+      !!(p.observacion || p.texto || p.equiposPrestamo || p.equipos?.length)
+    );
   }
 
   abrirObs(log: AuditLogDto): void {
@@ -277,6 +287,23 @@ export class AuditPanelComponent implements OnChanges {
 
   cerrarObs(): void {
     this.obsAbierta = null;
+  }
+
+  formatearFechaDetalle(fecha?: string): string {
+    if (!fecha) return '—';
+
+    const value = new Date(fecha);
+    if (Number.isNaN(value.getTime())) return fecha;
+
+    return new Intl.DateTimeFormat('es-BO', {
+      timeZone: 'America/La_Paz',
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    }).format(value);
   }
 
   estadoEquipoLabel(estado?: string): string {
@@ -350,6 +377,27 @@ export class AuditPanelComponent implements OnChanges {
       { value: '', label: 'Todas las acciones' },
       ...this.acciones.map((accion) => ({ value: accion, label: accion })),
     ];
+  }
+
+  private parseLegacyLoanDetail(detail: string): AuditObservationDetail | null {
+    const match = detail.match(
+      /^Usuario:\s*(.+?)\s*\(([^)]+)\)\.\s*Equipos:\s*(.+?)\.\s*Inicio:\s*(.+?)\s+UTC\.\s*Devolución:\s*(.+?)\s+UTC\.?$/i,
+    );
+
+    if (!match) return null;
+
+    return {
+      usuarioNombre: match[1].trim(),
+      usuarioCarnet: match[2].trim(),
+      equiposPrestamo: match[3].trim(),
+      fechaInicio: this.normalizarFechaUtcLegacy(match[4]),
+      fechaDevolucion: this.normalizarFechaUtcLegacy(match[5]),
+    };
+  }
+
+  private normalizarFechaUtcLegacy(value: string): string {
+    const normalized = value.trim().replace(' ', 'T');
+    return normalized.endsWith('Z') ? normalized : `${normalized}:00Z`;
   }
 
   private inicioDelDia(fecha: Date): Date {

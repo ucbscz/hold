@@ -41,6 +41,35 @@ describe('PrestamosTablaComponent', () => {
     expect(nombresRenderizados()).toEqual(['Reciente', 'Antiguo']);
   });
 
+  it('should prioritize teachers and keep newest requests first', () => {
+    cargarPrestamos([
+      crearPrestamo({
+        id: 1,
+        nombre: 'Estudiante reciente',
+        rol: 'estudiante',
+        fechaSolicitud: '2026-06-14T15:00:00',
+      }),
+      crearPrestamo({
+        id: 2,
+        nombre: 'Docente antiguo',
+        rol: 'docente',
+        fechaSolicitud: '2026-06-13T10:00:00',
+      }),
+      crearPrestamo({
+        id: 3,
+        nombre: 'Docente reciente',
+        rol: 'docente',
+        fechaSolicitud: '2026-06-14T12:00:00',
+      }),
+    ]);
+
+    expect(nombresRenderizados()).toEqual([
+      'Docente reciente',
+      'Docente antiguo',
+      'Estudiante reciente',
+    ]);
+  });
+
   it('should render loan table headers without sort buttons', () => {
     cargarPrestamos([
       crearPrestamo({ id: 1, nombre: 'CarnetMayor', carnet: '200' }),
@@ -160,6 +189,7 @@ describe('PrestamosTablaComponent', () => {
     fechaPrestamoEsperada?: string;
     fechaDevolucionEsperada?: string;
     estado?: string;
+    rol?: string;
   }): PrestamoDto {
     return Object.assign(new PrestamoDto(), {
       Id: datos.id,
@@ -176,6 +206,7 @@ describe('PrestamosTablaComponent', () => {
         datos.fechaDevolucionEsperada ?? '2026-06-14T00:00:00',
       ),
       EstadoPrestamo: datos.estado ?? 'pendiente',
+      TipoUsuario: datos.rol ?? 'estudiante',
     });
   }
 

@@ -148,9 +148,34 @@
         <img src="assets/x.png" alt="Cerrar" />
       </button>
       <h3 class="obs-title">Detalle de auditoría</h3>
-      <p class="obs-text">
-        {{ obsAbierta.observacion || obsAbierta.texto || "Sin observación" }}
-      </p>
+      @if (obsAbierta.usuarioNombre || obsAbierta.equiposPrestamo) {
+        <dl class="obs-summary">
+          <div>
+            <dt>Usuario</dt>
+            <dd>{{ obsAbierta.usuarioNombre || "—" }}</dd>
+          </div>
+          <div>
+            <dt>Carnet</dt>
+            <dd>{{ obsAbierta.usuarioCarnet || "—" }}</dd>
+          </div>
+          <div class="obs-summary__wide">
+            <dt>Equipos</dt>
+            <dd>{{ obsAbierta.equiposPrestamo || "—" }}</dd>
+          </div>
+          <div>
+            <dt>Inicio</dt>
+            <dd>{{ formatearFechaDetalle(obsAbierta.fechaInicio) }}</dd>
+          </div>
+          <div>
+            <dt>Devolución</dt>
+            <dd>{{ formatearFechaDetalle(obsAbierta.fechaDevolucion) }}</dd>
+          </div>
+        </dl>
+      } @else {
+        <p class="obs-text">
+          {{ obsAbierta.observacion || obsAbierta.texto || "Sin observación" }}
+        </p>
+      }
       @if (obsAbierta.equipos?.length) {
         <h4 class="obs-subtitle">Estado de los equipos devueltos</h4>
         <table class="obs-equipos">
