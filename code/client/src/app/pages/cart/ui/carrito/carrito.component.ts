@@ -7,28 +7,19 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ConfiguracionService } from '@app/entities/configuracion/api/configuracion.service';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Carrito } from '@entities/cart';
 import { PrestamosAPIService } from '@entities/loan';
 import { UsuarioService } from '@entities/user';
 import { CalendarioComponent } from '@features/availability-selector';
+import { CarritoService, CartDateValidationService } from '@features/cart';
 import {
-  CarritoService,
-  CartDateValidationService,
-  LoanReturnNavigationService,
-} from '@features/cart';
-import { extractErrorMessage } from '@shared/lib/error';
-import {
-  Aviso,
-  AvisoExitoComponent,
   CustomSelectComponent,
   EquipmentImagePlaceholderComponent,
   MostrarerrorComponent,
   OpcionSelect,
-  PantallaCargaComponent,
 } from '@shared/ui';
-import { finalize, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-carrito',
@@ -37,9 +28,6 @@ import { finalize, Subscription } from 'rxjs';
     CommonModule,
     FormsModule,
     MostrarerrorComponent,
-    Aviso,
-    AvisoExitoComponent,
-    PantallaCargaComponent,
     CalendarioComponent,
     EquipmentImagePlaceholderComponent,
     CustomSelectComponent,
@@ -48,17 +36,12 @@ import { finalize, Subscription } from 'rxjs';
   styleUrl: './carrito.component.css',
 })
 export class CarritoComponent implements OnDestroy {
-  esDocente = false;
-  destinoPrestamo = 'Universidad';
   public step: number = 1;
   public errorSolicitudVisible: WritableSignal<boolean> = signal(false);
   public mensajeError: string = 'Datos insertados no validos';
-  confirmacionVisible: WritableSignal<boolean> = signal(false);
-  exitoVisible: WritableSignal<boolean> = signal(false);
   fechaInicio: WritableSignal<Date | null> = signal(null);
   fechaFinal: WritableSignal<Date | null> = signal(null);
   carrito: Carrito = {};
-  cargando = false;
   puedeReservar: WritableSignal<boolean> = signal(true);
   motivoBloqueo: WritableSignal<string> = signal('');
   maximoDiasPrestamo: WritableSignal<number | null> = signal(null);
@@ -83,13 +66,9 @@ export class CarritoComponent implements OnDestroy {
     private readonly usuarioService: UsuarioService,
     private readonly prestamosApiService: PrestamosAPIService,
     private readonly cartDateValidationService: CartDateValidationService,
-    private readonly loanReturnNavigation: LoanReturnNavigationService,
-    protected readonly configuracionService: ConfiguracionService,
   ) {
     this.carrito = this.carritoService.obtenerCarrito();
     this.actualizarCarrito(this.carrito);
-    this.esDocente =
-      this.usuarioService.obtenerUsuario()?.rol?.toLowerCase() === 'docente';
     this.carritoSubscription = this.carritoService.carrito$.subscribe(
       (carrito) => this.actualizarCarrito(carrito),
     );
@@ -116,7 +95,7 @@ export class CarritoComponent implements OnDestroy {
     });
   }
 
-  confirmarSolicitud(): void {
+  continuarAlDestino(): void {
     const validacion = this.validacionFechas();
 
     if (!validacion.isValid) {
@@ -136,39 +115,7 @@ export class CarritoComponent implements OnDestroy {
 
     this.guardarFechasEnCarrito();
 
-    const monto = this.carritoService.calcularPrecioTotal();
-
-    if (monto >= 1000) {
-      this.router.navigate(['/reserva']);
-
-      return;
-    }
-
-    this.confirmacionVisible.set(true);
-  }
-
-  realizarPrestamo(): void {
-    this.cargando = true;
-    const carnet = this.usuarioService.obtenerUsuario().carnet!;
-
-    this.prestamosApiService
-      .crearPrestamo(this.carrito, carnet, undefined)
-      .pipe(finalize(() => (this.cargando = false)))
-      .subscribe({
-        next: () => {
-          this.carritoService.vaciarCarrito();
-          this.exitoVisible.set(true);
-        },
-        error: (error) => {
-          const errorMsg = extractErrorMessage(error, 'Error desconocido');
-          this.mensajeError = errorMsg;
-          this.errorSolicitudVisible.set(true);
-        },
-      });
-  }
-
-  redirigirAnterior(): void {
-    void this.loanReturnNavigation.returnToPreviousPage();
+    void this.router.navigate(['/destino']);
   }
 
   carritoEstaVacio(): boolean {

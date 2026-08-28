@@ -6,7 +6,7 @@ import {
 } from '@shared/lib/session';
 
 const DEFAULT_RETURN_URL = '/inicio';
-const LOAN_FLOW_PATHS = new Set(['/carrito', '/reserva']);
+const LOAN_FLOW_PATHS = new Set(['/carrito', '/destino', '/reserva']);
 const PUBLIC_ACCESS_PATHS = new Set(['/login', '/registro']);
 
 @Injectable({ providedIn: 'root' })

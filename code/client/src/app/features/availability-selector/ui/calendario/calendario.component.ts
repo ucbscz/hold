@@ -8,7 +8,7 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { ConfiguracionService } from '@app/entities/configuracion/api/configuracion.service';
+import { ConfiguracionService } from '@entities/configuracion';
 import { Disponibilidad, DisponibilidadService } from '@entities/availability';
 import { Carrito } from '@entities/cart';
 import { extractErrorMessage } from '@shared/lib/error';

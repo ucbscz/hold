@@ -19,6 +19,7 @@ export class PrestamoDto extends BaseModel {
   Ubicacion_Mueble: string | null = null;
   IdContrato: string | null = null;
   TipoUsuario: string | null = null;
+  DestinoPrestamo: string | null = null;
   IdCarrera: number | null = null;
   NombreMateria: string | null = null;
   constructor() {
@@ -42,6 +43,7 @@ export class PrestamoDto extends BaseModel {
     this.Nombre_Mueble = null;
     this.Ubicacion_Mueble = null;
     this.TipoUsuario = null;
+    this.DestinoPrestamo = null;
     this.IdCarrera = null;
     this.NombreMateria = null;
   }

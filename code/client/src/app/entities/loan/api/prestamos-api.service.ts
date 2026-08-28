@@ -38,13 +38,14 @@ export class PrestamosAPIService {
       Observacion: item.Observacion,
       EstadoPrestamo: item.EstadoPrestamo,
       IdContrato: item.IdContrato,
-      Ubicacion_Equipo: item.UbicacionEquipo || item.Ubicacion_Equipo || null,
-      Nombre_Gavetero: item.NombreGavetero || item.Nombre_Gavetero || null,
-      Nombre_Mueble: item.NombreMueble || item.Nombre_Mueble || null,
-      Ubicacion_Mueble: item.UbicacionMueble || item.Ubicacion_Mueble || null,
-      TipoUsuario: item.TipoUsuario || null,
-      IdCarrera: item.IdCarrera || null,
-      NombreMateria: item.NombreMateria || null,
+      Ubicacion_Equipo: item.UbicacionEquipo ?? null,
+      Nombre_Gavetero: item.NombreGavetero ?? null,
+      Nombre_Mueble: item.NombreMueble ?? null,
+      Ubicacion_Mueble: item.UbicacionMueble ?? null,
+      TipoUsuario: item.TipoUsuario ?? null,
+      DestinoPrestamo: item.DestinoPrestamo,
+      IdCarrera: item.IdCarrera ?? null,
+      NombreMateria: item.NombreMateria ?? null,
     };
   }
 
@@ -87,8 +88,8 @@ export class PrestamosAPIService {
       Observacion: '',
       Contrato: contrato || null,
       DestinoPrestamo: destinoPrestamo,
-      IdCarrera: idCarrera || null,
-      NombreMateria: nombreMateria || null,
+      IdCarrera: idCarrera ?? null,
+      NombreMateria: nombreMateria ?? null,
     };
 
     return this.http.post(this.url, body);

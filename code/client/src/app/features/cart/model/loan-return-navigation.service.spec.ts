@@ -25,6 +25,7 @@ describe('LoanReturnNavigationService', () => {
   it('returns to the last page outside the loan flow', async () => {
     service.track('/administracion?seccion=prestamos');
     service.track('/carrito?step=2');
+    service.track('/destino');
     service.track('/reserva');
 
     await service.returnToPreviousPage();

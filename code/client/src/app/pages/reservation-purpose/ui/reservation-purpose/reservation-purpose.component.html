@@ -1,0 +1,158 @@
+<main class="purpose-page" aria-labelledby="purpose-title">
+  <header class="purpose-page__heading">
+    <span>Paso 3 de 3</span>
+    <h1 id="purpose-title">Define el uso del préstamo</h1>
+    <p>Indica dónde y para qué utilizarás los equipos seleccionados.</p>
+  </header>
+
+  <form class="purpose-form" (ngSubmit)="continuar()">
+    <fieldset class="purpose-options">
+      <legend>Destino de los equipos</legend>
+
+      <label
+        class="purpose-option"
+        [class.purpose-option--selected]="destinoPrestamo === 'Universidad'"
+      >
+        <input
+          type="radio"
+          name="destino"
+          value="Universidad"
+          [ngModel]="destinoPrestamo"
+          (ngModelChange)="seleccionarDestino($event)"
+        />
+        <span class="purpose-option__icon"
+          ><i class="fas fa-university" aria-hidden="true"></i
+        ></span>
+        <span>
+          <strong>{{
+            esDocente ? "Uso personal en laboratorio" : "Uso en la Universidad"
+          }}</strong>
+          <small>Los equipos permanecerán dentro de las instalaciones.</small>
+        </span>
+      </label>
+
+      <label
+        class="purpose-option"
+        [class.purpose-option--selected]="destinoPrestamo === 'Casa'"
+      >
+        <input
+          type="radio"
+          name="destino"
+          value="Casa"
+          [ngModel]="destinoPrestamo"
+          (ngModelChange)="seleccionarDestino($event)"
+        />
+        <span class="purpose-option__icon"
+          ><i class="fas fa-home" aria-hidden="true"></i
+        ></span>
+        <span>
+          <strong>{{
+            esDocente
+              ? "Uso personal fuera del laboratorio"
+              : "Uso fuera de la Universidad"
+          }}</strong>
+          <small
+            >Los equipos saldrán de las instalaciones durante la reserva.</small
+          >
+        </span>
+      </label>
+
+      @if (esDocente) {
+        <label
+          class="purpose-option"
+          [class.purpose-option--selected]="destinoPrestamo === 'Clase'"
+        >
+          <input
+            type="radio"
+            name="destino"
+            value="Clase"
+            [ngModel]="destinoPrestamo"
+            (ngModelChange)="seleccionarDestino($event)"
+          />
+          <span class="purpose-option__icon"
+            ><i class="fas fa-chalkboard-teacher" aria-hidden="true"></i
+          ></span>
+          <span>
+            <strong>Uso en una clase</strong>
+            <small>La reserva quedará asociada a una carrera y materia.</small>
+          </span>
+        </label>
+      }
+    </fieldset>
+
+    @if (destinoPrestamo === "Clase") {
+      <section class="class-details" aria-labelledby="class-details-title">
+        <h2 id="class-details-title">Datos de la clase</h2>
+        <div class="class-details__grid">
+          <label>
+            <span>Carrera</span>
+            <app-custom-select
+              name="carrera"
+              [ngModel]="idCarrera"
+              (ngModelChange)="actualizarCarrera($event)"
+              [opciones]="carrerasOpciones"
+              placeholder="Selecciona una carrera"
+              [searchThreshold]="6"
+            ></app-custom-select>
+          </label>
+          <label>
+            <span>Materia</span>
+            <input
+              type="text"
+              name="materia"
+              maxlength="255"
+              [(ngModel)]="nombreMateria"
+              placeholder="Ej. Sistemas de control"
+            />
+          </label>
+        </div>
+      </section>
+    }
+
+    <footer class="purpose-actions">
+      <button
+        type="button"
+        class="purpose-button purpose-button--secondary"
+        (click)="volver()"
+      >
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        Volver
+      </button>
+      <button
+        type="submit"
+        class="purpose-button purpose-button--primary"
+        [disabled]="!seleccionValida()"
+      >
+        Continuar
+        <i class="fas fa-arrow-right" aria-hidden="true"></i>
+      </button>
+    </footer>
+  </form>
+</main>
+
+@if (errorVisible()) {
+  <app-mostrarerror
+    [error]="errorVisible"
+    [mensaje]="mensajeError"
+  ></app-mostrarerror>
+}
+
+@if (confirmacionVisible()) {
+  <app-aviso
+    [cerrar]="confirmacionVisible"
+    mensaje="¿Está seguro de realizar el préstamo con los datos seleccionados?"
+    (aceptar)="realizarPrestamo()"
+  ></app-aviso>
+}
+
+@if (exitoVisible()) {
+  <app-aviso-exito
+    [exito]="exitoVisible"
+    mensaje="El préstamo se ha realizado con éxito."
+    (accion)="redirigirAnterior()"
+  ></app-aviso-exito>
+}
+
+@if (cargando()) {
+  <app-pantalla-carga></app-pantalla-carga>
+}

@@ -1,5 +1,3 @@
-import { ConfiguracionService } from '@app/entities/configuracion/api/configuracion.service';
-import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import {
   Component,
@@ -11,6 +9,7 @@ import {
   signal,
 } from '@angular/core';
 import { Carrito } from '@entities/cart';
+import { ConfiguracionService } from '@entities/configuracion';
 import { PrestamosAPIService } from '@entities/loan';
 import { UsuarioService } from '@entities/user';
 import { CarritoService, LoanReturnNavigationService } from '@features/cart';
@@ -22,13 +21,9 @@ import {
   AvisoExitoComponent,
   MostrarerrorComponent,
   PantallaCargaComponent,
-  CustomSelectComponent,
-  OpcionSelect,
 } from '@shared/ui';
 import { finalize } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
-import { CarreraService } from '@entities/career';
-import { FormsModule } from '@angular/forms';
 
 const CONFLICT_STATUS = 409;
 const UNPROCESSABLE_ENTITY_STATUS = 422;
@@ -39,13 +34,10 @@ const SERVER_ERROR_STATUS = 500;
   standalone: true,
   imports: [
     FirmaComponent,
-    CommonModule,
-    FormsModule,
     MostrarerrorComponent,
     PantallaCargaComponent,
     Aviso,
     AvisoExitoComponent,
-    CustomSelectComponent,
   ],
   templateUrl: './formulario.component.html',
   styleUrl: './formulario.component.css',
@@ -68,8 +60,8 @@ export class FormularioComponent implements OnInit {
     'Aviso de exito desconocido , si ve esto es un error , avise al soporte si puede o intente mas tarde';
 
   destinoPrestamo: string = 'Casa';
-  carrerasOpciones: OpcionSelect[] = [];
   idCarrera: number | null = null;
+  nombreCarrera: string = '';
   nombreMateria: string = '';
 
   constructor(
@@ -80,7 +72,6 @@ export class FormularioComponent implements OnInit {
     private readonly mandarprestamo: PrestamosAPIService,
     private readonly loanReturnNavigation: LoanReturnNavigationService,
     private readonly route: ActivatedRoute,
-    private readonly carreraService: CarreraService,
     private readonly configuracionService: ConfiguracionService,
   ) {}
 
@@ -102,10 +93,7 @@ export class FormularioComponent implements OnInit {
 
     let detallesClase = '';
     if (this.destinoPrestamo === 'Clase') {
-      const nombreCarrera =
-        this.carrerasOpciones.find(
-          (c) => c.value === this.idCarrera?.toString(),
-        )?.label || '[Carrera no seleccionada]';
+      const nombreCarrera = this.nombreCarrera || '[Carrera no seleccionada]';
       const materia = this.nombreMateria || '[Materia no ingresada]';
       detallesClase = `, los cuales serán utilizados para la clase de ${materia} de la carrera de ${nombreCarrera}`;
     }
@@ -159,19 +147,12 @@ export class FormularioComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.carreraService.obtenerCarreras().subscribe((carreras) => {
-      this.carrerasOpciones = carreras.map((c) => ({
-        value: c.Id.toString(),
-        label: c.Nombre ?? 'Desconocido',
-      }));
-      this.actualizarContrato();
-    });
-
     this.route.queryParams.subscribe((params) => {
-      if (params['destino']) {
-        this.destinoPrestamo = params['destino'];
-        this.actualizarContrato();
-      }
+      this.destinoPrestamo = params['destino'] || 'Casa';
+      this.idCarrera = params['idCarrera'] ? Number(params['idCarrera']) : null;
+      this.nombreCarrera = params['nombreCarrera'] || '';
+      this.nombreMateria = params['nombreMateria'] || '';
+      this.actualizarContrato();
     });
 
     const fechaInicioReserva = this.carrito.obtenerFechaInicio();
@@ -299,31 +280,14 @@ export class FormularioComponent implements OnInit {
   }
 
   private primeradelobjeto(carrito: Carrito): string {
-    const items = Object.entries(carrito).filter(
-      ([, item]) => typeof item === 'object' && 'nombre' in item,
-    );
-    return `
-      ${items
-        .map(
-          ([key, item]) => `
-        <tr>
-          <td class="imt-code" data-grupo-id="${escapeHtmlValue(key)}">Pendiente de asignación</td>
-          <td class="ucb-code" data-grupo-id="${escapeHtmlValue(key)}">Pendiente de asignación</td>
-          <td>
-          <strong>${escapeHtmlValue(item.nombre ?? '')}</strong>
-          <p>Marca: ${escapeHtmlValue(item.marca ?? '')} </p>
-          <p>Modelo: ${escapeHtmlValue(item.modelo ?? '')} </p>
-          </td>
-          <td class="serial-code" data-grupo-id="${escapeHtmlValue(key)}">Pendiente de asignación</td>
-          <td>${item.cantidad}</td>
-        </tr>
-      `,
-        )
-        .join('')}
-    `;
+    return this.crearFilasEquipos(carrito, false);
   }
 
   private quintavalordebienes(carrito: Carrito): string {
+    return this.crearFilasEquipos(carrito, true);
+  }
+
+  private crearFilasEquipos(carrito: Carrito, incluirPrecio: boolean): string {
     const items = Object.entries(carrito).filter(
       ([, item]) => typeof item === 'object' && 'nombre' in item,
     );
@@ -341,8 +305,11 @@ export class FormularioComponent implements OnInit {
           </td>
           <td class="serial-code" data-grupo-id="${escapeHtmlValue(key)}">Pendiente de asignación</td>
           <td>${item.cantidad}</td>
-          <td>${item.precio}</td>
-          <td>${item.precio * item.cantidad}</td>
+          ${
+            incluirPrecio
+              ? `<td>${item.precio}</td><td>${item.precio * item.cantidad}</td>`
+              : ''
+          }
         </tr>
       `,
         )

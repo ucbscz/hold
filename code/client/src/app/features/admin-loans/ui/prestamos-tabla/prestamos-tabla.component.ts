@@ -475,7 +475,6 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       if (aIsDocente && !bIsDocente) return -1;
       if (!aIsDocente && bIsDocente) return 1;
 
-      // Fallback to original column sorting handled by sortByColumn
       return 0;
     });
 

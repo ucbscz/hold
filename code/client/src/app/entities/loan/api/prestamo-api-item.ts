@@ -16,13 +16,9 @@ export interface PrestamoApiItem {
   IdContrato: string | null;
   DestinoPrestamo: string;
   UbicacionEquipo?: string | null;
-  Ubicacion_Equipo?: string | null;
   NombreGavetero?: string | null;
-  Nombre_Gavetero?: string | null;
   NombreMueble?: string | null;
-  Nombre_Mueble?: string | null;
   UbicacionMueble?: string | null;
-  Ubicacion_Mueble?: string | null;
   TipoUsuario?: string | null;
   IdCarrera?: number | null;
   NombreMateria?: string | null;

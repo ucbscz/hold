@@ -1,40 +1,27 @@
-<div class="contrato-container">
-  @if (destinoPrestamo === "Clase") {
-    <div class="form-container-docente">
-      <div class="form-group">
-        <label>Carrera</label>
-        <app-custom-select
-          name="carrera"
-          [(ngModel)]="idCarrera"
-          (ngModelChange)="actualizarContrato()"
-          [opciones]="carrerasOpciones"
-          placeholder="Seleccione una carrera"
-        ></app-custom-select>
-      </div>
-      <div class="form-group">
-        <label>Materia</label>
-        <input
-          type="text"
-          class="form-input"
-          [(ngModel)]="nombreMateria"
-          (ngModelChange)="actualizarContrato()"
-          placeholder="Ingrese la materia"
-        />
-      </div>
+<main class="contract-page" aria-labelledby="contract-page-title">
+  <header class="contract-page__heading">
+    <span>Contrato de préstamo</span>
+    <h1 id="contract-page-title">Revisa y firma el contrato</h1>
+    <p>Verifica la información antes de confirmar la solicitud.</p>
+  </header>
+  <section class="contrato-container" aria-label="Vista previa del contrato">
+    <div
+      #contratoContainer
+      class="formulario"
+      [innerHTML]="contenidoHtml"
+    ></div>
+    <div class="botones-container">
+      <button class="boton boton-firmar" (click)="firmar()">
+        <i class="fas fa-signature" aria-hidden="true"></i>
+        Firmar
+      </button>
+      <button (click)="aceptar()" class="boton boton-aceptar">
+        <i class="fas fa-check" aria-hidden="true"></i>
+        Confirmar solicitud
+      </button>
     </div>
-  }
-  <div #contratoContainer class="formulario" [innerHTML]="contenidoHtml"></div>
-  <div class="botones-container">
-    <button class="boton boton-firmar" (click)="firmar()">
-      <i class="icono-firma"></i>
-      Firmar
-    </button>
-    <button (click)="aceptar()" class="boton boton-aceptar">
-      <i class="icono-check"></i>
-      Aceptar
-    </button>
-  </div>
-</div>
+  </section>
+</main>
 @if (clickfirma()) {
   <app-firma
     (firma)="guardarfirma($event)"

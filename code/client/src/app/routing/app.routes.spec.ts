@@ -10,6 +10,7 @@ describe('application routes', () => {
     'perfil',
     'administracion',
     'reserva',
+    'destino',
     'historial',
     'registro',
   ];

@@ -48,6 +48,14 @@ export const routes: Routes = [
       ),
   },
   {
+    path: 'destino',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('@pages/reservation-purpose').then(
+        (page) => page.ReservationPurposeComponent,
+      ),
+  },
+  {
     path: 'historial',
     canActivate: [authGuard],
     loadComponent: () =>
