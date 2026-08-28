@@ -2,7 +2,7 @@ using Hangfire.Dashboard;
 
 namespace IMT_Reservas.Server.Infrastructure.Jobs;
 
-public sealed class HangfireDashboardAuthorizationFilter : IDashboardAuthorizationFilter
+public sealed class HangfireDashboardAccessPolicy : IDashboardAuthorizationFilter
 {
     public bool Authorize(DashboardContext context)
     {

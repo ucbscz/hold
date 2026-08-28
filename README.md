@@ -103,6 +103,8 @@ ASPNETCORE_URLS=http://+:80
 ConnectionStrings__PostgreSQL=Host=ucb_db;Port=5432;Database=IMT_Reservas;Username=postgres;Password=postgres;Pooling=true;MinPoolSize=2;MaxPoolSize=20
 Jwt__Key=<local-secret-with-at-least-32-characters>
 Redis__ConnectionString=ucb_redis:6379
+Redis__Enabled=true
+Hangfire__Enabled=true
 ```
 
 Start the stack:
@@ -127,8 +129,9 @@ docker compose up -d ucb_db ucb_redis
 ```
 
 ```bash
-cd code/server
-dotnet run
+dotnet tool restore
+dotnet ef database update --project code/server/IMT_Reservas.Server.csproj
+dotnet run --project code/server/IMT_Reservas.Server.csproj
 ```
 
 ```bash

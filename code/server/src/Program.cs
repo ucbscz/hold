@@ -261,7 +261,10 @@ builder.Services.AddScoped<IValidator<PrestamoDto>, PrestamoValidator>();
 builder.Services.AddScoped<IValidator<UsuarioDto>, UsuarioValidator>();
 
 var redisConnectionString = builder.Configuration["Redis:ConnectionString"];
-if (!string.IsNullOrWhiteSpace(redisConnectionString))
+var redisEnabled =
+    builder.Configuration.GetValue<bool?>("Redis:Enabled")
+    ?? !builder.Environment.IsDevelopment();
+if (redisEnabled && !string.IsNullOrWhiteSpace(redisConnectionString))
 {
     var redisConfig = ConfigurationOptions.Parse(redisConnectionString);
     redisConfig.ConnectTimeout = 5000;
@@ -308,10 +311,16 @@ builder.Services.AddScoped<AvisoDisponibilidadService>();
 builder.Services.AddScoped<ComentarioEquipoRepository>();
 builder.Services.AddScoped<ComentarioEquipoService>();
 
-builder.Services.AddHangfire(config =>
-    config.UsePostgreSqlStorage(options => options.UseNpgsqlConnection(connectionString))
-);
-builder.Services.AddHangfireServer();
+var hangfireEnabled =
+    builder.Configuration.GetValue<bool?>("Hangfire:Enabled")
+    ?? !builder.Environment.IsDevelopment();
+if (hangfireEnabled)
+{
+    builder.Services.AddHangfire(config =>
+        config.UsePostgreSqlStorage(options => options.UseNpgsqlConnection(connectionString))
+    );
+    builder.Services.AddHangfireServer();
+}
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -405,14 +414,17 @@ app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/api/health");
-app.UseHangfireDashboard(
-    "/hangfire",
-    new DashboardOptions { Authorization = [new HangfireDashboardAuthorizationFilter()] }
-);
-RecurringJob.AddOrUpdate<EstadoPrestamoJob>(
-    "estado-prestamo",
-    job => job.Execute(CancellationToken.None),
-    "*/10 * * * *"
-);
+if (hangfireEnabled)
+{
+    app.UseHangfireDashboard(
+        "/hangfire",
+        new DashboardOptions { Authorization = [new HangfireDashboardAccessPolicy()] }
+    );
+    RecurringJob.AddOrUpdate<EstadoPrestamoJob>(
+        "estado-prestamo",
+        job => job.Execute(CancellationToken.None),
+        "*/10 * * * *"
+    );
+}
 
 await app.RunAsync();

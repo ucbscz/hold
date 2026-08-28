@@ -37,6 +37,8 @@ ASPNETCORE_URLS=http://+:80
 ConnectionStrings__PostgreSQL=Host=ucb_db;Port=5432;Database=IMT_Reservas;Username=postgres;Password=postgres;Pooling=true;MinPoolSize=2;MaxPoolSize=20
 Jwt__Key=<local-secret-with-at-least-32-characters>
 Redis__ConnectionString=ucb_redis:6379
+Redis__Enabled=true
+Hangfire__Enabled=true
 ```
 
 Generate a development key:
@@ -53,6 +55,13 @@ dotnet user-secrets init
 dotnet user-secrets set "ConnectionStrings:PostgreSQL" "Host=localhost;Port=5432;Database=IMT_Reservas;Username=postgres;Password=postgres;Pooling=true;MinPoolSize=2;MaxPoolSize=20"
 dotnet user-secrets set "Jwt:Key" "local_dev_secret_at_least_32_chars!!"
 dotnet user-secrets set "Redis:ConnectionString" "localhost:6379"
+```
+
+Redis and Hangfire are disabled by default in the Development environment. Enable them when testing the complete local infrastructure:
+
+```bash
+dotnet user-secrets set "Redis:Enabled" "true"
+dotnet user-secrets set "Hangfire:Enabled" "true"
 ```
 
 ### Frontend
@@ -90,8 +99,9 @@ docker compose up -d ucb_db ucb_redis
 Run backend:
 
 ```bash
-cd code/server
-dotnet run
+dotnet tool restore
+dotnet ef database update --project code/server/IMT_Reservas.Server.csproj
+dotnet run --project code/server/IMT_Reservas.Server.csproj
 ```
 
 Run frontend:
