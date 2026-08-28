@@ -1,199 +1,208 @@
-<div class="config-container">
-  <div class="config-header">
-    <h2 class="config-title">Configuración del Sistema</h2>
-  </div>
+<section class="config-page" aria-labelledby="config-title">
+  <header class="config-page__header">
+    <h1 id="config-title">Configuración del sistema</h1>
+    <p>Administra las reglas generales de reservas, atención y contratos.</p>
+  </header>
 
-  <div
-    *ngIf="cargando()"
-    class="text-center"
-    style="color: var(--ink-muted); padding: 2rem"
-  >
-    Cargando configuración...
-  </div>
-
-  <div *ngIf="!cargando() && config()" class="config-card">
-    <!-- Contratos -->
-    <div class="config-section">
-      <h3 class="section-title">Préstamos y Contratos</h3>
-      <div class="config-grid">
-        <div class="form-group">
-          <label class="form-label">Monto Mínimo para Contrato (Bs)</label>
-          <input
-            type="number"
-            [(ngModel)]="config()!.MontoMinimoContrato"
-            class="form-input"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Duración Mínima de Reserva (Minutos)</label>
-          <input
-            type="number"
-            [(ngModel)]="config()!.TiempoMinimoReservaMinutos"
-            class="form-input"
-          />
-        </div>
-      </div>
+  @if (cargando()) {
+    <div class="config-page__loading" role="status">
+      Cargando configuración...
     </div>
+  } @else if (config(); as currentConfig) {
+    <form class="config-form" (ngSubmit)="guardar()">
+      <fieldset class="config-section">
+        <legend>Préstamos y contratos</legend>
+        <div class="config-grid">
+          <label class="config-field">
+            <span>Monto mínimo para contrato</span>
+            <span class="config-field__control">
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                name="montoMinimoContrato"
+                [(ngModel)]="currentConfig.MontoMinimoContrato"
+              />
+              <span>Bs</span>
+            </span>
+          </label>
+          <label class="config-field">
+            <span>Duración mínima de reserva</span>
+            <span class="config-field__control">
+              <input
+                type="number"
+                min="30"
+                step="1"
+                name="tiempoMinimoReserva"
+                [(ngModel)]="currentConfig.TiempoMinimoReservaMinutos"
+              />
+              <span>min</span>
+            </span>
+          </label>
+        </div>
+      </fieldset>
 
-    <!-- Horarios -->
-    <div class="config-section">
-      <h3 class="section-title">Horario de Atención</h3>
-      <div class="config-grid">
-        <div class="form-group">
-          <label class="form-label">Hora de Apertura</label>
-          <div class="time-inputs">
-            <input
-              type="number"
-              min="0"
-              max="23"
-              [(ngModel)]="horarioInicioHora"
-              class="form-input time-input-box"
-            />
-            <span style="font-weight: bold; color: var(--ink)">:</span>
-            <input
-              type="number"
-              min="0"
-              max="59"
-              [(ngModel)]="horarioInicioMinuto"
-              class="form-input time-input-box"
-            />
+      <fieldset class="config-section">
+        <legend>Horario de atención</legend>
+        <div class="config-grid">
+          <div class="config-field">
+            <span>Hora de apertura</span>
+            <div class="config-time">
+              <label>
+                <span class="sr-only">Hora de apertura</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="23"
+                  name="horarioInicioHora"
+                  [(ngModel)]="horarioInicioHora"
+                />
+              </label>
+              <span aria-hidden="true">:</span>
+              <label>
+                <span class="sr-only">Minuto de apertura</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  name="horarioInicioMinuto"
+                  [(ngModel)]="horarioInicioMinuto"
+                />
+              </label>
+            </div>
+          </div>
+          <div class="config-field">
+            <span>Hora de cierre</span>
+            <div class="config-time">
+              <label>
+                <span class="sr-only">Hora de cierre</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="23"
+                  name="horarioFinHora"
+                  [(ngModel)]="horarioFinHora"
+                />
+              </label>
+              <span aria-hidden="true">:</span>
+              <label>
+                <span class="sr-only">Minuto de cierre</span>
+                <input
+                  type="number"
+                  min="0"
+                  max="59"
+                  name="horarioFinMinuto"
+                  [(ngModel)]="horarioFinMinuto"
+                />
+              </label>
+            </div>
           </div>
         </div>
-        <div class="form-group">
-          <label class="form-label">Hora de Cierre</label>
-          <div class="time-inputs">
+        @if (!configuracionValida()) {
+          <p class="config-section__hint">
+            La apertura debe ser anterior al cierre y la duración mínima debe
+            ser de 30 minutos.
+          </p>
+        }
+      </fieldset>
+
+      <fieldset class="config-section">
+        <legend>Notificaciones y atrasos</legend>
+        <div class="config-grid">
+          <label class="config-field">
+            <span>Recordatorio antes de la devolución</span>
+            <span class="config-field__control">
+              <input
+                type="number"
+                min="0"
+                step="1"
+                name="tiempoRecordatorio"
+                [(ngModel)]="currentConfig.TiempoRecordatorioPrevioMinutos"
+              />
+              <span>min</span>
+            </span>
+          </label>
+          <label class="config-field">
+            <span>Tiempo de gracia para atraso</span>
+            <span class="config-field__control">
+              <input
+                type="number"
+                min="0"
+                step="1"
+                name="minutosGracia"
+                [(ngModel)]="currentConfig.MinutosGraciaAtraso"
+              />
+              <span>min</span>
+            </span>
+          </label>
+        </div>
+      </fieldset>
+
+      <fieldset class="config-section config-section--signature">
+        <legend>Firma del jefe de carrera</legend>
+        <div class="config-grid">
+          <label class="config-field">
+            <span>Nombre completo</span>
             <input
-              type="number"
-              min="0"
-              max="23"
-              [(ngModel)]="horarioFinHora"
-              class="form-input time-input-box"
+              type="text"
+              name="nombreJefeCarrera"
+              maxlength="255"
+              [(ngModel)]="currentConfig.NombreJefeCarrera"
             />
-            <span style="font-weight: bold; color: var(--ink)">:</span>
-            <input
-              type="number"
-              min="0"
-              max="59"
-              [(ngModel)]="horarioFinMinuto"
-              class="form-input time-input-box"
-            />
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Notificaciones y Tiempos -->
-    <div class="config-section">
-      <h3 class="section-title">Notificaciones y Tiempos</h3>
-      <div class="config-grid">
-        <div class="form-group">
-          <label class="form-label"
-            >Recordatorio Previo (Minutos antes del fin)</label
-          >
-          <input
-            type="number"
-            [(ngModel)]="config()!.TiempoRecordatorioPrevioMinutos"
-            class="form-input"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label"
-            >Tiempo de Gracia para Atraso (Minutos)</label
-          >
-          <input
-            type="number"
-            [(ngModel)]="config()!.MinutosGraciaAtraso"
-            class="form-input"
-          />
-        </div>
-      </div>
-    </div>
-
-    <!-- Firma -->
-    <div class="config-section" style="border-bottom: none; padding-bottom: 0">
-      <h3 class="section-title">Firma Jefe de Carrera</h3>
-      <div class="config-grid">
-        <div class="form-group">
-          <label class="form-label">Nombre del Jefe de Carrera</label>
-          <input
-            type="text"
-            [(ngModel)]="config()!.NombreJefeCarrera"
-            class="form-input"
-          />
-        </div>
-        <div class="form-group">
-          <label class="form-label">Firma (Dibuja la nueva firma aquí)</label>
-          <div
-            style="
-              border: 2px dashed var(--border);
-              border-radius: var(--radius-lg);
-              padding: 1rem;
-              background: var(--bg);
-              margin-top: 0.5rem;
-            "
-          >
-            <app-firma
-              *ngIf="clickfirma()"
-              (firma)="guardarfirma($event)"
-              [clickfirma]="clickfirma"
-            ></app-firma>
-
-            <div
-              style="
-                display: flex;
-                gap: 1rem;
-                justify-content: center;
-                margin-top: 1rem;
-              "
-            >
+          </label>
+          <div class="config-field">
+            <span>Firma registrada</span>
+            <div class="signature-control">
+              @if (currentConfig.FirmaJefeCarreraBase64) {
+                <img
+                  [src]="
+                    currentConfig.FirmaJefeCarreraBase64.startsWith('data:')
+                      ? currentConfig.FirmaJefeCarreraBase64
+                      : 'data:image/png;base64,' +
+                        currentConfig.FirmaJefeCarreraBase64
+                  "
+                  alt="Firma del jefe de carrera"
+                />
+              } @else {
+                <span>Sin firma registrada</span>
+              }
               <button
-                class="boton-guardar"
-                style="
-                  background: var(--surface);
-                  color: var(--ink-secondary);
-                  border: 1px solid var(--border);
-                "
-                (click)="limpiarFirma()"
+                type="button"
+                class="config-button config-button--secondary"
+                (click)="abrirFirma()"
               >
-                Limpiar lienzo
+                <i class="fas fa-pen" aria-hidden="true"></i>
+                Actualizar firma
               </button>
             </div>
           </div>
-
-          <div class="firma-preview" *ngIf="config()!.FirmaJefeCarreraBase64">
-            <p>Firma actual guardada:</p>
-            <img
-              [src]="
-                config()!.FirmaJefeCarreraBase64.startsWith('data:')
-                  ? config()!.FirmaJefeCarreraBase64
-                  : 'data:image/png;base64,' + config()!.FirmaJefeCarreraBase64
-              "
-              alt="Firma Jefe de Carrera"
-            />
-          </div>
         </div>
-      </div>
-    </div>
+      </fieldset>
 
-    <!-- Acciones -->
-    <div class="config-actions">
-      <div
-        *ngIf="mensaje()"
-        class="mensaje-estado"
-        [ngClass]="error() ? 'error' : 'exito'"
-      >
-        {{ mensaje() }}
-      </div>
-      <!-- Empty div for flex spacing when message is empty -->
-      <div *ngIf="!mensaje()"></div>
+      <footer class="config-actions">
+        <p
+          class="config-message"
+          [class.config-message--error]="error()"
+          aria-live="polite"
+        >
+          {{ mensaje() }}
+        </p>
+        <button
+          type="submit"
+          class="config-button config-button--primary"
+          [disabled]="guardando() || !configuracionValida()"
+        >
+          <i class="fas fa-save" aria-hidden="true"></i>
+          {{ guardando() ? "Guardando..." : "Guardar cambios" }}
+        </button>
+      </footer>
+    </form>
+  }
+</section>
 
-      <button
-        class="boton-guardar"
-        [disabled]="guardando()"
-        (click)="guardar()"
-      >
-        {{ guardando() ? "Guardando..." : "Guardar Cambios" }}
-      </button>
-    </div>
-  </div>
-</div>
+@if (clickfirma()) {
+  <app-firma
+    (firma)="guardarfirma($event)"
+    [clickfirma]="clickfirma"
+  ></app-firma>
+}

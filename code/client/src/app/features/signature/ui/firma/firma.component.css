@@ -70,8 +70,15 @@
   background-color: var(--sidebar);
   display: block;
 }
+.signature-error {
+  min-height: 1.25rem;
+  margin: 0.5rem 0 0;
+  color: var(--error);
+  font-size: 0.8rem;
+  text-align: center;
+}
 .buttons {
-  margin-top: 1.25rem;
+  margin-top: 0.5rem;
   display: flex;
   justify-content: center;
   gap: 1rem;

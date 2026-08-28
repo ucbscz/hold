@@ -1,13 +1,19 @@
 <div class="signature-overlay" *ngIf="clickfirma()">
   <div class="signature-container">
-    <button class="close-button" (click)="close()">
+    <button
+      class="close-button"
+      type="button"
+      aria-label="Cerrar"
+      (click)="close()"
+    >
       <img src="assets/x.png" alt="Cerrar" />
     </button>
     <div class="signature-instructions">Firme en el espacio en blanco</div>
     <canvas #signatureCanvas class="signature-pad"></canvas>
+    <p class="signature-error" aria-live="polite">{{ signatureError }}</p>
     <div class="buttons">
-      <button (click)="clearSignature()">Limpiar</button>
-      <button (click)="saveSignature()">Guardar</button>
+      <button type="button" (click)="clearSignature()">Limpiar</button>
+      <button type="button" (click)="saveSignature()">Guardar</button>
     </div>
   </div>
 </div>
