@@ -63,7 +63,7 @@ public class ConfiguracionRepository
         );
 
         if (existing == null)
-            throw new InvalidOperationException("No existe una configuración del sistema para actualizar.");
+            throw new KeyNotFoundException("No existe una configuración del sistema para actualizar.");
 
         _dbContext.Entry(existing).CurrentValues.SetValues(config);
         await _dbContext.SaveChangesAsync(cancellationToken);

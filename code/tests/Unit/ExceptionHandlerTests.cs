@@ -71,15 +71,18 @@ public class ExceptionHandlerTests
     }
 
     [Test]
-    public async Task TryHandleAsync_InvalidOperationException_Returns409()
+    public async Task TryHandleAsync_InvalidOperationException_Returns500WithoutInternalDetails()
     {
         await Handle(new InvalidOperationException("Invalid Op"));
 
-        _httpContext.Response.StatusCode.Should().Be(409);
+        _httpContext.Response.StatusCode.Should().Be(500);
         var response = await GetResponse();
         response.Should().NotBeNull();
-        response!.Status.Should().Be(409);
-        response.Errors.Should().Contain("Invalid Op");
+        response!.Status.Should().Be(500);
+        response.Errors.Should().Contain(
+            "Error interno del servidor. Por favor intenta de nuevo más tarde."
+        );
+        response.Errors.Should().NotContain("Invalid Op");
     }
 
     [Test]

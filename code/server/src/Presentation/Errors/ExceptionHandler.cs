@@ -62,7 +62,10 @@ public sealed class ExceptionHandler : IExceptionHandler
                 StatusCodes.Status409Conflict,
                 ["Conflicto al guardar: registro duplicado o restricción violada"]
             ),
-            InvalidOperationException => (StatusCodes.Status409Conflict, [exception.Message]),
+            InvalidOperationException => (
+                StatusCodes.Status500InternalServerError,
+                ["Error interno del servidor. Por favor intenta de nuevo más tarde."]
+            ),
             ArgumentException => (StatusCodes.Status400BadRequest, [exception.Message]),
             _ => (
                 StatusCodes.Status500InternalServerError,
