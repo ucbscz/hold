@@ -103,10 +103,21 @@ export class AdminConfiguracionesComponent implements OnInit {
   }
 
   private parseHorarios(data: ConfiguracionDto): void {
-    this.horarioInicioHora = Math.floor(data.HorarioInicioMinutos / 60);
-    this.horarioInicioMinuto = data.HorarioInicioMinutos % 60;
-    this.horarioFinHora = Math.floor(data.HorarioFinMinutos / 60);
-    this.horarioFinMinuto = data.HorarioFinMinutos % 60;
+    const inicio = this.normalizarMinutos(data.HorarioInicioMinutos, 8 * 60);
+    const fin = this.normalizarMinutos(data.HorarioFinMinutos, 18 * 60);
+
+    this.horarioInicioHora = Math.floor(inicio / 60);
+    this.horarioInicioMinuto = inicio % 60;
+    this.horarioFinHora = Math.floor(fin / 60);
+    this.horarioFinMinuto = fin % 60;
+  }
+
+  private normalizarMinutos(value: unknown, fallback: number): number {
+    const numericValue = Number(value);
+
+    if (!Number.isFinite(numericValue)) return fallback;
+
+    return Math.min(24 * 60 - 1, Math.max(0, Math.trunc(numericValue)));
   }
 
   private mostrarMensaje(msg: string, esError: boolean): void {

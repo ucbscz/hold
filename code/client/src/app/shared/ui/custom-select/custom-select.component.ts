@@ -217,21 +217,29 @@ export class CustomSelectComponent
         spaceAbove > spaceBelow);
 
     const availableSpace = this.abreHaciaArriba ? spaceAbove : spaceBelow;
-    this.menuMaxHeight = Math.max(80, Math.min(desiredHeight, availableSpace));
-    this.menuWidth = Math.min(
-      triggerRect.width,
-      viewportWidth - viewportPadding * 2,
+    this.menuMaxHeight = this.normalizarMedida(
+      Math.max(80, Math.min(desiredHeight, availableSpace)),
+      80,
     );
-    this.menuLeft = Math.min(
-      Math.max(viewportPadding, triggerRect.left),
-      viewportWidth - this.menuWidth - viewportPadding,
+    this.menuWidth = this.normalizarMedida(
+      Math.min(triggerRect.width, viewportWidth - viewportPadding * 2),
     );
-    this.menuTop = this.abreHaciaArriba
-      ? Math.max(
-          viewportPadding,
-          triggerRect.top - menuGap - this.menuMaxHeight,
-        )
-      : triggerRect.bottom + menuGap;
+    this.menuLeft = this.normalizarMedida(
+      Math.min(
+        Math.max(viewportPadding, triggerRect.left),
+        viewportWidth - this.menuWidth - viewportPadding,
+      ),
+      viewportPadding,
+    );
+    this.menuTop = this.normalizarMedida(
+      this.abreHaciaArriba
+        ? Math.max(
+            viewportPadding,
+            triggerRect.top - menuGap - this.menuMaxHeight,
+          )
+        : triggerRect.bottom + menuGap,
+      viewportPadding,
+    );
     this.menuPosicionado = true;
     if (!this.destruido) this.changeDetector.detectChanges();
 
@@ -331,5 +339,9 @@ export class CustomSelectComponent
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '');
+  }
+
+  private normalizarMedida(valor: number, fallback = 0): number {
+    return Number.isFinite(valor) ? Math.max(0, valor) : fallback;
   }
 }
