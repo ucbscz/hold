@@ -99,7 +99,7 @@ docker compose up -d ucb_db ucb_redis
 Run backend:
 
 ```bash
-psql -U postgres -d IMT_Reservas -f code/database/update.sql
+psql -U postgres -d IMT_Reservas -f code/database/schema.sql
 dotnet run --project code/server/IMT_Reservas.Server.csproj
 ```
 
@@ -163,7 +163,7 @@ pg_restore -U postgres -d IMT_Reservas --clean --if-exists artifacts/releases/da
 | `.NET SDK not found` | Install .NET 8 SDK and restart the terminal. |
 | PostgreSQL or Redis refuses connection | Run `cd code && docker compose up -d ucb_db ucb_redis`. |
 | Backend cannot read secrets | Run the `dotnet user-secrets` commands from `code/server`. |
-| Database schema is outdated | Run `psql -U postgres -d IMT_Reservas -f code/database/update.sql` from the repository root. |
+| Database schema is outdated | Restore the current release backup, or recreate an empty database with `code/database/schema.sql`. |
 | Port `4200` is already in use | Run Angular with another port, for example `ng serve --port 4300`. |
 | Frontend dependencies are missing | Run `npm install` from `code/client`. |
 | Docker backend restarts | Inspect logs with `docker logs -f ucb_server`. |
