@@ -206,6 +206,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   rolSeleccionado: string = '';
   readonly rolesFiltroOpciones: OpcionSelect[] = [
     { value: '', label: 'Todos los roles' },
+    { value: 'administrador', label: 'Administrador' },
     { value: 'docente', label: 'Docente' },
     { value: 'estudiante', label: 'Estudiante' },
   ];

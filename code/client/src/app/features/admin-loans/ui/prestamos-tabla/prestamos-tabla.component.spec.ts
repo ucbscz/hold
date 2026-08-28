@@ -70,6 +70,24 @@ describe('PrestamosTablaComponent', () => {
     ]);
   });
 
+  it('should expose and apply the administrator role filter', () => {
+    cargarPrestamos([
+      crearPrestamo({ id: 1, nombre: 'Administrador', rol: 'administrador' }),
+      crearPrestamo({ id: 2, nombre: 'Docente', rol: 'docente' }),
+    ]);
+
+    component.seleccionarRol('administrador');
+    fixture.detectChanges();
+
+    expect(component.rolesFiltroOpciones).toContain(
+      jasmine.objectContaining({
+        value: 'administrador',
+        label: 'Administrador',
+      }),
+    );
+    expect(nombresRenderizados()).toEqual(['Administrador']);
+  });
+
   it('should render loan table headers without sort buttons', () => {
     cargarPrestamos([
       crearPrestamo({ id: 1, nombre: 'CarnetMayor', carnet: '200' }),
