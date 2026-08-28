@@ -1,6 +1,7 @@
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
@@ -27,10 +28,19 @@ public class ConfiguracionRepository
             return cached.Value;
         }
 
-        var config = await _dbContext.ConfiguracionesSistema.SingleOrDefaultAsync(
-            current => current.Id == DefaultConfigurationId,
-            cancellationToken
-        );
+        ConfiguracionSistema? config;
+        try
+        {
+            config = await _dbContext.ConfiguracionesSistema.SingleOrDefaultAsync(
+                current => current.Id == DefaultConfigurationId,
+                cancellationToken
+            );
+        }
+        catch (PostgresException exception)
+            when (exception.SqlState == PostgresErrorCodes.UndefinedTable)
+        {
+            return ConfiguracionSeed.Default;
+        }
         if (config == null)
         {
             config = ConfiguracionSeed.Default;

@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Npgsql;
 using NUnit.Framework;
 
 namespace IMT_Reservas.Tests.Unit;
@@ -46,6 +47,27 @@ public class ExceptionHandlerTests
         response.Should().NotBeNull();
         response!.Status.Should().Be(409);
         response.Errors.Should().Contain("Conflicto al guardar: registro duplicado o restricción violada");
+    }
+
+    [Test]
+    public async Task TryHandleAsync_DbSchemaException_Returns500()
+    {
+        var postgresException = new PostgresException(
+            "relation does not exist",
+            "ERROR",
+            "ERROR",
+            PostgresErrorCodes.UndefinedTable
+        );
+
+        await Handle(new DbUpdateException("DB Error", postgresException));
+
+        _httpContext.Response.StatusCode.Should().Be(500);
+        var response = await GetResponse();
+        response.Should().NotBeNull();
+        response!.Status.Should().Be(500);
+        response.Errors.Should().Contain(
+            "Error interno del servidor. Por favor intenta de nuevo más tarde."
+        );
     }
 
     [Test]

@@ -33,6 +33,21 @@ public sealed class UsuarioAuthRepository
         CancellationToken cancellationToken = default
     )
     {
+        if (_dbContext.Database.IsRelational())
+        {
+            await _dbContext
+                .Usuarios.IgnoreQueryFilters()
+                .Where(user => user.Carnet == carnet && !user.EstadoEliminado)
+                .ExecuteUpdateAsync(
+                    update =>
+                        update
+                            .SetProperty(user => user.RefreshToken, token)
+                            .SetProperty(user => user.RefreshTokenExpiry, expiry),
+                    cancellationToken
+                );
+            return;
+        }
+
         var entity = await _dbContext
             .Usuarios.IgnoreQueryFilters()
             .FirstOrDefaultAsync(

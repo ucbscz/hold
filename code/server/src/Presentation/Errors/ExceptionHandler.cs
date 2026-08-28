@@ -2,6 +2,7 @@ using System.Text.Json;
 using IMT_Reservas.Server.Application.Abstraction;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace IMT_Reservas.Server.Presentation.Errors;
 
@@ -48,6 +49,15 @@ public sealed class ExceptionHandler : IExceptionHandler
         exception switch
         {
             KeyNotFoundException => (StatusCodes.Status404NotFound, [exception.Message]),
+            DbUpdateException { InnerException: PostgresException postgresException }
+                when IsConstraintViolation(postgresException.SqlState) => (
+                StatusCodes.Status409Conflict,
+                ["Conflicto al guardar: registro duplicado o restricción violada"]
+            ),
+            DbUpdateException { InnerException: PostgresException } => (
+                StatusCodes.Status500InternalServerError,
+                ["Error interno del servidor. Por favor intenta de nuevo más tarde."]
+            ),
             DbUpdateException => (
                 StatusCodes.Status409Conflict,
                 ["Conflicto al guardar: registro duplicado o restricción violada"]
@@ -59,6 +69,13 @@ public sealed class ExceptionHandler : IExceptionHandler
                 ["Error interno del servidor. Por favor intenta de nuevo más tarde."]
             ),
         };
+
+    private static bool IsConstraintViolation(string sqlState) =>
+        sqlState
+            is PostgresErrorCodes.UniqueViolation
+                or PostgresErrorCodes.ForeignKeyViolation
+                or PostgresErrorCodes.CheckViolation
+                or PostgresErrorCodes.NotNullViolation;
 
     private void LogException(Exception exception, int statusCode)
     {
