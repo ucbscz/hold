@@ -36,15 +36,6 @@
   font-size: 0.95rem;
 }
 
-.config-page__scope {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--sp-2);
-  color: var(--ink-muted);
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
 .config-page__loading {
   display: flex;
   min-height: 12rem;

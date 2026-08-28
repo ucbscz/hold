@@ -225,7 +225,8 @@
   gap: var(--sp-3);
 }
 .cart__actions--between {
-  justify-content: space-between;
+  width: auto;
+  justify-content: center;
 }
 .cart__button--secondary {
   background: var(--surface);
@@ -360,6 +361,7 @@
     font-size: 0.9rem;
   }
   .cart__actions--between {
+    width: 100%;
     align-items: stretch;
     flex-direction: column-reverse;
   }
