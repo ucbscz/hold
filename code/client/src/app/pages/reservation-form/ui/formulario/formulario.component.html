@@ -1,6 +1,6 @@
 <main class="contract-page" aria-labelledby="contract-page-title">
   <header class="contract-page__heading">
-    <span>Contrato de préstamo</span>
+    <span>Paso final</span>
     <h1 id="contract-page-title">Revisa y firma el contrato</h1>
     <p>Verifica la información antes de confirmar la solicitud.</p>
   </header>
@@ -11,14 +11,24 @@
       [innerHTML]="contenidoHtml"
     ></div>
     <div class="botones-container">
-      <button class="boton boton-firmar" (click)="firmar()">
-        <i class="fas fa-signature" aria-hidden="true"></i>
-        Firmar
+      <button
+        type="button"
+        class="boton boton-anterior"
+        (click)="volverAlDestino()"
+      >
+        <i class="fas fa-arrow-left" aria-hidden="true"></i>
+        Anterior
       </button>
-      <button (click)="aceptar()" class="boton boton-aceptar">
-        <i class="fas fa-check" aria-hidden="true"></i>
-        Confirmar solicitud
-      </button>
+      <div class="botones-container__primary">
+        <button type="button" class="boton boton-firmar" (click)="firmar()">
+          <i class="fas fa-signature" aria-hidden="true"></i>
+          Firmar
+        </button>
+        <button type="button" (click)="aceptar()" class="boton boton-aceptar">
+          <i class="fas fa-check" aria-hidden="true"></i>
+          Confirmar solicitud
+        </button>
+      </div>
     </div>
   </section>
 </main>

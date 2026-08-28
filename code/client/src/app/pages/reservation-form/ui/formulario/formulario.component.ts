@@ -23,7 +23,7 @@ import {
   PantallaCargaComponent,
 } from '@shared/ui';
 import { finalize } from 'rxjs';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 
 const CONFLICT_STATUS = 409;
 const UNPROCESSABLE_ENTITY_STATUS = 422;
@@ -72,6 +72,7 @@ export class FormularioComponent implements OnInit {
     private readonly mandarprestamo: PrestamosAPIService,
     private readonly loanReturnNavigation: LoanReturnNavigationService,
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
     private readonly configuracionService: ConfiguracionService,
   ) {}
 
@@ -268,6 +269,17 @@ export class FormularioComponent implements OnInit {
 
   redirigirAnterior(): void {
     void this.loanReturnNavigation.returnToPreviousPage();
+  }
+
+  volverAlDestino(): void {
+    void this.router.navigate(['/destino'], {
+      queryParams: {
+        destino: this.destinoPrestamo,
+        idCarrera: this.idCarrera,
+        nombreCarrera: this.nombreCarrera || null,
+        nombreMateria: this.nombreMateria || null,
+      },
+    });
   }
 
   guardarfirma(signatureData: string): void {

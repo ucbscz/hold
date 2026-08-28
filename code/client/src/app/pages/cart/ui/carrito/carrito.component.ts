@@ -95,6 +95,14 @@ export class CarritoComponent implements OnDestroy {
     });
   }
 
+  previousStep(): void {
+    void this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { step: 1 },
+      queryParamsHandling: 'merge',
+    });
+  }
+
   continuarAlDestino(): void {
     const validacion = this.validacionFechas();
 

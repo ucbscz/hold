@@ -81,13 +81,25 @@
           <i class="fas fa-ban"></i> {{ motivoBloqueo() }}
         </div>
       }
-      <button
-        (click)="continuarAlDestino()"
-        class="cart__button"
-        [disabled]="botonDeshabilitado()"
-      >
-        Siguiente
-      </button>
+      <div class="cart__actions cart__actions--between">
+        <button
+          type="button"
+          (click)="previousStep()"
+          class="cart__button cart__button--secondary"
+        >
+          <i class="fas fa-arrow-left" aria-hidden="true"></i>
+          Anterior
+        </button>
+        <button
+          type="button"
+          (click)="continuarAlDestino()"
+          class="cart__button"
+          [disabled]="botonDeshabilitado()"
+        >
+          Siguiente
+          <i class="fas fa-arrow-right" aria-hidden="true"></i>
+        </button>
+      </div>
     }
     @if (errorSolicitudVisible()) {
       <app-mostrarerror

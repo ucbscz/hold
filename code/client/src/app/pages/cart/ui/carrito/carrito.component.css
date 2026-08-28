@@ -205,6 +205,7 @@
   cursor: pointer;
   transition: var(--btn-transition);
   box-shadow: 0 2px 8px rgba(255, 216, 20, 0.3);
+  gap: var(--sp-2);
 }
 @media (hover: hover) and (pointer: fine) {
   .cart__button:not(:disabled):hover {
@@ -221,6 +222,24 @@
   display: flex;
   justify-content: center;
   width: 100%;
+  gap: var(--sp-3);
+}
+.cart__actions--between {
+  justify-content: space-between;
+}
+.cart__button--secondary {
+  background: var(--surface);
+  color: var(--ink-secondary);
+  border: 1px solid var(--border);
+  box-shadow: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .cart__button--secondary:not(:disabled):hover {
+    background: var(--sidebar);
+    border-color: var(--border-strong);
+    box-shadow: none;
+    color: var(--ink);
+  }
 }
 .cart__button:disabled {
   cursor: not-allowed;
@@ -271,6 +290,10 @@
   .cart__button {
     width: 100%;
     max-width: 300px;
+  }
+  .cart__actions--between .cart__button {
+    width: auto;
+    min-width: 8.75rem;
   }
   .cart__page-heading {
     margin-bottom: var(--sp-5);
@@ -335,6 +358,14 @@
   .cart__button {
     padding: 0.6rem 1.5rem;
     font-size: 0.9rem;
+  }
+  .cart__actions--between {
+    align-items: stretch;
+    flex-direction: column-reverse;
+  }
+  .cart__actions--between .cart__button {
+    width: 100%;
+    max-width: none;
   }
   .cart__page-heading h1 {
     font-size: 1.625rem;
