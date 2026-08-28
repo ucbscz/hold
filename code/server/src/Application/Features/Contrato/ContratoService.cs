@@ -28,7 +28,11 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
         _audit = audit;
     }
 
-    public async Task<Result<ContratoDto>> CreateForPrestamo(int prestamoId, string htmlContent)
+    public async Task<Result<ContratoDto>> CreateForPrestamo(
+        int prestamoId,
+        string htmlContent,
+        CancellationToken cancellationToken = default
+    )
     {
         string sanitizedHtml;
 
@@ -42,12 +46,12 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
         }
 
         var dto = new ContratoDto { ContratoHtml = sanitizedHtml, PrestamoId = prestamoId };
-        var validation = await Validator.ValidateAsync(dto);
+        var validation = await Validator.ValidateAsync(dto, cancellationToken);
 
         if (!validation.IsValid)
             return validation.ToResult<ContratoDto>();
 
-        var loan = await Repository.FindPrestamoById(prestamoId);
+        var loan = await Repository.FindPrestamoById(prestamoId, cancellationToken);
 
         if (loan == null)
             return Result<ContratoDto>.Error("Préstamo no existe");
@@ -64,7 +68,7 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
             );
 
         loan.IdContrato = result.Value.Id;
-        await Repository.SavePrestamo(loan);
+        await Repository.SavePrestamo(loan, cancellationToken);
         await _audit.Log(
             AuditAccion.RegistrarContrato,
             "Prestamo",
@@ -93,13 +97,14 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
     public async Task<Result<ContratoDto>> GetByPrestamoId(
         int prestamoId,
         string carnet,
-        bool isAdmin
+        bool isAdmin,
+        CancellationToken cancellationToken = default
     )
     {
-        if (!await Repository.CanAccess(prestamoId, carnet, isAdmin))
+        if (!await Repository.CanAccess(prestamoId, carnet, isAdmin, cancellationToken))
             return Result<ContratoDto>.NotFound();
 
-        var result = await Repository.GetEntityByPrestamoId(prestamoId);
+        var result = await Repository.GetEntityByPrestamoId(prestamoId, cancellationToken);
 
         if (!result.IsSuccess)
             return Result<ContratoDto>.Error(
@@ -109,7 +114,7 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
         var dto = MapToDto(result.Value);
         dto.ContratoHtml = _contractHtml.RenderEquipment(
             dto.ContratoHtml ?? string.Empty,
-            await _prestamos.GetContractEquipment(prestamoId)
+            await _prestamos.GetContractEquipment(prestamoId, cancellationToken)
         );
 
         return Result<ContratoDto>.Success(dto);

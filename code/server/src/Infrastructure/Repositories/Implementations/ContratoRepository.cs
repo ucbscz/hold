@@ -13,18 +13,21 @@ public class ContratoRepository : Repository<ContratoEntity, ContratoDto>
     public ContratoRepository(ApplicationDbContext dbContext, ContratoMapper mapper)
         : base(dbContext, mapper) { }
 
-    public async Task<Result<ContratoEntity>> GetEntityByPrestamoId(int prestamoId)
+    public async Task<Result<ContratoEntity>> GetEntityByPrestamoId(
+        int prestamoId,
+        CancellationToken cancellationToken = default
+    )
     {
         var loan = await DbContext
             .Prestamos.AsNoTracking()
-            .FirstOrDefaultAsync(loan => loan.Id == prestamoId);
+            .FirstOrDefaultAsync(loan => loan.Id == prestamoId, cancellationToken);
 
         if (loan == null || !loan.IdContrato.HasValue)
             return Result<ContratoEntity>.Error("Préstamo no encontrado o no tiene contrato");
 
         var contract = await DbContext
             .Contratos.AsNoTracking()
-            .FirstOrDefaultAsync(contract => contract.Id == loan.IdContrato.Value);
+            .FirstOrDefaultAsync(contract => contract.Id == loan.IdContrato.Value, cancellationToken);
 
         if (contract == null)
             return Result<ContratoEntity>.Error("Contrato no encontrado");
@@ -32,11 +35,16 @@ public class ContratoRepository : Repository<ContratoEntity, ContratoDto>
         return Result<ContratoEntity>.Success(contract);
     }
 
-    public async Task<bool> CanAccess(int prestamoId, string carnet, bool isAdmin) =>
+    public async Task<bool> CanAccess(
+        int prestamoId,
+        string carnet,
+        bool isAdmin,
+        CancellationToken cancellationToken = default
+    ) =>
         isAdmin
         || await DbContext.Prestamos.AsNoTracking().AnyAsync(loan =>
             loan.Id == prestamoId && loan.Carnet == carnet
-        );
+        , cancellationToken);
 
     public override async Task<Result<object>> Delete(int id)
     {
@@ -60,12 +68,21 @@ public class ContratoRepository : Repository<ContratoEntity, ContratoDto>
         return Result<object>.Success(new { });
     }
 
-    public async Task<PrestamoEntity?> FindPrestamoById(int prestamoId) =>
-        await DbContext.Prestamos.FirstOrDefaultAsync(loan => loan.Id == prestamoId);
+    public async Task<PrestamoEntity?> FindPrestamoById(
+        int prestamoId,
+        CancellationToken cancellationToken = default
+    ) =>
+        await DbContext.Prestamos.FirstOrDefaultAsync(
+            loan => loan.Id == prestamoId,
+            cancellationToken
+        );
 
-    public async Task SavePrestamo(PrestamoEntity loan)
+    public async Task SavePrestamo(
+        PrestamoEntity loan,
+        CancellationToken cancellationToken = default
+    )
     {
         DbContext.Prestamos.Update(loan);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(cancellationToken);
     }
 }
