@@ -78,7 +78,7 @@
       <button
         type="submit"
         class="login-button"
-        [disabled]="!email || !contrasena"
+        [disabled]="!email || !contrasena || loading"
       >
         @if (!loading) {
           <span>Ingresar</span>

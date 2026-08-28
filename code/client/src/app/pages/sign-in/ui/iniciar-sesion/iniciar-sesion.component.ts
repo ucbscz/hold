@@ -31,7 +31,9 @@ export class IniciarSesionComponent {
     private readonly authService: AuthService,
   ) {}
 
-  login() {
+  login(): void {
+    if (this.loading) return;
+
     this.loading = true;
     this.usuarioapi.iniciarSesion(this.email, this.contrasena).subscribe({
       next: (data) => {
@@ -59,7 +61,7 @@ export class IniciarSesionComponent {
       },
     });
   }
-  registrarUsuario() {
+  registrarUsuario(): void {
     this.router.navigate(['/registro']);
   }
 
