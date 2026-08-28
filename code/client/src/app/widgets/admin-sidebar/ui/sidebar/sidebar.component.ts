@@ -22,6 +22,7 @@ const ICONS: Record<string, string> = {
   Muebles: 'fas fa-chair',
   Mantenimientos: 'fas fa-wrench',
   'Empresas de Mantenimiento': 'fas fa-building',
+  Configuraciones: 'fas fa-sliders',
 };
 
 @Component({

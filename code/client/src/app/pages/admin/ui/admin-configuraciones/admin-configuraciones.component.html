@@ -1,17 +1,32 @@
-<section class="config-page" aria-labelledby="config-title">
+<main class="config-page" aria-labelledby="config-title">
   <header class="config-page__header">
-    <h1 id="config-title">Configuración del sistema</h1>
-    <p>Administra las reglas generales de reservas, atención y contratos.</p>
+    <div>
+      <h1 id="config-title">Configuración</h1>
+      <p>Reglas globales para reservas, avisos y contratos.</p>
+    </div>
+    <span class="config-page__scope">
+      <i class="fas fa-shield-alt" aria-hidden="true"></i>
+      Solo administradores
+    </span>
   </header>
 
   @if (cargando()) {
     <div class="config-page__loading" role="status">
+      <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
       Cargando configuración...
     </div>
   } @else if (config(); as currentConfig) {
     <form class="config-form" (ngSubmit)="guardar()">
-      <fieldset class="config-section">
-        <legend>Préstamos y contratos</legend>
+      <section class="config-section" aria-labelledby="loans-settings-title">
+        <header class="config-section__intro">
+          <span class="config-section__icon">
+            <i class="fas fa-file-contract" aria-hidden="true"></i>
+          </span>
+          <div>
+            <h2 id="loans-settings-title">Préstamos y contratos</h2>
+            <p>Define cuándo se genera un contrato y la duración mínima.</p>
+          </div>
+        </header>
         <div class="config-grid">
           <label class="config-field">
             <span>Monto mínimo para contrato</span>
@@ -40,77 +55,98 @@
             </span>
           </label>
         </div>
-      </fieldset>
+      </section>
 
-      <fieldset class="config-section">
-        <legend>Horario de atención</legend>
-        <div class="config-grid">
-          <div class="config-field">
-            <span>Hora de apertura</span>
-            <div class="config-time">
-              <label>
-                <span class="sr-only">Hora de apertura</span>
-                <input
-                  type="number"
-                  min="0"
-                  max="23"
-                  name="horarioInicioHora"
-                  [(ngModel)]="horarioInicioHora"
-                />
-              </label>
-              <span aria-hidden="true">:</span>
-              <label>
-                <span class="sr-only">Minuto de apertura</span>
-                <input
-                  type="number"
-                  min="0"
-                  max="59"
-                  name="horarioInicioMinuto"
-                  [(ngModel)]="horarioInicioMinuto"
-                />
-              </label>
+      <section class="config-section" aria-labelledby="schedule-settings-title">
+        <header class="config-section__intro">
+          <span class="config-section__icon">
+            <i class="fas fa-clock" aria-hidden="true"></i>
+          </span>
+          <div>
+            <h2 id="schedule-settings-title">Horario de atención</h2>
+            <p>Limita las reservas al intervalo operativo del laboratorio.</p>
+          </div>
+        </header>
+        <div>
+          <div class="config-grid">
+            <div class="config-field">
+              <span>Hora de apertura</span>
+              <div class="config-time">
+                <label>
+                  <span class="sr-only">Hora de apertura</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="23"
+                    name="horarioInicioHora"
+                    [(ngModel)]="horarioInicioHora"
+                  />
+                </label>
+                <span aria-hidden="true">:</span>
+                <label>
+                  <span class="sr-only">Minuto de apertura</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    name="horarioInicioMinuto"
+                    [(ngModel)]="horarioInicioMinuto"
+                  />
+                </label>
+              </div>
+            </div>
+            <div class="config-field">
+              <span>Hora de cierre</span>
+              <div class="config-time">
+                <label>
+                  <span class="sr-only">Hora de cierre</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="23"
+                    name="horarioFinHora"
+                    [(ngModel)]="horarioFinHora"
+                  />
+                </label>
+                <span aria-hidden="true">:</span>
+                <label>
+                  <span class="sr-only">Minuto de cierre</span>
+                  <input
+                    type="number"
+                    min="0"
+                    max="59"
+                    name="horarioFinMinuto"
+                    [(ngModel)]="horarioFinMinuto"
+                  />
+                </label>
+              </div>
             </div>
           </div>
-          <div class="config-field">
-            <span>Hora de cierre</span>
-            <div class="config-time">
-              <label>
-                <span class="sr-only">Hora de cierre</span>
-                <input
-                  type="number"
-                  min="0"
-                  max="23"
-                  name="horarioFinHora"
-                  [(ngModel)]="horarioFinHora"
-                />
-              </label>
-              <span aria-hidden="true">:</span>
-              <label>
-                <span class="sr-only">Minuto de cierre</span>
-                <input
-                  type="number"
-                  min="0"
-                  max="59"
-                  name="horarioFinMinuto"
-                  [(ngModel)]="horarioFinMinuto"
-                />
-              </label>
-            </div>
-          </div>
+          @if (!configuracionValida()) {
+            <p class="config-section__hint">
+              La apertura debe ser anterior al cierre y la reserva mínima debe
+              durar 30 minutos.
+            </p>
+          }
         </div>
-        @if (!configuracionValida()) {
-          <p class="config-section__hint">
-            La apertura debe ser anterior al cierre y la duración mínima debe
-            ser de 30 minutos.
-          </p>
-        }
-      </fieldset>
+      </section>
 
-      <fieldset class="config-section">
-        <legend>Notificaciones y atrasos</legend>
+      <section
+        class="config-section"
+        aria-labelledby="notification-settings-title"
+      >
+        <header class="config-section__intro">
+          <span class="config-section__icon">
+            <i class="fas fa-bell" aria-hidden="true"></i>
+          </span>
+          <div>
+            <h2 id="notification-settings-title">Avisos y atrasos</h2>
+            <p>Ajusta la anticipación de los avisos y el tiempo de gracia.</p>
+          </div>
+        </header>
         <div class="config-grid">
           <label class="config-field">
-            <span>Recordatorio antes de la devolución</span>
+            <span>Recordatorio antes de devolver</span>
             <span class="config-field__control">
               <input
                 type="number"
@@ -136,13 +172,24 @@
             </span>
           </label>
         </div>
-      </fieldset>
+      </section>
 
-      <fieldset class="config-section config-section--signature">
-        <legend>Firma del jefe de carrera</legend>
-        <div class="config-grid">
+      <section
+        class="config-section"
+        aria-labelledby="signature-settings-title"
+      >
+        <header class="config-section__intro">
+          <span class="config-section__icon">
+            <i class="fas fa-signature" aria-hidden="true"></i>
+          </span>
+          <div>
+            <h2 id="signature-settings-title">Firma institucional</h2>
+            <p>Datos del responsable que aparecen en los contratos.</p>
+          </div>
+        </header>
+        <div class="config-grid config-grid--signature">
           <label class="config-field">
-            <span>Nombre completo</span>
+            <span>Nombre del jefe de carrera</span>
             <input
               type="text"
               name="nombreJefeCarrera"
@@ -153,31 +200,33 @@
           <div class="config-field">
             <span>Firma registrada</span>
             <div class="signature-control">
-              @if (currentConfig.FirmaJefeCarreraBase64) {
-                <img
-                  [src]="
-                    currentConfig.FirmaJefeCarreraBase64.startsWith('data:')
-                      ? currentConfig.FirmaJefeCarreraBase64
-                      : 'data:image/png;base64,' +
-                        currentConfig.FirmaJefeCarreraBase64
-                  "
-                  alt="Firma del jefe de carrera"
-                />
-              } @else {
-                <span>Sin firma registrada</span>
-              }
+              <div class="signature-control__preview">
+                @if (currentConfig.FirmaJefeCarreraBase64) {
+                  <img
+                    [src]="
+                      currentConfig.FirmaJefeCarreraBase64.startsWith('data:')
+                        ? currentConfig.FirmaJefeCarreraBase64
+                        : 'data:image/png;base64,' +
+                          currentConfig.FirmaJefeCarreraBase64
+                    "
+                    alt="Firma del jefe de carrera"
+                  />
+                } @else {
+                  <span>Sin firma registrada</span>
+                }
+              </div>
               <button
                 type="button"
-                class="config-button config-button--secondary"
+                class="btn btn-secondary"
                 (click)="abrirFirma()"
               >
                 <i class="fas fa-pen" aria-hidden="true"></i>
-                Actualizar firma
+                Cambiar firma
               </button>
             </div>
           </div>
         </div>
-      </fieldset>
+      </section>
 
       <footer class="config-actions">
         <p
@@ -189,7 +238,7 @@
         </p>
         <button
           type="submit"
-          class="config-button config-button--primary"
+          class="btn btn-primary"
           [disabled]="guardando() || !configuracionValida()"
         >
           <i class="fas fa-save" aria-hidden="true"></i>
@@ -198,7 +247,7 @@
       </footer>
     </form>
   }
-</section>
+</main>
 
 @if (clickfirma()) {
   <app-firma

@@ -18,6 +18,12 @@ describe('UsuariosTablaComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('should expose docente in the role filter', () => {
+    expect(component.rolesFiltroOpciones).toContain(
+      jasmine.objectContaining({ value: 'docente', label: 'Docente' }),
+    );
+  });
+
   it('should combine role and career filters', () => {
     component.usuarioscopia = [
       {

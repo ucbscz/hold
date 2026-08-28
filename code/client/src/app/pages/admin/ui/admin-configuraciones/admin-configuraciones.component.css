@@ -4,15 +4,19 @@
 }
 
 .config-page {
-  width: min(100%, 960px);
+  width: min(100%, 1180px);
   margin: 0 auto;
   padding: var(--sp-8) var(--sp-5) 5rem;
-  font-family: var(--font);
   color: var(--ink);
+  font-family: var(--font);
 }
 
 .config-page__header {
-  margin-bottom: var(--sp-7);
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-5);
+  margin-bottom: var(--sp-8);
 }
 
 .config-page__header h1,
@@ -22,44 +26,82 @@
 
 .config-page__header h1 {
   font-size: 2rem;
-  line-height: 1.2;
   font-weight: 800;
+  line-height: 1.2;
 }
 
 .config-page__header p {
   margin-top: var(--sp-2);
   color: var(--ink-secondary);
   font-size: 0.95rem;
-  line-height: 1.5;
+}
+
+.config-page__scope {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
 }
 
 .config-page__loading {
-  padding: var(--sp-8) 0;
+  display: flex;
+  min-height: 12rem;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
   color: var(--ink-muted);
-  text-align: center;
 }
 
 .config-form {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
+  border-top: 1px solid var(--border);
 }
 
 .config-section {
-  margin: 0;
-  padding: var(--sp-6);
-  border: 0;
+  display: grid;
+  grid-template-columns: minmax(15rem, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(2rem, 5vw, 5rem);
+  padding: var(--sp-8) 0;
   border-bottom: 1px solid var(--border);
 }
 
-.config-section legend {
-  width: 100%;
-  margin-bottom: var(--sp-5);
-  padding: 0;
-  color: var(--ink);
+.config-section__intro {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--sp-4);
+}
+
+.config-section__intro h2,
+.config-section__intro p {
+  margin: 0;
+}
+
+.config-section__intro h2 {
   font-size: 1rem;
   font-weight: 750;
+  line-height: 1.35;
+}
+
+.config-section__intro p {
+  max-width: 23rem;
+  margin-top: var(--sp-2);
+  color: var(--ink-secondary);
+  font-size: 0.82rem;
+  line-height: 1.55;
+}
+
+.config-section__icon {
+  display: inline-flex;
+  width: 2.5rem;
+  height: 2.5rem;
+  flex: 0 0 2.5rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  color: var(--ink-secondary);
 }
 
 .config-grid {
@@ -68,35 +110,39 @@
   gap: var(--sp-5);
 }
 
+.config-grid--signature {
+  grid-template-columns: minmax(12rem, 0.8fr) minmax(16rem, 1.2fr);
+}
+
 .config-field {
   display: flex;
   min-width: 0;
   flex-direction: column;
   gap: var(--sp-2);
   color: var(--ink-secondary);
-  font-size: 0.875rem;
+  font-size: 0.82rem;
   font-weight: 650;
 }
 
 .config-field input {
   width: 100%;
   min-width: 0;
-  min-height: 46px;
+  min-height: 44px;
   padding: 0 0.9rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
   outline: none;
   background: var(--surface);
   color: var(--ink);
-  font: 500 0.95rem var(--font);
+  font: 500 0.9rem var(--font);
   transition:
     border-color var(--t-fast),
     box-shadow var(--t-fast);
 }
 
 .config-field input:focus {
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px var(--interactive-subtle);
+  border-color: var(--interactive-text);
+  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
 }
 
 .config-field__control {
@@ -110,8 +156,8 @@
 }
 
 .config-field__control:focus-within {
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px var(--interactive-subtle);
+  border-color: var(--interactive-text);
+  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
 }
 
 .config-field__control input,
@@ -121,9 +167,9 @@
 }
 
 .config-field__control > span {
-  padding: 0 0.9rem;
+  padding: 0 var(--sp-4);
   color: var(--ink-muted);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
 }
 
 .config-time {
@@ -134,90 +180,65 @@
 }
 
 .config-time > span {
-  color: var(--ink-secondary);
+  color: var(--ink-muted);
   font-size: 1.1rem;
 }
 
 .config-section__hint {
   margin: var(--sp-3) 0 0;
   color: var(--error);
-  font-size: 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 600;
 }
 
 .signature-control {
-  display: grid;
-  grid-template-columns: minmax(150px, 1fr) auto;
+  display: flex;
   align-items: center;
   gap: var(--sp-4);
-  min-height: 110px;
-  padding: var(--sp-3);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg);
 }
 
-.signature-control img {
-  width: 100%;
-  height: 82px;
-  object-fit: contain;
+.signature-control__preview {
+  display: flex;
+  width: min(100%, 14rem);
+  min-width: 10rem;
+  height: 5.5rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   background: var(--surface);
 }
 
-.signature-control > span {
+.signature-control__preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.signature-control__preview span {
   color: var(--ink-muted);
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 500;
-  text-align: center;
 }
 
 .config-actions {
   display: flex;
+  min-height: 6rem;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-end;
   gap: var(--sp-4);
-  padding: var(--sp-5) var(--sp-6);
 }
 
 .config-message {
-  min-height: 1.25rem;
-  margin: 0;
+  margin: 0 auto 0 0;
   color: var(--success);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   font-weight: 650;
 }
 
 .config-message--error {
   color: var(--error);
-}
-
-.config-button {
-  display: inline-flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  gap: var(--sp-2);
-  padding: 0 var(--btn-pad-x);
-  border-radius: var(--btn-radius);
-  cursor: pointer;
-  font: var(--btn-font-weight) var(--btn-font-size) var(--font);
-  transition: var(--btn-transition);
-}
-
-.config-button--primary {
-  border: 1px solid var(--brand);
-  background: var(--brand);
-  color: var(--brand-text);
-}
-
-.config-button--secondary {
-  border: 1px solid var(--border);
-  background: var(--surface);
-  color: var(--ink-secondary);
-}
-
-.config-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
 }
 
 .sr-only {
@@ -231,57 +252,63 @@
   border: 0;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .config-button--primary:not(:disabled):hover {
-    background: var(--brand-hover);
+@media (max-width: 900px) {
+  .config-section {
+    grid-template-columns: 1fr;
+    gap: var(--sp-6);
   }
 
-  .config-button--secondary:hover {
-    border-color: var(--border-strong);
-    background: var(--sidebar);
-    color: var(--ink);
+  .config-section__intro p {
+    max-width: none;
   }
 }
 
-@media (max-width: 720px) {
+@media (max-width: 640px) {
   .config-page {
     padding: var(--sp-6) var(--sp-4) 4rem;
+  }
+
+  .config-page__header {
+    align-items: flex-start;
+    flex-direction: column;
+    margin-bottom: var(--sp-6);
   }
 
   .config-page__header h1 {
     font-size: 1.625rem;
   }
 
-  .config-grid {
-    grid-template-columns: 1fr;
+  .config-section {
+    padding: var(--sp-6) 0;
   }
 
-  .config-section,
-  .config-actions {
-    padding-right: var(--sp-4);
-    padding-left: var(--sp-4);
+  .config-grid,
+  .config-grid--signature {
+    grid-template-columns: 1fr;
   }
 
   .signature-control {
-    grid-template-columns: 1fr;
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .signature-control__preview {
+    width: 100%;
+    max-width: none;
   }
 
   .config-actions {
     align-items: stretch;
     flex-direction: column;
+    padding-top: var(--sp-5);
   }
 
-  .config-button--primary {
+  .config-message {
+    min-height: 1.25rem;
+    margin: 0;
+  }
+
+  .config-actions .btn {
     width: 100%;
-  }
-}
-
-@media (max-width: 380px) {
-  .config-time {
-    gap: var(--sp-1);
-  }
-
-  .config-field input {
-    padding: 0 0.65rem;
   }
 }

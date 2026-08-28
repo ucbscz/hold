@@ -66,6 +66,7 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
   readonly rolesFiltroOpciones: OpcionSelect[] = [
     { value: '', label: 'Todos los roles' },
     { value: 'administrador', label: 'Administrador' },
+    { value: 'docente', label: 'Docente' },
     { value: 'estudiante', label: 'Estudiante' },
   ];
   carrerasFiltroOpciones: OpcionSelect[] = [
