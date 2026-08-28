@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
@@ -14,17 +15,24 @@ public sealed class UsuarioAuthRepository
     public async Task<(UsuarioEntity? Usuario, string? CarreraNombre)> GetByEmailWithCarrera(
         string email,
         CancellationToken cancellationToken = default
-    ) => Map(await ActiveUsers().FirstOrDefaultAsync(item => item.Email == email, cancellationToken));
+    ) =>
+        Map(
+            await GetActiveUser(
+                user => user.Email == email,
+                cancellationToken
+            )
+        );
 
     public async Task<(UsuarioEntity? Usuario, string? CarreraNombre)> GetByRefreshTokenWithCarrera(
         string token,
         CancellationToken cancellationToken = default
-    ) => Map(
-        await ActiveUsers().FirstOrDefaultAsync(
-            item => item.RefreshToken == token,
-            cancellationToken
-        )
-    );
+    ) =>
+        Map(
+            await GetActiveUser(
+                user => user.RefreshToken == token,
+                cancellationToken
+            )
+        );
 
     public async Task UpdateRefreshToken(
         string carnet,
@@ -33,21 +41,6 @@ public sealed class UsuarioAuthRepository
         CancellationToken cancellationToken = default
     )
     {
-        if (_dbContext.Database.IsRelational())
-        {
-            await _dbContext
-                .Usuarios.IgnoreQueryFilters()
-                .Where(user => user.Carnet == carnet && !user.EstadoEliminado)
-                .ExecuteUpdateAsync(
-                    update =>
-                        update
-                            .SetProperty(user => user.RefreshToken, token)
-                            .SetProperty(user => user.RefreshTokenExpiry, expiry),
-                    cancellationToken
-                );
-            return;
-        }
-
         var entity = await _dbContext
             .Usuarios.IgnoreQueryFilters()
             .FirstOrDefaultAsync(
@@ -112,11 +105,15 @@ public sealed class UsuarioAuthRepository
         return updated == 1;
     }
 
-    private IQueryable<UsuarioAuthData> ActiveUsers() =>
+    private Task<UsuarioAuthData?> GetActiveUser(
+        Expression<Func<UsuarioEntity, bool>> predicate,
+        CancellationToken cancellationToken
+    ) =>
         _dbContext
             .Usuarios.AsNoTracking()
             .IgnoreQueryFilters()
             .Where(user => !user.EstadoEliminado)
+            .Where(predicate)
             .Join(
                 _dbContext
                     .Carreras.AsNoTracking()
@@ -142,7 +139,8 @@ public sealed class UsuarioAuthRepository
                         user.RefreshTokenExpiry,
                         career.Nombre
                     )
-            );
+            )
+            .FirstOrDefaultAsync(cancellationToken);
 
     private static (UsuarioEntity? Usuario, string? CarreraNombre) Map(UsuarioAuthData? data)
     {
