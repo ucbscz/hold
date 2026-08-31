@@ -4,7 +4,7 @@
   </button>
   <div class="form-content">
     <h2>Registrar Usuario</h2>
-    <form #form="ngForm" (ngSubmit)="validarcrear()">
+    <form #form="ngForm" (ngSubmit)="form.valid && validarcrear()">
       <div class="form-group">
         <label for="carnet">Carnet</label>
         <input
@@ -74,17 +74,36 @@
         />
       </div>
       <div class="form-group">
-        <label for="contrasena">Contraseña</label>
-        <input
-          type="password"
-          id="contrasena"
+        <label for="crear-contrasena">Contraseña</label>
+        <app-password-input
+          inputId="crear-contrasena"
           name="contrasena"
           [(ngModel)]="contrasena"
-          required
-          maxlength="30"
+          [required]="true"
           placeholder="Contraseña del usuario"
-          class="form-input"
         />
+      </div>
+      <div class="form-group">
+        <label for="crear-repetir-contrasena">Repetir contraseña</label>
+        <app-password-input
+          inputId="crear-repetir-contrasena"
+          name="repetirContrasena"
+          [(ngModel)]="repetirContrasena"
+          [required]="true"
+          #confirmacion="ngModel"
+          [invalid]="!!confirmacion.touched && !contrasenasValidas"
+          [describedBy]="
+            confirmacion.touched && !contrasenasValidas
+              ? 'crear-password-error'
+              : ''
+          "
+          placeholder="Repite la contraseña"
+        />
+        @if (confirmacion.touched && !contrasenasValidas) {
+          <p id="crear-password-error" class="password-error" role="alert">
+            Las contraseñas deben coincidir.
+          </p>
+        }
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono</label>
@@ -159,7 +178,11 @@
         />
       </div>
       <div class="form-submit">
-        <button type="submit" class="register-button" [disabled]="!form.valid">
+        <button
+          type="submit"
+          class="register-button"
+          [disabled]="!form.valid || !contrasenasValidas"
+        >
           <span>Crear Usuario</span>
         </button>
       </div>

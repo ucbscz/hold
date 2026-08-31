@@ -1,5 +1,6 @@
 export * from './custom-select/custom-select.component';
 export * from './custom-select/opcion-select';
+export * from './password-input/password-input.component';
 export * from './equipment-image-placeholder/equipment-image-placeholder.component';
 export * from './feedback/aviso-eliminar/aviso-eliminar.component';
 export * from './feedback/aviso-exito/aviso-exito.component';

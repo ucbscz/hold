@@ -4,7 +4,7 @@
   </button>
   <div class="form-content">
     <h2>Editar Usuario</h2>
-    <form #form="ngForm" (ngSubmit)="validareditar()">
+    <form #form="ngForm" (ngSubmit)="form.valid && validareditar()">
       <div class="form-group">
         <label for="nombre">Nombre</label>
         <input
@@ -65,16 +65,35 @@
         }
       </div>
       <div class="form-group">
-        <label for="contrasena">Contraseña</label>
-        <input
-          type="password"
-          id="contrasena"
+        <label for="editar-contrasena">Nueva contraseña (opcional)</label>
+        <app-password-input
+          inputId="editar-contrasena"
           name="contrasena"
           [(ngModel)]="contrasena"
-          maxlength="30"
-          placeholder="Contraseña del usuario"
-          class="form-input"
+          placeholder="Sin cambios"
         />
+      </div>
+      <div class="form-group">
+        <label for="editar-repetir-contrasena">Repetir contraseña</label>
+        <app-password-input
+          inputId="editar-repetir-contrasena"
+          name="repetirContrasena"
+          [(ngModel)]="repetirContrasena"
+          [required]="!!contrasena"
+          #confirmacion="ngModel"
+          [invalid]="!!confirmacion.touched && !contrasenasValidas"
+          [describedBy]="
+            confirmacion.touched && !contrasenasValidas
+              ? 'editar-password-error'
+              : ''
+          "
+          placeholder="Repite la contraseña"
+        />
+        @if (confirmacion.touched && !contrasenasValidas) {
+          <p id="editar-password-error" class="password-error" role="alert">
+            Las contraseñas deben coincidir.
+          </p>
+        }
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono</label>
@@ -149,7 +168,11 @@
         />
       </div>
       <div class="form-submit">
-        <button type="submit" class="register-button" [disabled]="!form.valid">
+        <button
+          type="submit"
+          class="register-button"
+          [disabled]="!form.valid || !contrasenasValidas"
+        >
           <span>Confirmar Cambios</span>
         </button>
       </div>

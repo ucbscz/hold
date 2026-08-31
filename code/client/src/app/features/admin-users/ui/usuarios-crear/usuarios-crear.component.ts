@@ -17,6 +17,7 @@ import {
   CustomSelectComponent,
   MostrarerrorComponent,
   OpcionSelect,
+  PasswordInputComponent,
 } from '@shared/ui';
 @Component({
   selector: 'app-usuarios-crear',
@@ -27,6 +28,7 @@ import {
     Aviso,
     AvisoExitoComponent,
     CustomSelectComponent,
+    PasswordInputComponent,
   ],
   templateUrl: './usuarios-crear.component.html',
   styleUrl: './usuarios-crear.component.css',
@@ -37,6 +39,13 @@ export class UsuariosCrearComponent extends BaseTablaComponent {
   @Input() carreras: string[] = [];
   usuario: Usuario = new Usuario();
   contrasena: string = '';
+  repetirContrasena = '';
+
+  get contrasenasValidas(): boolean {
+    return (
+      this.contrasena.length > 0 && this.contrasena === this.repetirContrasena
+    );
+  }
   private readonly sesion = inject(UsuarioService);
   readonly rolesOpciones: OpcionSelect[] = [
     { value: 'administrador', label: 'Administrador general' },
@@ -56,10 +65,12 @@ export class UsuariosCrearComponent extends BaseTablaComponent {
     super();
   }
   validarcrear() {
+    if (!this.contrasenasValidas) return;
     this.mensajeaviso = '¿Desea crear el usuario ';
     this.aviso.set(true);
   }
   registrar() {
+    if (!this.contrasenasValidas) return;
     this.usuarioApi
       .registrarCuenta(this.usuario, this.contrasena, this.usuario.rol!)
       .subscribe({

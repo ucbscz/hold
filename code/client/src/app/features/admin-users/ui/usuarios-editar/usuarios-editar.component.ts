@@ -18,6 +18,7 @@ import {
   CustomSelectComponent,
   MostrarerrorComponent,
   OpcionSelect,
+  PasswordInputComponent,
 } from '@shared/ui';
 @Component({
   selector: 'app-usuarios-editar',
@@ -27,6 +28,7 @@ import {
     Aviso,
     AvisoExitoComponent,
     CustomSelectComponent,
+    PasswordInputComponent,
   ],
   templateUrl: './usuarios-editar.component.html',
   styleUrl: './usuarios-editar.component.css',
@@ -37,6 +39,11 @@ export class UsuariosEditarComponent extends BaseTablaComponent {
   @Input() usuario: Usuario = new Usuario();
   @Input() carreras: string[] = [];
   contrasena: string = '';
+  repetirContrasena = '';
+
+  get contrasenasValidas(): boolean {
+    return this.contrasena === this.repetirContrasena;
+  }
   private readonly sesion = inject(UsuarioService);
   readonly rolesOpciones: OpcionSelect[] = [
     { value: 'administrador', label: 'Administrador general' },
@@ -56,10 +63,12 @@ export class UsuariosEditarComponent extends BaseTablaComponent {
     super();
   }
   validareditar() {
+    if (!this.contrasenasValidas) return;
     this.mensajeaviso = '¿Desea guardar los cambios realizados al usuario ?';
     this.aviso.set(true);
   }
   confirmar() {
+    if (!this.contrasenasValidas) return;
     this.usuarioApi.editarUsuario(this.usuario, this.contrasena).subscribe({
       next: (_response) => {
         this.actualizar.emit();
