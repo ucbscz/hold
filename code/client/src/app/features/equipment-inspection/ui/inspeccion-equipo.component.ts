@@ -136,6 +136,10 @@ import { Subscription, finalize } from 'rxjs';
       }
       header {
         position: relative;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
         padding: 24px 72px 20px 24px;
         border-bottom: 1px solid var(--border);
         min-height: 80px;
@@ -144,6 +148,12 @@ import { Subscription, finalize } from 'rxjs';
         margin: 0;
         font-size: 22px;
         overflow-wrap: anywhere;
+      }
+      .modal-close-btn {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        margin: 0;
       }
       h3 {
         font-size: 18px;

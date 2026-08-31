@@ -195,7 +195,12 @@ export abstract class Tabla extends BaseTablaComponent {
     compare: (firstValue: unknown, secondValue: unknown) => number,
   ): T[] {
     return [...items].sort((firstItem, secondItem) => {
-      const result = compare(accessor(firstItem), accessor(secondItem));
+      const first = accessor(firstItem);
+      const second = accessor(secondItem);
+      const firstEmpty = first == null || first === '';
+      const secondEmpty = second == null || second === '';
+      if (firstEmpty !== secondEmpty) return firstEmpty ? 1 : -1;
+      const result = compare(first, second);
 
       return direction === 'asc' ? result : -result;
     });
@@ -271,6 +276,7 @@ export abstract class Tabla extends BaseTablaComponent {
 
     if (!normalizedValue) return NaN;
     if (Number.isFinite(Number(normalizedValue))) return NaN;
+    if (!/^\d{4}-\d{2}-\d{2}(?:T|\s|$)/.test(normalizedValue)) return NaN;
 
     return Date.parse(normalizedValue);
   }

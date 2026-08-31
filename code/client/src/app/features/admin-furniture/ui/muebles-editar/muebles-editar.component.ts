@@ -1,3 +1,5 @@
+import { CatalogoInventarioService } from '@entities/equipment';
+import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
 import {
   Component,
   EventEmitter,
@@ -17,7 +19,13 @@ import { Aviso, AvisoExitoComponent, MostrarerrorComponent } from '@shared/ui';
 @Component({
   selector: 'app-muebles-editar',
   standalone: true,
-  imports: [FormsModule, MostrarerrorComponent, Aviso, AvisoExitoComponent],
+  imports: [
+    CustomSelectComponent,
+    FormsModule,
+    MostrarerrorComponent,
+    Aviso,
+    AvisoExitoComponent,
+  ],
   templateUrl: './muebles-editar.component.html',
   styleUrl: './muebles-editar.component.css',
 })
@@ -29,7 +37,21 @@ export class MueblesEditarComponent
   @Output() actualizar: EventEmitter<void> = new EventEmitter<void>();
   @Input() muebleOriginal: Muebles = new Muebles();
   mueble: Muebles = { ...this.muebleOriginal };
-  constructor(private readonly muebleapi: MuebleService) {
+  ambientes: OpcionSelect[] = [];
+  ngOnInit() {
+    this.catalogos.listar('ambientes').subscribe({
+      next: (items) =>
+        (this.ambientes = items.map((a) => ({ value: a.Id, label: a.Nombre }))),
+      error: (e) => {
+        this.mensajeerror = extractErrorMessage(e);
+        this.error.set(true);
+      },
+    });
+  }
+  constructor(
+    private readonly muebleapi: MuebleService,
+    private readonly catalogos: CatalogoInventarioService,
+  ) {
     super();
   }
   ngOnChanges() {

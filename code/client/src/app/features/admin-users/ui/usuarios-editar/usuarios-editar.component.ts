@@ -39,7 +39,7 @@ export class UsuariosEditarComponent extends BaseTablaComponent {
   contrasena: string = '';
   private readonly sesion = inject(UsuarioService);
   readonly rolesOpciones: OpcionSelect[] = [
-    { value: 'administrador', label: 'Administrador' },
+    { value: 'administrador', label: 'Administrador general' },
     {
       value: 'administrador_laboratorio',
       label: 'Administrador de laboratorio',

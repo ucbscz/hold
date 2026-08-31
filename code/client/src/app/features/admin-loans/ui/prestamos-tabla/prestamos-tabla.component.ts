@@ -14,7 +14,12 @@ import {
   PrestamosAPIService,
   VistaPrestamosComponent,
 } from '@entities/loan';
-import { UsuarioServiceAPI, UsuarioService } from '@entities/user';
+import {
+  UsuarioServiceAPI,
+  UsuarioService,
+  NombreRolPipe,
+  nombreRol,
+} from '@entities/user';
 import { BuscadorComponent } from '@features/admin-search';
 import {
   printTable,
@@ -44,6 +49,7 @@ import { VercontratoComponent } from '@entities/loan';
   imports: [
     StickyScrollDirective,
     CommonModule,
+    NombreRolPipe,
     FormsModule,
     ReactiveFormsModule,
     VercontratoComponent,
@@ -121,7 +127,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       this.prestamosTabla.map(({ value }) => [
         `${value.datosgrupo.NombreUsuario ?? ''} ${value.datosgrupo.ApellidoPaternoUsuario ?? ''}`.trim(),
         value.datosgrupo.CarnetUsuario,
-        value.datosgrupo.TipoUsuario,
+        nombreRol(value.datosgrupo.TipoUsuario),
         value.datosgrupo.TelefonoUsuario,
         this.detalleEquipos(value),
         this.formatearFechaImpresion(value.datosgrupo.FechaSolicitud),
@@ -149,7 +155,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       rows: this.prestamosTabla.map(({ value }) => [
         `${value.datosgrupo.NombreUsuario ?? ''} ${value.datosgrupo.ApellidoPaternoUsuario ?? ''}`.trim(),
         value.datosgrupo.CarnetUsuario,
-        value.datosgrupo.TipoUsuario,
+        nombreRol(value.datosgrupo.TipoUsuario),
         value.datosgrupo.TelefonoUsuario,
         this.detalleEquipos(value),
         this.formatearFechaImpresion(value.datosgrupo.FechaSolicitud),
@@ -217,7 +223,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   rolSeleccionado: string = '';
   readonly rolesFiltroOpciones: OpcionSelect[] = [
     { value: '', label: 'Todos los roles' },
-    { value: 'administrador', label: 'Administrador' },
+    { value: 'administrador', label: 'Administrador general' },
     {
       value: 'administrador_laboratorio',
       label: 'Administrador de laboratorio',
@@ -465,9 +471,9 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
         Usuario: ([, prestamo]) =>
           `${prestamo.datosgrupo.NombreUsuario ?? ''} ${prestamo.datosgrupo.ApellidoPaternoUsuario ?? ''}`,
         Carnet: ([, prestamo]) => prestamo.datosgrupo.CarnetUsuario,
-        Rol: ([, prestamo]) => prestamo.datosgrupo.TipoUsuario,
+        Rol: ([, prestamo]) => nombreRol(prestamo.datosgrupo.TipoUsuario),
         Teléfono: ([, prestamo]) => prestamo.datosgrupo.TelefonoUsuario,
-        Equipos: ([, prestamo]) => prestamo.datosgrupo.NombreGrupoEquipo,
+        Equipos: ([, prestamo]) => prestamo.equipos[0]?.NombreGrupoEquipo,
         'Fecha Solicitud': ([, prestamo]) => prestamo.datosgrupo.FechaSolicitud,
         'Fecha Préstamo Esperada': ([, prestamo]) =>
           prestamo.datosgrupo.FechaPrestamoEsperada,

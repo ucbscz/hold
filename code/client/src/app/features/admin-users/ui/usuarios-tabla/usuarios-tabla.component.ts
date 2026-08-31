@@ -9,7 +9,13 @@ import {
 import { FormsModule } from '@angular/forms';
 import { Carrera } from '@entities/admin';
 import { CarreraService } from '@entities/career';
-import { Usuario, UsuarioServiceAPI, UsuarioService } from '@entities/user';
+import {
+  Usuario,
+  UsuarioServiceAPI,
+  UsuarioService,
+  NombreRolPipe,
+  nombreRol,
+} from '@entities/user';
 import { BuscadorComponent } from '@features/admin-search';
 import { Tabla, TablePaginationComponent } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
@@ -31,6 +37,7 @@ import { UsuariosEditarComponent } from '../usuarios-editar/usuarios-editar.comp
   imports: [
     StickyScrollDirective,
     CommonModule,
+    NombreRolPipe,
     FormsModule,
     UsuariosCrearComponent,
     UsuariosEditarComponent,
@@ -82,7 +89,7 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
   filtroBusqueda: [string, string] = ['', ''];
   readonly rolesFiltroOpciones: OpcionSelect[] = [
     { value: '', label: 'Todos los roles' },
-    { value: 'administrador', label: 'Administrador' },
+    { value: 'administrador', label: 'Administrador general' },
     {
       value: 'administrador_laboratorio',
       label: 'Administrador de laboratorio',
@@ -397,7 +404,7 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
       'Apellido Materno': (usuario) => usuario.apellido_materno,
       Correo: (usuario) => usuario.correo,
       Teléfono: (usuario) => usuario.telefono,
-      Rol: (usuario) => usuario.rol,
+      Rol: (usuario) => nombreRol(usuario.rol),
       Carrera: (usuario) => usuario.carrera,
       Referencia: (usuario) => usuario.nombre_referencia,
       'Tel. Referencia': (usuario) => usuario.telefono_referencia,

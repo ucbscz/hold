@@ -1771,6 +1771,11 @@ td.actions-column .btn-icon {
   vertical-align: middle !important;
 }
 
+.data-table .actions-column button:not(:hover) i,
+.admin-toolbar-button:not(:hover) i {
+  color: var(--ink-muted) !important;
+}
+
 .data-table tbody tr:hover {
   box-shadow: inset 3px 0 0 rgba(255, 215, 0, 0.5);
 }

@@ -1182,7 +1182,7 @@ td.actions-column > * {
 
 .data-table--loans {
   table-layout: fixed;
-  min-width: 92rem;
+  min-width: 118rem;
 }
 
 .data-table--loans th,
@@ -1202,6 +1202,14 @@ td.actions-column > * {
 
 .data-table--loans .loans-table__col--carnet {
   width: 8.5rem;
+}
+.data-table--loans .loans-table__col--rol {
+  width: 10rem;
+}
+
+.data-table--loans td:nth-child(3) {
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .data-table--loans .loans-table__col--telefono {
@@ -1227,6 +1235,10 @@ td.actions-column > * {
 
 .data-table--loans .loans-table__col--acciones {
   width: 20rem;
+}
+.data-table--loans td:not(.actions-column) {
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .data-table--loans .actions-column {
@@ -1270,7 +1282,7 @@ td.actions-column > * {
   }
 
   .data-table--loans {
-    min-width: 76rem;
+    min-width: 106rem;
   }
 
   .data-table--loans .loans-table__col--acciones,

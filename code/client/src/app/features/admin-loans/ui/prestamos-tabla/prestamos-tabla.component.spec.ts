@@ -114,7 +114,7 @@ describe('PrestamosTablaComponent', () => {
     expect(component.rolesFiltroOpciones).toContain(
       jasmine.objectContaining({
         value: 'administrador',
-        label: 'Administrador',
+        label: 'Administrador general',
       }),
     );
     expect(nombresRenderizados()).toEqual(['Administrador']);
@@ -177,6 +177,76 @@ describe('PrestamosTablaComponent', () => {
       'Estudiante reciente',
       'Docente antiguo',
     ]);
+  });
+
+  for (const column of [
+    'Usuario',
+    'Carnet',
+    'Rol',
+    'Teléfono',
+    'Equipos',
+    'Fecha Solicitud',
+    'Fecha Préstamo Esperada',
+    'Fecha Devolución Esperada',
+    'Estado',
+  ]) {
+    it(`sorts the rendered rows in both directions by ${column}`, () => {
+      cargarPrestamos([
+        crearPrestamo({
+          id: 1,
+          nombre: 'Zeta',
+          carnet: '900',
+          telefono: '900',
+          rol: 'estudiante',
+          equipo: 'Zeta',
+          estado: 'rechazado',
+          fechaSolicitud: '2026-08-20',
+          fechaPrestamoEsperada: '2030-08-20',
+          fechaDevolucionEsperada: '2030-08-21',
+        }),
+        crearPrestamo({
+          id: 2,
+          nombre: 'Ana',
+          carnet: '100',
+          telefono: '100',
+          rol: 'docente',
+          equipo: 'Alfa',
+          estado: 'pendiente',
+          fechaSolicitud: '2026-08-10',
+          fechaPrestamoEsperada: '2030-08-10',
+          fechaDevolucionEsperada: '2030-08-11',
+        }),
+      ]);
+      const button = Array.from(
+        fixture.nativeElement.querySelectorAll(
+          '.table-sort-button',
+        ) as NodeListOf<HTMLButtonElement>,
+      ).find((b) => b.textContent?.trim() === column)!;
+      button.click();
+      fixture.detectChanges();
+      expect(nombresRenderizados()).toEqual(['Ana', 'Zeta']);
+      button.click();
+      fixture.detectChanges();
+      expect(nombresRenderizados()).toEqual(['Zeta', 'Ana']);
+    });
+  }
+
+  it('gives the role its own column without overlapping the phone', () => {
+    cargarPrestamos([
+      crearPrestamo({
+        id: 1,
+        nombre: 'Fernando',
+        rol: 'administrador_laboratorio',
+      }),
+    ]);
+    const cells = fixture.nativeElement.querySelectorAll(
+      'tbody tr:first-child td',
+    ) as NodeListOf<HTMLElement>;
+    expect(cells[2].getBoundingClientRect().width).toBeGreaterThan(100);
+    expect(cells[2].getBoundingClientRect().right).toBeLessThanOrEqual(
+      cells[3].getBoundingClientRect().left + 1,
+    );
+    expect(getComputedStyle(cells[2]).overflowX).not.toBe('visible');
   });
 
   it('marks an active loan as overdue at its exact return time', () => {
@@ -250,7 +320,7 @@ describe('PrestamosTablaComponent', () => {
         [
           'Fernando',
           '12890061',
-          'estudiante',
+          'Estudiante',
           '799430792',
           'Mini Dron',
           jasmine.any(String),

@@ -31,14 +31,25 @@
         />
       </div>
       <div class="form-group">
-        <label for="Ubicacion">Ubicación</label>
+        <label for="Ambiente">Ambiente</label>
+        <app-custom-select
+          id="Ambiente"
+          name="Ambiente"
+          [(ngModel)]="mueble.IdAmbiente"
+          [opciones]="ambientes"
+          placeholder="Seleccionar ambiente"
+          required
+        />
+      </div>
+      <div class="form-group">
+        <label for="Ubicacion">Referencia dentro del ambiente</label>
         <input
           type="text"
           id="Ubicacion"
           name="Ubicacion"
           [(ngModel)]="mueble.Ubicacion"
           maxlength="200"
-          placeholder="Ubicación del mueble"
+          placeholder="Ejemplo: pared junto a la entrada"
           class="form-input"
         />
       </div>

@@ -102,6 +102,33 @@ describe('Tabla', () => {
     expect(new TextDecoder().decode(bytes)).toContain('"—"');
   });
 
+  it('keeps missing values last in either sort direction', () => {
+    const items = [{ name: undefined }, { name: 'B' }, { name: 'A' }];
+    const accessors = { Nombre: (item: SortableItem) => item.name };
+    for (const dir of ['asc', 'desc'] as const) {
+      const result = tabla.sortItems(items, { col: 'Nombre', dir }, accessors);
+      expect(result[2].name).toBeUndefined();
+      expect(result[0].name).toBe(dir === 'asc' ? 'A' : 'B');
+    }
+  });
+
+  it('does not interpret equipment names ending in numbers as dates', () => {
+    const items = [
+      { name: 'May 10' },
+      { name: 'April 20' },
+      { name: 'Zeta 1' },
+    ];
+    expect(
+      tabla
+        .sortItems(
+          items,
+          { col: 'Nombre', dir: 'asc' },
+          { Nombre: (i) => i.name },
+        )
+        .map((i) => i.name),
+    ).toEqual(['April 20', 'May 10', 'Zeta 1']);
+  });
+
   it('should not mutate the current page while rendering a page slice', () => {
     tabla.paginaActual = 99;
     const items = Array.from({ length: 12 }, (_, index) => index + 1);

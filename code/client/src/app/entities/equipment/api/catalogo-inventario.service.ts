@@ -7,6 +7,8 @@ import { map } from 'rxjs';
 export interface CatalogoInventario {
   Id: number;
   Nombre: string;
+  CarnetAdministrador?: string | null;
+  NombreAdministrador?: string | null;
 }
 export type TipoCatalogo = 'ambientes' | 'procedencias';
 
@@ -26,11 +28,18 @@ export class CatalogoInventarioService {
         ),
       );
   }
-  guardar(tipo: TipoCatalogo, nombre: string, id?: number) {
+  guardar(
+    tipo: TipoCatalogo,
+    nombre: string,
+    id?: number,
+    carnetAdministrador?: string | null,
+  ) {
     const url = `${environment.apiUrl}/api/${tipo}`;
-    return id
-      ? this.http.put(`${url}/${id}`, { Nombre: nombre.trim() })
-      : this.http.post(url, { Nombre: nombre.trim() });
+    const body = {
+      Nombre: nombre.trim(),
+      CarnetAdministrador: carnetAdministrador || null,
+    };
+    return id ? this.http.put(`${url}/${id}`, body) : this.http.post(url, body);
   }
   eliminar(tipo: TipoCatalogo, id: number) {
     return this.http.delete(`${environment.apiUrl}/api/${tipo}/${id}`);

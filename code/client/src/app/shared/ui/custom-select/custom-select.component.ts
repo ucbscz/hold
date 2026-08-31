@@ -100,7 +100,9 @@ export class CustomSelectComponent
   ) {}
 
   ngAfterViewInit(): void {
-    document.body.appendChild(this.menuRef.nativeElement);
+    const container =
+      this.elementRef.nativeElement.closest('dialog') ?? document.body;
+    container.appendChild(this.menuRef.nativeElement);
   }
 
   @HostBinding('class.cs-open')

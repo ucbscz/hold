@@ -32,24 +32,32 @@
         {{ producto.modelo }} · {{ producto.marca }}
       </p>
       <p class="descripcion-objeto">{{ producto.descripcion }}</p>
-      <p>
-        Costo de referencia: {{ producto.CostoPromedio | number: "1.2-2" }} Bs
-      </p>
-      <button class="btn btn-secondary" (click)="mostrarComponentes = true">
-        <i class="fas fa-microchip"></i> Ver componentes
-      </button>
+      <dl class="equipment-facts">
+        <div>
+          <dt>Costo de referencia</dt>
+          <dd>{{ producto.CostoPromedio | number: "1.2-2" }} Bs</dd>
+        </div>
+        <div>
+          <dt>Préstamo máximo</dt>
+          <dd>{{ producto.TiempoMaximoPrestamoDias }} días</dd>
+        </div>
+      </dl>
+      <div class="equipment-resources">
+        <button class="btn btn-secondary" (click)="mostrarComponentes = true">
+          <i class="fas fa-microchip"></i> Ver componentes
+        </button>
 
-      @if (producto.url_data_sheet) {
-        <a
-          class="ficha-link"
-          [href]="producto.url_data_sheet"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <i class="fas fa-file-alt"></i> Ver ficha técnica
-        </a>
-      }
-
+        @if (producto.url_data_sheet) {
+          <a
+            class="ficha-link"
+            [href]="producto.url_data_sheet"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <i class="fas fa-file-alt"></i> Ver ficha técnica
+          </a>
+        }
+      </div>
       <div class="seccion-compra">
         <p class="disponibilidad-texto">
           @if (consultandoDisponibilidad) {

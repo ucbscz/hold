@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Muebles } from '@entities/admin';
 import { MuebleService } from '@entities/furniture';
 import { BuscadorComponent } from '@features/admin-search';
-import { Tabla } from '@shared/lib/admin-table';
+import { Tabla, TablePaginationComponent } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -22,6 +22,7 @@ import { MueblesEditarComponent } from '../muebles-editar/muebles-editar.compone
   imports: [
     StickyScrollDirective,
     CommonModule,
+    TablePaginationComponent,
     FormsModule,
     ReactiveFormsModule,
     MueblesCrearComponent,
@@ -52,6 +53,7 @@ export class MueblesTablaComponent extends Tabla implements OnInit {
   override columnas: string[] = [
     'Nombre',
     'Tipo',
+    'Ambiente',
     'Ubicación',
     'Costo',
     'Gaveteros',
@@ -91,6 +93,7 @@ export class MueblesTablaComponent extends Tabla implements OnInit {
     this.aplicarFiltros();
   }
   aplicarFiltros(event?: [string, string]) {
+    this.reiniciarPaginacion();
     const busqueda = this.mantenerBusqueda(event);
     if (busqueda[0].trim() !== '') {
       const busquedaNormalizada = this.normalizeText(busqueda[0]);
@@ -103,6 +106,10 @@ export class MueblesTablaComponent extends Tabla implements OnInit {
             );
           case 'Tipo':
             return this.normalizeText(mueble.Tipo || '').includes(
+              busquedaNormalizada,
+            );
+          case 'Ambiente':
+            return this.normalizeText(mueble.NombreAmbiente).includes(
               busquedaNormalizada,
             );
           case 'Ubicación':
@@ -123,6 +130,9 @@ export class MueblesTablaComponent extends Tabla implements OnInit {
             );
           default:
             return (
+              this.normalizeText(mueble.NombreAmbiente).includes(
+                busquedaNormalizada,
+              ) ||
               this.normalizeText(mueble.Nombre || '').includes(
                 busquedaNormalizada,
               ) ||
@@ -157,6 +167,7 @@ export class MueblesTablaComponent extends Tabla implements OnInit {
     this.mueblesFiltrados = this.sortByColumn(this.mueblesFiltrados, e, {
       Nombre: (mueble) => mueble.Nombre,
       Tipo: (mueble) => mueble.Tipo,
+      Ambiente: (mueble) => mueble.NombreAmbiente,
       Ubicación: (mueble) => mueble.Ubicacion,
       Costo: (mueble) => mueble.Costo,
       Gaveteros: (mueble) => mueble.NumeroGaveteros,

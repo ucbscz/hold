@@ -66,6 +66,26 @@ describe('CustomSelectComponent', () => {
     expect(component.opcionesNormalizadas).toBe(normalizedOptions);
   });
 
+  it('keeps options inside the top-layer dialog so they remain clickable', fakeAsync(() => {
+    const dialog = document.createElement('dialog');
+    document.body.appendChild(dialog);
+    dialog.appendChild(fixture.nativeElement);
+    component.opciones = ['Sala principal', 'Laboratorio'];
+    fixture.detectChanges();
+    dialog.showModal();
+    component.alternar();
+    tick(32);
+    fixture.detectChanges();
+    const option = dialog.querySelector<HTMLButtonElement>('.cs-item')!;
+    expect(option).not.toBeNull();
+    option.click();
+    expect(component.valor).toBe('Sala principal');
+    expect(component.abierto).toBeFalse();
+    dialog.close();
+    fixture.destroy();
+    dialog.remove();
+  }));
+
   it('should focus search only once and ignore its own scrolling', fakeAsync(() => {
     component.opciones = [
       'Preventivo',

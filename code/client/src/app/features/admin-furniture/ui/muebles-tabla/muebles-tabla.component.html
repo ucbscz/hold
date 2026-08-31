@@ -54,13 +54,14 @@
         </thead>
         <tbody>
           @for (
-            mueble of mueblesFiltrados;
+            mueble of paginar(mueblesFiltrados);
             track mueble.Id || mueble.Nombre || mueble.Tipo || $index;
             let i = $index
           ) {
             <tr>
               <td>{{ mueble.Nombre }}</td>
               <td>{{ mueble.Tipo }}</td>
+              <td>{{ mueble.NombreAmbiente || "Sin ambiente asignado" }}</td>
               <td>{{ mueble.Ubicacion }}</td>
               <td class="precio-column">
                 Bs {{ mueble.Costo | number: "1.2-2" }}
@@ -99,7 +100,7 @@
           }
           @if (mueblesFiltrados.length === 0) {
             <tr>
-              <td colspan="7" class="empty-table">
+              <td colspan="8" class="empty-table">
                 <div class="empty-state">
                   <i class="fas fa-search fa-3x"></i>
                   <p>No se encontraron muebles</p>
@@ -110,6 +111,12 @@
         </tbody>
       </table>
     </div>
+    <app-table-pagination
+      [totalItems]="mueblesFiltrados.length"
+      [page]="paginaActual"
+      [pageSize]="filasPorPagina"
+      (pageChange)="cambiarPagina($event)"
+    />
   } @else {
     <app-audit-panel [refreshTrigger]="auditRefresh" [entidad]="'Mueble'">
       <div admin-tabs class="admin-tabs">
