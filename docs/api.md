@@ -160,6 +160,14 @@ Visible uses are internal (`Universidad`, or `Clase` for class details) and exte
 
 Contract retrieval uses the **loan ID**, not the contract ID, and is restricted to its owner or either management role. New contract HTML includes `img[data-carnet="frente"]`, `img[data-carnet="atras"]` and the signature; only sanitized inline raster images are retained. The client offers HTML download and isolated contract/identity-card printing, also usable as browser PDF export. These documents contain personal data and are not public assets.
 
+## Pickup Location and Inventory Catalogs
+
+`/api/ambientes` accepts optional `CarnetAdministrador`, referencing an enabled `administrador_laboratorio`, and returns `NombreAdministrador` (full name). `/api/procedencias` keeps its name-only catalog. Existing root-only mutation permissions and administrative auditing apply to both catalogs.
+
+Furniture payloads (`/api/muebles`) include nullable `IdAmbiente` and read-only `NombreAmbiente`. The location hierarchy is ambiente → mueble → gavetero → equipo. Loan responses include `UbicacionEquipo`, `NombreMueble`, `NombreGavetero`, `UbicacionMueble` (a reference within the room), and `AdministradorAmbiente` (full name). The furniture environment takes precedence over legacy `Equipo.IdAmbiente`. Missing assignments remain null; clients show an explicit unassigned state. Owners can inspect pickup locations for approved/active loans and existing contracts from every history status.
+
+The root role is displayed as **Administrador general**; its API/authorization value remains `administrador`.
+
 ## Weekly and Special Opening Hours
 
 `GET /api/configuracion` remains public; `PUT /api/configuracion` remains root-only. The existing payload adds `Horarios`, an array of `{ DiaSemana, Fecha, Abierto, InicioMinutos, FinMinutos }`. `Fecha` is nullable ISO `YYYY-MM-DD`; `DiaSemana` is 0 (Sunday) through 6. A date exception takes precedence over a weekday rule. Without either, the global hours apply Monday through Saturday. Minimum duration is at least 30 minutes. All reservation enforcement uses Bolivia time.

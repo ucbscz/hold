@@ -10,7 +10,7 @@ public partial class EquipoMapper : IMapper<EquipoEntity, EquipoDto>
 {
     [MapProperty("GrupoEquipo.Nombre", nameof(EquipoDto.NombreGrupoEquipo))]
     [MapProperty("Gavetero.Nombre", nameof(EquipoDto.NombreGavetero))]
-    [MapProperty("Ambiente.Nombre", nameof(EquipoDto.Ubicacion))]
+    [MapPropertyFromSource(nameof(EquipoDto.Ubicacion), Use = nameof(UbicacionEquipo))]
     [MapProperty("Procedencia.Nombre", nameof(EquipoDto.Procedencia))]
     public partial EquipoDto ToDto(EquipoEntity entity);
 
@@ -25,6 +25,11 @@ public partial class EquipoMapper : IMapper<EquipoEntity, EquipoDto>
     public partial EquipoEntity ToEntity(EquipoDto dto);
 
     public partial IQueryable<EquipoDto> ProjectTo(IQueryable<EquipoEntity> source);
+
+    private static string? UbicacionEquipo(EquipoEntity equipo) =>
+        equipo.Gavetero != null && equipo.Gavetero.Mueble != null && equipo.Gavetero.Mueble.Ambiente != null
+            ? equipo.Gavetero.Mueble.Ambiente.Nombre
+            : equipo.Ambiente != null ? equipo.Ambiente.Nombre : null;
 
     private static string EstadoEquipoToString(EstadoEquipo estado) =>
         estado switch

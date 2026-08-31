@@ -9,6 +9,8 @@ internal sealed class AmbienteConfiguration : IEntityTypeConfiguration<Ambiente>
     public void Configure(EntityTypeBuilder<Ambiente> entity)
     {
         entity.ToTable("ambientes");
+        entity.Property(e => e.CarnetAdministrador).HasColumnName("carnet_administrador").HasMaxLength(64);
+        entity.HasOne(e => e.Administrador).WithMany().HasForeignKey(e => e.CarnetAdministrador).HasPrincipalKey(e => e.Carnet).OnDelete(DeleteBehavior.Restrict);
         entity.HasKey(e => e.Id);
         entity.Property(e => e.Id).HasColumnName("id_ambiente");
         entity.Property(e => e.Nombre).HasColumnName("nombre").HasMaxLength(255).IsRequired();

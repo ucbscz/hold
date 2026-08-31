@@ -1,13 +1,22 @@
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Core.Entities;
-using Riok.Mapperly.Abstractions;
 
 namespace IMT_Reservas.Server.Application.Features.Inventario;
 
-[Mapper]
-public partial class AmbienteMapper : IMapper<Ambiente, CatalogoInventarioDto>
+public sealed class AmbienteMapper : IMapper<Ambiente, CatalogoInventarioDto>
 {
-    public partial CatalogoInventarioDto ToDto(Ambiente entity);
-    public partial Ambiente ToEntity(CatalogoInventarioDto dto);
-    public partial IQueryable<CatalogoInventarioDto> ProjectTo(IQueryable<Ambiente> source);
+    public CatalogoInventarioDto ToDto(Ambiente entity) => ProjectTo(new[] { entity }.AsQueryable()).Single();
+    public Ambiente ToEntity(CatalogoInventarioDto dto) => new()
+    {
+        Id = dto.Id ?? 0,
+        Nombre = dto.Nombre,
+        CarnetAdministrador = string.IsNullOrWhiteSpace(dto.CarnetAdministrador) ? null : dto.CarnetAdministrador.Trim()
+    };
+    public IQueryable<CatalogoInventarioDto> ProjectTo(IQueryable<Ambiente> source) => source.Select(a => new CatalogoInventarioDto
+    {
+        Id = a.Id,
+        Nombre = a.Nombre,
+        CarnetAdministrador = a.CarnetAdministrador,
+        NombreAdministrador = a.Administrador == null ? null : a.Administrador.Nombre + " " + a.Administrador.ApellidoPaterno + " " + a.Administrador.ApellidoMaterno
+    });
 }

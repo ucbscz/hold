@@ -243,6 +243,14 @@ public sealed class PrestamoReadRepository
                 on gavetero.IdMueble equals mueble.Id
                 into muebleJoin
             from mueble in muebleJoin.DefaultIfEmpty()
+            join ambiente in _dbContext.Ambientes.AsNoTracking().IgnoreQueryFilters()
+                on ((mueble != null ? mueble.IdAmbiente : null) ?? (equipo != null ? equipo.IdAmbiente : null)) equals ambiente.Id
+                into ambienteJoin
+            from ambiente in ambienteJoin.DefaultIfEmpty()
+            join responsable in _dbContext.Usuarios.AsNoTracking().IgnoreQueryFilters()
+                on (ambiente != null ? ambiente.CarnetAdministrador : null) equals responsable.Carnet
+                into responsableJoin
+            from responsable in responsableJoin.DefaultIfEmpty()
             orderby
                 prestamo.EstadoPrestamo == EstadoPrestamo.Pendiente ? 0 : 1,
                 (prestamo.EstadoPrestamo == EstadoPrestamo.Finalizado
@@ -275,7 +283,9 @@ public sealed class PrestamoReadRepository
                 prestamo.NombreMateria,
                 NombreGrupoEquipo = grupoReserva != null ? grupoReserva.Nombre : null,
                 CodigoImt = equipo != null ? (int?)equipo.CodigoImt : null,
-                UbicacionEquipo = equipo != null && equipo.Ambiente != null ? equipo.Ambiente!.Nombre : null,
+                UbicacionEquipo = ambiente != null ? ambiente.Nombre : null,
+                AdministradorAmbiente = responsable != null
+                    ? (responsable.Nombre + " " + responsable.ApellidoPaterno + " " + responsable.ApellidoMaterno).Trim() : null,
                 NombreGavetero = gavetero != null ? gavetero.Nombre : null,
                 NombreMueble = mueble != null ? mueble.Nombre : null,
                 UbicacionMueble = mueble != null ? mueble.Ubicacion : null,
@@ -310,6 +320,7 @@ public sealed class PrestamoReadRepository
             NombreGavetero = row.NombreGavetero,
             NombreMueble = row.NombreMueble,
             UbicacionMueble = row.UbicacionMueble,
+            AdministradorAmbiente = row.AdministradorAmbiente,
         }).ToList();
     }
 }

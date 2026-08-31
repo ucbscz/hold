@@ -34,6 +34,8 @@ internal sealed class MuebleConfiguration : IEntityTypeConfiguration<Mueble>
     public void Configure(EntityTypeBuilder<Mueble> entity)
     {
         entity.ToTable("muebles");
+        entity.Property(e => e.IdAmbiente).HasColumnName("id_ambiente");
+        entity.HasOne(e => e.Ambiente).WithMany().HasForeignKey(e => e.IdAmbiente).OnDelete(DeleteBehavior.Restrict);
         entity.HasKey(e => e.Id);
         entity.Property(e => e.Id).HasColumnName("id_mueble");
         entity.Property(e => e.Nombre).IsRequired().HasMaxLength(255).HasColumnName(DatabaseColumns.Nombre);

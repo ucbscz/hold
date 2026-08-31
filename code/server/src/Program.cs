@@ -149,8 +149,7 @@ builder.Services.AddScoped<PrestamoReadRepository>();
 builder.Services.AddScoped<PrestamoEstadoRepository>();
 builder.Services.AddScoped<PrestamoDisponibilidadRepository>();
 builder.Services.AddScoped<EquipoRepository>();
-builder.Services.AddScoped<Repository<Ambiente, CatalogoInventarioDto>, CatalogoInventarioRepository<Ambiente>>();
-builder.Services.AddScoped<Repository<Procedencia, CatalogoInventarioDto>, CatalogoInventarioRepository<Procedencia>>();
+builder.Services.AddInventoryCatalogs();
 builder.Services.AddScoped<AccesorioRepository>();
 builder.Services.AddScoped<GrupoEquipoRepository>();
 builder.Services.AddScoped<Repository<CarreraEntity, CarreraDto>>();
@@ -326,9 +325,6 @@ if (hangfireEnabled)
 
 builder.Services.AddRateLimiter(RequestLimits.Configure);
 
-builder.Services.AddScoped<IMapper<Ambiente, CatalogoInventarioDto>, AmbienteMapper>();
-builder.Services.AddScoped<IMapper<Procedencia, CatalogoInventarioDto>, ProcedenciaMapper>();
-builder.Services.AddScoped<IValidator<CatalogoInventarioDto>, CatalogoInventarioValidator>();
 
 var app = builder.Build();
 var useHttpsRedirection = builder.Configuration.GetValue("HttpsRedirection:Enabled", true);
