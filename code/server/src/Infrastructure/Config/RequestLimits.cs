@@ -25,7 +25,9 @@ public static class RequestLimits
             context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             _ => new FixedWindowRateLimiterOptions
             {
-                PermitLimit = 10, Window = TimeSpan.FromMinutes(1), QueueLimit = 0,
+                PermitLimit = 10,
+                Window = TimeSpan.FromMinutes(1),
+                QueueLimit = 0,
             }));
         options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
         {
@@ -34,7 +36,9 @@ public static class RequestLimits
                 : "ip:" + context.Connection.RemoteIpAddress;
             return RateLimitPartition.GetSlidingWindowLimiter(identity, _ => new SlidingWindowRateLimiterOptions
             {
-                PermitLimit = 180, Window = TimeSpan.FromMinutes(1), SegmentsPerWindow = 6,
+                PermitLimit = 180,
+                Window = TimeSpan.FromMinutes(1),
+                SegmentsPerWindow = 6,
                 QueueLimit = 0,
             });
         });

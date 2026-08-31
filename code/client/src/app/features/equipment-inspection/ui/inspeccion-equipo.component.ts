@@ -223,12 +223,10 @@ export class InspeccionEquipoComponent
   private pagina = 1;
   ngOnInit() {
     this.solicitudes.add(
-      this.api
-        .getproducto(String(this.grupoId))
-        .subscribe({
-          next: (g) => (this.grupo = g),
-          error: () => (this.error = 'No se pudo cargar el equipo.'),
-        }),
+      this.api.getproducto(String(this.grupoId)).subscribe({
+        next: (g) => (this.grupo = g),
+        error: () => (this.error = 'No se pudo cargar el equipo.'),
+      }),
     );
     this.cargarComponentes();
   }

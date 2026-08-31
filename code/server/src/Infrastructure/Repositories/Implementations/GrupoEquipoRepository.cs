@@ -17,11 +17,17 @@ public class GrupoEquipoRepository : Repository<GrupoEquipoEntity, GrupoEquipoDt
          join equipo in DbContext.Equipos.AsNoTracking() on componente.IdEquipo equals equipo.Id
          where equipo.IdGrupoEquipo == id
          orderby componente.Nombre, componente.Id
-         select new ComponenteDto {
-             Id = componente.Id, Nombre = componente.Nombre, Modelo = componente.Modelo,
-             Tipo = componente.Tipo, Descripcion = componente.Descripcion,
-             PrecioReferencia = componente.PrecioReferencia, IdEquipo = equipo.Id,
-             CodigoImtEquipo = equipo.CodigoImt.ToString(), UrlDataSheet = componente.UrlDataSheet
+         select new ComponenteDto
+         {
+             Id = componente.Id,
+             Nombre = componente.Nombre,
+             Modelo = componente.Modelo,
+             Tipo = componente.Tipo,
+             Descripcion = componente.Descripcion,
+             PrecioReferencia = componente.PrecioReferencia,
+             IdEquipo = equipo.Id,
+             CodigoImtEquipo = equipo.CodigoImt.ToString(),
+             UrlDataSheet = componente.UrlDataSheet
          }).Skip((page - 1) * 100).Take(100).ToListAsync(token);
 
     public GrupoEquipoRepository(

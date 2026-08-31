@@ -310,10 +310,9 @@
 }
 :host .weekly-schedule__day {
   display: grid;
-  grid-template-columns: minmax(130px, 1fr) minmax(110px, 1fr) minmax(
-      110px,
-      1fr
-    ) 44px;
+  grid-template-columns:
+    minmax(130px, 1fr) minmax(110px, 1fr) minmax(110px, 1fr)
+    44px;
   align-items: center;
   gap: 12px;
 }
