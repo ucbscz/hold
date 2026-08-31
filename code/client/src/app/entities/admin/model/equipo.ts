@@ -5,6 +5,8 @@ export class Equipos extends BaseModel {
   NumeroSerial: string | null = null;
   EstadoEquipo: string | null = null;
   Ubicacion: string | null = null;
+  IdAmbiente?: number | null = null;
+  IdProcedencia?: number | null = null;
   CostoReferencia: number | null = null;
   Descripcion: string | null = null;
   Procedencia: string | null = null;

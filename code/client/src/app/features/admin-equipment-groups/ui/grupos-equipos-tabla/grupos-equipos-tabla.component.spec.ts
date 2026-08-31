@@ -41,7 +41,7 @@ describe('GruposEquiposTablaComponent', () => {
     ).toEqual(['Zeta', 'Alpha']);
   });
 
-  it('should render table headers without sort buttons', () => {
+  it('should expose accessible column sorting', () => {
     component.gruposEquiposFiltrados = [
       Object.assign(new GrupoEquipo(), { id: 0, nombre: 'Zeta' }),
       Object.assign(new GrupoEquipo(), { id: 0, nombre: 'Alpha' }),
@@ -56,7 +56,10 @@ describe('GruposEquiposTablaComponent', () => {
     ).map((header) => (header as HTMLElement).textContent!.trim());
 
     expect(sortableHeader).toBeNull();
-    expect(sortButton).toBeNull();
+    expect(sortButton).not.toBeNull();
+    sortButton.click();
+    fixture.detectChanges();
+    expect(component.sortColumn).toBe('Nombre');
     expect(headers).toContain('Nombre');
   });
 });

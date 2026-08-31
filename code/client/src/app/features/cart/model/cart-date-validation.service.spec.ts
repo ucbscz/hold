@@ -72,8 +72,8 @@ describe('CartDateValidationService', () => {
 
     expect(beforeOpening.isValid).toBeFalse();
     expect(afterClosing.isValid).toBeFalse();
-    expect(beforeOpening.message).toContain('08:00 a 18:00');
-    expect(afterClosing.message).toContain('08:00 a 18:00');
+    expect(beforeOpening.message).toContain('horario de atención');
+    expect(afterClosing.message).toContain('horario de atención');
   });
 
   it('rejects reservations starting or ending on Sunday', () => {
@@ -84,6 +84,6 @@ describe('CartDateValidationService', () => {
     );
 
     expect(result.isValid).toBeFalse();
-    expect(result.message).toContain('lunes a sábado');
+    expect(result.message).toContain('horario de atención');
   });
 });

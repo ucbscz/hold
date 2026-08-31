@@ -1,9 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, WritableSignal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  WritableSignal,
+} from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Carrera } from '@entities/admin';
 import { CarreraService } from '@entities/career';
-import { Usuario, UsuarioServiceAPI } from '@entities/user';
+import { Usuario, UsuarioServiceAPI, UsuarioService } from '@entities/user';
 import { BuscadorComponent } from '@features/admin-search';
 import { Tabla, TablePaginationComponent } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
@@ -41,6 +47,17 @@ import { UsuariosEditarComponent } from '../usuarios-editar/usuarios-editar.comp
   styleUrls: ['./usuarios-tabla.component.css'],
 })
 export class UsuariosTablaComponent extends Tabla implements OnInit {
+  readonly esRoot =
+    inject(UsuarioService).obtenerUsuario().rol?.toLowerCase() ===
+    'administrador';
+  puedeGestionar(usuario: Usuario): boolean {
+    return (
+      this.esRoot ||
+      !['administrador', 'administrador_laboratorio'].includes(
+        usuario.rol?.toLowerCase() ?? '',
+      )
+    );
+  }
   auditRefresh = 0;
   expandedCarnet: string | null = null;
 
@@ -66,6 +83,11 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
   readonly rolesFiltroOpciones: OpcionSelect[] = [
     { value: '', label: 'Todos los roles' },
     { value: 'administrador', label: 'Administrador' },
+    {
+      value: 'administrador_laboratorio',
+      label: 'Administrador de laboratorio',
+    },
+    { value: 'administrativo', label: 'Administrativo' },
     { value: 'docente', label: 'Docente' },
     { value: 'estudiante', label: 'Estudiante' },
   ];

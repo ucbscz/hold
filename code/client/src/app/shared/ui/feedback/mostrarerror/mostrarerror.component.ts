@@ -19,7 +19,7 @@ export class MostrarerrorComponent implements OnInit, OnDestroy {
   private cerrado = false;
 
   ngOnInit(): void {
-    this.timeoutId = setTimeout(() => this.cerrar(), 1000);
+    this.timeoutId = setTimeout(() => this.cerrar(), 8000);
   }
 
   cerrar(): void {

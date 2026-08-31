@@ -12,6 +12,9 @@ export interface PrestamoApiItem {
   FechaDevolucionEsperada: string | Date | null;
   FechaDevolucion: string | Date | null;
   Observacion: string | null;
+  MotivoRechazo?: string | null;
+  AutorizadoPor?: string | null;
+  EntregadoPor?: string | null;
   EstadoPrestamo: string | null;
   IdContrato: string | null;
   DestinoPrestamo: string;

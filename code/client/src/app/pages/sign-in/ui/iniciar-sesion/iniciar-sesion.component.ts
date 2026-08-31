@@ -46,7 +46,9 @@ export class IniciarSesionComponent {
 
         this.loading = false;
         this.incorrecto = false;
-        this.router.navigate(['/inicio']);
+        this.router.navigate([
+          this.authService.isAdmin() ? '/administracion' : '/inicio',
+        ]);
       },
       error: (error) => {
         if (

@@ -44,7 +44,20 @@
         <thead>
           <tr>
             @for (columna of columnas; track columna) {
-              <th scope="col">{{ columna }}</th>
+              <th scope="col" [attr.aria-sort]="ariaOrdenColumna(columna)">
+                <button
+                  type="button"
+                  class="table-sort-button"
+                  (click)="ordenarPorColumna(columna)"
+                >
+                  {{ columna }}
+                  <i
+                    class="fas"
+                    [ngClass]="iconoOrdenColumna(columna)"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+              </th>
             }
             <th class="actions-column">Acciones</th>
           </tr>

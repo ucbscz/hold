@@ -62,7 +62,20 @@
         <thead>
           <tr>
             @for (columna of columnas; track columna) {
-              <th scope="col">{{ columna }}</th>
+              <th scope="col" [attr.aria-sort]="ariaOrdenColumna(columna)">
+                <button
+                  type="button"
+                  class="table-sort-button"
+                  (click)="ordenarPorColumna(columna)"
+                >
+                  {{ columna }}
+                  <i
+                    class="fas"
+                    [ngClass]="iconoOrdenColumna(columna)"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+              </th>
             }
             <th class="actions-column">Acciones</th>
           </tr>
@@ -103,18 +116,23 @@
                 </button>
                 <button
                   class="btn-icon btn-delete"
+                  [disabled]="!esRoot"
+                  title="Eliminar usuario (administrador general)"
                   (click)="eliminarUsuario(usuario)"
                 >
                   <i class="fas fa-trash-alt"></i>
                 </button>
                 <button
                   class="btn-icon btn-edit"
+                  [disabled]="!puedeGestionar(usuario)"
+                  title="Editar usuario"
                   (click)="editarUsuario(usuario)"
                 >
                   <i class="fas fa-pencil-alt"></i>
                 </button>
                 <button
                   class="btn-icon btn-lock"
+                  [disabled]="!puedeGestionar(usuario)"
                   [class.btn-icon--block-active]="usuario.bloqueado"
                   (click)="alternarBloqueo(usuario)"
                   [title]="usuario.bloqueado ? 'Desbloquear' : 'Bloquear'"

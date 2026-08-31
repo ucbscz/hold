@@ -26,9 +26,11 @@ describe('MostrarerrorComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should close automatically after one second', fakeAsync(() => {
+  it('should remain visible for eight seconds', fakeAsync(() => {
     fixture.detectChanges();
-    tick(1000);
+    tick(7999);
+    expect(component.error()).toBeTrue();
+    tick(1);
 
     expect(component.error()).toBeFalse();
   }));

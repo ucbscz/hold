@@ -1,3 +1,4 @@
+import { ConfiguracionDto, horarioParaFecha } from '@entities/configuracion';
 import { Injectable } from '@angular/core';
 import { CartDateValidationResult } from './cart-date-validation-result';
 
@@ -10,6 +11,7 @@ export class CartDateValidationService {
     endDate: Date | null,
     currentDate: Date,
     maximumLoanDays: number | null = null,
+    config: ConfiguracionDto | null = null,
   ): CartDateValidationResult {
     if (!startDate || !endDate) {
       return { isValid: false, message: null };
@@ -17,6 +19,12 @@ export class CartDateValidationService {
 
     const maximumStartDate = new Date(currentDate);
     maximumStartDate.setFullYear(currentDate.getFullYear() + 1);
+
+    if (
+      !Number.isFinite(startDate.getTime()) ||
+      !Number.isFinite(endDate.getTime())
+    )
+      return { isValid: false, message: 'Selecciona fechas válidas' };
 
     if (startDate > endDate) {
       return {
@@ -42,32 +50,30 @@ export class CartDateValidationService {
       };
     }
 
-    if (endDate.getTime() - startDate.getTime() < 30 * 60 * 1000) {
+    const minimo = config?.TiempoMinimoReservaMinutos ?? 30;
+    if (endDate.getTime() - startDate.getTime() < minimo * 60 * 1000) {
       return {
         isValid: false,
-        message: 'Error: El préstamo debe durar al menos 30 minutos',
+        message: `Error: El préstamo debe durar al menos ${minimo} minutos`,
       };
     }
 
-    if (startDate.getDay() === 0 || endDate.getDay() === 0) {
-      return {
-        isValid: false,
-        message: 'Error: El horario de atención es de lunes a sábado',
-      };
-    }
-
+    const inicio = horarioParaFecha(config, startDate);
+    const fin = horarioParaFecha(config, endDate);
     const startMinutes = startDate.getHours() * 60 + startDate.getMinutes();
     const endMinutes = endDate.getHours() * 60 + endDate.getMinutes();
     if (
-      startMinutes < 8 * 60 ||
-      startMinutes > 17 * 60 + 30 ||
-      endMinutes < 8 * 60 ||
-      endMinutes > 18 * 60
+      !inicio.Abierto ||
+      !fin.Abierto ||
+      startMinutes < inicio.InicioMinutos ||
+      startMinutes > inicio.FinMinutos - minimo ||
+      endMinutes < fin.InicioMinutos ||
+      endMinutes > fin.FinMinutos
     ) {
       return {
         isValid: false,
         message:
-          'Error: El horario de atención para reservas es de lunes a sábado, de 08:00 a 18:00',
+          'Error: Selecciona fechas y horas dentro del horario de atención configurado',
       };
     }
 

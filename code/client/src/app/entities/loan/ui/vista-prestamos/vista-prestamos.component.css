@@ -354,3 +354,27 @@
   margin: 0;
   line-height: 1.5;
 }
+.loan-actors {
+  display: grid;
+  grid-template-columns: minmax(140px, 1fr) 2fr;
+  gap: 10px 16px;
+  margin: 24px 0;
+  font-size: 15px;
+}
+.loan-actors dt {
+  font-weight: 600;
+  color: var(--ink-secondary);
+}
+.loan-actors dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 480px) {
+  .loan-actors {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+  .loan-actors dd {
+    margin-bottom: 10px;
+  }
+}

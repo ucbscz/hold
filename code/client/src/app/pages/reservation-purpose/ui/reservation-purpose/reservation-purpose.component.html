@@ -24,9 +24,7 @@
           ><i class="fas fa-university" aria-hidden="true"></i
         ></span>
         <span>
-          <strong>{{
-            esDocente ? "Uso personal en laboratorio" : "Uso en la Universidad"
-          }}</strong>
+          <strong>Uso interno: clases o laboratorios</strong>
           <small>Los equipos permanecerán dentro de las instalaciones.</small>
         </span>
       </label>
@@ -46,43 +44,17 @@
           ><i class="fas fa-home" aria-hidden="true"></i
         ></span>
         <span>
-          <strong>{{
-            esDocente
-              ? "Uso personal fuera del laboratorio"
-              : "Uso fuera de la Universidad"
-          }}</strong>
+          <strong>Uso externo</strong>
           <small
             >Los equipos saldrán de las instalaciones durante la reserva.</small
           >
         </span>
       </label>
-
-      @if (esDocente) {
-        <label
-          class="purpose-option"
-          [class.purpose-option--selected]="destinoPrestamo === 'Clase'"
-        >
-          <input
-            type="radio"
-            name="destino"
-            value="Clase"
-            [ngModel]="destinoPrestamo"
-            (ngModelChange)="seleccionarDestino($event)"
-          />
-          <span class="purpose-option__icon"
-            ><i class="fas fa-chalkboard-teacher" aria-hidden="true"></i
-          ></span>
-          <span>
-            <strong>Uso en una clase</strong>
-            <small>La reserva quedará asociada a una carrera y materia.</small>
-          </span>
-        </label>
-      }
     </fieldset>
 
-    @if (destinoPrestamo === "Clase") {
+    @if (destinoPrestamo === "Universidad" && esDocente) {
       <section class="class-details" aria-labelledby="class-details-title">
-        <h2 id="class-details-title">Datos de la clase</h2>
+        <h2 id="class-details-title">Datos de la clase (opcional)</h2>
         <div class="class-details__grid">
           <label>
             <span>Carrera</span>

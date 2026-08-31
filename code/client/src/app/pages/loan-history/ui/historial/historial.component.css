@@ -33,7 +33,7 @@
 
 .history-toolbar {
   display: grid;
-  grid-template-columns: 13rem minmax(16rem, 1fr) 10.5rem 10.5rem auto;
+  grid-template-columns: minmax(16rem, 1fr) 10.5rem 10.5rem auto;
   gap: 0.75rem;
   align-items: center;
   margin-bottom: 1.5rem;
@@ -197,4 +197,27 @@
     grid-column: 1;
     width: 100%;
   }
+}
+.history-tabs {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--border);
+}
+.history-tabs button {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: none;
+  color: var(--ink-secondary);
+  font: inherit;
+  cursor: pointer;
+}
+.history-tabs button.is-active {
+  border-color: var(--primary, #ffd700);
+  color: var(--ink);
+  font-weight: 700;
 }

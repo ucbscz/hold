@@ -1,3 +1,9 @@
+@if (mostrarComponentes) {
+  <app-inspeccion-equipo
+    [grupoId]="+id"
+    (cerrar)="mostrarComponentes = false"
+  ></app-inspeccion-equipo>
+}
 @if (!cargando) {
   <div class="contenedor-objeto">
     <div class="seccion-imagen">
@@ -26,6 +32,12 @@
         {{ producto.modelo }} · {{ producto.marca }}
       </p>
       <p class="descripcion-objeto">{{ producto.descripcion }}</p>
+      <p>
+        Costo de referencia: {{ producto.CostoPromedio | number: "1.2-2" }} Bs
+      </p>
+      <button class="btn btn-secondary" (click)="mostrarComponentes = true">
+        <i class="fas fa-microchip"></i> Ver componentes
+      </button>
 
       @if (producto.url_data_sheet) {
         <a

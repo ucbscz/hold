@@ -438,3 +438,17 @@
   font-size: 0.85rem;
   font-weight: 600;
 }
+.cart__detail-link {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  border: 0;
+  padding: 0;
+  background: none;
+  min-height: 44px;
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+.cart__detail-link:hover {
+  text-decoration: underline;
+}

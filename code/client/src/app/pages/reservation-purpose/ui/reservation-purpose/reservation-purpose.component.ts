@@ -83,7 +83,7 @@ export class ReservationPurposeComponent implements OnInit {
 
   seleccionarDestino(destino: DestinoPrestamo): void {
     this.destinoPrestamo = destino;
-    if (destino !== 'Clase') {
+    if (destino === 'Casa') {
       this.idCarrera = null;
       this.nombreCarrera = '';
       this.nombreMateria = '';
@@ -99,6 +99,7 @@ export class ReservationPurposeComponent implements OnInit {
   }
 
   continuar(): void {
+    if (!this.validarUsoInterno()) return;
     if (!this.seleccionValida()) {
       this.mensajeError =
         'Selecciona una carrera e ingresa la materia para continuar.';
@@ -113,7 +114,7 @@ export class ReservationPurposeComponent implements OnInit {
     if (this.carritoService.calcularPrecioTotal() >= montoMinimo) {
       void this.router.navigate(['/reserva'], {
         queryParams: {
-          destino: this.destinoPrestamo,
+          destino: this.destinoParaSolicitud(),
           idCarrera: this.idCarrera,
           nombreCarrera: this.nombreCarrera || null,
           nombreMateria: this.nombreMateria.trim() || null,
@@ -126,6 +127,7 @@ export class ReservationPurposeComponent implements OnInit {
   }
 
   realizarPrestamo(): void {
+    if (!this.validarUsoInterno()) return;
     const carnet = this.usuarioService.obtenerUsuario().carnet;
     if (!carnet) {
       void this.router.navigate(['/login']);
@@ -139,7 +141,7 @@ export class ReservationPurposeComponent implements OnInit {
         this.carritoService.obtenerCarrito(),
         carnet,
         undefined,
-        this.destinoPrestamo,
+        this.destinoParaSolicitud(),
         this.idCarrera ?? undefined,
         this.nombreMateria.trim() || undefined,
       )
@@ -163,15 +165,44 @@ export class ReservationPurposeComponent implements OnInit {
     void this.router.navigate(['/carrito'], { queryParams: { step: 2 } });
   }
 
+  private validarUsoInterno(): boolean {
+    const inicio = this.carritoService.obtenerFechaInicio();
+    const fin = this.carritoService.obtenerFechaFinal();
+    const fechaBolivia = (fecha: string | Date) =>
+      new Intl.DateTimeFormat('en-CA', { timeZone: 'America/La_Paz' }).format(
+        new Date(fecha),
+      );
+    if (
+      this.destinoPrestamo !== 'Casa' &&
+      inicio &&
+      fin &&
+      fechaBolivia(inicio) !== fechaBolivia(fin)
+    ) {
+      this.mensajeError =
+        'El uso interno requiere devolver los equipos el mismo día. Vuelve al horario para ajustar la devolución.';
+      this.errorVisible.set(true);
+      return false;
+    }
+    return true;
+  }
+
   redirigirAnterior(): void {
     void this.loanReturnNavigation.returnToPreviousPage();
   }
 
   seleccionValida(): boolean {
     return (
-      this.destinoPrestamo !== 'Clase' ||
+      (!this.idCarrera && !this.nombreMateria.trim()) ||
       (this.idCarrera !== null && this.nombreMateria.trim().length > 0)
     );
+  }
+
+  private destinoParaSolicitud(): DestinoPrestamo {
+    return this.destinoPrestamo === 'Universidad' &&
+      this.idCarrera &&
+      this.nombreMateria.trim()
+      ? 'Clase'
+      : this.destinoPrestamo;
   }
 
   private flujoDisponible(): boolean {

@@ -17,6 +17,7 @@ describe('PrestamosTablaComponent', () => {
 
     fixture = TestBed.createComponent(PrestamosTablaComponent);
     component = fixture.componentInstance;
+    component.modo = 'tabla';
     fixture.detectChanges();
   });
 
@@ -88,7 +89,7 @@ describe('PrestamosTablaComponent', () => {
     expect(nombresRenderizados()).toEqual(['Administrador']);
   });
 
-  it('should render loan table headers without sort buttons', () => {
+  it('should render sortable loan table headers', () => {
     cargarPrestamos([
       crearPrestamo({ id: 1, nombre: 'CarnetMayor', carnet: '200' }),
       crearPrestamo({ id: 2, nombre: 'CarnetMenor', carnet: '100' }),
@@ -102,7 +103,7 @@ describe('PrestamosTablaComponent', () => {
       fixture.nativeElement.querySelectorAll('thead th'),
     ).map((header) => (header as HTMLElement).textContent!.trim());
 
-    expect(sortButtons.length).toBe(0);
+    expect(sortButtons.length).toBe(component.columnas.length);
     expect(sortableHeaders.length).toBe(0);
     expect(headers).toContain('Carnet');
     expect(headers).toContain('Estado');
@@ -167,6 +168,7 @@ describe('PrestamosTablaComponent', () => {
       [
         'Usuario',
         'Carnet',
+        'Rol',
         'Teléfono',
         'Equipos',
         'Fecha Solicitud',
@@ -178,6 +180,7 @@ describe('PrestamosTablaComponent', () => {
         [
           'Fernando',
           '12890061',
+          'estudiante',
           '799430792',
           'Mini Dron',
           jasmine.any(String),

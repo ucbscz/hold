@@ -12,6 +12,9 @@ export class PrestamoDto extends BaseModel {
   FechaDevolucionEsperada: Date | null = null;
   FechaDevolucion: Date | null = null;
   Observacion: string | null = null;
+  MotivoRechazo?: string | null = null;
+  AutorizadoPor?: string | null = null;
+  EntregadoPor?: string | null = null;
   EstadoPrestamo: string | null = null;
   Ubicacion_Equipo: string | null = null;
   Nombre_Gavetero: string | null = null;

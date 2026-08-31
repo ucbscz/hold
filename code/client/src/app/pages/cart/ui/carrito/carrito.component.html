@@ -1,3 +1,9 @@
+@if (equipoDetalle !== null) {
+  <app-inspeccion-equipo
+    [grupoId]="equipoDetalle"
+    (cerrar)="equipoDetalle = null"
+  ></app-inspeccion-equipo>
+}
 @if (!carritoEstaVacio()) {
   <div class="cart" [class.cart--schedule]="step === 2">
     @if (step === 1) {
@@ -28,7 +34,15 @@
                 ></app-equipment-image-placeholder>
               }
               <div class="cart__product-info">
-                <h3 class="cart__product-title">{{ item.value.nombre }}</h3>
+                <h3 class="cart__product-title">
+                  <button
+                    type="button"
+                    class="cart__detail-link"
+                    (click)="equipoDetalle = +item.key"
+                  >
+                    {{ item.value.nombre }}
+                  </button>
+                </h3>
                 <p class="cart__product-owner">Propietario: IMT</p>
               </div>
               <div class="cart__quantity">

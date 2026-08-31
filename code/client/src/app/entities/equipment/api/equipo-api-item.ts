@@ -7,6 +7,8 @@ export interface EquipoApiItem {
   NumeroSerial: string | null;
   EstadoEquipo: string | null;
   Ubicacion: string | null;
+  IdAmbiente?: number | null;
+  IdProcedencia?: number | null;
   NombreGavetero: string | null;
   IdGavetero: number | null;
   CostoReferencia: number | null;

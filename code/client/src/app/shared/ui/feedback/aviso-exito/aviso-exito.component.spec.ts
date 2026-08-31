@@ -26,9 +26,11 @@ describe('AvisoExitoComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should close automatically after one second', fakeAsync(() => {
+  it('should remain visible for five seconds', fakeAsync(() => {
     fixture.detectChanges();
-    tick(1000);
+    tick(4999);
+    expect(component.exito()).toBeTrue();
+    tick(1);
 
     expect(component.exito()).toBeFalse();
   }));

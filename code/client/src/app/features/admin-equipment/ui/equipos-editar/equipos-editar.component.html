@@ -14,13 +14,12 @@
         ></app-custom-select>
       </div>
       <div class="form-group">
-        <label for="codigo_ucb">Código UCB</label>
+        <label for="codigo_ucb">Código UCB (opcional)</label>
         <input
           type="text"
           id="codigo_ucb"
           name="codigo_ucb"
           [(ngModel)]="equipo.CodigoUcb"
-          required
           maxlength="20"
           placeholder="Código UCB del equipo"
           class="form-input"
@@ -49,19 +48,7 @@
           placeholder="Estado del equipo"
         ></app-custom-select>
       </div>
-      <div class="form-group">
-        <label for="ubicacion">Ubicación</label>
-        <input
-          type="text"
-          id="ubicacion"
-          name="ubicacion"
-          [(ngModel)]="equipo.Ubicacion"
-          required
-          maxlength="200"
-          placeholder="Ubicación del equipo"
-          class="form-input"
-        />
-      </div>
+      <app-catalogo-selector [equipo]="equipo" />
       <div class="form-group">
         <label for="nombre_gavetero">Gavetero</label>
         <app-custom-select
@@ -72,7 +59,7 @@
         ></app-custom-select>
       </div>
       <div class="form-group">
-        <label for="costo_referencia">Costo Referencia</label>
+        <label for="costo_referencia">Costo de referencia (Bs)</label>
         <input
           type="number"
           id="costo_referencia"
@@ -97,19 +84,7 @@
           class="form-input"
         ></textarea>
       </div>
-      <div class="form-group">
-        <label for="procedencia">Procedencia</label>
-        <input
-          type="text"
-          id="procedencia"
-          name="procedencia"
-          [(ngModel)]="equipo.Procedencia"
-          required
-          maxlength="200"
-          placeholder="Procedencia del equipo"
-          class="form-input"
-        />
-      </div>
+
       <div class="form-submit">
         <button type="submit" class="register-button" [disabled]="!form.valid">
           <span>Confirmar Cambios</span>

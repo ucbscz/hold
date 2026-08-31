@@ -20,9 +20,14 @@ describe('CalendarioComponent', () => {
 
   it('renders an in-place calendar with 30-minute time options', () => {
     expect(component.diasDelMes.length % 7).toBe(0);
-    expect(component.horas).toHaveSize(21);
-    expect(component.horas[0].value).toBe('08:00');
-    expect(component.horas[20].value).toBe('18:00');
+    component.fechaInicioSeleccionada.set(new Date(2030, 0, 10, 8, 0));
+    component.fechaFinSeleccionada.set(new Date(2030, 0, 10, 8, 30));
+    component.seleccionarCampo('inicio');
+    expect(component.horasDisponibles).toHaveSize(20);
+    expect(component.horasDisponibles[0].value).toBe('08:00');
+    expect(component.horasDisponibles[19].value).toBe('17:30');
+    component.seleccionarCampo('fin');
+    expect(component.horasDisponibles.at(-1)?.value).toBe('18:00');
     expect(
       fixture.nativeElement.querySelectorAll('.availability-selector__day')
         .length,

@@ -95,7 +95,9 @@ export class AuthService {
   }
 
   isAdmin(): boolean {
-    return this.getRole() === 'administrador';
+    return ['administrador', 'administrador_laboratorio'].includes(
+      this.getRole() ?? '',
+    );
   }
 
   refreshTokens(

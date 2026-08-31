@@ -475,3 +475,15 @@
     display: none;
   }
 }
+:host ::ng-deep .contract-document img[data-carnet] {
+  display: block;
+  max-width: 100%;
+  width: 320px;
+  height: 205px;
+  object-fit: contain;
+  margin: 12px auto;
+}
+:host ::ng-deep .contract-document .contract-identity {
+  table-layout: fixed;
+  break-inside: avoid;
+}

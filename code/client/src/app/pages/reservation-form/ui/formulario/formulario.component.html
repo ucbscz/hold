@@ -5,6 +5,22 @@
     <p>Verifica la información antes de confirmar la solicitud.</p>
   </header>
   <section class="contrato-container" aria-label="Vista previa del contrato">
+    <div class="identity-upload">
+      <label
+        >Anverso del carnet<input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          (change)="cargarCarnet($event, 'frente')"
+          [disabled]="procesandoCarnet"
+      /></label>
+      <label
+        >Reverso del carnet<input
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          (change)="cargarCarnet($event, 'atras')"
+          [disabled]="procesandoCarnet"
+      /></label>
+    </div>
     <div
       #contratoContainer
       class="formulario"

@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { InspeccionEquipoComponent } from '@features/equipment-inspection';
 import {
   AfterViewInit,
   Component,
@@ -41,6 +42,7 @@ const MAX_COMMENT_LENGTH = 1024;
   selector: 'app-objeto',
   standalone: true,
   imports: [
+    InspeccionEquipoComponent,
     CommonModule,
     MostrarerrorComponent,
     EquipmentImagePlaceholderComponent,
@@ -73,6 +75,7 @@ export class ObjetoComponent implements AfterViewInit, OnDestroy {
   cantidad: number = 1;
 
   showCalendarioModal = false;
+  mostrarComponentes = false;
   carritoCalendario: Carrito = {};
   fechaInicioCalendario: WritableSignal<Date | null> = signal(null);
   fechaFinCalendario: WritableSignal<Date | null> = signal(null);

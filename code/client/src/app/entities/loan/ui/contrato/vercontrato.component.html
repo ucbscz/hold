@@ -1,0 +1,84 @@
+<div class="contract-modal-backdrop">
+  <section
+    class="contract-modal-shell"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="contract-modal-title"
+  >
+    <header class="contract-modal-header">
+      <h2 id="contract-modal-title" class="contract-modal-title">
+        <i class="fas fa-file-signature" aria-hidden="true"></i> Contrato
+      </h2>
+      <button
+        class="contract-modal-close"
+        (click)="cerrar()"
+        type="button"
+        aria-label="Cerrar contrato"
+      >
+        <img src="assets/x.png" alt="Cerrar" />
+      </button>
+    </header>
+    <main class="contract-modal-body">
+      <div class="contract-document-scroll">
+        <article
+          #contractContent
+          class="contract-document"
+          *ngIf="contratoContentSeguro; else loading"
+          [innerHTML]="contratoContentSeguro"
+        ></article>
+        <ng-template #loading>
+          <div class="contract-loading">
+            <div class="contract-spinner"></div>
+            <p>Cargando contrato...</p>
+          </div>
+        </ng-template>
+      </div>
+    </main>
+    <footer
+      class="contract-modal-footer"
+      *ngIf="contratoContentSeguro"
+      style="gap: 12px"
+      [attr.aria-busy]="imprimiendo"
+    >
+      <button
+        class="contract-download-button"
+        (click)="descargarContrato()"
+        type="button"
+        title="Descargar contrato HTML"
+        aria-label="Descargar contrato HTML"
+        style="width: 46px; min-width: 46px; padding: 0"
+      >
+        <i class="fas fa-download" aria-hidden="true"></i>
+      </button>
+      <button
+        class="contract-download-button"
+        (click)="imprimirContrato()"
+        type="button"
+        title="Imprimir contrato"
+        aria-label="Imprimir contrato"
+        [disabled]="imprimiendo"
+        [style.opacity]="imprimiendo ? 0.5 : 1"
+        style="width: 46px; min-width: 46px; padding: 0"
+      >
+        <i class="fas fa-print" aria-hidden="true"></i>
+      </button>
+      <button
+        class="contract-download-button"
+        (click)="imprimirCarnet()"
+        type="button"
+        [title]="
+          tieneCarnet ? 'Imprimir carnet' : 'Carnet no adjunto o incompleto'
+        "
+        aria-label="Imprimir ambas caras del carnet"
+        [disabled]="imprimiendo || !tieneCarnet"
+        [style.opacity]="imprimiendo || !tieneCarnet ? 0.5 : 1"
+        style="width: 46px; min-width: 46px; padding: 0"
+      >
+        <i class="fas fa-id-card" aria-hidden="true"></i>
+      </button>
+    </footer>
+  </section>
+</div>
+@if (error()) {
+  <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>
+}

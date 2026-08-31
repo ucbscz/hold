@@ -1,3 +1,4 @@
+import { CatalogoSelectorComponent } from '../catalogo-selector.component';
 import {
   Component,
   EventEmitter,
@@ -25,6 +26,7 @@ import {
   standalone: true,
   imports: [
     FormsModule,
+    CatalogoSelectorComponent,
     MostrarerrorComponent,
     Aviso,
     AvisoExitoComponent,

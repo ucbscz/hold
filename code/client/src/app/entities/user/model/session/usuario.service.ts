@@ -57,6 +57,10 @@ export class UsuarioService {
 
   obtenerRol(): 'administrador' | 'usuario' {
     const usuario = this.usuarioSignal();
-    return usuario.rol === 'administrador' ? 'administrador' : 'usuario';
+    return ['administrador', 'administrador_laboratorio'].includes(
+      usuario.rol ?? '',
+    )
+      ? 'administrador'
+      : 'usuario';
   }
 }

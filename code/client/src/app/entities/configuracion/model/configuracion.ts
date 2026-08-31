@@ -1,4 +1,5 @@
 export interface ConfiguracionDto {
+  Horarios?: HorarioAtencion[];
   MontoMinimoContrato: number;
   HorarioInicioMinutos: number;
   HorarioFinMinutos: number;
@@ -7,6 +8,32 @@ export interface ConfiguracionDto {
   TiempoMinimoReservaMinutos: number;
   TiempoRecordatorioPrevioMinutos: number;
   MinutosGraciaAtraso: number;
+}
+
+export interface HorarioAtencion {
+  DiaSemana: number;
+  Fecha?: string | null;
+  Abierto: boolean;
+  InicioMinutos: number;
+  FinMinutos: number;
+}
+
+export function horarioParaFecha(
+  config: ConfiguracionDto | null,
+  fecha: Date,
+): HorarioAtencion {
+  const fechaTexto = `${fecha.getFullYear()}-${String(fecha.getMonth() + 1).padStart(2, '0')}-${String(fecha.getDate()).padStart(2, '0')}`;
+  return (
+    config?.Horarios?.find((h) => h.Fecha === fechaTexto) ??
+    config?.Horarios?.find(
+      (h) => !h.Fecha && h.DiaSemana === fecha.getDay(),
+    ) ?? {
+      DiaSemana: fecha.getDay(),
+      Abierto: fecha.getDay() !== 0,
+      InicioMinutos: config?.HorarioInicioMinutos ?? 480,
+      FinMinutos: config?.HorarioFinMinutos ?? 1080,
+    }
+  );
 }
 
 export const CONFIGURACION_PREDETERMINADA: ConfiguracionDto = {

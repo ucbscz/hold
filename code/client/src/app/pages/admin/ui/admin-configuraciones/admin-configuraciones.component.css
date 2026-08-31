@@ -303,3 +303,30 @@
     width: 100%;
   }
 }
+:host .weekly-schedule {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0;
+}
+:host .weekly-schedule__day {
+  display: grid;
+  grid-template-columns: minmax(130px, 1fr) minmax(110px, 1fr) minmax(
+      110px,
+      1fr
+    ) 44px;
+  align-items: center;
+  gap: 12px;
+}
+:host .weekly-schedule__day label {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+@media (max-width: 640px) {
+  :host .weekly-schedule__day {
+    grid-template-columns: 1fr 1fr;
+  }
+  :host .weekly-schedule__day label {
+    grid-column: 1 / -1;
+  }
+}

@@ -1997,3 +1997,17 @@ button.btn:active {
     width: max-content;
   }
 }
+.table-sort-button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 44px;
+  cursor: pointer;
+}
+.table-sort-button i {
+  color: var(--color-text-muted);
+}

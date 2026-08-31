@@ -49,6 +49,53 @@ export class FormularioComponent implements OnInit {
   contenidoHtml: string = '';
   clickfirma: WritableSignal<boolean> = signal(false);
   firma: string = '';
+  carnetFrente = '';
+  carnetAtras = '';
+  procesandoCarnet = false;
+
+  async cargarCarnet(event: Event, cara: 'frente' | 'atras'): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    if (
+      !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
+      file.size > 5 * 1024 * 1024
+    ) {
+      this.mensajeerror =
+        'Selecciona una imagen JPG, PNG o WebP de hasta 5 MB.';
+      this.error.set(true);
+      input.value = '';
+      return;
+    }
+    this.procesandoCarnet = true;
+    try {
+      const bitmap = await createImageBitmap(file);
+      const scale = Math.min(1, 1200 / Math.max(bitmap.width, bitmap.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(bitmap.width * scale);
+      canvas.height = Math.round(bitmap.height * scale);
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('Imagen no disponible');
+      ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+      bitmap.close();
+      const data = canvas.toDataURL('image/jpeg', 0.8);
+      if (data.length > 650000) throw new Error('Imagen demasiado grande');
+      if (cara === 'frente') this.carnetFrente = data;
+      else this.carnetAtras = data;
+      this.actualizarContrato();
+      if (this.firma)
+        this.contenidoHtml = this.insertarFirmaEnContrato(
+          this.contenidoHtml,
+          this.firma,
+        );
+    } catch {
+      this.mensajeerror =
+        'No se pudo leer la imagen. Prueba con una fotografía más pequeña.';
+      this.error.set(true);
+    } finally {
+      this.procesandoCarnet = false;
+    }
+  }
   error: WritableSignal<boolean> = signal(false);
   mensajeerror: string = 'Error desconocido intente mas tarde';
   cargando: boolean = false;
@@ -124,6 +171,8 @@ export class FormularioComponent implements OnInit {
         config?.NombreJefeCarrera ?? 'Job Angel Ledezma Dr.Ing',
       ),
       firma_jefe_carrera: firmaSrc,
+      carnet_frente: this.carnetFrente,
+      carnet_atras: this.carnetAtras,
 
       dia: new Date().getDate().toString(),
       mesliteral: new Intl.DateTimeFormat('es-ES', {
@@ -142,7 +191,7 @@ export class FormularioComponent implements OnInit {
         month: 'long',
       }).format(fechaFinal),
       año_devolucion: fechaFinal.getFullYear().toString(),
-      detalles_clase: detallesClase,
+      detalles_clase: escapeHtmlValue(detallesClase),
     });
     this.contenidoHtml = processedTemplate;
   }
@@ -213,6 +262,13 @@ export class FormularioComponent implements OnInit {
   }
 
   aceptar() {
+    if (this.procesandoCarnet) return;
+    if (!this.carnetFrente || !this.carnetAtras) {
+      this.mensajeerror =
+        'Adjunta el anverso y reverso del carnet antes de confirmar.';
+      this.error.set(true);
+      return;
+    }
     if (
       !this.carrito ||
       Object.keys(this.carrito.obtenerCarrito()).length === 0

@@ -25,9 +25,36 @@
     </table>
   </div>
   @if (prestamos.length > 0) {
+    @if (prestamos[0].IdContrato) {
+      <button class="btn btn-secondary" (click)="contratoVisible.set(true)">
+        <i class="fas fa-file-signature" aria-hidden="true"></i> Ver y descargar
+        contrato
+      </button>
+    }
+    <dl class="loan-actors">
+      <dt>Solicitante</dt>
+      <dd>
+        {{ prestamos[0].NombreUsuario }}
+        {{ prestamos[0].ApellidoPaternoUsuario }}
+      </dd>
+      <dt>Autorizado y aprobado por</dt>
+      <dd>{{ prestamos[0].AutorizadoPor || "Sin autorización registrada" }}</dd>
+      <dt>Entregado por</dt>
+      <dd>{{ prestamos[0].EntregadoPor || "Sin entrega registrada" }}</dd>
+      @if (prestamos[0].MotivoRechazo) {
+        <dt>Motivo del rechazo</dt>
+        <dd>{{ prestamos[0].MotivoRechazo }}</dd>
+      }
+    </dl>
     <div class="observacion-general">
       <span class="obs-label">Observaciones del préstamo:</span>
       <p class="obs-texto">{{ observacionTexto() }}</p>
     </div>
   }
 </div>
+@if (contratoVisible() && prestamos.length) {
+  <app-vercontrato
+    [vercontraro]="contratoVisible"
+    [idprestamo]="prestamos[0].Id"
+  />
+}

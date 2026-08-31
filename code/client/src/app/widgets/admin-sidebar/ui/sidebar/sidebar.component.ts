@@ -10,6 +10,8 @@ import {
 import { SidebarService } from '../../model/sidebar.service';
 
 const ICONS: Record<string, string> = {
+  Ambientes: 'fas fa-door-open',
+  Procedencias: 'fas fa-truck',
   Prestamos: 'fas fa-handshake',
   Carreras: 'fas fa-graduation-cap',
   Usuarios: 'fas fa-users',
@@ -50,5 +52,6 @@ export class SidebarComponent {
 
   clickitem(item: string) {
     this.item.emit(item);
+    this.sidebarService.close();
   }
 }

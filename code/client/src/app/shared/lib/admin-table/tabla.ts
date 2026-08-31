@@ -53,6 +53,9 @@ export abstract class Tabla extends BaseTablaComponent {
   }
 
   protected aplicarOrdenActualSiExiste(): void {
+    if (!this.sortColumn)
+      this.sortColumn =
+        this.columnas.find((c) => c.toLowerCase().includes('nombre')) ?? '';
     if (!this.sortColumn) return;
 
     this.sortTable({ col: this.sortColumn, dir: this.sortDirection });

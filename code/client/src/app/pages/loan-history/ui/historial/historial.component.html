@@ -4,17 +4,25 @@
     <p>Consulta el estado y las fechas de tus reservas de equipos.</p>
   </header>
 
+  <nav class="history-tabs" aria-label="Estados de préstamos">
+    @for (estado of estados; track estado.value) {
+      <button
+        type="button"
+        [class.is-active]="modo === 'lista' && item === estado.value"
+        (click)="seleccionarEstado(estado.value)"
+      >
+        {{ estado.label }}
+      </button>
+    }
+    <button
+      type="button"
+      [class.is-active]="modo === 'tablero'"
+      (click)="verTablero()"
+    >
+      <i class="fas fa-columns"></i> Tablero
+    </button>
+  </nav>
   <div class="history-toolbar">
-    <app-custom-select
-      class="history-state-select"
-      [ngModel]="item"
-      (ngModelChange)="seleccionarEstado($event)"
-      [ngModelOptions]="{ standalone: true }"
-      [opciones]="estados"
-      [searchThreshold]="99"
-      icon="fas fa-history"
-      placeholder="Estado del préstamo"
-    ></app-custom-select>
     <div class="audit-search-wrap">
       <i class="fas fa-search search-icon"></i>
       <input
@@ -62,7 +70,24 @@
   </div>
 
   <div class="items-wrapper" role="tabpanel">
-    @if (item == "Activo") {
+    @if (modo === "tablero") {
+      @if (mensajeError) {
+        <p role="alert">
+          {{ mensajeError }}
+          <button class="btn btn-secondary" (click)="verTablero()">
+            Reintentar
+          </button>
+        </p>
+      }
+      @if (cargando && !prestamos.length) {
+        <p role="status">Cargando préstamos...</p>
+      }
+      <app-tablero-prestamos
+        [prestamos]="prestamosFiltrados"
+        (detalle)="detalle = $event"
+        (accion)="abrirContrato($event)"
+      ></app-tablero-prestamos>
+    } @else if (item == "Activo") {
       <app-activo
         [filtroTexto]="filtroTexto"
         [fechaDesde]="fechaDesde"
@@ -114,3 +139,22 @@
     }
   </div>
 </div>
+@if (detalle) {
+  <app-vista-prestamos
+    [prestamos]="detalle"
+    (cerrar)="detalle = null"
+  ></app-vista-prestamos>
+}
+@if (contrato()) {
+  <app-vercontrato
+    [vercontraro]="contrato"
+    [idprestamo]="contratoId"
+  ></app-vercontrato>
+}
+@if (avisoCancelar()) {
+  <app-aviso
+    [cerrar]="avisoCancelar"
+    mensaje="¿Cancelar este préstamo?"
+    (aceptar)="cancelarPrestamo()"
+  ></app-aviso>
+}

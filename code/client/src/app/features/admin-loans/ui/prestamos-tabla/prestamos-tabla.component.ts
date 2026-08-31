@@ -1,13 +1,21 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, signal, WritableSignal } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  inject,
+  signal,
+  WritableSignal,
+} from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PrestamoDto } from '@entities/admin';
 import {
   PrestamoAgrupados,
+  TableroPrestamosComponent,
+  compararPrestamos,
   PrestamosAPIService,
   VistaPrestamosComponent,
 } from '@entities/loan';
-import { UsuarioServiceAPI } from '@entities/user';
+import { UsuarioServiceAPI, UsuarioService } from '@entities/user';
 import { BuscadorComponent } from '@features/admin-search';
 import {
   AdminTableSort,
@@ -31,11 +39,12 @@ import {
 } from '@shared/ui';
 import { AuditPanelComponent } from '@widgets/audit-panel';
 import { finalize } from 'rxjs';
-import { VercontratoComponent } from '../vercontrato/vercontrato.component';
+import { VercontratoComponent } from '@entities/loan';
 @Component({
   selector: 'app-prestamos-tabla',
   standalone: true,
   imports: [
+    TableroPrestamosComponent,
     StickyScrollDirective,
     CommonModule,
     FormsModule,
@@ -59,6 +68,37 @@ import { VercontratoComponent } from '../vercontrato/vercontrato.component';
 export class PrestamosTablaComponent extends Tabla implements OnInit {
   override sortColumn = 'Fecha Solicitud';
   override sortDirection: AdminTableSort['dir'] = 'desc';
+  readonly esRoot =
+    inject(UsuarioService).obtenerUsuario().rol?.toLowerCase() ===
+    'administrador';
+  modo: 'tablero' | 'tabla' = 'tablero';
+  get prestamosTablero(): PrestamoDto[] {
+    return [...this.prestamos.values()].flatMap((p) => p.equipos);
+  }
+  accionTablero(evento: { id: number; accion: string }): void {
+    const prestamo = this.prestamos.get(evento.id);
+    if (!prestamo) return;
+    switch (evento.accion) {
+      case 'aprobar':
+        this.validaraprobacion(evento.id);
+        break;
+      case 'rechazar':
+        this.validarrechazo(evento.id);
+        break;
+      case 'entregar':
+        this.validarRecogido(evento.id);
+        break;
+      case 'devolver':
+        this.validarDevuelto(evento.id);
+        break;
+      case 'contrato':
+        this.cambiarestadovercontrato(prestamo.datosgrupo);
+        break;
+      case 'observacion':
+        this.editarObservacion(evento.id);
+        break;
+    }
+  }
   expandedRowId: number | null = null;
   auditRefresh = 0;
 
@@ -103,6 +143,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       [
         'Usuario',
         'Carnet',
+        'Rol',
         'Teléfono',
         'Equipos',
         'Fecha Solicitud',
@@ -113,6 +154,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       this.prestamosTabla.map(({ value }) => [
         `${value.datosgrupo.NombreUsuario ?? ''} ${value.datosgrupo.ApellidoPaternoUsuario ?? ''}`.trim(),
         value.datosgrupo.CarnetUsuario,
+        value.datosgrupo.TipoUsuario,
         value.datosgrupo.TelefonoUsuario,
         this.detalleEquipos(value),
         this.formatearFechaImpresion(value.datosgrupo.FechaSolicitud),
@@ -129,6 +171,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       headers: [
         'Usuario',
         'Carnet',
+        'Rol',
         'Teléfono',
         'Equipos',
         'Fecha solicitud',
@@ -139,6 +182,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       rows: this.prestamosTabla.map(({ value }) => [
         `${value.datosgrupo.NombreUsuario ?? ''} ${value.datosgrupo.ApellidoPaternoUsuario ?? ''}`.trim(),
         value.datosgrupo.CarnetUsuario,
+        value.datosgrupo.TipoUsuario,
         value.datosgrupo.TelefonoUsuario,
         this.detalleEquipos(value),
         this.formatearFechaImpresion(value.datosgrupo.FechaSolicitud),
@@ -207,6 +251,11 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   readonly rolesFiltroOpciones: OpcionSelect[] = [
     { value: '', label: 'Todos los roles' },
     { value: 'administrador', label: 'Administrador' },
+    {
+      value: 'administrador_laboratorio',
+      label: 'Administrador de laboratorio',
+    },
+    { value: 'administrativo', label: 'Administrativo' },
     { value: 'docente', label: 'Docente' },
     { value: 'estudiante', label: 'Estudiante' },
   ];
@@ -214,6 +263,32 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   fechaPrestamoHasta = '';
   private busquedaActual?: [string, string];
   abrirVista: boolean = false;
+  motivoRechazo = '';
+  observacionEditar = '';
+  editandoObservacion: number | null = null;
+
+  editarObservacion(id: number): void {
+    this.editandoObservacion = id;
+    this.observacionEditar =
+      this.prestamos.get(id)?.datosgrupo.Observacion ?? '';
+  }
+
+  guardarObservacion(): void {
+    if (this.editandoObservacion == null) return;
+    this.prestamosapi
+      .editarObservacion(this.editandoObservacion, this.observacionEditar)
+      .subscribe({
+        next: () => {
+          this.editandoObservacion = null;
+          this.auditRefresh++;
+          this.cargarPrestamos();
+        },
+        error: (e) => {
+          this.mensajeerror = extractErrorMessage(e);
+          this.error.set(true);
+        },
+      });
+  }
   prestamosVista: PrestamoDto[] = [];
   constructor(
     private readonly prestamosapi: PrestamosAPIService,
@@ -233,26 +308,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   cargarPrestamos() {
     this.prestamosapi.obtenerPrestamos().subscribe({
       next: (data: PrestamoDto[]) => {
-        data.sort((a, b) => {
-          const inactives = ['finalizado', 'cancelado', 'rechazado'];
-          const aEstado = (a.EstadoPrestamo ?? '').toString().toLowerCase();
-          const bEstado = (b.EstadoPrestamo ?? '').toString().toLowerCase();
-          const aInactivo = inactives.includes(aEstado);
-          const bInactivo = inactives.includes(bEstado);
-          if (aInactivo !== bInactivo) return aInactivo ? 1 : -1;
-
-          const aIsDocente =
-            (a.TipoUsuario ?? '').toString().toLowerCase() === 'docente';
-          const bIsDocente =
-            (b.TipoUsuario ?? '').toString().toLowerCase() === 'docente';
-          if (aIsDocente && !bIsDocente) return -1;
-          if (!aIsDocente && bIsDocente) return 1;
-
-          return (
-            new Date(b.FechaSolicitud ?? 0).getTime() -
-            new Date(a.FechaSolicitud ?? 0).getTime()
-          );
-        });
+        data.sort(compararPrestamos);
         this.agruparPrestamos(data);
         this.seleccionarEstado(this.estadoSeleccionado);
       },
@@ -455,29 +511,11 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       },
     );
 
-    prestamosOrdenados.sort((a, b) => {
-      const inactives = ['finalizado', 'cancelado', 'rechazado'];
-      const aEstado = (a[1].datosgrupo.EstadoPrestamo ?? '')
-        .toString()
-        .toLowerCase();
-      const bEstado = (b[1].datosgrupo.EstadoPrestamo ?? '')
-        .toString()
-        .toLowerCase();
-      const aInactivo = inactives.includes(aEstado);
-      const bInactivo = inactives.includes(bEstado);
-      if (aInactivo !== bInactivo) return aInactivo ? 1 : -1;
-
-      const aIsDocente =
-        (a[1].datosgrupo.TipoUsuario ?? '').toString().toLowerCase() ===
-        'docente';
-      const bIsDocente =
-        (b[1].datosgrupo.TipoUsuario ?? '').toString().toLowerCase() ===
-        'docente';
-      if (aIsDocente && !bIsDocente) return -1;
-      if (!aIsDocente && bIsDocente) return 1;
-
-      return 0;
-    });
+    if (e.col === 'Fecha Solicitud' && e.dir === 'desc') {
+      prestamosOrdenados.sort((a, b) =>
+        compararPrestamos(a[1].datosgrupo, b[1].datosgrupo),
+      );
+    }
 
     this.prestamos = new Map<number, PrestamoAgrupados>(prestamosOrdenados);
   }
@@ -539,16 +577,19 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     this.prestamoKeySeleccionado = 0;
   }
   validarrechazo(key: number) {
+    this.motivoRechazo = '';
     this.mensajeavisorechazar =
       '¿Está seguro de rechazar el préstamo seleccionado?';
     this.prestamoKeySeleccionado = key;
     this.avisorechazar.set(true);
   }
   rechazarprestamo(key: number) {
+    if (!this.motivoRechazo.trim()) return;
     this.prestamosapi
       .cambiarEstadoPrestamo(
         this.prestamos.get(key)!.datosgrupo.Id,
         'rechazado',
+        this.motivoRechazo.trim(),
       )
       .subscribe({
         next: (_response) => {

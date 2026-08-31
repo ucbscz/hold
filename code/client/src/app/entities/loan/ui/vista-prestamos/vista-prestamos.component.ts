@@ -1,12 +1,14 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
+import { VercontratoComponent } from '../contrato/vercontrato.component';
 import { PrestamoDto } from '@entities/admin';
 @Component({
   selector: 'app-vista-prestamos',
-  imports: [],
+  imports: [VercontratoComponent],
   templateUrl: './vista-prestamos.component.html',
   styleUrl: './vista-prestamos.component.css',
 })
 export class VistaPrestamosComponent {
+  readonly contratoVisible = signal(false);
   @Input() prestamos: PrestamoDto[] = [];
   @Output() cerrar: EventEmitter<void> = new EventEmitter<void>();
   cerrarVista() {

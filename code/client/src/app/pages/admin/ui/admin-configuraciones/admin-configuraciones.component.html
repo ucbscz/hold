@@ -124,6 +124,69 @@
               durar 30 minutos.
             </p>
           }
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="aplicarSemana()"
+          >
+            Aplicar horario a la semana
+          </button>
+          <div class="weekly-schedule">
+            @for (horario of horarios; track $index) {
+              <div class="weekly-schedule__day">
+                <label
+                  ><input
+                    type="checkbox"
+                    [(ngModel)]="horario.Abierto"
+                    [name]="'abierto' + $index"
+                  />
+                  {{ horario.Fecha || dias[horario.DiaSemana] }}</label
+                >
+                <app-custom-select
+                  [name]="'inicio' + $index"
+                  aria-label="Hora de apertura"
+                  [disabled]="!horario.Abierto"
+                  [opciones]="horas"
+                  [(ngModel)]="horario.InicioMinutos"
+                />
+                <app-custom-select
+                  [name]="'fin' + $index"
+                  aria-label="Hora de cierre"
+                  [disabled]="!horario.Abierto"
+                  [opciones]="horas"
+                  [(ngModel)]="horario.FinMinutos"
+                />
+                @if (horario.Fecha) {
+                  <button
+                    type="button"
+                    class="btn-icon"
+                    title="Eliminar excepción"
+                    (click)="quitarExcepcion(horario)"
+                  >
+                    <i class="fas fa-trash" aria-hidden="true"></i>
+                  </button>
+                }
+              </div>
+            }
+          </div>
+          <div class="config-grid">
+            <label class="config-field"
+              ><span>Fecha especial</span
+              ><input
+                appFlatpickr
+                name="fechaEspecial"
+                [(ngModel)]="fechaEspecial"
+                placeholder="Seleccionar fecha"
+            /></label>
+            <button
+              type="button"
+              class="btn btn-secondary"
+              (click)="agregarExcepcion()"
+              [disabled]="!fechaEspecial"
+            >
+              Añadir excepción
+            </button>
+          </div>
         </div>
       </section>
 

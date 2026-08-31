@@ -36,6 +36,9 @@ export class PrestamosAPIService {
         ? new Date(item.FechaDevolucion)
         : null,
       Observacion: item.Observacion,
+      MotivoRechazo: item.MotivoRechazo,
+      AutorizadoPor: item.AutorizadoPor,
+      EntregadoPor: item.EntregadoPor,
       EstadoPrestamo: item.EstadoPrestamo,
       IdContrato: item.IdContrato,
       Ubicacion_Equipo: item.UbicacionEquipo ?? null,
@@ -130,6 +133,12 @@ export class PrestamosAPIService {
       EquiposRetorno: equiposRetorno ?? [],
     };
     return this.http.patch(`${this.url}/${Id}/estado`, body);
+  }
+
+  editarObservacion(id: number, observacion: string) {
+    return this.http.patch(`${this.url}/${id}/observacion`, {
+      Observacion: observacion,
+    });
   }
 
   obtenerPrestamosPorUsuario(carnet: string, estadoPrestamo: string) {

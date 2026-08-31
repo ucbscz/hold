@@ -2,15 +2,23 @@ import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   ConfiguracionDto,
+  HorarioAtencion,
   ConfiguracionService,
 } from '@entities/configuracion';
 import { FirmaComponent } from '@features/signature';
+import { CustomSelectComponent } from '@shared/ui';
+import { FlatpickrDirective } from '@shared/lib/directives';
 import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-admin-configuraciones',
   standalone: true,
-  imports: [FormsModule, FirmaComponent],
+  imports: [
+    FormsModule,
+    FirmaComponent,
+    CustomSelectComponent,
+    FlatpickrDirective,
+  ],
   templateUrl: './admin-configuraciones.component.html',
   styleUrls: ['./admin-configuraciones.component.css'],
 })
@@ -25,6 +33,57 @@ export class AdminConfiguracionesComponent implements OnInit {
   horarioInicioMinuto = 0;
   horarioFinHora = 18;
   horarioFinMinuto = 0;
+  readonly dias = [
+    'Domingo',
+    'Lunes',
+    'Martes',
+    'Miércoles',
+    'Jueves',
+    'Viernes',
+    'Sábado',
+  ];
+  readonly horas = Array.from({ length: 48 }, (_, i) => ({
+    value: i * 30,
+    label: `${String(Math.floor(i / 2)).padStart(2, '0')}:${i % 2 ? '30' : '00'}`,
+  }));
+  horarios: HorarioAtencion[] = [];
+  fechaEspecial = '';
+
+  aplicarSemana(): void {
+    this.horarios = this.horarios.map((h) =>
+      h.Fecha
+        ? h
+        : {
+            ...h,
+            InicioMinutos:
+              this.horarioInicioHora * 60 + this.horarioInicioMinuto,
+            FinMinutos: this.horarioFinHora * 60 + this.horarioFinMinuto,
+          },
+    );
+  }
+
+  agregarExcepcion(): void {
+    if (
+      !this.fechaEspecial ||
+      this.horarios.some((h) => h.Fecha === this.fechaEspecial)
+    )
+      return;
+    this.horarios = [
+      ...this.horarios,
+      {
+        Fecha: this.fechaEspecial,
+        DiaSemana: 0,
+        Abierto: false,
+        InicioMinutos: 480,
+        FinMinutos: 1080,
+      },
+    ];
+    this.fechaEspecial = '';
+  }
+
+  quitarExcepcion(horario: HorarioAtencion): void {
+    this.horarios = this.horarios.filter((h) => h !== horario);
+  }
 
   constructor(private readonly configuracionService: ConfiguracionService) {}
 
@@ -63,6 +122,7 @@ export class AdminConfiguracionesComponent implements OnInit {
 
     const updatedConfig = {
       ...currentConfig,
+      Horarios: this.horarios,
       HorarioInicioMinutos:
         this.horarioInicioHora * 60 + this.horarioInicioMinuto,
       HorarioFinMinutos: this.horarioFinHora * 60 + this.horarioFinMinuto,
@@ -91,6 +151,11 @@ export class AdminConfiguracionesComponent implements OnInit {
     const fin = this.horarioFinHora * 60 + this.horarioFinMinuto;
 
     return (
+      this.horarios.every(
+        (h) =>
+          !h.Abierto ||
+          h.FinMinutos - h.InicioMinutos >= current.TiempoMinimoReservaMinutos,
+      ) &&
       inicio >= 0 &&
       fin <= 24 * 60 - 1 &&
       inicio < fin &&
@@ -103,6 +168,17 @@ export class AdminConfiguracionesComponent implements OnInit {
   }
 
   private parseHorarios(data: ConfiguracionDto): void {
+    this.horarios = [1, 2, 3, 4, 5, 6, 0].map((day) => ({
+      ...(data.Horarios?.find((h) => !h.Fecha && h.DiaSemana === day) ?? {
+        DiaSemana: day,
+        Abierto: day !== 0,
+        InicioMinutos: data.HorarioInicioMinutos,
+        FinMinutos: data.HorarioFinMinutos,
+      }),
+    }));
+    this.horarios.push(
+      ...(data.Horarios?.filter((h) => !!h.Fecha).map((h) => ({ ...h })) ?? []),
+    );
     const inicio = this.normalizarMinutos(data.HorarioInicioMinutos, 8 * 60);
     const fin = this.normalizarMinutos(data.HorarioFinMinutos, 18 * 60);
 

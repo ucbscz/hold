@@ -10,6 +10,15 @@ import {
 import { GrupoEquipo } from '../model/grupo-equipo';
 import { ComentarioEquipoApiItem } from './comentario-equipo-api-item';
 import { GrupoEquipoApiItem } from './grupo-equipo-api-item';
+export interface ComponenteGrupo {
+  Id: number;
+  Nombre: string;
+  Modelo: string;
+  Descripcion?: string;
+  Tipo?: string;
+  CodigoImtEquipo?: string;
+  PrecioReferencia?: number;
+}
 @Injectable({
   providedIn: 'root',
 })
@@ -41,6 +50,14 @@ export class GrupoequipoService {
   paginaGuardada: number = 0;
   cantidadObjetosGuardada: number = 21;
   constructor(private readonly http: HttpClient) {}
+
+  obtenerComponentes(id: number, pagina = 1) {
+    return this.http
+      .get<ApiResponse<ComponenteGrupo[]>>(
+        `${this.apiUrl}/${id}/componentes?pagina=${pagina}`,
+      )
+      .pipe(map((r) => extractApiValue(r, [])));
+  }
 
   invalidarCache() {
     this.cache.clear();

@@ -1,4 +1,5 @@
 import { CommonModule } from '@angular/common';
+import { InspeccionEquipoComponent } from '@features/equipment-inspection';
 import {
   Component,
   computed,
@@ -8,6 +9,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { ConfiguracionService } from '@entities/configuracion';
 import { Carrito } from '@entities/cart';
 import { PrestamosAPIService } from '@entities/loan';
 import { UsuarioService } from '@entities/user';
@@ -25,6 +27,7 @@ import { Subscription } from 'rxjs';
   selector: 'app-carrito',
   standalone: true,
   imports: [
+    InspeccionEquipoComponent,
     CommonModule,
     FormsModule,
     MostrarerrorComponent,
@@ -36,6 +39,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './carrito.component.css',
 })
 export class CarritoComponent implements OnDestroy {
+  equipoDetalle: number | null = null;
   public step: number = 1;
   public errorSolicitudVisible: WritableSignal<boolean> = signal(false);
   public mensajeError: string = 'Datos insertados no validos';
@@ -56,6 +60,7 @@ export class CarritoComponent implements OnDestroy {
       this.fechaFinal(),
       this.fechaActual,
       this.maximoDiasPrestamo(),
+      this.configuracionService.configuracionActual(),
     ),
   );
 
@@ -66,6 +71,7 @@ export class CarritoComponent implements OnDestroy {
     private readonly usuarioService: UsuarioService,
     private readonly prestamosApiService: PrestamosAPIService,
     private readonly cartDateValidationService: CartDateValidationService,
+    private readonly configuracionService: ConfiguracionService,
   ) {
     this.carrito = this.carritoService.obtenerCarrito();
     this.actualizarCarrito(this.carrito);

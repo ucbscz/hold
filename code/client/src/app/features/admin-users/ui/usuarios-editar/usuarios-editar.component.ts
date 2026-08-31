@@ -1,5 +1,6 @@
 import {
   Component,
+  inject,
   EventEmitter,
   HostListener,
   Input,
@@ -8,7 +9,7 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Usuario, UsuarioServiceAPI } from '@entities/user';
+import { Usuario, UsuarioServiceAPI, UsuarioService } from '@entities/user';
 import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -36,11 +37,21 @@ export class UsuariosEditarComponent extends BaseTablaComponent {
   @Input() usuario: Usuario = new Usuario();
   @Input() carreras: string[] = [];
   contrasena: string = '';
-  rolesOpciones: OpcionSelect[] = [
+  private readonly sesion = inject(UsuarioService);
+  readonly rolesOpciones: OpcionSelect[] = [
     { value: 'administrador', label: 'Administrador' },
+    {
+      value: 'administrador_laboratorio',
+      label: 'Administrador de laboratorio',
+    },
+    { value: 'administrativo', label: 'Administrativo' },
     { value: 'docente', label: 'Docente' },
     { value: 'estudiante', label: 'Estudiante' },
-  ];
+  ].filter(
+    (rol) =>
+      this.sesion.obtenerUsuario().rol?.toLowerCase() === 'administrador' ||
+      !rol.value.startsWith('administrador'),
+  );
   constructor(private readonly usuarioApi: UsuarioServiceAPI) {
     super();
   }

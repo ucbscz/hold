@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CatalogosInventarioComponent } from '../catalogos-inventario.component';
 import { Router } from '@angular/router';
 import { UsuarioService } from '@entities/user';
 import { AccesoriosTablaComponent } from '@features/admin-accessories';
@@ -20,6 +21,7 @@ import { AdminConfiguracionesComponent } from '../admin-configuraciones/admin-co
   standalone: true,
   imports: [
     SidebarComponent,
+    CatalogosInventarioComponent,
     AccesoriosTablaComponent,
     CarrerasTablaComponent,
     UsuariosTablaComponent,
@@ -40,6 +42,8 @@ import { AdminConfiguracionesComponent } from '../admin-configuraciones/admin-co
 export class AdministradorComponent {
   tablas: string[] = [
     'Prestamos',
+    'Ambientes',
+    'Procedencias',
     'Carreras',
     'Usuarios',
     'Categorias',
@@ -59,6 +63,9 @@ export class AdministradorComponent {
     private usuario: UsuarioService,
   ) {}
   ngOnInit() {
+    if (this.usuario.obtenerUsuario().rol === 'administrador_laboratorio') {
+      this.tablas = ['Prestamos', 'Usuarios'];
+    }
     if (this.usuario.estaVacio()) {
       this.router.navigate(['/login']);
     } else if (this.usuario.obtenerRol() != 'administrador') {
@@ -66,6 +73,6 @@ export class AdministradorComponent {
     }
   }
   clickitem(item: string) {
-    this.item = item;
+    if (this.tablas.includes(item)) this.item = item;
   }
 }

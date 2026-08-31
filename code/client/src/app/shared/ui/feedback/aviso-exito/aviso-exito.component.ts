@@ -22,7 +22,7 @@ export class AvisoExitoComponent implements OnInit, OnDestroy {
   private cerrado = false;
 
   ngOnInit(): void {
-    this.timeoutId = setTimeout(() => this.cerrar(), 1000);
+    this.timeoutId = setTimeout(() => this.cerrar(), 5000);
   }
 
   cerrar() {
