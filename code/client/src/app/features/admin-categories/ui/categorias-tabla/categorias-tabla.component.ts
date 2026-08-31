@@ -87,17 +87,25 @@ export class CategoriasTablaComponent extends Tabla {
     const busqueda = this.mantenerBusqueda(event);
     if (busqueda[0].trim() === '') {
       this.categorias = [...this.categoriascopia];
+      this.aplicarOrdenActualSiExiste();
       return;
     }
     const busquedaNormalizada = this.normalizeText(busqueda[0]);
     this.categorias = this.categoriascopia.filter((categoria) =>
       this.normalizeText(categoria.Nombre || '').includes(busquedaNormalizada),
     );
+    this.aplicarOrdenActualSiExiste();
+  }
+
+  override sortTable(sort: { col: string; dir: 'asc' | 'desc' }): void {
+    this.categorias = this.sortByColumn(this.categorias, sort, {
+      Nombre: (categoria) => categoria.Nombre,
+    });
   }
 
   limpiarBusqueda(): void {
     this.limpiarBusquedaPersistida();
-    this.categorias = [...this.categoriascopia];
+    this.aplicarFiltros();
   }
 
   editarCategoria(categoria: Categorias): void {

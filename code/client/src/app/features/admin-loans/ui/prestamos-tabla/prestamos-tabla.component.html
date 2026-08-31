@@ -7,7 +7,7 @@
   </div>
   @if (activeTab === "tabla") {
     <app-buscador (terminoBusqueda)="aplicarFiltros($event)">
-      <div class="loan-date-filters">
+      <div search-secondary class="loan-date-filters">
         <input
           type="text"
           appFlatpickr
@@ -68,19 +68,8 @@
     <div class="admin-tabs">
       <button
         class="admin-tabs__button"
-        [class.admin-tabs__button--active]="
-          estaTabActiva('tabla') && modo === 'tablero'
-        "
-        (click)="seleccionarTab('tabla'); modo = 'tablero'"
-      >
-        <i class="fas fa-columns"></i> Tablero
-      </button>
-      <button
-        class="admin-tabs__button"
-        [class.admin-tabs__button--active]="
-          estaTabActiva('tabla') && modo === 'tabla'
-        "
-        (click)="seleccionarTab('tabla'); modo = 'tabla'"
+        [class.admin-tabs__button--active]="estaTabActiva('tabla')"
+        (click)="seleccionarTab('tabla')"
       >
         Tabla
       </button>
@@ -92,264 +81,254 @@
         Auditoría
       </button>
     </div>
-    @if (modo === "tablero") {
-      <app-tablero-prestamos
-        [prestamos]="prestamosTablero"
-        [admin]="true"
-        (detalle)="abrirVistaPrestamos($event)"
-        (accion)="accionTablero($event)"
-      ></app-tablero-prestamos>
-    } @else {
-      <div
-        class="loans-table-shell"
-        [class.loans-table-shell--empty]="prestamos.size === 0"
-      >
-        <div class="table-responsive" appStickyScroll>
-          <table class="data-table data-table--loans">
-            <colgroup>
-              <col class="loans-table__col loans-table__col--usuario" />
-              <col class="loans-table__col loans-table__col--carnet" />
-              <col class="loans-table__col loans-table__col--rol" />
-              <col class="loans-table__col loans-table__col--telefono" />
-              <col class="loans-table__col loans-table__col--equipos" />
-              <col class="loans-table__col loans-table__col--fecha-solicitud" />
-              <col class="loans-table__col loans-table__col--fecha-prestamo" />
-              <col
-                class="loans-table__col loans-table__col--fecha-devolucion"
-              />
-              <col class="loans-table__col loans-table__col--estado" />
-              <col class="loans-table__col loans-table__col--acciones" />
-            </colgroup>
-            <thead>
+    <div
+      class="loans-table-shell"
+      [class.loans-table-shell--empty]="prestamos.size === 0"
+    >
+      <div class="table-responsive" appStickyScroll>
+        <table class="data-table data-table--loans">
+          <colgroup>
+            <col class="loans-table__col loans-table__col--usuario" />
+            <col class="loans-table__col loans-table__col--carnet" />
+            <col class="loans-table__col loans-table__col--rol" />
+            <col class="loans-table__col loans-table__col--telefono" />
+            <col class="loans-table__col loans-table__col--equipos" />
+            <col class="loans-table__col loans-table__col--fecha-solicitud" />
+            <col class="loans-table__col loans-table__col--fecha-prestamo" />
+            <col class="loans-table__col loans-table__col--fecha-devolucion" />
+            <col class="loans-table__col loans-table__col--estado" />
+            <col class="loans-table__col loans-table__col--acciones" />
+          </colgroup>
+          <thead>
+            <tr>
+              @for (columna of columnas; track columna) {
+                <th scope="col" [attr.aria-sort]="ariaOrdenColumna(columna)">
+                  <button
+                    type="button"
+                    class="table-sort-button"
+                    (click)="ordenarPorColumna(columna)"
+                  >
+                    {{ columna }}
+                    <i
+                      class="fas"
+                      [ngClass]="iconoOrdenColumna(columna)"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+                </th>
+              }
+              <th scope="col" [attr.aria-sort]="ariaOrdenColumna('Estado')">
+                <button
+                  type="button"
+                  class="table-sort-button"
+                  (click)="ordenarPorColumna('Estado')"
+                >
+                  Estado
+                  <i
+                    class="fas"
+                    [ngClass]="iconoOrdenColumna('Estado')"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+              </th>
+              <th class="actions-column">Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (
+              prestamo of paginar(prestamosTabla);
+              track prestamo.key ||
+                prestamo.value.datosgrupo.Id ||
+                prestamo.value.datosgrupo.CarnetUsuario ||
+                $index
+            ) {
               <tr>
-                @for (columna of columnas; track columna) {
-                  <th scope="col" [attr.aria-sort]="ariaOrdenColumna(columna)">
+                <td class="nombre-usuario">
+                  <span
+                    title="{{ prestamo.value.datosgrupo.NombreUsuario }} {{
+                      prestamo.value.datosgrupo.ApellidoPaternoUsuario
+                    }}"
+                  >
+                    {{ prestamo.value.datosgrupo.NombreUsuario }}
+                    {{ prestamo.value.datosgrupo.ApellidoPaternoUsuario }}
+                  </span>
+                </td>
+                <td>{{ prestamo.value.datosgrupo.CarnetUsuario }}</td>
+                <td>
+                  {{ prestamo.value.datosgrupo.TipoUsuario | titlecase }}
+                </td>
+                <td>{{ prestamo.value.datosgrupo.TelefonoUsuario }}</td>
+                <td class="equipos-cell">
+                  <div class="equipos-info">
+                    <span
+                      class="nombre-equipo"
+                      [title]="detalleEquipos(prestamo.value)"
+                    >
+                      {{ resumenEquipo(prestamo.value) }}
+                    </span>
+                  </div>
+                </td>
+                <td>
+                  {{
+                    prestamo.value.datosgrupo.FechaSolicitud
+                      | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
+                  }}
+                </td>
+                <td>
+                  {{
+                    prestamo.value.datosgrupo.FechaPrestamoEsperada
+                      | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
+                  }}
+                </td>
+                <td>
+                  {{
+                    prestamo.value.datosgrupo.FechaDevolucionEsperada
+                      | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
+                  }}
+                </td>
+                <td>
+                  <span
+                    [class]="
+                      'badge badge-' +
+                      (getEstadoCalculado(prestamo.value) || '')
+                    "
+                  >
+                    {{ getEstadoCalculado(prestamo.value) | titlecase }}
+                  </span>
+                </td>
+                <td class="actions-column">
+                  <div class="loan-actions" aria-label="Acciones del préstamo">
                     <button
-                      type="button"
-                      class="table-sort-button"
-                      (click)="ordenarPorColumna(columna)"
+                      class="btn-icon btn-view"
+                      title="Ver detalles"
+                      aria-label="Ver detalles"
+                      (click)="abrirVistaPrestamos(prestamo.value.equipos)"
                     >
-                      {{ columna }}
-                      <i
-                        class="fas"
-                        [ngClass]="iconoOrdenColumna(columna)"
-                        aria-hidden="true"
-                      ></i>
+                      <i class="fas fa-eye"></i>
                     </button>
-                  </th>
-                }
-                <th scope="col">Estado</th>
-                <th class="actions-column">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (
-                prestamo of paginar(prestamosTabla);
-                track prestamo.key ||
-                  prestamo.value.datosgrupo.Id ||
-                  prestamo.value.datosgrupo.CarnetUsuario ||
-                  $index
-              ) {
-                <tr>
-                  <td class="nombre-usuario">
-                    <span
-                      title="{{ prestamo.value.datosgrupo.NombreUsuario }} {{
-                        prestamo.value.datosgrupo.ApellidoPaternoUsuario
-                      }}"
+                    <button
+                      class="btn-icon"
+                      title="Editar observaciones"
+                      aria-label="Editar observaciones"
+                      (click)="editarObservacion(prestamo.key)"
                     >
-                      {{ prestamo.value.datosgrupo.NombreUsuario }}
-                      {{ prestamo.value.datosgrupo.ApellidoPaternoUsuario }}
-                    </span>
-                  </td>
-                  <td>{{ prestamo.value.datosgrupo.CarnetUsuario }}</td>
-                  <td>
-                    {{ prestamo.value.datosgrupo.TipoUsuario | titlecase }}
-                  </td>
-                  <td>{{ prestamo.value.datosgrupo.TelefonoUsuario }}</td>
-                  <td class="equipos-cell">
-                    <div class="equipos-info">
-                      <span
-                        class="nombre-equipo"
-                        [title]="detalleEquipos(prestamo.value)"
-                      >
-                        {{ resumenEquipo(prestamo.value) }}
-                      </span>
-                    </div>
-                  </td>
-                  <td>
-                    {{
-                      prestamo.value.datosgrupo.FechaSolicitud
-                        | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
-                    }}
-                  </td>
-                  <td>
-                    {{
-                      prestamo.value.datosgrupo.FechaPrestamoEsperada
-                        | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
-                    }}
-                  </td>
-                  <td>
-                    {{
-                      prestamo.value.datosgrupo.FechaDevolucionEsperada
-                        | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
-                    }}
-                  </td>
-                  <td>
-                    <span
-                      [class]="
-                        'badge badge-' +
-                        (getEstadoCalculado(prestamo.value) || '')
-                      "
-                    >
-                      {{ getEstadoCalculado(prestamo.value) | titlecase }}
-                    </span>
-                  </td>
-                  <td class="actions-column">
-                    <div
-                      class="loan-actions"
-                      aria-label="Acciones del préstamo"
-                    >
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    @if (prestamo.value.datosgrupo.IdContrato) {
                       <button
                         class="btn-icon btn-view"
-                        title="Ver detalles"
-                        aria-label="Ver detalles"
-                        (click)="abrirVistaPrestamos(prestamo.value.equipos)"
+                        title="Ver contrato"
+                        aria-label="Ver contrato"
+                        (click)="
+                          cambiarestadovercontrato(prestamo.value.datosgrupo)
+                        "
                       >
-                        <i class="fas fa-eye"></i>
+                        <i class="fas fa-file-signature"></i>
+                      </button>
+                    }
+                    @if (
+                      prestamo.value.datosgrupo.EstadoPrestamo == "rechazado" ||
+                      prestamo.value.datosgrupo.EstadoPrestamo ==
+                        "finalizado" ||
+                      prestamo.value.datosgrupo.EstadoPrestamo == "cancelado"
+                    ) {
+                      <button
+                        class="btn-icon btn-delete"
+                        title="Eliminar"
+                        aria-label="Eliminar"
+                        [disabled]="!esRoot"
+                        (click)="eliminarPrestamo(prestamo.value.datosgrupo)"
+                      >
+                        <i class="fas fa-trash-alt"></i>
+                      </button>
+                    } @else if (
+                      prestamo.value.datosgrupo.EstadoPrestamo == "pendiente"
+                    ) {
+                      <button
+                        class="btn-action btn-accept"
+                        [title]="
+                          puedeAprobar(prestamo.value)
+                            ? 'Aceptar'
+                            : 'El horario de inicio ya venció'
+                        "
+                        aria-label="Aceptar"
+                        [disabled]="!puedeAprobar(prestamo.value)"
+                        (click)="validaraprobacion(prestamo.key)"
+                      >
+                        <i class="fas fa-check"></i>
+                        <span class="btn-label">Aceptar</span>
                       </button>
                       <button
-                        class="btn-icon"
-                        title="Editar observaciones"
-                        aria-label="Editar observaciones"
-                        (click)="editarObservacion(prestamo.key)"
+                        class="btn-action btn-reject"
+                        title="Rechazar"
+                        aria-label="Rechazar"
+                        (click)="validarrechazo(prestamo.key)"
                       >
-                        <i class="fas fa-pencil-alt"></i>
+                        <i class="fas fa-times"></i>
+                        <span class="btn-label">Rechazar</span>
                       </button>
-                      @if (prestamo.value.datosgrupo.IdContrato) {
-                        <button
-                          class="btn-icon btn-view"
-                          title="Ver contrato"
-                          aria-label="Ver contrato"
-                          (click)="
-                            cambiarestadovercontrato(prestamo.value.datosgrupo)
-                          "
-                        >
-                          <i class="fas fa-file-signature"></i>
-                        </button>
-                      }
-                      @if (
-                        prestamo.value.datosgrupo.EstadoPrestamo ==
-                          "rechazado" ||
-                        prestamo.value.datosgrupo.EstadoPrestamo ==
-                          "finalizado" ||
-                        prestamo.value.datosgrupo.EstadoPrestamo == "cancelado"
-                      ) {
-                        <button
-                          class="btn-icon btn-delete"
-                          title="Eliminar"
-                          aria-label="Eliminar"
-                          [disabled]="!esRoot"
-                          (click)="eliminarPrestamo(prestamo.value.datosgrupo)"
-                        >
-                          <i class="fas fa-trash-alt"></i>
-                        </button>
-                      } @else if (
-                        prestamo.value.datosgrupo.EstadoPrestamo == "pendiente"
-                      ) {
-                        <button
-                          class="btn-action btn-accept"
-                          [title]="
-                            puedeAprobar(prestamo.value)
-                              ? 'Aceptar'
-                              : 'El horario de inicio ya venció'
-                          "
-                          aria-label="Aceptar"
-                          [disabled]="!puedeAprobar(prestamo.value)"
-                          (click)="validaraprobacion(prestamo.key)"
-                        >
-                          <i class="fas fa-check"></i>
-                          <span class="btn-label">Aceptar</span>
-                        </button>
-                        <button
-                          class="btn-action btn-reject"
-                          title="Rechazar"
-                          aria-label="Rechazar"
-                          (click)="validarrechazo(prestamo.key)"
-                        >
-                          <i class="fas fa-times"></i>
-                          <span class="btn-label">Rechazar</span>
-                        </button>
-                      } @else if (
-                        prestamo.value.datosgrupo.EstadoPrestamo == "aprobado"
-                      ) {
-                        <button
-                          class="btn-action btn-accept"
-                          title="Recogido"
-                          aria-label="Recogido"
-                          (click)="validarRecogido(prestamo.key)"
-                        >
-                          <i class="fas fa-briefcase"></i>
-                          <span class="btn-label">Recogido</span>
-                        </button>
-                        <button
-                          class="btn-action btn-reject"
-                          title="Cancelar"
-                          aria-label="Cancelar"
-                          (click)="validarcancelacion(prestamo.key)"
-                        >
-                          <i class="fas fa-times"></i>
-                          <span class="btn-label">Cancelar</span>
-                        </button>
-                      } @else if (
-                        getEstadoCalculado(prestamo.value) === "activo" ||
-                        getEstadoCalculado(prestamo.value) === "atrasado"
-                      ) {
-                        <button
-                          class="btn-action btn-accept"
-                          title="Devuelto"
-                          aria-label="Devuelto"
-                          (click)="validarDevuelto(prestamo.key)"
-                        >
-                          <i class="fas fa-undo"></i>
-                          <span class="btn-label">Devuelto</span>
-                        </button>
-                      }
-                    </div>
-                  </td>
-                </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-        @if (prestamos.size === 0) {
-          <div class="empty-state empty-state--viewport">
-            <i class="fas fa-search fa-3x"></i>
-            <p>No se encontraron préstamos</p>
-          </div>
-        }
+                    } @else if (
+                      prestamo.value.datosgrupo.EstadoPrestamo == "aprobado"
+                    ) {
+                      <button
+                        class="btn-action btn-accept"
+                        title="Recogido"
+                        aria-label="Recogido"
+                        (click)="validarRecogido(prestamo.key)"
+                      >
+                        <i class="fas fa-briefcase"></i>
+                        <span class="btn-label">Recogido</span>
+                      </button>
+                      <button
+                        class="btn-action btn-reject"
+                        title="Cancelar"
+                        aria-label="Cancelar"
+                        (click)="validarcancelacion(prestamo.key)"
+                      >
+                        <i class="fas fa-times"></i>
+                        <span class="btn-label">Cancelar</span>
+                      </button>
+                    } @else if (
+                      getEstadoCalculado(prestamo.value) === "activo" ||
+                      getEstadoCalculado(prestamo.value) === "atrasado"
+                    ) {
+                      <button
+                        class="btn-action btn-accept"
+                        title="Devuelto"
+                        aria-label="Devuelto"
+                        (click)="validarDevuelto(prestamo.key)"
+                      >
+                        <i class="fas fa-undo"></i>
+                        <span class="btn-label">Devuelto</span>
+                      </button>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
-      <app-table-pagination
-        [totalItems]="prestamos.size"
-        [page]="paginaActual"
-        [pageSize]="filasPorPagina"
-        (pageChange)="cambiarPagina($event)"
-      ></app-table-pagination>
-    }
+      @if (prestamos.size === 0) {
+        <div class="empty-state empty-state--viewport">
+          <i class="fas fa-search fa-3x"></i>
+          <p>No se encontraron préstamos</p>
+        </div>
+      }
+    </div>
+    <app-table-pagination
+      [totalItems]="prestamos.size"
+      [page]="paginaActual"
+      [pageSize]="filasPorPagina"
+      (pageChange)="cambiarPagina($event)"
+    ></app-table-pagination>
   } @else {
     <app-audit-panel [refreshTrigger]="auditRefresh" [entidad]="'Prestamo'">
       <div admin-tabs class="admin-tabs">
         <button
           class="admin-tabs__button"
-          (click)="seleccionarTab('tabla'); modo = 'tablero'"
-        >
-          <i class="fas fa-columns"></i> Tablero
-        </button>
-        <button
-          class="admin-tabs__button"
-          [class.admin-tabs__button--active]="
-            estaTabActiva('tabla') && modo === 'tabla'
-          "
-          (click)="seleccionarTab('tabla'); modo = 'tabla'"
+          [class.admin-tabs__button--active]="estaTabActiva('tabla')"
+          (click)="seleccionarTab('tabla')"
         >
           Tabla
         </button>

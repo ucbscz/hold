@@ -4,19 +4,6 @@
     [activeItem]="item"
     (item)="clickitem($event)"
   ></app-sidebar>
-  <nav class="admin-shortcuts" aria-label="Accesos directos">
-    <button class="btn btn-secondary" (click)="clickitem('Prestamos')">
-      <i class="fas fa-handshake"></i> Gestionar préstamos
-    </button>
-    <button class="btn btn-secondary" (click)="clickitem('Usuarios')">
-      <i class="fas fa-users"></i> Gestionar usuarios
-    </button>
-    @if (tablas.includes("Equipos")) {
-      <button class="btn btn-secondary" (click)="clickitem('Equipos')">
-        <i class="fas fa-laptop"></i> Ver inventario
-      </button>
-    }
-  </nav>
   @if (item === "Ambientes" || item === "Procedencias") {
     <app-catalogos-inventario
       [tipo]="item === 'Ambientes' ? 'ambientes' : 'procedencias'"

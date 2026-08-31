@@ -19,17 +19,30 @@ describe('CategoriasTablaComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should render the compact table without sortable headers', () => {
-    component.categorias = [
+  it('sorts categories using the visible column button', () => {
+    component.categoriascopia = [
       Object.assign(new Categorias(), { Id: 1, Nombre: 'Zeta' }),
       Object.assign(new Categorias(), { Id: 2, Nombre: 'Alpha' }),
     ];
+    component.aplicarFiltros();
     fixture.detectChanges();
 
-    const sortableHeader = fixture.nativeElement.querySelector('.sortable-th');
+    const button = fixture.nativeElement.querySelector('.table-sort-button');
     const headers = fixture.nativeElement.querySelectorAll('thead th');
 
-    expect(sortableHeader).toBeNull();
+    expect(component.categorias.map((c) => c.Nombre)).toEqual([
+      'Alpha',
+      'Zeta',
+    ]);
+    button.click();
+    fixture.detectChanges();
+    expect(component.categorias.map((c) => c.Nombre)).toEqual([
+      'Zeta',
+      'Alpha',
+    ]);
+    expect(
+      fixture.nativeElement.querySelector('tbody td').textContent.trim(),
+    ).toBe('Zeta');
     expect(headers.length).toBe(2);
   });
 });

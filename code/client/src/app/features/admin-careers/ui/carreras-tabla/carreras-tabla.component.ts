@@ -103,11 +103,18 @@ export class CarrerasTablaComponent extends Tabla {
     } else {
       this.carreras = [...this.carrerascopia];
     }
+    this.aplicarOrdenActualSiExiste();
+  }
+
+  override sortTable(sort: { col: string; dir: 'asc' | 'desc' }): void {
+    this.carreras = this.sortByColumn(this.carreras, sort, {
+      Nombre: (carrera) => carrera.Nombre,
+    });
   }
 
   limpiarBusqueda(): void {
     this.limpiarBusquedaPersistida();
-    this.carreras = [...this.carrerascopia];
+    this.aplicarFiltros();
   }
 
   editarCarrera(carrera: Carrera): void {

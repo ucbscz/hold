@@ -2,6 +2,7 @@
   display: block;
   flex: 0 0 100%;
   width: 100%;
+  min-width: 0;
 }
 
 .search-and-filter-row {
@@ -16,7 +17,7 @@
 .search-input-wrapper {
   flex: 1 1 200px;
   position: relative;
-  min-width: 180px;
+  min-width: min(180px, 100%);
   max-width: 22rem;
 }
 .search-icon {
@@ -26,6 +27,7 @@
   transform: translateY(-50%);
   font-size: 0.85rem;
   color: var(--ink-muted);
+  pointer-events: none;
 }
 .search-input {
   width: 100%;
@@ -86,13 +88,17 @@
   transform: translateY(-50%) scale(0.92);
 }
 .filter-container {
-  position: relative;
+  display: contents;
+}
+.search-secondary {
   display: flex;
-  gap: 0.625rem;
-  align-items: center;
-  flex-shrink: 0;
   flex-wrap: wrap;
-  overflow: visible;
+  gap: 0.625rem;
+  padding-bottom: 1rem;
+  min-width: 0;
+}
+.search-secondary:empty {
+  display: none;
 }
 
 :host ::ng-deep .botoncrear {
@@ -111,8 +117,8 @@
 }
 @media (max-width: 640px) {
   .search-and-filter-row {
-    justify-content: space-between;
-    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
     gap: 0.625rem;
     padding-bottom: 1rem;
   }
@@ -122,40 +128,29 @@
     margin-right: 0;
     flex: 0 0 auto;
   }
-  .filter-container {
-    width: 100%;
-    flex-wrap: wrap;
-    justify-content: flex-start;
-  }
   .search-input {
-    padding: 0.65rem 1rem 0.65rem 2.25rem;
+    padding: 0 2.25rem 0 2.5rem;
     font-size: 16px;
   }
 }
 
 @media (max-width: 480px) {
   .search-and-filter-row {
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 0.625rem;
-  }
-  .filter-container {
-    gap: 0.5rem;
   }
 }
 
 @media (max-width: 360px) {
   .search-and-filter-row {
-    justify-content: space-between;
+    justify-content: flex-start;
     gap: 0.625rem;
   }
   .search-input {
-    padding: 0.55rem 0.75rem 0.55rem 2rem;
-    font-size: 0.75rem;
+    padding: 0 2.25rem 0 2.25rem;
+    font-size: 16px;
   }
   .search-icon {
     left: 0.75rem;
-  }
-  .filter-container {
-    gap: 0.4rem;
   }
 }

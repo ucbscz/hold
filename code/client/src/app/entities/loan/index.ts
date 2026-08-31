@@ -4,4 +4,3 @@ export * from './model/prestamo-agrupados';
 export * from './ui/vista-prestamos/vista-prestamos.component';
 export * from './ui/contrato/vercontrato.component';
 export * from './model/prioridad-prestamo';
-export * from './ui/tablero/tablero-prestamos.component';

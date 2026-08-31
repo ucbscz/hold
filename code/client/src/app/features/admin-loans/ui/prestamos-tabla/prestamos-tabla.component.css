@@ -129,42 +129,6 @@ app-buscador {
   color: var(--ink-secondary);
   font-size: 0.875rem;
 }
-.search-container {
-  margin-bottom: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.search-input-wrapper {
-  position: relative;
-  width: 100%;
-  max-width: 30rem;
-}
-.search-icon {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--ink-secondary);
-}
-.search-input {
-  width: 100%;
-  padding: 0.75rem 1.25rem 0.75rem 3.25rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-weight: 400;
-  transition: var(--t-base);
-}
-.search-input::placeholder {
-  font-weight: 400 !important;
-  color: var(--ink-secondary);
-}
-.search-input:focus {
-  outline: none;
-  border-color: var(--interactive);
-  box-shadow: 0 0 0 3px var(--interactive-subtle);
-}
 .table-responsive {
   overflow-x: auto;
   scrollbar-width: none;
@@ -467,22 +431,6 @@ td.actions-column {
 .btn-action i {
   font-size: 0.7rem;
 }
-.search-and-filter-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  width: 100%;
-}
-.search-input-wrapper {
-  flex: 1;
-  position: relative;
-  max-width: 30rem;
-}
-.filter-container {
-  position: relative;
-  display: inline-block;
-  flex-shrink: 0;
-}
 .estados-panel-flotante {
   position: absolute;
   top: 100%;
@@ -583,23 +531,7 @@ td.actions-column {
     transform: translateY(0);
   }
 }
-.search-container {
-  margin-bottom: 1.5rem;
-  display: flex;
-  flex-direction: column;
-}
 @media (max-width: 768px) {
-  .search-and-filter-row {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0.75rem;
-  }
-  .search-input-wrapper {
-    max-width: none;
-  }
-  .filter-container {
-    width: 100%;
-  }
   .estados-panel-flotante {
     right: 0;
     left: 0;
@@ -829,16 +761,6 @@ td.actions-column {
   .subtitle {
     font-size: 0.75rem;
   }
-  .search-container {
-    gap: 0.5rem;
-  }
-  .search-input {
-    padding: 0.55rem 0.75rem 0.55rem 2.75rem;
-    font-size: 0.75rem;
-  }
-  .search-icon {
-    left: 0.75rem;
-  }
   .data-table th,
   .data-table td {
     padding: 0.6rem;
@@ -1049,16 +971,6 @@ td.actions-column {
   }
   .subtitle {
     font-size: 0.75rem;
-  }
-  .search-container {
-    gap: 0.5rem;
-  }
-  .search-input {
-    padding: 0.55rem 0.75rem 0.55rem 2rem;
-    font-size: 0.75rem;
-  }
-  .search-icon {
-    left: 0.75rem;
   }
   .data-table th,
   .data-table td {

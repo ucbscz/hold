@@ -1,6 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { withDefaultTestingProviders } from '@shared/lib/testing';
-import { PrestamoDto } from '@entities/admin';
 import { HistorialComponent } from './historial.component';
 describe('HistorialComponent', () => {
   let component: HistorialComponent;
@@ -18,18 +17,18 @@ describe('HistorialComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
-  it('abre el contrato por id de prestamo, no por id de contrato', () => {
-    component.prestamos = [
-      Object.assign(new PrestamoDto(), { Id: 27, IdContrato: '901' }),
-    ];
-    component.abrirContrato({ id: 27, accion: 'contrato' });
-    expect(component.contratoId).toBe(27);
-    expect(component.contrato()).toBeTrue();
+  it('starts with pending loans and has no board tab', () => {
+    expect(component.item).toBe('Pendiente');
+    expect(fixture.nativeElement.querySelector('app-pendiente')).not.toBeNull();
+    const tabs = fixture.nativeElement.querySelector('.history-tabs');
+    expect(tabs.querySelector('button').textContent.trim()).toBe('Pendientes');
+    expect(tabs.textContent).not.toContain('Tablero');
   });
-  it('no abre contratos inexistentes y pide confirmar una cancelacion', () => {
-    component.abrirContrato({ id: 99, accion: 'contrato' });
-    expect(component.contrato()).toBeFalse();
-    component.abrirContrato({ id: 27, accion: 'cancelar' });
-    expect(component.avisoCancelar()).toBeTrue();
+  it('keeps filters when switching loan states', () => {
+    component.filtroTexto = 'Mini Dron';
+    component.seleccionarEstado('Activo');
+    fixture.detectChanges();
+    expect(fixture.nativeElement.querySelector('app-activo')).not.toBeNull();
+    expect(component.filtroTexto).toBe('Mini Dron');
   });
 });

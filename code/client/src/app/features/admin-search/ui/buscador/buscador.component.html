@@ -7,10 +7,12 @@
       (ngModelChange)="onSearchInput()"
       (keydown.enter)="buscar()"
       placeholder="Buscar ..."
+      aria-label="Buscar en la tabla"
       class="search-input"
     />
     @if (terminoBusquedaLocal) {
       <button
+        type="button"
         class="clear-search"
         (click)="limpiarBusqueda()"
         title="Limpiar búsqueda"
@@ -23,6 +25,9 @@
     <ng-content></ng-content>
     <ng-content select=".boton-derecha"></ng-content>
   </div>
+</div>
+<div class="search-secondary">
+  <ng-content select="[search-secondary]"></ng-content>
 </div>
 @if (terminoBusquedaLocal) {
   <div class="filter-chips">

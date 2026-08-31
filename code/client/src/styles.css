@@ -971,7 +971,7 @@ app-administrador .table-responsive::-webkit-scrollbar-track {
   width: 100%;
   min-width: unset !important;
   min-height: 2.25rem !important;
-  padding: 0.55rem 0.875rem;
+  padding: 0;
   border: 0;
   border-radius: 0;
   background: transparent;
@@ -984,6 +984,11 @@ app-administrador .table-responsive::-webkit-scrollbar-track {
 .table-sort-button:focus-visible {
   outline: 2px solid var(--interactive-text);
   outline-offset: -2px;
+}
+.table-sort-button i {
+  color: var(--ink-muted);
+  flex: 0 0 0.75rem;
+  font-size: 0.75rem;
 }
 .sort-icon {
   display: inline-flex;
@@ -1996,18 +2001,4 @@ button.btn:active {
     min-width: 30rem !important;
     width: max-content;
   }
-}
-.table-sort-button {
-  border: 0;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-  display: inline-flex;
-  gap: 8px;
-  align-items: center;
-  min-height: 44px;
-  cursor: pointer;
-}
-.table-sort-button i {
-  color: var(--color-text-muted);
 }

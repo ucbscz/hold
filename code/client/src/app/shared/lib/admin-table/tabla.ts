@@ -49,6 +49,7 @@ export abstract class Tabla extends BaseTablaComponent {
         ? 'desc'
         : 'asc';
     this.sortColumn = columnaOrdenable;
+    this.reiniciarPaginacion();
     this.sortTable({ col: columnaOrdenable, dir: this.sortDirection });
   }
 

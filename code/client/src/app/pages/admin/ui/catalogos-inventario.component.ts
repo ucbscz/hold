@@ -159,7 +159,39 @@ import { extractErrorMessage } from '@shared/lib/error';
     }
   `,
   styles: [
-    '.catalog-toolbar { display:flex; flex-wrap:wrap; gap:12px; margin:24px 0; align-items:center; } .catalog-toolbar input { flex:1 1 220px; min-width:0; }',
+    `
+      .catalog-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin: 24px 0;
+        align-items: center;
+      }
+      .catalog-toolbar input {
+        flex: 1 1 220px;
+        min-width: 0;
+        max-width: 22rem;
+        height: 42px;
+        box-sizing: border-box;
+        padding: 0 1rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-full);
+        background: var(--surface);
+        color: var(--ink);
+        font: 500 0.875rem var(--font);
+      }
+      .catalog-toolbar input:focus-visible {
+        outline: 2px solid var(--interactive-text);
+        outline-offset: 2px;
+      }
+      @media (max-width: 640px) {
+        .catalog-toolbar input {
+          flex-basis: 100%;
+          max-width: none;
+          font-size: 16px;
+        }
+      }
+    `,
   ],
 })
 export class CatalogosInventarioComponent extends Tabla implements OnChanges {

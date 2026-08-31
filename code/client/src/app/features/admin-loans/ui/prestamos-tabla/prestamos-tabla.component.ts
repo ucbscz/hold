@@ -10,7 +10,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PrestamoDto } from '@entities/admin';
 import {
   PrestamoAgrupados,
-  TableroPrestamosComponent,
   compararPrestamos,
   PrestamosAPIService,
   VistaPrestamosComponent,
@@ -18,7 +17,6 @@ import {
 import { UsuarioServiceAPI, UsuarioService } from '@entities/user';
 import { BuscadorComponent } from '@features/admin-search';
 import {
-  AdminTableSort,
   printTable,
   Tabla,
   TablePaginationComponent,
@@ -44,7 +42,6 @@ import { VercontratoComponent } from '@entities/loan';
   selector: 'app-prestamos-tabla',
   standalone: true,
   imports: [
-    TableroPrestamosComponent,
     StickyScrollDirective,
     CommonModule,
     FormsModule,
@@ -66,39 +63,9 @@ import { VercontratoComponent } from '@entities/loan';
   styleUrls: ['./prestamos-tabla.component.css'],
 })
 export class PrestamosTablaComponent extends Tabla implements OnInit {
-  override sortColumn = 'Fecha Solicitud';
-  override sortDirection: AdminTableSort['dir'] = 'desc';
   readonly esRoot =
     inject(UsuarioService).obtenerUsuario().rol?.toLowerCase() ===
     'administrador';
-  modo: 'tablero' | 'tabla' = 'tablero';
-  get prestamosTablero(): PrestamoDto[] {
-    return [...this.prestamos.values()].flatMap((p) => p.equipos);
-  }
-  accionTablero(evento: { id: number; accion: string }): void {
-    const prestamo = this.prestamos.get(evento.id);
-    if (!prestamo) return;
-    switch (evento.accion) {
-      case 'aprobar':
-        this.validaraprobacion(evento.id);
-        break;
-      case 'rechazar':
-        this.validarrechazo(evento.id);
-        break;
-      case 'entregar':
-        this.validarRecogido(evento.id);
-        break;
-      case 'devolver':
-        this.validarDevuelto(evento.id);
-        break;
-      case 'contrato':
-        this.cambiarestadovercontrato(prestamo.datosgrupo);
-        break;
-      case 'observacion':
-        this.editarObservacion(evento.id);
-        break;
-    }
-  }
   expandedRowId: number | null = null;
   auditRefresh = 0;
 
@@ -308,7 +275,6 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   cargarPrestamos() {
     this.prestamosapi.obtenerPrestamos().subscribe({
       next: (data: PrestamoDto[]) => {
-        data.sort(compararPrestamos);
         this.agruparPrestamos(data);
         this.seleccionarEstado(this.estadoSeleccionado);
       },
@@ -328,7 +294,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       this.prestamoscopia = new Map(this.prestamos);
       return;
     }
-    for (const prestamo of datos) {
+    for (const prestamo of [...datos].sort(compararPrestamos)) {
       if (prestamo.Id == null) continue;
       if (!this.prestamos.has(prestamo.Id)) {
         this.prestamos.set(prestamo.Id, new PrestamoAgrupados([prestamo]));
@@ -510,12 +476,6 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
         Estado: ([, prestamo]) => this.getEstadoCalculado(prestamo),
       },
     );
-
-    if (e.col === 'Fecha Solicitud' && e.dir === 'desc') {
-      prestamosOrdenados.sort((a, b) =>
-        compararPrestamos(a[1].datosgrupo, b[1].datosgrupo),
-      );
-    }
 
     this.prestamos = new Map<number, PrestamoAgrupados>(prestamosOrdenados);
   }

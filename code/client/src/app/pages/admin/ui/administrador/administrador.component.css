@@ -77,9 +77,3 @@
     padding-bottom: 60px;
   }
 }
-.admin-shortcuts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-  margin-bottom: 24px;
-}

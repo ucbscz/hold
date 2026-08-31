@@ -17,13 +17,44 @@ describe('PrestamosTablaComponent', () => {
 
     fixture = TestBed.createComponent(PrestamosTablaComponent);
     component = fixture.componentInstance;
-    component.modo = 'tabla';
     fixture.detectChanges();
   });
 
   it('should create', () => {
     expect(component).toBeTruthy();
+    expect(fixture.nativeElement.querySelector('table')).not.toBeNull();
+    expect(
+      fixture.nativeElement.querySelector('app-tablero-prestamos'),
+    ).toBeNull();
   });
+
+  for (const width of [288, 343, 720, 1200]) {
+    it(`keeps filters and pagination outside the table scroll area at ${width}px`, () => {
+      const host: HTMLElement = fixture.nativeElement;
+      host.style.display = 'block';
+      host.style.width = `${width}px`;
+      const container = host.querySelector('.prestamos-container')!;
+      const bounds = container.getBoundingClientRect();
+      for (const control of host.querySelectorAll(
+        'app-buscador input, app-buscador app-custom-select, app-buscador .admin-toolbar-button',
+      )) {
+        const rect = control.getBoundingClientRect();
+        expect(rect.width).toBeGreaterThan(0);
+        expect(rect.left).toBeGreaterThanOrEqual(bounds.left - 1);
+        expect(rect.right).toBeLessThanOrEqual(bounds.right + 1);
+      }
+      const table = host
+        .querySelector('.loans-table-shell')!
+        .getBoundingClientRect();
+      const pagination = host
+        .querySelector('app-table-pagination')!
+        .getBoundingClientRect();
+      expect(pagination.top).toBeGreaterThanOrEqual(table.bottom - 1);
+      expect(
+        host.querySelector('.table-responsive app-table-pagination'),
+      ).toBeNull();
+    });
+  }
 
   it('should initially render newest loans first by Fecha Solicitud', () => {
     cargarPrestamos([
@@ -103,10 +134,49 @@ describe('PrestamosTablaComponent', () => {
       fixture.nativeElement.querySelectorAll('thead th'),
     ).map((header) => (header as HTMLElement).textContent!.trim());
 
-    expect(sortButtons.length).toBe(component.columnas.length);
+    expect(sortButtons.length).toBe(component.columnas.length + 1);
     expect(sortableHeaders.length).toBe(0);
     expect(headers).toContain('Carnet');
     expect(headers).toContain('Estado');
+    const carnetButton = Array.from(
+      sortButtons as NodeListOf<HTMLButtonElement>,
+    ).find((button) => button.textContent?.trim() === 'Carnet')!;
+    carnetButton.click();
+    fixture.detectChanges();
+    expect(nombresRenderizados()).toEqual(['CarnetMenor', 'CarnetMayor']);
+    carnetButton.click();
+    fixture.detectChanges();
+    expect(nombresRenderizados()).toEqual(['CarnetMayor', 'CarnetMenor']);
+  });
+
+  it('respects explicit date sorting instead of reapplying role priority', () => {
+    cargarPrestamos([
+      crearPrestamo({
+        id: 1,
+        nombre: 'Docente antiguo',
+        rol: 'docente',
+        fechaSolicitud: '2026-06-12T12:00:00',
+      }),
+      crearPrestamo({
+        id: 2,
+        nombre: 'Estudiante reciente',
+        rol: 'estudiante',
+        fechaSolicitud: '2026-06-14T12:00:00',
+      }),
+    ]);
+    component.ordenarPorColumna('Fecha Solicitud');
+    component.ordenarPorColumna('Fecha Solicitud');
+    fixture.detectChanges();
+    expect(nombresRenderizados()).toEqual([
+      'Estudiante reciente',
+      'Docente antiguo',
+    ]);
+    component.aplicarFiltros();
+    fixture.detectChanges();
+    expect(nombresRenderizados()).toEqual([
+      'Estudiante reciente',
+      'Docente antiguo',
+    ]);
   });
 
   it('marks an active loan as overdue at its exact return time', () => {
@@ -193,8 +263,6 @@ describe('PrestamosTablaComponent', () => {
   });
 
   function cargarPrestamos(prestamos: PrestamoDto[]): void {
-    component.sortColumn = 'Fecha Solicitud';
-    component.sortDirection = 'desc';
     component.agruparPrestamos(prestamos);
     component.aplicarFiltros();
     fixture.detectChanges();

@@ -26,6 +26,15 @@ describe('Tabla', () => {
     tabla = new TestTabla();
   });
 
+  it('returns to the first page when the sort column changes', () => {
+    tabla.paginaActual = 5;
+    tabla.ordenarPorColumna('Nombre');
+    expect(tabla.paginaActual).toBe(1);
+    expect(tabla.ariaOrdenColumna('Nombre')).toBe('ascending');
+    tabla.ordenarPorColumna('Nombre');
+    expect(tabla.ariaOrdenColumna('Nombre')).toBe('descending');
+  });
+
   it('should sort text globally in both directions', () => {
     const items: SortableItem[] = [{ name: 'Zeta' }, { name: 'Álgebra' }];
     const accessors = { Nombre: (item: SortableItem) => item.name };
