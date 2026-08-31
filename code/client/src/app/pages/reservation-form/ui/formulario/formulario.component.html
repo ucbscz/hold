@@ -5,22 +5,6 @@
     <p>Verifica la información antes de confirmar la solicitud.</p>
   </header>
   <section class="contrato-container" aria-label="Vista previa del contrato">
-    <div class="identity-upload">
-      <label
-        >Anverso del carnet<input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          (change)="cargarCarnet($event, 'frente')"
-          [disabled]="procesandoCarnet"
-      /></label>
-      <label
-        >Reverso del carnet<input
-          type="file"
-          accept="image/jpeg,image/png,image/webp"
-          (change)="cargarCarnet($event, 'atras')"
-          [disabled]="procesandoCarnet"
-      /></label>
-    </div>
     <div
       #contratoContainer
       class="formulario"
@@ -36,6 +20,18 @@
         Anterior
       </button>
       <div class="botones-container__primary">
+        <button
+          type="button"
+          class="boton boton-firmar"
+          (click)="carnetModal.showModal()"
+        >
+          <i class="fas fa-id-card" aria-hidden="true"></i>
+          {{
+            carnetFrente && carnetAtras
+              ? "Ver carnet adjunto"
+              : "Agregar carnet"
+          }}
+        </button>
         <button type="button" class="boton boton-firmar" (click)="firmar()">
           <i class="fas fa-signature" aria-hidden="true"></i>
           Firmar
@@ -48,6 +44,87 @@
     </div>
   </section>
 </main>
+<dialog #carnetModal class="identity-dialog" aria-labelledby="identity-title">
+  <header>
+    <h2 id="identity-title">Carnet de identidad</h2>
+    <button
+      type="button"
+      class="modal-close-btn"
+      aria-label="Cerrar carnet"
+      (click)="carnetModal.close()"
+    >
+      <i class="fas fa-times"></i>
+    </button>
+  </header>
+  <div class="identity-upload">
+    <section>
+      <h3>Anverso</h3>
+      <div class="identity-preview">
+        @if (carnetFrente) {
+          <img [src]="carnetFrente" alt="Anverso del carnet adjunto" />
+        } @else {
+          <i class="fas fa-id-card" aria-hidden="true"></i>
+        }
+      </div>
+      <input
+        #frenteInput
+        type="file"
+        hidden
+        accept="image/jpeg,image/png,image/webp"
+        (change)="cargarCarnet($event, 'frente')"
+      />
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="procesandoCarnet"
+        (click)="frenteInput.click()"
+      >
+        {{ carnetFrente ? "Cambiar anverso" : "Agregar anverso" }}
+      </button>
+    </section>
+    <section>
+      <h3>Reverso</h3>
+      <div class="identity-preview">
+        @if (carnetAtras) {
+          <img [src]="carnetAtras" alt="Reverso del carnet adjunto" />
+        } @else {
+          <i class="fas fa-id-card" aria-hidden="true"></i>
+        }
+      </div>
+      <input
+        #atrasInput
+        type="file"
+        hidden
+        accept="image/jpeg,image/png,image/webp"
+        (change)="cargarCarnet($event, 'atras')"
+      />
+      <button
+        type="button"
+        class="btn btn-secondary"
+        [disabled]="procesandoCarnet"
+        (click)="atrasInput.click()"
+      >
+        {{ carnetAtras ? "Cambiar reverso" : "Agregar reverso" }}
+      </button>
+    </section>
+  </div>
+  @if (procesandoCarnet) {
+    <p role="status">Procesando imagen...</p>
+  }
+  @if (error()) {
+    <p role="alert">{{ mensajeerror }}</p>
+  }
+  <footer>
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="procesandoCarnet || !carnetFrente || !carnetAtras"
+      (click)="carnetModal.close()"
+    >
+      Listo
+    </button>
+  </footer>
+</dialog>
 @if (clickfirma()) {
   <app-firma
     (firma)="guardarfirma($event)"

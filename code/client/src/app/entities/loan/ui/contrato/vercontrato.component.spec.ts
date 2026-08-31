@@ -17,4 +17,10 @@ describe('VercontratoComponent', () => {
   it('should create', () => {
     expect(component).toBeTruthy();
   });
+  it('renders outside transformed history cards and cleans up on close', () => {
+    const host = fixture.nativeElement as HTMLElement;
+    expect(host.parentElement).toBe(document.body);
+    fixture.destroy();
+    expect(host.isConnected).toBeFalse();
+  });
 });

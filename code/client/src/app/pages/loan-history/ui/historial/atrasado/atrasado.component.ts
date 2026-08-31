@@ -1,3 +1,4 @@
+import { RecursosPrestamoComponent } from '@entities/loan';
 import { CommonModule, DatePipe } from '@angular/common';
 import { Component } from '@angular/core';
 import { PrestamosAPIService, VistaPrestamosComponent } from '@entities/loan';
@@ -9,6 +10,7 @@ import { HistorialBase } from '../base/historial-base';
 @Component({
   selector: 'app-atrasado',
   imports: [
+    RecursosPrestamoComponent,
     CommonModule,
     DatePipe,
     VistaPrestamosComponent,

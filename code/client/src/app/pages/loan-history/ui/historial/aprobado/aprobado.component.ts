@@ -1,3 +1,4 @@
+import { RecursosPrestamoComponent } from '@entities/loan';
 import { CommonModule } from '@angular/common';
 import { Component, signal, WritableSignal } from '@angular/core';
 import { PrestamoDto } from '@entities/admin';
@@ -11,6 +12,7 @@ import { HistorialBase } from '../base/historial-base';
   selector: 'app-aprobado',
   standalone: true,
   imports: [
+    RecursosPrestamoComponent,
     CommonModule,
     Aviso,
     VistaPrestamosComponent,

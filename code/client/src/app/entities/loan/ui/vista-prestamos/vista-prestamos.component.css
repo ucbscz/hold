@@ -71,6 +71,14 @@
   color: #334155;
   word-break: break-word;
 }
+.vista-table tbody td span,
+.vista-table tbody td strong {
+  display: block;
+}
+.vista-table tbody td span {
+  color: var(--ink-secondary);
+  margin-top: 0.2rem;
+}
 .vista-table tbody tr:hover {
   background-color: #fffde7;
 }

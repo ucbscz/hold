@@ -1,3 +1,4 @@
+import { RecursosPrestamoComponent } from '@entities/loan';
 import { CommonModule } from '@angular/common';
 import { Component, signal, WritableSignal } from '@angular/core';
 import { PrestamoDto } from '@entities/admin';
@@ -10,6 +11,7 @@ import { HistorialBase } from '../base/historial-base';
 @Component({
   selector: 'app-pendiente',
   imports: [
+    RecursosPrestamoComponent,
     CommonModule,
     Aviso,
     VistaPrestamosComponent,

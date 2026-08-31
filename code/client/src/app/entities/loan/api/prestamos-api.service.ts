@@ -45,6 +45,7 @@ export class PrestamosAPIService {
       Nombre_Gavetero: item.NombreGavetero ?? null,
       Nombre_Mueble: item.NombreMueble ?? null,
       Ubicacion_Mueble: item.UbicacionMueble ?? null,
+      Administrador_Ambiente: item.AdministradorAmbiente ?? null,
       TipoUsuario: item.TipoUsuario ?? null,
       DestinoPrestamo: item.DestinoPrestamo,
       IdCarrera: item.IdCarrera ?? null,

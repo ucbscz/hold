@@ -1,8 +1,10 @@
 import { CommonModule } from '@angular/common';
 import {
+  AfterViewInit,
   Component,
   ElementRef,
   Input,
+  inject,
   OnDestroy,
   signal,
   ViewChild,
@@ -26,8 +28,9 @@ const DOWNLOAD_CLEANUP_DELAY_MS = 1_000;
 })
 export class VercontratoComponent
   extends BaseTablaComponent
-  implements OnDestroy
+  implements AfterViewInit, OnDestroy
 {
+  private readonly host = inject<ElementRef<HTMLElement>>(ElementRef);
   @Input() vercontraro: WritableSignal<boolean> = signal(true);
   @Input() idprestamo: number = 0;
   @ViewChild('contractContent') contractContentRef?: ElementRef<HTMLElement>;
@@ -45,6 +48,9 @@ export class VercontratoComponent
   }
   ngOnInit() {
     this.cargarcontrato();
+  }
+  ngAfterViewInit(): void {
+    document.body.appendChild(this.host.nativeElement);
   }
   cargarcontrato() {
     this.prestamo.obtenercontratoPrestamo(this.idprestamo).subscribe({
@@ -230,6 +236,7 @@ export class VercontratoComponent
       URL.revokeObjectURL(url);
     }
     this.descargas.clear();
+    this.host.nativeElement.remove();
   }
 
   private crearDocumento(

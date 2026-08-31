@@ -22,6 +22,7 @@ export interface PrestamoApiItem {
   NombreGavetero?: string | null;
   NombreMueble?: string | null;
   UbicacionMueble?: string | null;
+  AdministradorAmbiente?: string | null;
   TipoUsuario?: string | null;
   IdCarrera?: number | null;
   NombreMateria?: string | null;

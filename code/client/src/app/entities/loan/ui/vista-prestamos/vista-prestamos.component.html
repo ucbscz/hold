@@ -8,7 +8,7 @@
         <tr>
           <th>Equipo</th>
           <th>Codigo IMT</th>
-          <th>Ubicacion</th>
+          <th>Ubicación para recoger</th>
         </tr>
       </thead>
       <tbody>
@@ -17,7 +17,15 @@
             <td>{{ prestamo.NombreGrupoEquipo }}</td>
             <td>{{ prestamo.CodigoImt || "Pendiente de asignación" }}</td>
             <td>
-              {{ prestamo.Ubicacion_Equipo || "Pendiente de asignación" }}
+              <strong>{{
+                prestamo.Ubicacion_Equipo || "Ambiente sin asignar"
+              }}</strong>
+              @if (prestamo.Nombre_Mueble) {
+                <span>{{ prestamo.Nombre_Mueble }}</span>
+              }
+              @if (prestamo.Nombre_Gavetero) {
+                <span>{{ prestamo.Nombre_Gavetero }}</span>
+              }
             </td>
           </tr>
         }
@@ -32,6 +40,10 @@
       </button>
     }
     <dl class="loan-actors">
+      <dt>Responsable del ambiente</dt>
+      <dd>
+        {{ prestamos[0].Administrador_Ambiente || "Sin responsable asignado" }}
+      </dd>
       <dt>Solicitante</dt>
       <dd>
         {{ prestamos[0].NombreUsuario }}

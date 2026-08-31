@@ -20,6 +20,7 @@ export class PrestamoDto extends BaseModel {
   Nombre_Gavetero: string | null = null;
   Nombre_Mueble: string | null = null;
   Ubicacion_Mueble: string | null = null;
+  Administrador_Ambiente: string | null = null;
   IdContrato: string | null = null;
   TipoUsuario: string | null = null;
   DestinoPrestamo: string | null = null;
@@ -45,6 +46,7 @@ export class PrestamoDto extends BaseModel {
     this.Nombre_Gavetero = null;
     this.Nombre_Mueble = null;
     this.Ubicacion_Mueble = null;
+    this.Administrador_Ambiente = null;
     this.TipoUsuario = null;
     this.DestinoPrestamo = null;
     this.IdCarrera = null;
