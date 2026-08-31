@@ -4,6 +4,7 @@ export interface ConfiguracionDto {
   HorarioInicioMinutos: number;
   HorarioFinMinutos: number;
   NombreJefeCarrera: string;
+  CarnetJefeCarrera?: string | null;
   FirmaJefeCarreraBase64: string;
   TiempoMinimoReservaMinutos: number;
   TiempoRecordatorioPrevioMinutos: number;
@@ -40,7 +41,7 @@ export const CONFIGURACION_PREDETERMINADA: ConfiguracionDto = {
   MontoMinimoContrato: 2000,
   HorarioInicioMinutos: 8 * 60,
   HorarioFinMinutos: 18 * 60,
-  NombreJefeCarrera: 'Job Angel Ledezma Dr.Ing',
+  NombreJefeCarrera: '',
   FirmaJefeCarreraBase64: '',
   TiempoMinimoReservaMinutos: 30,
   TiempoRecordatorioPrevioMinutos: 30,

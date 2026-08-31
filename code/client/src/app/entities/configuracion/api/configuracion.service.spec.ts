@@ -19,6 +19,46 @@ describe('ConfiguracionService', () => {
 
   afterEach(() => http.verify());
 
+  it('unwraps the server response after saving and keeps the assigned user', () => {
+    const config = {
+      ...CONFIGURACION_PREDETERMINADA,
+      CarnetJefeCarrera: '123',
+      NombreJefeCarrera: 'Ana Perez',
+    };
+    let result: ConfiguracionDto | undefined;
+    service.updateConfiguracion(config).subscribe((value) => (result = value));
+    http
+      .expectOne(
+        (request) =>
+          request.method === 'PUT' &&
+          request.url.endsWith('/api/configuracion'),
+      )
+      .flush({ Status: 200, Value: config });
+    expect(result).toEqual(config);
+    expect(service.configuracionActual()).toEqual(config);
+  });
+
+  it('surfaces failures when editing configuration instead of returning defaults', () => {
+    const error = jasmine.createSpy('error');
+    service.loadConfiguracion(false).subscribe({ error });
+    http
+      .expectOne((request) => request.url.endsWith('/api/configuracion'))
+      .flush('Unavailable', { status: 503, statusText: 'Unavailable' });
+    expect(error).toHaveBeenCalled();
+    expect(service.configuracionActual()).toBeNull();
+  });
+
+  it('searches responsible users using the documented query parameter', () => {
+    service.buscarResponsables('Ana Perez').subscribe();
+    http
+      .expectOne(
+        (request) =>
+          request.url.endsWith('/api/configuracion/responsables') &&
+          request.params.get('buscar') === 'Ana Perez',
+      )
+      .flush([]);
+  });
+
   it('should store the configuration returned by the API', () => {
     const configuracion: ConfiguracionDto = {
       ...CONFIGURACION_PREDETERMINADA,

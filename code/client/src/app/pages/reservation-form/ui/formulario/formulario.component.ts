@@ -167,9 +167,7 @@ export class FormularioComponent implements OnInit {
       : `data:image/png;base64,${base64Firma}`;
 
     const processedTemplate = this.reemplazarMarcadores(this.templateCrudo, {
-      nombre_jefe_carrera: escapeHtmlValue(
-        config?.NombreJefeCarrera ?? 'Job Angel Ledezma Dr.Ing',
-      ),
+      nombre_jefe_carrera: escapeHtmlValue(config?.NombreJefeCarrera ?? ''),
       firma_jefe_carrera: firmaSrc,
       carnet_frente: this.carnetFrente,
       carnet_atras: this.carnetAtras,

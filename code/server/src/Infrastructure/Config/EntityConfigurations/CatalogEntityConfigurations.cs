@@ -70,6 +70,9 @@ internal sealed class ConfiguracionSistemaConfiguration : IEntityTypeConfigurati
                 value => value.Aggregate(0, (hash, item) => HashCode.Combine(hash, item.GetHashCode())),
                 value => value.Select(item => new HorarioAtencion { DiaSemana = item.DiaSemana, Fecha = item.Fecha, Abierto = item.Abierto, InicioMinutos = item.InicioMinutos, FinMinutos = item.FinMinutos }).ToList()));
         entity.Property(e => e.NombreJefeCarrera).HasColumnName("nombre_jefe_carrera").HasMaxLength(255);
+        entity.Property(e => e.CarnetJefeCarrera).HasColumnName("carnet_jefe_carrera").HasMaxLength(20);
+        entity.HasOne<Usuario>().WithMany().HasForeignKey(e => e.CarnetJefeCarrera)
+            .OnDelete(DeleteBehavior.SetNull);
         entity.Property(e => e.FirmaJefeCarreraBase64).HasColumnName("firma_jefe_carrera_base64");
         entity.Property(e => e.TiempoMinimoReservaMinutos).HasColumnName("tiempo_minimo_reserva_minutos");
         entity.Property(e => e.TiempoRecordatorioPrevioMinutos).HasColumnName("tiempo_recordatorio_previo_minutos");

@@ -20,7 +20,18 @@ public class ConfiguracionController : Controller
     public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
         var result = await _service.GetConfiguracion(cancellationToken);
+        if (!User.IsInRole("administrador")) result.CarnetJefeCarrera = null;
+        Response.Headers.CacheControl = "no-store";
         return Ok(result);
+    }
+
+    [HttpGet("responsables")]
+    [Authorize(Roles = "administrador")]
+    public async Task<IActionResult> Responsables([FromQuery] string? buscar, CancellationToken cancellationToken)
+    {
+        Response.Headers.CacheControl = "no-store";
+        if (buscar?.Length > 100) return BadRequest("La búsqueda no puede superar 100 caracteres.");
+        return Ok(await _service.BuscarResponsables(buscar, cancellationToken));
     }
 
     [HttpPut]

@@ -172,6 +172,10 @@ The root role is displayed as **Administrador general**; its API/authorization v
 
 `GET /api/configuracion` remains public; `PUT /api/configuracion` remains root-only. The existing payload adds `Horarios`, an array of `{ DiaSemana, Fecha, Abierto, InicioMinutos, FinMinutos }`. `Fecha` is nullable ISO `YYYY-MM-DD`; `DiaSemana` is 0 (Sunday) through 6. A date exception takes precedence over a weekday rule. Without either, the global hours apply Monday through Saturday. Minimum duration is at least 30 minutes. All reservation enforcement uses Bolivia time.
 
+The contract responsible is linked to an active user through `CarnetJefeCarrera`. When not assigned, the first available general administrator ordered by carnet is proposed. `NombreJefeCarrera` is derived from that user's full name, never trusted from the client. Changing the responsible requires their signature. Public configuration responses omit the identifier (null); only root can read/write it. Configuration responses use `Cache-Control: no-store`.
+
+`GET /api/configuracion/responsables?buscar=nombre` is root-only. It returns up to 30 active, non-blocked users as `{ Carnet, Nombre }`, ordered by name. Search accepts up to 100 characters and matches name parts case-insensitively. Refine the query for additional results. The schema stores `configuraciones_sistema.carnet_jefe_carrera` as a nullable foreign key to `usuarios.carnet`.
+
 The global limit is 180 requests/minute per authenticated identity or anonymous IP; authentication/registration additionally use 10/minute per IP. Limits are process-local and reject immediately without queueing. Multi-replica deployments need a shared gateway limit.
 
 ## Audit and Health

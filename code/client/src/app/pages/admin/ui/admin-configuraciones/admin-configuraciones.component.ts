@@ -1,20 +1,38 @@
-import { Component, OnInit, signal, WritableSignal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import {
+  Component,
+  DestroyRef,
+  OnInit,
+  ViewChild,
+  inject,
+  signal,
+  WritableSignal,
+} from '@angular/core';
+import { NgForm } from '@angular/forms';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import {
   ConfiguracionDto,
   HorarioAtencion,
   ConfiguracionService,
 } from '@entities/configuracion';
 import { FirmaComponent } from '@features/signature';
-import { CustomSelectComponent } from '@shared/ui';
+import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
 import { FlatpickrDirective } from '@shared/lib/directives';
-import { finalize } from 'rxjs';
+import { extractErrorMessage } from '@shared/lib/error/error-handler';
+import {
+  Subject,
+  catchError,
+  debounceTime,
+  finalize,
+  of,
+  switchMap,
+} from 'rxjs';
 
 @Component({
   selector: 'app-admin-configuraciones',
   standalone: true,
   imports: [
-    FormsModule,
+    ValidatedFormsModule,
     FirmaComponent,
     CustomSelectComponent,
     FlatpickrDirective,
@@ -23,6 +41,12 @@ import { finalize } from 'rxjs';
   styleUrls: ['./admin-configuraciones.component.css'],
 })
 export class AdminConfiguracionesComponent implements OnInit {
+  @ViewChild(NgForm) form?: NgForm;
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly buscarResponsable = new Subject<string>();
+  private messageTimer?: number;
+  readonly responsables = signal<OpcionSelect[]>([]);
+  readonly errorResponsables = signal('');
   readonly clickfirma = signal(false);
   readonly config: WritableSignal<ConfiguracionDto | null> = signal(null);
   readonly cargando = signal(false);
@@ -48,8 +72,60 @@ export class AdminConfiguracionesComponent implements OnInit {
   }));
   horarios: HorarioAtencion[] = [];
   fechaEspecial = '';
+  readonly fechaOptions = { dateFormat: 'Y-m-d' };
+
+  buscarUsuarios(texto: string): void {
+    this.buscarResponsable.next(texto.slice(0, 100));
+  }
+
+  asignarResponsable(carnet: string): void {
+    const current = this.config();
+    if (!current || current.CarnetJefeCarrera === carnet) return;
+    this.config.set({
+      ...current,
+      CarnetJefeCarrera: carnet,
+      NombreJefeCarrera:
+        this.responsables().find((u) => u.value === carnet)?.label ?? '',
+      FirmaJefeCarreraBase64: '',
+    });
+  }
+
+  get horarioBaseValido(): boolean {
+    const partes = [
+      this.horarioInicioHora,
+      this.horarioInicioMinuto,
+      this.horarioFinHora,
+      this.horarioFinMinuto,
+    ];
+    return (
+      partes.every(
+        (valor, i) =>
+          Number.isInteger(valor) && valor >= 0 && valor <= (i % 2 ? 59 : 23),
+      ) &&
+      this.horarioFinHora * 60 +
+        this.horarioFinMinuto -
+        this.horarioInicioHora * 60 -
+        this.horarioInicioMinuto >=
+        (this.config()?.TiempoMinimoReservaMinutos ?? 30)
+    );
+  }
+
+  errorHorario(horario: HorarioAtencion): string {
+    if (!horario.Abierto) return '';
+    return horario.FinMinutos - horario.InicioMinutos >=
+      (this.config()?.TiempoMinimoReservaMinutos ?? 30)
+      ? ''
+      : 'El cierre debe permitir al menos ' +
+          (this.config()?.TiempoMinimoReservaMinutos ?? 30) +
+          ' minutos de reserva.';
+  }
+
+  get fechaRepetida(): boolean {
+    return this.horarios.some((h) => h.Fecha === this.fechaEspecial);
+  }
 
   aplicarSemana(): void {
+    if (!this.horarioBaseValido) return;
     this.horarios = this.horarios.map((h) =>
       h.Fecha
         ? h
@@ -65,6 +141,7 @@ export class AdminConfiguracionesComponent implements OnInit {
   agregarExcepcion(): void {
     if (
       !this.fechaEspecial ||
+      this.horarios.length >= 373 ||
       this.horarios.some((h) => h.Fecha === this.fechaEspecial)
     )
       return;
@@ -85,20 +162,67 @@ export class AdminConfiguracionesComponent implements OnInit {
     this.horarios = this.horarios.filter((h) => h !== horario);
   }
 
-  constructor(private readonly configuracionService: ConfiguracionService) {}
+  constructor(private readonly configuracionService: ConfiguracionService) {
+    this.destroyRef.onDestroy(() => window.clearTimeout(this.messageTimer));
+  }
 
   ngOnInit(): void {
+    this.buscarResponsable
+      .pipe(
+        debounceTime(200),
+        switchMap((buscar) => {
+          this.errorResponsables.set('');
+          return this.configuracionService.buscarResponsables(buscar).pipe(
+            catchError(() => {
+              this.errorResponsables.set(
+                'No se pudieron cargar los usuarios. Vuelve a buscar.',
+              );
+              return of([]);
+            }),
+          );
+        }),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((usuarios) => {
+        const opciones = usuarios.map((u) => ({
+          value: u.Carnet,
+          label: u.Nombre,
+        }));
+        const current = this.config();
+        if (
+          current?.CarnetJefeCarrera &&
+          !opciones.some((u) => u.value === current.CarnetJefeCarrera)
+        )
+          opciones.unshift({
+            value: current.CarnetJefeCarrera,
+            label: current.NombreJefeCarrera,
+          });
+        this.responsables.set(opciones);
+      });
     this.cargarConfiguracion();
   }
 
   cargarConfiguracion(): void {
     this.cargando.set(true);
     this.configuracionService
-      .loadConfiguracion()
-      .pipe(finalize(() => this.cargando.set(false)))
+      .loadConfiguracion(false)
+      .pipe(
+        finalize(() => this.cargando.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
         next: (data) => {
           this.config.set({ ...data });
+          this.responsables.set(
+            data.CarnetJefeCarrera
+              ? [
+                  {
+                    value: data.CarnetJefeCarrera,
+                    label: data.NombreJefeCarrera,
+                  },
+                ]
+              : [],
+          );
           this.parseHorarios(data);
         },
         error: () =>
@@ -118,7 +242,13 @@ export class AdminConfiguracionesComponent implements OnInit {
 
   guardar(): void {
     const currentConfig = this.config();
-    if (!currentConfig || !this.configuracionValida()) return;
+    if (
+      !currentConfig ||
+      !this.configuracionValida() ||
+      this.form?.invalid ||
+      this.guardando()
+    )
+      return;
 
     const updatedConfig = {
       ...currentConfig,
@@ -131,15 +261,31 @@ export class AdminConfiguracionesComponent implements OnInit {
     this.guardando.set(true);
     this.configuracionService
       .updateConfiguracion(updatedConfig)
-      .pipe(finalize(() => this.guardando.set(false)))
+      .pipe(
+        finalize(() => this.guardando.set(false)),
+        takeUntilDestroyed(this.destroyRef),
+      )
       .subscribe({
         next: (data) => {
           this.config.set({ ...data });
+          this.responsables.set(
+            data.CarnetJefeCarrera
+              ? [
+                  {
+                    value: data.CarnetJefeCarrera,
+                    label: data.NombreJefeCarrera,
+                  },
+                ]
+              : [],
+          );
           this.parseHorarios(data);
           this.mostrarMensaje('Configuración guardada exitosamente', false);
         },
-        error: () =>
-          this.mostrarMensaje('Error al guardar la configuración', true),
+        error: (error) =>
+          this.mostrarMensaje(
+            extractErrorMessage(error, 'Error al guardar la configuración'),
+            true,
+          ),
       });
   }
 
@@ -151,11 +297,8 @@ export class AdminConfiguracionesComponent implements OnInit {
     const fin = this.horarioFinHora * 60 + this.horarioFinMinuto;
 
     return (
-      this.horarios.every(
-        (h) =>
-          !h.Abierto ||
-          h.FinMinutos - h.InicioMinutos >= current.TiempoMinimoReservaMinutos,
-      ) &&
+      this.horarioBaseValido &&
+      this.horarios.every((h) => !this.errorHorario(h)) &&
       inicio >= 0 &&
       fin <= 24 * 60 - 1 &&
       inicio < fin &&
@@ -163,7 +306,8 @@ export class AdminConfiguracionesComponent implements OnInit {
       current.TiempoMinimoReservaMinutos >= 30 &&
       current.TiempoRecordatorioPrevioMinutos >= 0 &&
       current.MinutosGraciaAtraso >= 0 &&
-      current.NombreJefeCarrera.trim().length > 0
+      !!current.CarnetJefeCarrera &&
+      !!current.FirmaJefeCarreraBase64
     );
   }
 
@@ -199,6 +343,7 @@ export class AdminConfiguracionesComponent implements OnInit {
   private mostrarMensaje(msg: string, esError: boolean): void {
     this.mensaje.set(msg);
     this.error.set(esError);
-    window.setTimeout(() => this.mensaje.set(''), 3000);
+    window.clearTimeout(this.messageTimer);
+    this.messageTimer = window.setTimeout(() => this.mensaje.set(''), 5000);
   }
 }

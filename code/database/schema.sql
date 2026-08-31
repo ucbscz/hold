@@ -4338,6 +4338,7 @@ CREATE TABLE IF NOT EXISTS configuraciones_sistema (
     horario_inicio_minutos integer NOT NULL,
     horario_fin_minutos integer NOT NULL,
     nombre_jefe_carrera text NOT NULL,
+    carnet_jefe_carrera varchar(20) REFERENCES usuarios(carnet) ON DELETE SET NULL,
     firma_jefe_carrera_base64 text NOT NULL,
     tiempo_minimo_reserva_minutos integer NOT NULL,
     tiempo_recordatorio_previo_minutos integer NOT NULL,

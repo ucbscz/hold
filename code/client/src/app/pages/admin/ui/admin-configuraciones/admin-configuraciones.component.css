@@ -4,6 +4,7 @@
 }
 
 .config-page {
+  box-sizing: border-box;
   width: min(100%, 1180px);
   margin: 0 auto;
   padding: var(--sp-8) var(--sp-5) 5rem;
@@ -25,8 +26,8 @@
 }
 
 .config-page__header h1 {
-  font-size: 2rem;
-  font-weight: 800;
+  font-size: 1.75rem;
+  font-weight: 700;
   line-height: 1.2;
 }
 
@@ -51,8 +52,8 @@
 
 .config-section {
   display: grid;
-  grid-template-columns: minmax(15rem, 0.72fr) minmax(0, 1.28fr);
-  gap: clamp(2rem, 5vw, 5rem);
+  grid-template-columns: minmax(13rem, 0.6fr) minmax(0, 1.4fr);
+  gap: 2rem;
   padding: var(--sp-8) 0;
   border-bottom: 1px solid var(--border);
 }
@@ -89,20 +90,18 @@
   flex: 0 0 2.5rem;
   align-items: center;
   justify-content: center;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--ink-secondary);
+  color: var(--ink-muted);
 }
 
 .config-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--sp-5);
+  align-items: start;
 }
 
 .config-grid--signature {
-  grid-template-columns: minmax(12rem, 0.8fr) minmax(16rem, 1.2fr);
+  grid-template-columns: minmax(0, 1fr);
 }
 
 .config-field {
@@ -116,12 +115,13 @@
 }
 
 .config-field input {
+  box-sizing: border-box;
   width: 100%;
   min-width: 0;
   min-height: 44px;
   padding: 0 0.9rem;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   outline: none;
   background: var(--surface);
   color: var(--ink);
@@ -142,7 +142,7 @@
   align-items: center;
   overflow: hidden;
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   background: var(--surface);
 }
 
@@ -186,12 +186,13 @@
   display: flex;
   align-items: center;
   gap: var(--sp-4);
+  flex-wrap: wrap;
 }
 
 .signature-control__preview {
   display: flex;
   width: min(100%, 14rem);
-  min-width: 10rem;
+  min-width: 0;
   height: 5.5rem;
   align-items: center;
   justify-content: center;
@@ -303,29 +304,92 @@
     width: 100%;
   }
 }
-:host .weekly-schedule {
+.weekly-schedule {
   display: grid;
   gap: 12px;
   margin: 20px 0;
 }
-:host .weekly-schedule__day {
+.weekly-schedule__day {
   display: grid;
   grid-template-columns:
-    minmax(130px, 1fr) minmax(110px, 1fr) minmax(110px, 1fr)
+    minmax(100px, 1fr) minmax(100px, 1fr) minmax(100px, 1fr)
     44px;
   align-items: center;
   gap: 12px;
 }
-:host .weekly-schedule__day label {
+.weekly-schedule__label {
   display: flex;
   gap: 10px;
   align-items: center;
+  min-height: 44px;
+  font-size: 0.9rem;
+  color: var(--ink-secondary);
+}
+.weekly-schedule__label input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--brand);
+  flex-shrink: 0;
+}
+.weekly-schedule__error {
+  grid-column: 2 / -1;
+}
+.special-date {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+  gap: 12px;
+}
+.special-date .btn {
+  min-height: 44px;
+  align-self: end;
+}
+.special-date__error {
+  grid-column: 1 / -1;
+}
+.config-page .btn {
+  gap: 8px;
+  min-height: 44px;
+  white-space: normal;
+}
+.config-page .btn i {
+  color: var(--ink-muted);
+}
+.config-page .btn-primary i {
+  color: inherit;
+}
+.config-page .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+.config-page .btn-icon:hover {
+  background: var(--interactive-subtle);
 }
 @media (max-width: 640px) {
-  :host .weekly-schedule__day {
-    grid-template-columns: 1fr 1fr;
+  .weekly-schedule__day {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
   }
-  :host .weekly-schedule__day label {
+  .weekly-schedule__label {
     grid-column: 1 / -1;
+  }
+  .weekly-schedule__day:not(.weekly-schedule__day--special) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+  .weekly-schedule__error {
+    grid-column: 1 / -1;
+  }
+  .special-date {
+    grid-template-columns: minmax(0, 1fr);
   }
 }

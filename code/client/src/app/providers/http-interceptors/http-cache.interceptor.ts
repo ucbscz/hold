@@ -39,6 +39,14 @@ export class HttpCacheInterceptor implements HttpInterceptor {
     return next.handle(request).pipe(
       tap((event) => {
         if (event instanceof HttpResponse) {
+          if (
+            /\b(no-store|no-cache)\b/i.test(
+              event.headers.get('Cache-Control') ?? '',
+            )
+          ) {
+            this.cache.delete(key);
+            return;
+          }
           this.cache.set(key, {
             expires: Date.now() + this.ttlMs,
             event: event.clone(),

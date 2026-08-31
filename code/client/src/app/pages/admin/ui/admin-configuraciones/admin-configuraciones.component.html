@@ -12,11 +12,11 @@
       Cargando configuración...
     </div>
   } @else if (config(); as currentConfig) {
-    <form class="config-form" (ngSubmit)="guardar()">
+    <form class="config-form" #formulario="ngForm" (ngSubmit)="guardar()">
       <section class="config-section" aria-labelledby="loans-settings-title">
         <header class="config-section__intro">
           <span class="config-section__icon">
-            <i class="fas fa-file-contract" aria-hidden="true"></i>
+            <i class="fas fa-file-signature" aria-hidden="true"></i>
           </span>
           <div>
             <h2 id="loans-settings-title">Préstamos y contratos</h2>
@@ -32,6 +32,7 @@
                 min="0"
                 step="0.01"
                 name="montoMinimoContrato"
+                required
                 [(ngModel)]="currentConfig.MontoMinimoContrato"
               />
               <span>Bs</span>
@@ -45,6 +46,7 @@
                 min="30"
                 step="1"
                 name="tiempoMinimoReserva"
+                required
                 [(ngModel)]="currentConfig.TiempoMinimoReservaMinutos"
               />
               <span>min</span>
@@ -75,6 +77,7 @@
                     min="0"
                     max="23"
                     name="horarioInicioHora"
+                    required
                     [(ngModel)]="horarioInicioHora"
                   />
                 </label>
@@ -86,6 +89,7 @@
                     min="0"
                     max="59"
                     name="horarioInicioMinuto"
+                    required
                     [(ngModel)]="horarioInicioMinuto"
                   />
                 </label>
@@ -101,6 +105,7 @@
                     min="0"
                     max="23"
                     name="horarioFinHora"
+                    required
                     [(ngModel)]="horarioFinHora"
                   />
                 </label>
@@ -112,29 +117,35 @@
                     min="0"
                     max="59"
                     name="horarioFinMinuto"
+                    required
                     [(ngModel)]="horarioFinMinuto"
                   />
                 </label>
               </div>
             </div>
           </div>
-          @if (!configuracionValida()) {
-            <p class="config-section__hint">
-              La apertura debe ser anterior al cierre y la reserva mínima debe
-              durar 30 minutos.
+          @if (!horarioBaseValido) {
+            <p class="config-section__hint" role="status">
+              Revisa las horas de apertura y cierre. El intervalo debe permitir
+              la duración mínima de reserva.
             </p>
           }
           <button
             type="button"
             class="btn btn-secondary"
             (click)="aplicarSemana()"
+            [disabled]="!horarioBaseValido"
           >
+            <i class="fas fa-calendar-check" aria-hidden="true"></i>
             Aplicar horario a la semana
           </button>
           <div class="weekly-schedule">
             @for (horario of horarios; track $index) {
-              <div class="weekly-schedule__day">
-                <label
+              <div
+                class="weekly-schedule__day"
+                [class.weekly-schedule__day--special]="horario.Fecha"
+              >
+                <label class="weekly-schedule__label"
                   ><input
                     type="checkbox"
                     [(ngModel)]="horario.Abierto"
@@ -155,25 +166,41 @@
                   [disabled]="!horario.Abierto"
                   [opciones]="horas"
                   [(ngModel)]="horario.FinMinutos"
+                  [invalid]="!!errorHorario(horario)"
+                  [attr.aria-describedby]="
+                    errorHorario(horario) ? 'horario-error-' + $index : null
+                  "
                 />
                 @if (horario.Fecha) {
                   <button
                     type="button"
                     class="btn-icon"
                     title="Eliminar excepción"
+                    aria-label="Eliminar excepción"
                     (click)="quitarExcepcion(horario)"
                   >
-                    <i class="fas fa-trash" aria-hidden="true"></i>
+                    <i class="fas fa-trash-alt" aria-hidden="true"></i>
                   </button>
+                }
+                @if (errorHorario(horario)) {
+                  <p
+                    class="field-error weekly-schedule__error"
+                    [id]="'horario-error-' + $index"
+                    role="status"
+                  >
+                    {{ errorHorario(horario) }}
+                  </p>
                 }
               </div>
             }
           </div>
-          <div class="config-grid">
+          <div class="special-date">
             <label class="config-field"
               ><span>Fecha especial</span
               ><input
                 appFlatpickr
+                [fpOptions]="fechaOptions"
+                readonly
                 name="fechaEspecial"
                 [(ngModel)]="fechaEspecial"
                 placeholder="Seleccionar fecha"
@@ -182,10 +209,18 @@
               type="button"
               class="btn btn-secondary"
               (click)="agregarExcepcion()"
-              [disabled]="!fechaEspecial"
+              [disabled]="
+                !fechaEspecial || fechaRepetida || horarios.length >= 373
+              "
             >
+              <i class="fas fa-plus" aria-hidden="true"></i>
               Añadir excepción
             </button>
+            @if (fechaRepetida) {
+              <p class="field-error special-date__error" role="status">
+                Esta fecha ya tiene una excepción.
+              </p>
+            }
           </div>
         </div>
       </section>
@@ -212,6 +247,7 @@
                 min="0"
                 step="1"
                 name="tiempoRecordatorio"
+                required
                 [(ngModel)]="currentConfig.TiempoRecordatorioPrevioMinutos"
               />
               <span>min</span>
@@ -225,6 +261,7 @@
                 min="0"
                 step="1"
                 name="minutosGracia"
+                required
                 [(ngModel)]="currentConfig.MinutosGraciaAtraso"
               />
               <span>min</span>
@@ -247,15 +284,24 @@
           </div>
         </header>
         <div class="config-grid config-grid--signature">
-          <label class="config-field">
-            <span>Nombre del jefe de carrera</span>
-            <input
-              type="text"
-              name="nombreJefeCarrera"
-              maxlength="255"
-              [(ngModel)]="currentConfig.NombreJefeCarrera"
+          <div class="config-field">
+            <label id="responsable-label">Jefe de carrera</label>
+            <app-custom-select
+              name="jefeCarrera"
+              aria-labelledby="responsable-label"
+              required
+              [opciones]="responsables()"
+              [searchThreshold]="0"
+              [remoteSearch]="true"
+              (searchChange)="buscarUsuarios($event)"
+              [ngModel]="currentConfig.CarnetJefeCarrera"
+              (ngModelChange)="asignarResponsable($event)"
+              placeholder="Asignar un usuario"
             />
-          </label>
+            @if (errorResponsables()) {
+              <p class="field-error" role="status">{{ errorResponsables() }}</p>
+            }
+          </div>
           <div class="config-field">
             <span>Firma registrada</span>
             <div class="signature-control">
@@ -283,6 +329,11 @@
                 Cambiar firma
               </button>
             </div>
+            @if (!currentConfig.FirmaJefeCarreraBase64) {
+              <p class="field-error" role="status">
+                Registra la firma del jefe de carrera asignado.
+              </p>
+            }
           </div>
         </div>
       </section>
@@ -298,13 +349,24 @@
         <button
           type="submit"
           class="btn btn-primary"
-          [disabled]="guardando() || !configuracionValida()"
+          [disabled]="
+            guardando() || formulario.invalid || !configuracionValida()
+          "
         >
           <i class="fas fa-save" aria-hidden="true"></i>
           {{ guardando() ? "Guardando..." : "Guardar cambios" }}
         </button>
       </footer>
     </form>
+  } @else {
+    <p class="field-error" role="alert">{{ mensaje() }}</p>
+    <button
+      type="button"
+      class="btn btn-secondary"
+      (click)="cargarConfiguracion()"
+    >
+      Reintentar
+    </button>
   }
 </main>
 

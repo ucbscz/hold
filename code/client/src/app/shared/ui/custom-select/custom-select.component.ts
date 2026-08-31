@@ -8,6 +8,8 @@ import {
   forwardRef,
   HostBinding,
   Input,
+  Output,
+  EventEmitter,
   NgZone,
   OnDestroy,
   ViewChild,
@@ -41,6 +43,8 @@ export class CustomSelectComponent
   @Input() invalid = false;
   @Input() menuAnimation = true;
   @Input() searchThreshold = 6;
+  @Input() remoteSearch = false;
+  @Output() searchChange = new EventEmitter<string>();
   @Input() menuPosition: 'auto' | 'top' | 'bottom' = 'auto';
   @Input() set opciones(valor: Array<OpcionSelect | string>) {
     const opciones = this.normalizarOpciones(valor ?? []);
@@ -136,6 +140,7 @@ export class CustomSelectComponent
     this.onTouched();
     this.menuPosicionado = false;
     this.enfocarBusquedaAlPosicionar = true;
+    if (this.remoteSearch) this.searchChange.emit('');
     this.activarListenersGlobales();
     this.programarPosicionMenu();
   }
@@ -148,6 +153,7 @@ export class CustomSelectComponent
 
   buscar(evento: Event): void {
     this.busqueda = (evento.target as HTMLInputElement).value;
+    this.searchChange.emit(this.busqueda);
     this.actualizarOpcionesFiltradas();
     this.programarPosicionMenu();
   }
@@ -292,11 +298,12 @@ export class CustomSelectComponent
 
   private actualizarOpcionesFiltradas(): void {
     const busquedaNormalizada = this.normalizarTexto(this.busqueda);
-    this.opcionesFiltradas = busquedaNormalizada
-      ? this.opcionesNormalizadas.filter((opcion) =>
-          this.normalizarTexto(opcion.label).includes(busquedaNormalizada),
-        )
-      : this.opcionesNormalizadas;
+    this.opcionesFiltradas =
+      busquedaNormalizada && !this.remoteSearch
+        ? this.opcionesNormalizadas.filter((opcion) =>
+            this.normalizarTexto(opcion.label).includes(busquedaNormalizada),
+          )
+        : this.opcionesNormalizadas;
   }
 
   private normalizarOpciones(

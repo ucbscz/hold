@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, signal, WritableSignal } from '@angular/core';
-import { catchError, Observable, of, tap } from 'rxjs';
+import { catchError, map, Observable, of, tap } from 'rxjs';
+import { ApiResponse, extractApiValue } from '@shared/api';
 import { environment } from '../../../../environments/environment';
 import {
   CONFIGURACION_PREDETERMINADA,
@@ -18,12 +19,13 @@ export class ConfiguracionService {
 
   constructor(private readonly http: HttpClient) {}
 
-  public loadConfiguracion(): Observable<ConfiguracionDto> {
+  public loadConfiguracion(useFallback = true): Observable<ConfiguracionDto> {
     return this.http.get<ConfiguracionDto>(this.url).pipe(
       tap((config) => {
         this.configuracionActual.set(config);
       }),
-      catchError(() => {
+      catchError((error) => {
+        if (!useFallback) throw error;
         const fallback = { ...CONFIGURACION_PREDETERMINADA };
         this.configuracionActual.set(fallback);
         return of(fallback);
@@ -31,13 +33,27 @@ export class ConfiguracionService {
     );
   }
 
+  buscarResponsables(
+    buscar = '',
+  ): Observable<{ Carnet: string; Nombre: string }[]> {
+    return this.http.get<{ Carnet: string; Nombre: string }[]>(
+      `${this.url}/responsables`,
+      {
+        params: { buscar },
+      },
+    );
+  }
+
   public updateConfiguracion(
     config: ConfiguracionDto,
   ): Observable<ConfiguracionDto> {
-    return this.http.put<ConfiguracionDto>(this.url, config).pipe(
-      tap((newConfig) => {
-        this.configuracionActual.set(newConfig);
-      }),
-    );
+    return this.http
+      .put<ApiResponse<ConfiguracionDto> | ConfiguracionDto>(this.url, config)
+      .pipe(
+        map((response) => extractApiValue(response, config)),
+        tap((newConfig) => {
+          this.configuracionActual.set(newConfig);
+        }),
+      );
   }
 }

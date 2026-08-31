@@ -9,6 +9,7 @@ public class ConfiguracionSistema : Entity
     public int HorarioFinMinutos { get; set; }
     public List<HorarioAtencion> Horarios { get; set; } = [];
     public string NombreJefeCarrera { get; set; } = null!;
+    public string? CarnetJefeCarrera { get; set; }
     public string FirmaJefeCarreraBase64 { get; set; } = null!;
     public int TiempoMinimoReservaMinutos { get; set; }
     public int TiempoRecordatorioPrevioMinutos { get; set; }

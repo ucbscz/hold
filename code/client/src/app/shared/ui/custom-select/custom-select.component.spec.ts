@@ -129,6 +129,25 @@ describe('CustomSelectComponent', () => {
     ]);
   });
 
+  it('delegates remote search without hiding server matches or changing selection', () => {
+    component.remoteSearch = true;
+    component.searchThreshold = 0;
+    component.opciones = [{ value: '1', label: 'Ana Maria Perez' }];
+    component.writeValue('1');
+    const search = spyOn(component.searchChange, 'emit');
+    fixture.detectChanges();
+    component.alternar();
+    expect(search).toHaveBeenCalledWith('');
+    const input = document.body.querySelector(
+      '.cs-search__input',
+    ) as HTMLInputElement;
+    input.value = 'perez ana';
+    input.dispatchEvent(new Event('input'));
+    expect(search).toHaveBeenCalledWith('perez ana');
+    expect(component.opcionesFiltradas.length).toBe(1);
+    expect(component.valor).toBe('1');
+  });
+
   it('should open immediately and close from an outside click', () => {
     component.opciones = ['Activo', 'Finalizado'];
     fixture.detectChanges();
