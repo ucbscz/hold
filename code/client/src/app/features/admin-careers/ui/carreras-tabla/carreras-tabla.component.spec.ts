@@ -19,7 +19,7 @@ describe('CarrerasTablaComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('sorts rendered rows on header clicks and preserves sorting after filtering', () => {
+  it('keeps alphabetical order without sorting controls in a two-column table', () => {
     component.carrerascopia = [
       Object.assign(new Carrera(), { Id: 2, Nombre: 'Mecatrónica' }),
       Object.assign(new Carrera(), { Id: 1, Nombre: 'Civil' }),
@@ -30,17 +30,14 @@ describe('CarrerasTablaComponent', () => {
       'Civil',
       'Mecatrónica',
     ]);
-    fixture.nativeElement.querySelector('.table-sort-button').click();
-    fixture.detectChanges();
-    expect(component.carreras.map((c) => c.Nombre)).toEqual([
-      'Mecatrónica',
-      'Civil',
-    ]);
+    expect(
+      fixture.nativeElement.querySelector('.table-sort-button'),
+    ).toBeNull();
     component.aplicarFiltros(['civil', '']);
     component.limpiarBusqueda();
     expect(component.carreras.map((c) => c.Nombre)).toEqual([
-      'Mecatrónica',
       'Civil',
+      'Mecatrónica',
     ]);
   });
 

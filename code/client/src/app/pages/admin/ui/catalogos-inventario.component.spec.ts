@@ -90,6 +90,84 @@ describe('CatalogosInventarioComponent', () => {
     fixture.componentRef.setInput('tipo', 'procedencias');
     fixture.detectChanges();
     expect(fixture.componentInstance.encabezados).toEqual(['Nombre']);
+    expect(
+      fixture.nativeElement.querySelector('.table-sort-button'),
+    ).toBeNull();
     expect(fixture.nativeElement.querySelector('#catalog-admin')).toBeNull();
   });
+
+  for (const width of [320, 375, 768, 1280]) {
+    it(
+      'keeps simple catalog actions reachable with long names at ' +
+        width +
+        'px',
+      async () => {
+        fixture.componentRef.setInput('tipo', 'procedencias');
+        fixture.detectChanges();
+        fixture.componentInstance.items = [
+          { Id: 1, Nombre: 'Nombre'.repeat(40) },
+        ];
+        fixture.detectChanges();
+        const frame = document.createElement('iframe');
+        frame.style.width = width + 'px';
+        frame.style.height = '800px';
+        document.body.appendChild(frame);
+        try {
+          const doc = frame.contentDocument!;
+          await Promise.all(
+            Array.from(
+              document.querySelectorAll<HTMLLinkElement>(
+                'link[rel="stylesheet"]',
+              ),
+            ).map(
+              (source) =>
+                new Promise<void>((resolve, reject) => {
+                  const link = document.createElement('link');
+                  link.rel = 'stylesheet';
+                  link.href = source.href;
+                  link.onload = () => resolve();
+                  link.onerror = () =>
+                    reject(new Error('Unable to load application styles'));
+                  doc.head.appendChild(link);
+                }),
+            ),
+          );
+          for (const style of document.querySelectorAll('style'))
+            doc.head.appendChild(style.cloneNode(true));
+          doc.body.style.margin = '0';
+          doc.body.appendChild(fixture.nativeElement);
+          await new Promise<void>((resolve) =>
+            requestAnimationFrame(() => resolve()),
+          );
+          const table = doc.querySelector('table')!;
+          const label = doc.querySelector('.table-cell-label') as HTMLElement;
+          const actions = doc.querySelector('td.actions-column') as HTMLElement;
+          const edit = actions.querySelector('button')!;
+          expect(table.getBoundingClientRect().width).toBeLessThanOrEqual(
+            width,
+          );
+          expect(label.getBoundingClientRect().right).toBeLessThanOrEqual(
+            actions.getBoundingClientRect().left,
+          );
+          expect(label.scrollWidth).toBeGreaterThan(label.clientWidth);
+          expect(
+            frame.contentWindow!.getComputedStyle(label).textOverflow,
+          ).toBe('ellipsis');
+          expect(
+            frame.contentWindow!.getComputedStyle(edit).borderTopWidth,
+          ).toBe('0px');
+          expect(edit.getBoundingClientRect().width).toBeGreaterThanOrEqual(
+            width <= 768 ? 44 : 36,
+          );
+          const buttons = Array.from(actions.querySelectorAll('button'));
+          expect(buttons[0].getBoundingClientRect().right).toBeLessThanOrEqual(
+            buttons[1].getBoundingClientRect().left,
+          );
+        } finally {
+          document.body.appendChild(fixture.nativeElement);
+          frame.remove();
+        }
+      },
+    );
+  }
 });

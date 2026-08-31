@@ -190,7 +190,8 @@ describe('PrestamosTablaComponent', () => {
     'Fecha Devolución Esperada',
     'Estado',
   ]) {
-    it(`sorts the rendered rows in both directions by ${column}`, () => {
+    it(`sorts the rendered rows in both directions by ${column}`, async () => {
+      fixture.autoDetectChanges();
       cargarPrestamos([
         crearPrestamo({
           id: 1,
@@ -223,10 +224,10 @@ describe('PrestamosTablaComponent', () => {
         ) as NodeListOf<HTMLButtonElement>,
       ).find((b) => b.textContent?.trim() === column)!;
       button.click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(nombresRenderizados()).toEqual(['Ana', 'Zeta']);
       button.click();
-      fixture.detectChanges();
+      await fixture.whenStable();
       expect(nombresRenderizados()).toEqual(['Zeta', 'Ana']);
     });
   }

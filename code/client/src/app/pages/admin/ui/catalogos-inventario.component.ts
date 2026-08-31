@@ -42,9 +42,9 @@ import { Subscription, finalize } from 'rxjs';
     CustomSelectComponent,
   ],
   template: `
-    <header class="catalog-heading">
+    <header class="catalog-heading header-title">
       <h1>{{ titulo }}</h1>
-      <p>
+      <p class="subtitle">
         {{
           tipo === 'ambientes'
             ? 'Ambientes y responsables del laboratorio'
@@ -79,24 +79,39 @@ import { Subscription, finalize } from 'rxjs';
       @if (mensajeError) {
         <p class="catalog-error" role="alert">{{ mensajeError }}</p>
       }
-      <div class="table-responsive">
-        <table class="data-table">
+      <div
+        class="table-responsive"
+        [class.table-responsive--compact]="tipo === 'procedencias'"
+      >
+        <table
+          class="data-table data-table--catalog"
+          [class.data-table--compact]="tipo === 'procedencias'"
+        >
           <thead>
             <tr>
               @for (columna of encabezados; track columna) {
-                <th scope="col" [attr.aria-sort]="ariaOrdenColumna(columna)">
-                  <button
-                    type="button"
-                    class="table-sort-button"
-                    (click)="ordenarPorColumna(columna)"
-                  >
-                    {{ columna
-                    }}<i
-                      class="fas"
-                      [ngClass]="iconoOrdenColumna(columna)"
-                      aria-hidden="true"
-                    ></i>
-                  </button>
+                <th
+                  scope="col"
+                  [attr.aria-sort]="
+                    tipo === 'ambientes' ? ariaOrdenColumna(columna) : null
+                  "
+                >
+                  @if (tipo === 'ambientes') {
+                    <button
+                      type="button"
+                      class="table-sort-button"
+                      (click)="ordenarPorColumna(columna)"
+                    >
+                      {{ columna
+                      }}<i
+                        class="fas"
+                        [ngClass]="iconoOrdenColumna(columna)"
+                        aria-hidden="true"
+                      ></i>
+                    </button>
+                  } @else {
+                    {{ columna }}
+                  }
                 </th>
               }
               <th scope="col" class="actions-column">Acciones</th>
@@ -105,16 +120,28 @@ import { Subscription, finalize } from 'rxjs';
           <tbody>
             @for (item of paginar(filtrados); track item.Id) {
               <tr>
-                <td>{{ item.Nombre }}</td>
+                <td>
+                  <span class="table-cell-label" [title]="item.Nombre">{{
+                    item.Nombre
+                  }}</span>
+                </td>
                 @if (tipo === 'ambientes') {
                   <td>
-                    {{ item.NombreAdministrador || 'Sin responsable asignado' }}
+                    <span
+                      class="table-cell-label"
+                      [title]="
+                        item.NombreAdministrador || 'Sin responsable asignado'
+                      "
+                      >{{
+                        item.NombreAdministrador || 'Sin responsable asignado'
+                      }}</span
+                    >
                   </td>
                 }
                 <td class="actions-column">
                   <button
                     type="button"
-                    class="btn-icon"
+                    class="btn-icon btn-edit"
                     title="Editar"
                     aria-label="Editar"
                     (click)="abrirEditor(item)"
@@ -123,12 +150,12 @@ import { Subscription, finalize } from 'rxjs';
                   </button>
                   <button
                     type="button"
-                    class="btn-icon"
+                    class="btn-icon btn-delete"
                     title="Eliminar"
                     aria-label="Eliminar"
                     (click)="eliminando = item.Id"
                   >
-                    <i class="fas fa-trash"></i>
+                    <i class="fas fa-trash-alt"></i>
                   </button>
                 </td>
               </tr>
@@ -290,9 +317,6 @@ import { Subscription, finalize } from 'rxjs';
     }
     th {
       background: var(--sidebar);
-    }
-    th .table-sort-button {
-      justify-content: flex-start;
     }
     .actions-column {
       width: 7rem;

@@ -65,6 +65,7 @@ export class MantenimientosTablaComponent extends Tabla implements OnInit {
     'Fecha Inicio',
     'Fecha Fin',
     'Costo',
+    'Equipos',
   ];
   constructor(private readonly mantenimientoapi: MantenimientoService) {
     super();
@@ -287,8 +288,8 @@ export class MantenimientosTablaComponent extends Tabla implements OnInit {
         'Fecha Fin': (mantenimiento) =>
           mantenimiento.datosgrupo.FechaFinalDeMantenimiento,
         Costo: (mantenimiento) => mantenimiento.datosgrupo.Costo,
-        'Tipo y nombre equipos': (mantenimiento) =>
-          `${mantenimiento.datosgrupo.TipoMantenimiento ?? ''} ${mantenimiento.datosgrupo.NombreGrupoEquipo ?? ''}`,
+        Equipos: (mantenimiento) =>
+          mantenimiento.matenimientos[0]?.NombreGrupoEquipo,
       },
     );
   }

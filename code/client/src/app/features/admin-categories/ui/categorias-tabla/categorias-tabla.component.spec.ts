@@ -19,7 +19,7 @@ describe('CategoriasTablaComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('sorts categories using the visible column button', () => {
+  it('keeps categories alphabetical without sorting controls', () => {
     component.categoriascopia = [
       Object.assign(new Categorias(), { Id: 1, Nombre: 'Zeta' }),
       Object.assign(new Categorias(), { Id: 2, Nombre: 'Alpha' }),
@@ -34,15 +34,10 @@ describe('CategoriasTablaComponent', () => {
       'Alpha',
       'Zeta',
     ]);
-    button.click();
-    fixture.detectChanges();
-    expect(component.categorias.map((c) => c.Nombre)).toEqual([
-      'Zeta',
-      'Alpha',
-    ]);
+    expect(button).toBeNull();
     expect(
       fixture.nativeElement.querySelector('tbody td').textContent.trim(),
-    ).toBe('Zeta');
+    ).toBe('Alpha');
     expect(headers.length).toBe(2);
   });
 });

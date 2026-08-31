@@ -34,20 +34,7 @@
         <thead>
           <tr>
             @for (columna of columnas; track columna) {
-              <th scope="col" [attr.aria-sort]="ariaOrdenColumna(columna)">
-                <button
-                  type="button"
-                  class="table-sort-button"
-                  (click)="ordenarPorColumna(columna)"
-                >
-                  {{ columna }}
-                  <i
-                    class="fas"
-                    [ngClass]="iconoOrdenColumna(columna)"
-                    aria-hidden="true"
-                  ></i>
-                </button>
-              </th>
+              <th scope="col">{{ columna }}</th>
             }
             <th class="actions-column">Acciones</th>
           </tr>
@@ -58,16 +45,26 @@
             track categoria.Id || categoria.Nombre || $index
           ) {
             <tr>
-              <td>{{ categoria.Nombre }}</td>
+              <td>
+                <span
+                  class="table-cell-label"
+                  [title]="categoria.Nombre || ''"
+                  >{{ categoria.Nombre }}</span
+                >
+              </td>
               <td class="actions-column">
                 <button
                   class="btn-icon btn-delete"
+                  title="Eliminar"
+                  aria-label="Eliminar"
                   (click)="eliminarCategoria(categoria)"
                 >
                   <i class="fas fa-trash-alt"></i>
                 </button>
                 <button
                   class="btn-icon btn-edit"
+                  title="Editar"
+                  aria-label="Editar"
                   (click)="editarCategoria(categoria)"
                 >
                   <i class="fas fa-pencil-alt"></i>

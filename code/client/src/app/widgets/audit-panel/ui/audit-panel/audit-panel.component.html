@@ -89,11 +89,31 @@
       <table class="audit-table">
         <thead>
           <tr>
-            <th scope="col">Fecha</th>
-            <th scope="col">Actor</th>
-            <th scope="col">Acción</th>
-            <th scope="col">ID</th>
-            <th scope="col">Detalle</th>
+            @for (columna of columnas; track columna) {
+              <th
+                scope="col"
+                [attr.aria-sort]="
+                  esColumnaOrdenada(columna)
+                    ? sortDirection === 'asc'
+                      ? 'ascending'
+                      : 'descending'
+                    : 'none'
+                "
+              >
+                <button
+                  type="button"
+                  class="table-sort-button"
+                  (click)="ordenarPorColumna(columna)"
+                >
+                  {{ columna
+                  }}<i
+                    class="fas"
+                    [ngClass]="iconoOrdenColumna(columna)"
+                    aria-hidden="true"
+                  ></i>
+                </button>
+              </th>
+            }
           </tr>
         </thead>
         <tbody>

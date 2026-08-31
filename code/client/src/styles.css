@@ -990,6 +990,11 @@ app-administrador .table-responsive::-webkit-scrollbar-track {
   flex: 0 0 0.75rem;
   font-size: 0.75rem;
 }
+.password-error {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--error);
+}
 .sort-icon {
   display: inline-flex;
   align-items: center;
@@ -1245,13 +1250,13 @@ app-administrador .table-responsive::-webkit-scrollbar-track {
 
 .data-table.data-table--compact th.actions-column,
 .data-table.data-table--compact td.actions-column {
-  width: 12rem;
-  min-width: 12rem;
+  width: 7rem;
+  min-width: 7rem;
   text-align: center !important;
 }
 
 .data-table.data-table--compact td {
-  height: 4.25rem;
+  height: auto;
   padding-block: 0.9rem !important;
 }
 
@@ -1271,8 +1276,8 @@ app-administrador .table-responsive::-webkit-scrollbar-track {
 
   .data-table.data-table--compact th.actions-column,
   .data-table.data-table--compact td.actions-column {
-    width: 8.75rem;
-    min-width: 8.75rem;
+    width: 6.5rem;
+    min-width: 6.5rem;
   }
 }
 
@@ -1771,6 +1776,70 @@ td.actions-column .btn-icon {
   vertical-align: middle !important;
 }
 
+.data-table .btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 2.25rem;
+  height: 2.25rem;
+  min-width: 2.25rem;
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-full);
+  background: transparent;
+  color: var(--ink-muted);
+  cursor: pointer;
+}
+.data-table .btn-icon:focus-visible {
+  outline: 2px solid var(--interactive-text);
+  outline-offset: 2px;
+}
+.table-cell-label {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.data-table th:has(> .table-sort-button),
+.audit-table th:has(> .table-sort-button) {
+  padding: 0 !important;
+}
+.data-table th > .table-sort-button,
+.audit-table th > .table-sort-button {
+  box-sizing: border-box;
+  min-height: 44px !important;
+  padding: 0.625rem 0.875rem;
+  white-space: normal;
+}
+.table-sort-button:hover {
+  background: var(--interactive-subtle);
+}
+.data-table--catalog:not(.data-table--compact) {
+  min-width: 28rem;
+}
+.data-table.data-table--catalog th,
+.data-table.data-table--catalog td {
+  text-align: left !important;
+}
+.data-table--catalog th > .table-sort-button {
+  justify-content: flex-start;
+}
+.data-table--catalog th:first-child > .table-sort-button {
+  padding-left: 1.25rem;
+}
+.data-table.data-table--catalog .actions-column {
+  text-align: center !important;
+}
+@media (max-width: 768px), (pointer: coarse) {
+  .data-table .btn-icon {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+  }
+}
+
 .data-table .actions-column button:not(:hover) i,
 .admin-toolbar-button:not(:hover) i {
   color: var(--ink-muted) !important;
@@ -2003,7 +2072,7 @@ button.btn:active {
   }
 
   .data-table.data-table--compact {
-    min-width: 30rem !important;
-    width: max-content;
+    min-width: 0 !important;
+    width: 100%;
   }
 }

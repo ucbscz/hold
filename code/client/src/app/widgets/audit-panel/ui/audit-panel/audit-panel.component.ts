@@ -54,6 +54,7 @@ export class AuditPanelComponent implements OnChanges {
   @Input() refreshTrigger: number = 0;
 
   logs: AuditLogDto[] = [];
+  readonly columnas = ['Fecha', 'Actor', 'Acción', 'ID', 'Detalle'];
   sortColumn = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   cargando = true;
@@ -201,7 +202,7 @@ export class AuditPanelComponent implements OnChanges {
         : 'asc';
     this.sortColumn = columnaOrdenable;
     this.aplicarOrdenActual();
-    this.cambiarPagina(this.paginaActual);
+    this.cambiarPagina(1);
   }
 
   esColumnaOrdenada(columna: string): boolean {
@@ -355,7 +356,7 @@ export class AuditPanelComponent implements OnChanges {
       Actor: log.AdminNombre || log.AdminCarnet,
       Acción: log.Accion,
       ID: log.EntidadId,
-      Observación: this.resumenObs(log),
+      Detalle: this.resumenObs(log),
     };
 
     return values[columna];

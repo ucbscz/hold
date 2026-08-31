@@ -23,66 +23,22 @@
     <table class="data-table">
       <thead>
         <tr>
-          <th (click)="ordenarPor('Nombre')">
-            Nombre
-            @if (sortColumn === "Nombre") {
-              <i
-                [class]="
-                  sortDirection === 'asc'
-                    ? 'fas fa-sort-up'
-                    : 'fas fa-sort-down'
-                "
-              ></i>
-            }
-          </th>
-          <th (click)="ordenarPor('EstadoEquipo')">
-            EstadoEquipo
-            @if (sortColumn === "EstadoEquipo") {
-              <i
-                [class]="
-                  sortDirection === 'asc'
-                    ? 'fas fa-sort-up'
-                    : 'fas fa-sort-down'
-                "
-              ></i>
-            }
-          </th>
-          <th (click)="ordenarPor('Ubicacion')">
-            Ubicacion
-            @if (sortColumn === "Ubicacion") {
-              <i
-                [class]="
-                  sortDirection === 'asc'
-                    ? 'fas fa-sort-up'
-                    : 'fas fa-sort-down'
-                "
-              ></i>
-            }
-          </th>
-          <th (click)="ordenarPor('CodigoImt')">
-            Código IMT
-            @if (sortColumn === "CodigoImt") {
-              <i
-                [class]="
-                  sortDirection === 'asc'
-                    ? 'fas fa-sort-up'
-                    : 'fas fa-sort-down'
-                "
-              ></i>
-            }
-          </th>
-          <th (click)="ordenarPor('CostoReferencia')">
-            Costo
-            @if (sortColumn === "CostoReferencia") {
-              <i
-                [class]="
-                  sortDirection === 'asc'
-                    ? 'fas fa-sort-up'
-                    : 'fas fa-sort-down'
-                "
-              ></i>
-            }
-          </th>
+          @for (columna of columnas; track columna) {
+            <th scope="col" [attr.aria-sort]="ariaOrdenColumna(columna)">
+              <button
+                type="button"
+                class="table-sort-button"
+                (click)="ordenarPorColumna(columna)"
+              >
+                {{ columna
+                }}<i
+                  class="fas"
+                  [ngClass]="iconoOrdenColumna(columna)"
+                  aria-hidden="true"
+                ></i>
+              </button>
+            </th>
+          }
           <th>Acciones</th>
         </tr>
       </thead>
