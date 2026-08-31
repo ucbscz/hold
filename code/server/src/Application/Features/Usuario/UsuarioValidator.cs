@@ -8,6 +8,10 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
 {
     public UsuarioValidator(ApplicationDbContext dbContext)
     {
+        RuleFor(usuario => usuario.Rol)
+            .Must(rol => string.IsNullOrWhiteSpace(rol) || new[]
+            { "estudiante", "docente", "administrativo", "administrador", "administrador_laboratorio" }.Contains(rol))
+            .WithMessage("Rol de usuario no reconocido");
         RuleFor(usuario => usuario.Carnet)
             .NotEmpty()
             .WithMessage("Carnet requerido")

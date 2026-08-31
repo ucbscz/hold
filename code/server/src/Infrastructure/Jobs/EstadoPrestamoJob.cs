@@ -227,7 +227,7 @@ public class EstadoPrestamoJob
         {
             var date = watch.Fecha;
 
-            if (!HorarioReserva.EsValido(date, date.AddMinutes(config.TiempoMinimoReservaMinutos), config.HorarioInicioMinutos, config.HorarioFinMinutos))
+            if (!HorarioReserva.EsValido(date, date.AddMinutes(config.TiempoMinimoReservaMinutos), config))
                 continue;
 
             if (await _availability.HasAvailableEquipo(

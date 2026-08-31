@@ -53,7 +53,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         string? blockReason,
         bool isAdmin,
         string? actorCarnet = null,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        bool isLabAdmin = false
     )
     {
         if (!isAdmin)
@@ -63,6 +64,9 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         if (user == null)
             return Result<object>.NotFound();
+
+        if (isLabAdmin && user.Rol is Core.Entities.TipoUsuario.Administrador or Core.Entities.TipoUsuario.Administrador_Laboratorio)
+            return Result<object>.Forbidden();
 
         user.Bloqueado = isBlocked;
         user.MotivoBloqueo = isBlocked ? blockReason : null;
@@ -127,13 +131,19 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
     public override async Task<Result<UsuarioDto>> Create(UsuarioDto dto) =>
         await Create(dto, isAdmin: false);
 
-    public async Task<Result<UsuarioDto>> Create(UsuarioDto dto, bool isAdmin)
+    public async Task<Result<UsuarioDto>> Create(UsuarioDto dto, bool isAdmin, bool isLabAdmin = false)
     {
+        dto.Rol = dto.Rol?.Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(dto.Contrasena))
             return Result<UsuarioDto>.Error("Contraseña requerida");
 
         if (!isAdmin)
             dto.Rol = null;
+
+        if (isLabAdmin && dto.Rol is "administrador" or "administrador_laboratorio")
+            return Result<UsuarioDto>.Forbidden();
+        dto.Bloqueado = false;
+        dto.MotivoBloqueo = null;
 
         await ResolveCarrera(dto);
 
@@ -171,12 +181,14 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         string carnet,
         UsuarioDto dto,
         string? callerCarnet,
-        bool isAdmin = false
+        bool isAdmin = false,
+        bool isLabAdmin = false
     )
     {
         if (!isAdmin && !string.Equals(callerCarnet, carnet, StringComparison.Ordinal))
             return Result<UsuarioDto>.Forbidden();
 
+        dto.Rol = dto.Rol?.Trim().ToLowerInvariant();
         var validation = await Validator.ValidateAsync(dto);
 
         if (!validation.IsValid)
@@ -186,6 +198,12 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         if (existing == null)
             return Result<UsuarioDto>.NotFound();
+
+        if (isLabAdmin && (existing.Rol is Core.Entities.TipoUsuario.Administrador or Core.Entities.TipoUsuario.Administrador_Laboratorio
+            || dto.Rol is "administrador" or "administrador_laboratorio"))
+            return Result<UsuarioDto>.Forbidden();
+        dto.Bloqueado = existing.Bloqueado;
+        dto.MotivoBloqueo = existing.MotivoBloqueo;
 
         if (
             !string.IsNullOrWhiteSpace(dto.Telefono)

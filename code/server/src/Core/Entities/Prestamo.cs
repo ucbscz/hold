@@ -12,6 +12,9 @@ public class Prestamo : Entity
     public string? Carnet { get; set; } = string.Empty;
     public EstadoPrestamo EstadoPrestamo { get; set; }
     public string? Observacion { get; set; }
+    public string? MotivoRechazo { get; set; }
+    public string? AutorizadoPor { get; set; }
+    public string? EntregadoPor { get; set; }
     public int? IdContrato { get; set; }
     public bool RecordatorioEnviado { get; set; } = false;
     public string DestinoPrestamo { get; set; } = "Universidad";

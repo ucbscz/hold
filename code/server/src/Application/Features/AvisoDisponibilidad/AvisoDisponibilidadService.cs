@@ -24,7 +24,7 @@ public class AvisoDisponibilidadService
             return Result<object>.Error("La fecha y hora del aviso debe ser futura");
 
         var config = await _configRepo.GetConfiguracion();
-        if (!HorarioReserva.EsValido(dto.Fecha.Value, dto.Fecha.Value.AddMinutes(config.TiempoMinimoReservaMinutos), config.HorarioInicioMinutos, config.HorarioFinMinutos))
+        if (!HorarioReserva.EsValido(dto.Fecha.Value, dto.Fecha.Value.AddMinutes(config.TiempoMinimoReservaMinutos), config))
             return Result<object>.Error(HorarioReserva.Mensaje);
 
         await _repository.Add(carnet, dto);

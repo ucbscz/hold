@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Security.Cryptography;
 using Ardalis.Result;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
@@ -11,8 +10,6 @@ namespace IMT_Reservas.Server.Application.Features.Equipo;
 
 public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
 {
-    private const int MaxCodeGenerationAttempts = 20;
-
     public EquipoService(
         EquipoRepository repository,
         EquipoMapper mapper,
@@ -32,22 +29,9 @@ public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
         entity.CodigoImt = await Repository.GetMaxCodigoImt() + 1;
         entity.FechaIngresoEquipo = DateOnly.FromDateTime(DateTime.Now);
 
-        if (string.IsNullOrWhiteSpace(entity.CodigoUcb))
-        {
-            entity.CodigoUcb = await GenerateCodigoUcb();
-
-            if (entity.CodigoUcb == null)
-                return Result<EquipoDto>.Error(
-                    "No se pudo generar un código UCB único. Intente nuevamente."
-                );
-        }
-        else
-        {
-            entity.CodigoUcb = entity.CodigoUcb.Trim().ToUpperInvariant();
-
-            if (await Repository.ExistsByCodigoUcb(entity.CodigoUcb))
-                return Result<EquipoDto>.Error("Código UCB ya registrado");
-        }
+        entity.CodigoUcb = string.IsNullOrWhiteSpace(entity.CodigoUcb) ? null : entity.CodigoUcb.Trim().ToUpperInvariant();
+        if (entity.CodigoUcb != null && await Repository.ExistsByCodigoUcb(entity.CodigoUcb))
+            return Result<EquipoDto>.Error("Código UCB ya registrado");
 
         if (await Repository.ExistsByCodigoImt(entity.CodigoImt))
             return Result<EquipoDto>.Error("Código IMT ya registrado");
@@ -85,17 +69,8 @@ public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
         entity.FechaIngresoEquipo = existing.FechaIngresoEquipo;
         entity.EstadoEliminado = existing.EstadoEliminado;
 
-        if (string.IsNullOrWhiteSpace(entity.CodigoUcb))
-            entity.CodigoUcb = existing.CodigoUcb ?? await GenerateCodigoUcb();
-        else
-            entity.CodigoUcb = entity.CodigoUcb.Trim().ToUpperInvariant();
-
-        if (entity.CodigoUcb == null)
-            return Result<EquipoDto>.Error(
-                "No se pudo generar un código UCB único. Intente nuevamente."
-            );
-
-        if (await Repository.ExistsByCodigoUcb(entity.CodigoUcb, id))
+        entity.CodigoUcb = string.IsNullOrWhiteSpace(entity.CodigoUcb) ? null : entity.CodigoUcb.Trim().ToUpperInvariant();
+        if (entity.CodigoUcb != null && await Repository.ExistsByCodigoUcb(entity.CodigoUcb, id))
             return Result<EquipoDto>.Error("Código UCB ya registrado");
 
         var result = await UpdateEntity(entity);
@@ -141,16 +116,4 @@ public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
     public virtual async Task<Result<List<HistorialEquipoDto>>> GetHistorial(int equipoId) =>
         Result<List<HistorialEquipoDto>>.Success(await Repository.GetHistorial(equipoId));
 
-    private async Task<string?> GenerateCodigoUcb()
-    {
-        for (var attempt = 0; attempt < MaxCodeGenerationAttempts; attempt++)
-        {
-            var code = $"UCB-{RandomNumberGenerator.GetInt32(1_000_000):D6}";
-
-            if (!await Repository.ExistsByCodigoUcb(code))
-                return code;
-        }
-
-        return null;
-    }
 }

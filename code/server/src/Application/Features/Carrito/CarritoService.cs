@@ -61,9 +61,9 @@ public class CarritoService
                 $"La duracion minima de un prestamo es de {config.TiempoMinimoReservaMinutos} minutos"
             );
 
-        if (!HorarioReserva.EsValido(fechaInicio, fechaFin, config.HorarioInicioMinutos, config.HorarioFinMinutos))
+        if (!HorarioReserva.EsValido(fechaInicio, fechaFin, config))
             return Result<List<CarritoDto>>.Error(
-                $"El horario de atención para reservas es de lunes a sábado, de {TimeSpan.FromMinutes(config.HorarioInicioMinutos):hh\\:mm} a {TimeSpan.FromMinutes(config.HorarioFinMinutos):hh\\:mm} (hora de Bolivia)"
+                HorarioReserva.Mensaje
             );
 
         var limits = await _repository.GetLoanLimitsByGroups(groupIds);

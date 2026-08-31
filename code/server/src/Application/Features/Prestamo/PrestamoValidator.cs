@@ -13,6 +13,12 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
         ConfiguracionRepository configRepository
     )
     {
+        RuleFor(p => p.DestinoPrestamo).Must(d => d is "Universidad" or "Clase" or "Casa")
+            .WithMessage("Selecciona uso interno o externo");
+        RuleFor(p => p).Must(p => p.DestinoPrestamo == "Casa"
+            || !p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue
+            || HorarioReserva.MismoDia(p.FechaPrestamoEsperada.Value, p.FechaDevolucionEsperada.Value))
+            .WithMessage("El uso interno en clases o laboratorio requiere devolución el mismo día");
         RuleFor(p => p.CarnetUsuario)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
@@ -84,8 +90,7 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
                 return HorarioReserva.EsValido(
                     p.FechaPrestamoEsperada.Value,
                     p.FechaDevolucionEsperada.Value,
-                    config.HorarioInicioMinutos,
-                    config.HorarioFinMinutos
+                    config
                 );
             })
             .WithMessage(HorarioReserva.Mensaje);

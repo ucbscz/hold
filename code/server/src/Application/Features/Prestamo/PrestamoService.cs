@@ -128,7 +128,19 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
     )
     {
         dto.CarnetUsuario = carnet;
+        dto.AutorizadoPor = null;
+        dto.EntregadoPor = null;
+        dto.MotivoRechazo = null;
         return Create(dto, cancellationToken);
+    }
+
+    public async Task<Result<PrestamoDto>> CancelForUser(int id, string carnet, CancellationToken cancellationToken)
+    {
+        var loan = await Repository.FindById(id, cancellationToken);
+        if (loan == null || loan.Carnet != carnet) return Result<PrestamoDto>.NotFound();
+        if (loan.EstadoPrestamo != EstadoPrestamo.Pendiente && loan.EstadoPrestamo != EstadoPrestamo.Aprobado)
+            return Result<PrestamoDto>.Error("Solo puedes cancelar préstamos pendientes o aprobados");
+        return await UpdateStatus(id, "cancelado", actorCarnet: carnet, cancellationToken: cancellationToken);
     }
 
     public Task<Result<PrestamoDto>> GetAuthorized(
@@ -157,6 +169,11 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         if (!parsedState.HasValue)
             return Result<PrestamoDto>.Error($"Estado '{newStatus}' no reconocido");
 
+        if (parsedState == EstadoPrestamo.Rechazado && string.IsNullOrWhiteSpace(observacion))
+            return Result<PrestamoDto>.Error("Indica el motivo del rechazo");
+        if (observacion?.Length > 1024)
+            return Result<PrestamoDto>.Error("La observación no puede superar 1024 caracteres");
+
         if (!PrestamoState.CanTransition(loan.EstadoPrestamo, parsedState.Value))
             return Result<PrestamoDto>.Error(
                 $"Transición '{PrestamoState.ToText(loan.EstadoPrestamo)}' → '{newStatus}' no permitida"
@@ -182,6 +199,11 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         }
 
         loan.EstadoPrestamo = parsedState.Value;
+        var actor = string.IsNullOrWhiteSpace(actorCarnet) ? "Sistema"
+            : await _queries.GetUsuarioDisplayName(actorCarnet, cancellationToken);
+        if (parsedState == EstadoPrestamo.Aprobado) loan.AutorizadoPor = actor;
+        if (parsedState == EstadoPrestamo.Activo) loan.EntregadoPor = actor;
+        if (parsedState == EstadoPrestamo.Rechazado) loan.MotivoRechazo = observacion!.Trim();
 
         if (observacion != null)
             loan.Observacion = observacion;
@@ -228,9 +250,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             auditDetail
         );
 
-        var emitter = string.IsNullOrWhiteSpace(actorCarnet)
-            ? "Sistema"
-            : await _queries.GetUsuarioDisplayName(actorCarnet, cancellationToken) ?? "Sistema";
+        var emitter = actor ?? "Sistema";
 
         await NotifyStatusChange(
             loan.Carnet!,
@@ -248,6 +268,20 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             await NotifyAvailabilityWatches();
 
         return await _queries.Get(id, cancellationToken);
+    }
+
+    public async Task<Result<PrestamoDto>> UpdateObservation(int id, string? observation, CancellationToken token)
+    {
+        if (observation?.Length > 1024)
+            return Result<PrestamoDto>.Error("La observación no puede superar 1024 caracteres");
+        var loan = await Repository.FindById(id, token);
+        if (loan == null) return Result<PrestamoDto>.NotFound();
+        var previous = loan.Observacion;
+        loan.Observacion = observation?.Trim();
+        await Repository.UpdateTracked(loan, token);
+        await Audit!.Log(AuditAccion.Editar, typeof(PrestamoEntity).Name, id.ToString(CultureInfo.InvariantCulture),
+            JsonSerializer.Serialize(new { anterior = previous, observacion = loan.Observacion }));
+        return await _queries.Get(id, token);
     }
 
     private static bool ReleasesAvailability(EstadoPrestamo estado) =>
@@ -306,7 +340,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         {
             var date = watch.Fecha;
 
-            if (!HorarioReserva.EsValido(date, date.AddMinutes(config.TiempoMinimoReservaMinutos), config.HorarioInicioMinutos, config.HorarioFinMinutos))
+            if (!HorarioReserva.EsValido(date, date.AddMinutes(config.TiempoMinimoReservaMinutos), config))
                 continue;
 
             if (!await _availability.HasAvailableEquipo(

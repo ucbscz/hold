@@ -102,10 +102,11 @@ public sealed class PrestamoReadRepository
                 into userJoin
             from user in userJoin.DefaultIfEmpty()
             orderby
+                loan.EstadoPrestamo == EstadoPrestamo.Pendiente ? 0 : 1,
                 (loan.EstadoPrestamo == EstadoPrestamo.Finalizado
                     || loan.EstadoPrestamo == EstadoPrestamo.Cancelado
                     || loan.EstadoPrestamo == EstadoPrestamo.Rechazado) ? 1 : 0,
-                user != null && user.Rol == TipoUsuario.Docente ? 0 : 1,
+                user != null && user.Rol == TipoUsuario.Docente ? 0 : user != null && user.Rol == TipoUsuario.Administrativo ? 1 : 2,
                 loan.FechaSolicitud descending,
                 loan.Id descending
             select loan.Id
@@ -243,10 +244,11 @@ public sealed class PrestamoReadRepository
                 into muebleJoin
             from mueble in muebleJoin.DefaultIfEmpty()
             orderby
+                prestamo.EstadoPrestamo == EstadoPrestamo.Pendiente ? 0 : 1,
                 (prestamo.EstadoPrestamo == EstadoPrestamo.Finalizado
                     || prestamo.EstadoPrestamo == EstadoPrestamo.Cancelado
                     || prestamo.EstadoPrestamo == EstadoPrestamo.Rechazado) ? 1 : 0,
-                usuario != null && usuario.Rol == TipoUsuario.Docente ? 0 : 1,
+                usuario != null && usuario.Rol == TipoUsuario.Docente ? 0 : usuario != null && usuario.Rol == TipoUsuario.Administrativo ? 1 : 2,
                 prestamo.FechaSolicitud descending,
                 prestamo.Id descending
             select new
@@ -264,13 +266,16 @@ public sealed class PrestamoReadRepository
                 prestamo.FechaDevolucionEsperada,
                 prestamo.FechaDevolucion,
                 prestamo.Observacion,
+                prestamo.MotivoRechazo,
+                prestamo.AutorizadoPor,
+                prestamo.EntregadoPor,
                 prestamo.IdContrato,
                 prestamo.DestinoPrestamo,
                 prestamo.IdCarrera,
                 prestamo.NombreMateria,
                 NombreGrupoEquipo = grupoReserva != null ? grupoReserva.Nombre : null,
                 CodigoImt = equipo != null ? (int?)equipo.CodigoImt : null,
-                UbicacionEquipo = equipo != null ? equipo.Ubicacion : null,
+                UbicacionEquipo = equipo != null && equipo.Ambiente != null ? equipo.Ambiente!.Nombre : null,
                 NombreGavetero = gavetero != null ? gavetero.Nombre : null,
                 NombreMueble = mueble != null ? mueble.Nombre : null,
                 UbicacionMueble = mueble != null ? mueble.Ubicacion : null,
@@ -292,6 +297,9 @@ public sealed class PrestamoReadRepository
             FechaDevolucionEsperada = row.FechaDevolucionEsperada,
             FechaDevolucion = row.FechaDevolucion,
             Observacion = row.Observacion,
+            MotivoRechazo = row.MotivoRechazo,
+            AutorizadoPor = row.AutorizadoPor,
+            EntregadoPor = row.EntregadoPor,
             IdContrato = row.IdContrato,
             DestinoPrestamo = row.DestinoPrestamo,
             IdCarrera = row.IdCarrera,

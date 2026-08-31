@@ -1,4 +1,5 @@
 using System.Globalization;
+using IMT_Reservas.Server.Application.Features.Componente;
 using Ardalis.Result;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
@@ -136,6 +137,12 @@ public class GrupoEquipoService : Service<GrupoEquipoEntity, GrupoEquipoReposito
         _ = await _cacheRepository.Set(cacheKey, results, GrupoEquipoSearchTtl);
 
         return Result<List<GrupoEquipoDto>>.Success(results);
+    }
+
+    public async Task<Result<List<ComponenteDto>>> GetComponents(int id, int page, CancellationToken token)
+    {
+        if (id <= 0 || page < 1 || page > 10000) return Result<List<ComponenteDto>>.Error("Página o grupo no válido");
+        return Result<List<ComponenteDto>>.Success(await Repository.GetComponents(id, page, token));
     }
 
     private async Task IndexGrupo(GrupoEquipoDto? group)

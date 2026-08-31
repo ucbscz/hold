@@ -254,7 +254,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         result.ValidationErrors
             .Select(error => error.ErrorMessage)
             .Should()
-            .Contain(error => error.Contains("08:00 a 18:00"));
+            .Contain(error => error.Contains("horario de atención"));
         Db.Prestamos.Should().BeEmpty();
     }
 
@@ -276,7 +276,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         result.ValidationErrors
             .Select(error => error.ErrorMessage)
             .Should()
-            .Contain(error => error.Contains("lunes a sábado"));
+            .Contain(error => error.Contains("horario de atención"));
         Db.Prestamos.Should().BeEmpty();
     }
 
@@ -383,7 +383,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var createResult = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
         var prestamoId = createResult.Value.Id!.Value;
 
-        var result = await Sut.UpdateStatus(prestamoId, "rechazado");
+        var result = await Sut.UpdateStatus(prestamoId, "rechazado", "Equipo requerido para una clase");
 
         result.IsSuccess.Should().BeTrue();
         result.Value.EstadoPrestamo.Should().Be("rechazado");
@@ -812,6 +812,45 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         await Db.SaveChangesAsync();
     }
 
+    [TestCase("Universidad")]
+    [TestCase("Clase")]
+    public async Task InternalLoan_CannotSpanMultipleDates(string destino)
+    {
+        var dto = BuildValidPrestamo(Carnet, GrupoId, DateTime.UtcNow.AddDays(4), DateTime.UtcNow.AddDays(5));
+        dto.DestinoPrestamo = destino;
+        var result = await Sut.Create(dto);
+        result.IsSuccess.Should().BeFalse();
+        result.ValidationErrors.Should().Contain(e => e.ErrorMessage.Contains("mismo día"));
+        Db.Prestamos.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task InternalLoan_SameDayIsAllowed()
+    {
+        var dto = BuildValidPrestamo(Carnet, GrupoId, DateTime.UtcNow.AddDays(4), DateTime.UtcNow.AddDays(4).AddHours(1));
+        dto.DestinoPrestamo = "Universidad";
+        var result = await Sut.Create(dto);
+        result.IsSuccess.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task CancelForUser_DoesNotCancelSomeoneElsesLoan()
+    {
+        var created = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.UtcNow.AddDays(4), DateTime.UtcNow.AddDays(5)));
+        var result = await Sut.CancelForUser(created.Value.Id!.Value, "another-user", default);
+        result.Status.Should().Be(Ardalis.Result.ResultStatus.NotFound);
+        Db.Prestamos.Single().EstadoPrestamo.Should().Be(EstadoPrestamo.Pendiente);
+    }
+
+    [Test]
+    public async Task Rejection_RequiresReasonAndDoesNotChangeStateWhenMissing()
+    {
+        var created = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.UtcNow.AddDays(4), DateTime.UtcNow.AddDays(5)));
+        var result = await Sut.UpdateStatus(created.Value.Id!.Value, "rechazado");
+        result.IsSuccess.Should().BeFalse();
+        Db.Prestamos.Single().EstadoPrestamo.Should().Be(EstadoPrestamo.Pendiente);
+    }
+
     private static PrestamoDto BuildValidPrestamo(
         string carnet,
         int grupoId,
@@ -835,6 +874,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         return new PrestamoDto
         {
             CarnetUsuario = carnet,
+            DestinoPrestamo = "Casa",
             GrupoEquipoId = [grupoId],
             FechaPrestamoEsperada = normalizedStart,
             FechaDevolucionEsperada = normalizedStart + duration,

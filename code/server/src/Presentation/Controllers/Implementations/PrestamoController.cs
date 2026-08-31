@@ -1,4 +1,5 @@
 using IMT_Reservas.Server.Application.Features.Prestamo;
+using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,7 @@ public class PrestamoController : Controller
         CancellationToken cancellationToken = default
     )
     {
-        if (User.IsInRole("administrador"))
+        if (User.PuedeGestionar())
         {
             if (string.IsNullOrWhiteSpace(carnet) && string.IsNullOrWhiteSpace(estado))
                 return ToResponse(
@@ -64,7 +65,7 @@ public class PrestamoController : Controller
             await _service.GetAuthorized(
                 id,
                 User.Identity?.Name ?? string.Empty,
-                User.IsInRole("administrador"),
+                User.PuedeGestionar(),
                 cancellationToken
             )
         );
@@ -92,14 +93,20 @@ public class PrestamoController : Controller
         return ToCreatedResponse(result, nameof(Get), new { id = result.Value?.Id });
     }
 
-    [Authorize(Roles = "administrador")]
     [HttpPatch("{id:int}/estado")]
     public async Task<IActionResult> UpdateStatus(
         int id,
         [FromBody] PrestamoDto request,
         CancellationToken cancellationToken
-    ) =>
-        ToResponse(
+    )
+    {
+        if (!User.PuedeGestionar())
+        {
+            if (!string.Equals(request.EstadoPrestamo, "cancelado", StringComparison.OrdinalIgnoreCase))
+                return Forbid();
+            return ToResponse(await _service.CancelForUser(id, User.Identity?.Name ?? string.Empty, cancellationToken));
+        }
+        return ToResponse(
             await _service.UpdateStatus(
                 id,
                 request.EstadoPrestamo ?? string.Empty,
@@ -109,9 +116,15 @@ public class PrestamoController : Controller
                 cancellationToken
             )
         );
+    }
 
     [Authorize(Roles = "administrador")]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id) => ToDeleteResponse(await _service.Delete(id));
+
+    [Authorize(Roles = Permisos.Gestion)]
+    [HttpPatch("{id:int}/observacion")]
+    public async Task<IActionResult> UpdateObservation(int id, [FromBody] PrestamoDto dto, CancellationToken token) =>
+        ToResponse(await _service.UpdateObservation(id, dto.Observacion, token));
 
 }

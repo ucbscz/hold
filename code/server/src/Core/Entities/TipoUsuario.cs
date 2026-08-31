@@ -12,4 +12,10 @@ public enum TipoUsuario
 
     [PgName("estudiante")]
     Estudiante,
+
+    [PgName("administrativo")]
+    Administrativo,
+
+    [PgName("administrador_laboratorio")]
+    Administrador_Laboratorio,
 }

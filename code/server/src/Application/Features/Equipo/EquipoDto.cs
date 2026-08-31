@@ -8,6 +8,8 @@ public class EquipoDto
     public string? NumeroSerial { get; set; }
     public string? EstadoEquipo { get; set; }
     public string? Ubicacion { get; set; }
+    public int? IdAmbiente { get; set; }
+    public int? IdProcedencia { get; set; }
     public double? CostoReferencia { get; set; }
     public string? Descripcion { get; set; }
     public string? Procedencia { get; set; }

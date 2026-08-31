@@ -47,15 +47,15 @@ internal class EquipoServiceTests : ServiceTest<EquipoService>
     }
 
     [Test]
-    public async Task Create_WithoutCodigoUcb_AssignsGeneratedUniqueCode()
+    public async Task Create_WithoutCodigoUcb_LeavesOptionalCodeEmpty()
     {
         await Sut.Create(BuildValidEquipo(GrupoId));
         await Sut.Create(BuildValidEquipo(GrupoId));
 
         var codes = Db.Equipos.Select(e => e.CodigoUcb).ToList();
 
-        codes.Should().OnlyHaveUniqueItems();
-        codes.Should().AllSatisfy(code => code.Should().MatchRegex("^UCB-[0-9]{6}$"));
+        codes.Should().HaveCount(2);
+        codes.Should().AllSatisfy(code => code.Should().BeNull());
     }
 
     [Test]

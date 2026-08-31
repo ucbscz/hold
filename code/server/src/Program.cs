@@ -1,5 +1,4 @@
 using System.Text;
-using System.Threading.RateLimiting;
 using Elastic.Clients.Elasticsearch;
 using FluentValidation;
 using Hangfire;
@@ -24,6 +23,7 @@ using IMT_Reservas.Server.Application.Features.Mueble;
 using IMT_Reservas.Server.Application.Features.Notificacion;
 using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Application.Features.Usuario;
+using IMT_Reservas.Server.Application.Features.Inventario;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using IMT_Reservas.Server.Infrastructure.Jobs;
@@ -149,6 +149,8 @@ builder.Services.AddScoped<PrestamoReadRepository>();
 builder.Services.AddScoped<PrestamoEstadoRepository>();
 builder.Services.AddScoped<PrestamoDisponibilidadRepository>();
 builder.Services.AddScoped<EquipoRepository>();
+builder.Services.AddScoped<Repository<Ambiente, CatalogoInventarioDto>, CatalogoInventarioRepository<Ambiente>>();
+builder.Services.AddScoped<Repository<Procedencia, CatalogoInventarioDto>, CatalogoInventarioRepository<Procedencia>>();
 builder.Services.AddScoped<AccesorioRepository>();
 builder.Services.AddScoped<GrupoEquipoRepository>();
 builder.Services.AddScoped<Repository<CarreraEntity, CarreraDto>>();
@@ -322,40 +324,11 @@ if (hangfireEnabled)
     builder.Services.AddHangfireServer();
 }
 
-builder.Services.AddRateLimiter(options =>
-{
-    options.OnRejected = async (context, ct) =>
-    {
-        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
-        context.HttpContext.Response.Headers.RetryAfter = "60";
-        await context.HttpContext.Response.WriteAsync("Demasiadas solicitudes.", ct);
-    };
+builder.Services.AddRateLimiter(RequestLimits.Configure);
 
-    options.AddFixedWindowLimiter(
-        "auth",
-        o =>
-        {
-            o.PermitLimit = 10;
-            o.Window = TimeSpan.FromMinutes(1);
-            o.QueueProcessingOrder = QueueProcessingOrder.OldestFirst;
-            o.QueueLimit = 0;
-        }
-    );
-
-    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(ctx =>
-        RateLimitPartition.GetSlidingWindowLimiter(
-            ctx.Connection.RemoteIpAddress?.ToString() ?? "unknown",
-            _ => new SlidingWindowRateLimiterOptions
-            {
-                PermitLimit = 100,
-                Window = TimeSpan.FromMinutes(1),
-                SegmentsPerWindow = 6,
-                QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
-                QueueLimit = 0,
-            }
-        )
-    );
-});
+builder.Services.AddScoped<IMapper<Ambiente, CatalogoInventarioDto>, AmbienteMapper>();
+builder.Services.AddScoped<IMapper<Procedencia, CatalogoInventarioDto>, ProcedenciaMapper>();
+builder.Services.AddScoped<IValidator<CatalogoInventarioDto>, CatalogoInventarioValidator>();
 
 var app = builder.Build();
 var useHttpsRedirection = builder.Configuration.GetValue("HttpsRedirection:Enabled", true);
@@ -400,7 +373,6 @@ app.Use(
     }
 );
 
-app.UseRateLimiter();
 app.UseCors("AllowFrontend");
 app.UseExceptionHandler(_ => { });
 
@@ -411,6 +383,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthentication();
+app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks("/api/health");

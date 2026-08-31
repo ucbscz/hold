@@ -13,6 +13,9 @@ public class PrestamoDto
     public DateTime? FechaDevolucionEsperada { get; set; }
     public DateTime? FechaDevolucion { get; set; }
     public string? Observacion { get; set; }
+    public string? MotivoRechazo { get; set; }
+    public string? AutorizadoPor { get; set; }
+    public string? EntregadoPor { get; set; }
     public string? EstadoPrestamo { get; set; }
     public int? IdContrato { get; set; }
     public string? NombreGrupoEquipo { get; set; }

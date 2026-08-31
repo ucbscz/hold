@@ -115,8 +115,8 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
 
         beforeOpening.IsSuccess.Should().BeFalse();
         afterClosing.IsSuccess.Should().BeFalse();
-        beforeOpening.Errors.Should().Contain(error => error.Contains("08:00 a 18:00"));
-        afterClosing.Errors.Should().Contain(error => error.Contains("08:00 a 18:00"));
+        beforeOpening.Errors.Should().Contain(error => error.Contains("horario de atención autorizado"));
+        afterClosing.Errors.Should().Contain(error => error.Contains("horario de atención autorizado"));
     }
 
     [Test]
@@ -129,7 +129,7 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
         );
 
         result.IsSuccess.Should().BeFalse();
-        result.Errors.Should().Contain(error => error.Contains("lunes a sábado"));
+        result.Errors.Should().Contain(error => error.Contains("horario de atención autorizado"));
     }
 
     [Test]

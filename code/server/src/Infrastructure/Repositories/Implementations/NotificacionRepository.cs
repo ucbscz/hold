@@ -48,7 +48,7 @@ public class NotificacionRepository
     public async Task<List<string>> GetAdminCarnets() =>
         await _db
             .Usuarios.AsNoTracking()
-            .Where(u => u.Rol == TipoUsuario.Administrador)
+            .Where(u => u.Rol == TipoUsuario.Administrador || u.Rol == TipoUsuario.Administrador_Laboratorio)
             .Select(u => u.Carnet)
             .ToListAsync();
 

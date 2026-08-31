@@ -1,4 +1,5 @@
 using Ardalis.Result;
+using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Application.Features.Contrato;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,7 +17,7 @@ public class ContratoController : Controller
         _contratoService = contratoService;
 
     [HttpPost]
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Gestion)]
     [Consumes("multipart/form-data")]
     [RequestSizeLimit(ContractHtmlProcessor.MaxHtmlLength + 64_000)]
     public async Task<IActionResult> Create(
@@ -62,7 +63,7 @@ public class ContratoController : Controller
             await _contratoService.GetByPrestamoId(
                 prestamoId,
                 User.Identity?.Name ?? string.Empty,
-                User.IsInRole("administrador"),
+                User.PuedeGestionar(),
                 cancellationToken
             )
         );

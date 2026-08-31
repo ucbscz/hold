@@ -51,6 +51,9 @@ internal sealed class PrestamoConfiguration : IEntityTypeConfiguration<Prestamo>
         entity.Property(e => e.FechaDevolucion).HasColumnName("fecha_devolucion");
         entity.Property(e => e.FechaDevolucionEsperada).IsRequired().HasColumnName("fecha_devolucion_esperada");
         entity.Property(e => e.Observacion).HasMaxLength(1024).HasColumnName("observacion");
+        entity.Property(e => e.MotivoRechazo).HasMaxLength(1024).HasColumnName("motivo_rechazo");
+        entity.Property(e => e.AutorizadoPor).HasMaxLength(255).HasColumnName("autorizado_por");
+        entity.Property(e => e.EntregadoPor).HasMaxLength(255).HasColumnName("entregado_por");
         entity.Property(e => e.EstadoPrestamo).HasColumnType("estado_prestamo").HasDefaultValue(EstadoPrestamo.Pendiente).HasColumnName("estado_prestamo");
         entity.Property(e => e.IdContrato).HasColumnName("id_contrato");
         entity.Property(e => e.Carnet).HasMaxLength(20).HasColumnName("carnet");

@@ -83,10 +83,12 @@ internal sealed class EquipoConfiguration : IEntityTypeConfiguration<Equipo>
         entity.Property(e => e.CodigoUcb).HasMaxLength(256).HasColumnName("codigo_ucb");
         entity.HasIndex(e => e.CodigoUcb).IsUnique().HasDatabaseName("unique_codigo_ucb");
         entity.Property(e => e.NumeroSerial).HasMaxLength(255).HasColumnName("numero_serial");
-        entity.Property(e => e.Ubicacion).HasMaxLength(255).HasColumnName("ubicacion");
+        entity.Property(e => e.IdAmbiente).HasColumnName("id_ambiente");
+        entity.HasOne(e => e.Ambiente).WithMany().HasForeignKey(e => e.IdAmbiente).OnDelete(DeleteBehavior.Restrict);
         entity.Property(e => e.Descripcion).HasMaxLength(2048).HasColumnName(DatabaseColumns.Descripcion);
         entity.Property(e => e.CostoReferencia).HasColumnName("costo_referencia");
-        entity.Property(e => e.Procedencia).HasMaxLength(255).HasColumnName("procedencia");
+        entity.Property(e => e.IdProcedencia).HasColumnName("id_procedencia");
+        entity.HasOne(e => e.Procedencia).WithMany().HasForeignKey(e => e.IdProcedencia).OnDelete(DeleteBehavior.Restrict);
         entity.Property(e => e.FechaIngresoEquipo).HasDefaultValueSql("CURRENT_DATE").HasColumnName("fecha_ingreso_equipo");
         entity.Property(e => e.EstadoEquipo).HasColumnType(DatabaseColumns.EstadoEquipo).HasDefaultValue(EstadoEquipo.Operativo).HasColumnName(DatabaseColumns.EstadoEquipo);
         entity.Property(e => e.IdGrupoEquipo).HasColumnName("id_grupo_equipo");

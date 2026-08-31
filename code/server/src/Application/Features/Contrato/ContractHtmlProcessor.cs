@@ -35,6 +35,7 @@ public sealed partial class ContractHtmlProcessor
         "colspan",
         "style",
         "data-grupo-id",
+        "data-carnet",
     ];
 
     private readonly HtmlSanitizer _sanitizer;

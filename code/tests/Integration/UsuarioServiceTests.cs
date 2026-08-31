@@ -472,6 +472,39 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         cacheRelease.SetResult();
     }
 
+    [TestCase("administrador")]
+    [TestCase(" ADMINISTRADOR ")]
+    [TestCase("administrador_laboratorio")]
+    public async Task LaboratoryAdmin_CannotCreatePrivilegedAccounts(string role)
+    {
+        var dto = BuildValidUsuario("PRIV", "priv@ucb.edu.bo");
+        dto.Rol = role;
+        var result = await Sut.Create(dto, isAdmin: true, isLabAdmin: true);
+        result.Status.Should().Be(Ardalis.Result.ResultStatus.Forbidden);
+        Db.Usuarios.Any(u => u.Carnet == "PRIV").Should().BeFalse();
+    }
+
+    [Test]
+    public async Task LaboratoryAdmin_CanCreateAdministrativeBorrower()
+    {
+        var dto = BuildValidUsuario("STAFF", "staff@ucb.edu.bo");
+        dto.Rol = "administrativo";
+        var result = await Sut.Create(dto, isAdmin: true, isLabAdmin: true);
+        result.IsSuccess.Should().BeTrue();
+        Db.Usuarios.Single(u => u.Carnet == "STAFF").Rol.Should().Be(TipoUsuario.Administrativo);
+    }
+
+    [Test]
+    public async Task LaboratoryAdmin_CannotBlockRoot()
+    {
+        var dto = BuildValidUsuario("ROOT", "root@ucb.edu.bo");
+        dto.Rol = "administrador";
+        await Sut.Create(dto, isAdmin: true);
+        var result = await Sut.SetBlocked("ROOT", true, "motivo", isAdmin: true, isLabAdmin: true);
+        result.Status.Should().Be(Ardalis.Result.ResultStatus.Forbidden);
+        Db.Usuarios.Single(u => u.Carnet == "ROOT").Bloqueado.Should().BeFalse();
+    }
+
     private static UsuarioDto BuildValidUsuario(
         string carnet,
         string email,

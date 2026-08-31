@@ -6,6 +6,13 @@ public class ConfiguracionValidator : AbstractValidator<ConfiguracionDto>
 {
     public ConfiguracionValidator()
     {
+        RuleFor(c => c.Horarios).NotNull().Must(h => h != null && h.Count <= 373 && h.All(d => d != null)
+            && h.Select(d => d.Fecha?.ToString("yyyy-MM-dd") ?? d.DiaSemana.ToString()).Distinct().Count() == h.Count)
+            .WithMessage("No repitas días u horarios y limita las excepciones a un año.");
+        RuleForEach(c => c.Horarios).Must(h => h != null && h.DiaSemana is >= 0 and <= 6
+            && h.InicioMinutos is >= 0 and < 1440 && h.FinMinutos is >= 0 and < 1440
+            && (!h.Abierto || h.FinMinutos - h.InicioMinutos >= 30))
+            .WithMessage("Cada día abierto debe tener un horario válido de al menos 30 minutos.");
         RuleFor(c => c.MontoMinimoContrato)
             .GreaterThanOrEqualTo(0).WithMessage("El monto mínimo no puede ser negativo.");
 
@@ -24,7 +31,7 @@ public class ConfiguracionValidator : AbstractValidator<ConfiguracionDto>
             .NotEmpty().WithMessage("La firma es obligatoria.");
 
         RuleFor(c => c.TiempoMinimoReservaMinutos)
-            .GreaterThan(0).WithMessage("El tiempo mínimo de reserva debe ser mayor a cero.");
+            .GreaterThanOrEqualTo(30).WithMessage("La duración mínima debe ser de al menos 30 minutos.");
 
         RuleFor(c => c.TiempoRecordatorioPrevioMinutos)
             .GreaterThanOrEqualTo(0).WithMessage("El tiempo de recordatorio no puede ser negativo.");

@@ -13,6 +13,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<Mueble> Muebles { get; set; }
     public DbSet<Gavetero> Gaveteros { get; set; }
     public DbSet<Equipo> Equipos { get; set; }
+    public DbSet<Ambiente> Ambientes { get; set; }
+    public DbSet<Procedencia> Procedencias { get; set; }
     public DbSet<Accesorio> Accesorios { get; set; }
     public DbSet<Componente> Componentes { get; set; }
     public DbSet<EmpresaMantenimiento> EmpresasMantenimiento { get; set; }

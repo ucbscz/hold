@@ -5,9 +5,26 @@ public static class HorarioReserva
     public const int HoraApertura = 8;
     public const int HoraCierre = 18;
     public const string Mensaje =
-        "El horario de atención para reservas es de lunes a sábado, de 08:00 a 18:00 (hora de Bolivia)";
+        "Selecciona una fecha y hora dentro del horario de atención autorizado (hora de Bolivia)";
 
     private static readonly TimeZoneInfo BoliviaTimeZone = ResolveBoliviaTimeZone();
+
+    public static bool EsValido(DateTime inicio, DateTime fin, Core.Entities.ConfiguracionSistema config) =>
+        fin > inicio && DentroHorario(EnBolivia(inicio), config, false)
+            && DentroHorario(EnBolivia(fin), config, true);
+
+    private static bool DentroHorario(DateTime fecha, Core.Entities.ConfiguracionSistema config, bool devolucion)
+    {
+        var horario = config.Horarios.FirstOrDefault(h => h.Fecha == DateOnly.FromDateTime(fecha))
+            ?? config.Horarios.FirstOrDefault(h => h.Fecha == null && h.DiaSemana == (int)fecha.DayOfWeek);
+        var abierto = horario?.Abierto ?? fecha.DayOfWeek != DayOfWeek.Sunday;
+        var inicio = horario?.InicioMinutos ?? config.HorarioInicioMinutos;
+        var fin = horario?.FinMinutos ?? config.HorarioFinMinutos;
+        var minutos = fecha.TimeOfDay.TotalMinutes;
+        return abierto && minutos >= inicio && (devolucion ? minutos <= fin : minutos <= fin - config.TiempoMinimoReservaMinutos);
+    }
+
+    public static bool MismoDia(DateTime inicio, DateTime fin) => EnBolivia(inicio).Date == EnBolivia(fin).Date;
 
     public static bool EsValido(DateTime inicio, DateTime fin, int aperturaMinutos, int cierreMinutos)
     {

@@ -30,6 +30,10 @@ public class GrupoEquipoController : Controller
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id) => ToResponse(await _service.Get(id));
 
+    [HttpGet("{id:int}/componentes")]
+    public async Task<IActionResult> GetComponents(int id, [FromQuery] int pagina = 1, CancellationToken token = default) =>
+        ToResponse(await _service.GetComponents(id, pagina, token));
+
     [HttpGet("{id:int}/comentarios")]
     public async Task<IActionResult> GetComentarios(
         int id,
