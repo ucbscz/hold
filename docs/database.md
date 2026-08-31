@@ -15,6 +15,9 @@ UCB Hold uses PostgreSQL 14+ with Entity Framework Core 8. The database name use
 | `detalles_prestamos` | Equipment groups requested in each loan. | Yes |
 | `grupos_equipos` | Catalog-level grouping, including the maximum loan duration shared by equivalent units. | Yes |
 | `equipos` | Physical equipment units with unique `codigo_imt` and `codigo_ucb` identifiers, serial number and condition. | Yes |
+| `ambientes` | Named rooms referenced by `equipos.id_ambiente`. | Yes |
+| `procedencias` | Acquisition origins referenced by `equipos.id_procedencia`. | Yes |
+| `configuraciones_sistema` | Global opening hours and weekly/date exceptions in `horarios` JSONB. | No |
 | `categorias` | Equipment classification. | Yes |
 | `carreras` | Academic programs associated with users. | Yes |
 | `muebles` | Storage furniture. | Yes |
@@ -32,10 +35,14 @@ UCB Hold uses PostgreSQL 14+ with Entity Framework Core 8. The database name use
 | --- | --- | --- |
 | `estado_prestamo` | `pendiente`, `aprobado`, `activo`, `finalizado`, `rechazado`, `cancelado` | `prestamos` |
 | `estado_equipo` | `operativo`, `parcialmente_operativo`, `inoperativo` | `equipos` |
-| `tipo_usuario` | `docente`, `administrador`, `estudiante` | `usuarios` |
+| `tipo_usuario` | `docente`, `administrativo`, `administrador`, `administrador_laboratorio`, `estudiante` | `usuarios` |
 | `tipo_mantenimiento` | `correctivo`, `preventivo` | `detalles_mantenimientos` |
 
 The backend maps PostgreSQL enums with `PgName` and `NpgsqlDataSourceBuilder.MapEnum<T>()`.
+
+`schema.sql` is the reference for fresh databases, not an upgrade script. Existing databases must match that schema before deploying this source. No EF migrations or `update.sql` are used. Restart application processes after enum changes.
+
+`codigo_ucb` is nullable and unique when present. `prestamos.autorizado_por`, `entregado_por` and `motivo_rechazo` retain actor names and rejection context. Legacy location/provenance text is preserved for historical SQL routines but is not updated by the application; new reads/writes use catalog foreign keys. Contracts store sanitized HTML that can contain identity photos and signatures. Restrict backups to private storage or anonymize them before release distribution.
 
 ## Derived Data
 
