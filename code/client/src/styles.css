@@ -648,6 +648,26 @@ input[type="date"] {
   border-radius: var(--radius-full) !important;
 }
 
+.field-error {
+  display: block;
+  margin: 6px 0 0;
+  color: var(--error);
+  font-family: var(--font);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+input.field-invalid,
+form input.form-input.field-invalid[aria-invalid="true"],
+form textarea.form-input.field-invalid[aria-invalid="true"],
+textarea.field-invalid,
+.field-invalid .cs-trigger,
+.field-invalid input,
+.config-field__control:has(.field-invalid) {
+  border-color: var(--error) !important;
+}
+
 textarea.form-input {
   border-radius: var(--radius-lg) !important;
 }

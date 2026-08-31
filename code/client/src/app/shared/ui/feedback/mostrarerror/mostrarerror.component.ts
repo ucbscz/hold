@@ -1,5 +1,6 @@
 import {
   Component,
+  HostBinding,
   Input,
   OnDestroy,
   OnInit,
@@ -12,6 +13,7 @@ import {
   styleUrl: './mostrarerror.component.css',
 })
 export class MostrarerrorComponent implements OnInit, OnDestroy {
+  @Input() @HostBinding('class.inline-error') inline = false;
   @Input() error!: WritableSignal<boolean>;
   @Input() mensaje: string = 'Error desconocido , intente mas tarde';
 
@@ -19,6 +21,7 @@ export class MostrarerrorComponent implements OnInit, OnDestroy {
   private cerrado = false;
 
   ngOnInit(): void {
+    if (this.inline) return;
     this.timeoutId = setTimeout(() => this.cerrar(), 8000);
   }
 

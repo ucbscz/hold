@@ -58,11 +58,6 @@
           class="form-input"
           #correoInput="ngModel"
         />
-        @if (correoInput.errors?.["pattern"] && correoInput.touched) {
-          <div class="error-message">
-            El correo debe ser de la forma &#64;ucb.edu.bo
-          </div>
-        }
       </div>
       <div class="form-group">
         <label for="contrasena">Contraseña</label>
@@ -70,6 +65,11 @@
           type="password"
           id="contrasena"
           name="contrasena"
+          minlength="8"
+          pattern="^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}$"
+          [validationMessages]="{
+            pattern: 'Incluye una mayúscula, un número y un carácter especial.',
+          }"
           [(ngModel)]="contrasena"
           maxlength="30"
           placeholder="Contraseña del usuario"
@@ -139,6 +139,13 @@
           class="form-input"
         />
       </div>
+      @if (error()) {
+        <app-mostrarerror
+          [inline]="true"
+          [error]="error"
+          [mensaje]="mensajeerror"
+        ></app-mostrarerror>
+      }
       <div class="form-submit">
         <button type="submit" class="register-button" [disabled]="!form.valid">
           <span>Confirmar Cambios</span>
@@ -153,9 +160,6 @@
     [mensaje]="mensajeexito"
     (accion)="cerrar()"
   ></app-aviso-exito>
-}
-@if (error()) {
-  <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>
 }
 @if (cargando) {
   <app-pantalla-carga></app-pantalla-carga>

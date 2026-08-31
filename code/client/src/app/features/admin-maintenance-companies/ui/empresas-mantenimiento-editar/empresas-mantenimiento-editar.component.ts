@@ -7,7 +7,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { EmpresaMantenimiento } from '@entities/admin';
 import { EmpresamantenimientoService } from '@entities/maintenance-company';
 import { BaseTablaComponent } from '@shared/lib/admin-table';
@@ -15,7 +15,12 @@ import { extractErrorMessage } from '@shared/lib/error';
 import { Aviso, AvisoExitoComponent, MostrarerrorComponent } from '@shared/ui';
 @Component({
   selector: 'app-empresas-mantenimiento-editar',
-  imports: [FormsModule, MostrarerrorComponent, Aviso, AvisoExitoComponent],
+  imports: [
+    ValidatedFormsModule,
+    MostrarerrorComponent,
+    Aviso,
+    AvisoExitoComponent,
+  ],
   templateUrl: './empresas-mantenimiento-editar.component.html',
   styleUrl: './empresas-mantenimiento-editar.component.css',
 })

@@ -6,7 +6,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { Categorias } from '@entities/admin';
 import { CategoriaService } from '@entities/category';
 import { BaseTablaComponent } from '@shared/lib/admin-table';
@@ -15,7 +15,12 @@ import { Aviso, AvisoExitoComponent, MostrarerrorComponent } from '@shared/ui';
 @Component({
   selector: 'app-categorias-crear',
   standalone: true,
-  imports: [FormsModule, MostrarerrorComponent, AvisoExitoComponent, Aviso],
+  imports: [
+    ValidatedFormsModule,
+    MostrarerrorComponent,
+    AvisoExitoComponent,
+    Aviso,
+  ],
   templateUrl: './categorias-crear.component.html',
   styleUrl: './categorias-crear.component.css',
 })

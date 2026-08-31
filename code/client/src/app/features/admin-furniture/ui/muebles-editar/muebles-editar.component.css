@@ -91,9 +91,6 @@
   box-shadow: 0 0 0 3px var(--interactive-subtle);
 }
 .form-input.ng-invalid.ng-touched {
-  .form-input.ng-invalid:not(.ng-touched) {
-    border-color: #e1e5ea !important;
-  }
   border-color: #dc2626 !important;
   border-width: 2px !important;
 }

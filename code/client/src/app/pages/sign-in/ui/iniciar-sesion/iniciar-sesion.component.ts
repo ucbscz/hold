@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, signal, WritableSignal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { Router } from '@angular/router';
 import { UsuarioService, UsuarioServiceAPI } from '@entities/user';
 import { AuthService } from '@features/auth-session';
@@ -12,7 +12,7 @@ const UNAUTHORIZED_STATUS = 401;
 @Component({
   selector: 'app-iniciar-sesion',
   standalone: true,
-  imports: [FormsModule, CommonModule, MostrarerrorComponent],
+  imports: [ValidatedFormsModule, CommonModule, MostrarerrorComponent],
   templateUrl: './iniciar-sesion.component.html',
   styleUrls: ['./iniciar-sesion.component.css'],
 })

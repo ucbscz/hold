@@ -7,7 +7,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { Equipos, Gaveteros } from '@entities/admin';
 import { EquipoService } from '@entities/equipment';
 import { GrupoEquipo, GrupoequipoService } from '@entities/equipment-group';
@@ -25,7 +25,7 @@ import {
   selector: 'app-equipos-crear',
   standalone: true,
   imports: [
-    FormsModule,
+    ValidatedFormsModule,
     CatalogoSelectorComponent,
     MostrarerrorComponent,
     Aviso,

@@ -1,5 +1,5 @@
 import { Component, OnInit, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { Router } from '@angular/router';
 import { CarreraService } from '@entities/career';
 import { ConfiguracionService } from '@entities/configuracion';
@@ -23,7 +23,7 @@ type DestinoPrestamo = 'Universidad' | 'Casa' | 'Clase';
   selector: 'app-reservation-purpose',
   standalone: true,
   imports: [
-    FormsModule,
+    ValidatedFormsModule,
     Aviso,
     AvisoExitoComponent,
     CustomSelectComponent,

@@ -8,7 +8,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { GrupoEquipo, GrupoequipoService } from '@entities/equipment-group';
 import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
@@ -22,7 +22,7 @@ import {
   selector: 'app-grupos-equipos-editar',
   standalone: true,
   imports: [
-    FormsModule,
+    ValidatedFormsModule,
     MostrarerrorComponent,
     Aviso,
     AvisoExitoComponent,

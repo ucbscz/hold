@@ -1,9 +1,28 @@
-<div class="toast" role="alert" aria-live="assertive">
-  <button class="toast-close" (click)="cerrar()" aria-label="Cerrar aviso">
-    <img src="assets/x.png" alt="" />
-  </button>
-  <div class="toast-content">
-    <strong>Error</strong>
+@if (inline) {
+  <div class="form-error" role="alert">
     <p>{{ mensaje }}</p>
+    <button
+      type="button"
+      class="form-error__close"
+      (click)="cerrar()"
+      aria-label="Cerrar error"
+    >
+      <img src="assets/x.png" alt="" />
+    </button>
   </div>
-</div>
+} @else {
+  <div class="toast" role="alert" aria-live="assertive">
+    <button
+      type="button"
+      class="toast-close"
+      (click)="cerrar()"
+      aria-label="Cerrar aviso"
+    >
+      <img src="assets/x.png" alt="" />
+    </button>
+    <div class="toast-content">
+      <strong>Error</strong>
+      <p>{{ mensaje }}</p>
+    </div>
+  </div>
+}

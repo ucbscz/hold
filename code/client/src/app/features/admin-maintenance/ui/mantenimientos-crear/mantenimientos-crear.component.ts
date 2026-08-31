@@ -7,7 +7,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { EmpresaMantenimiento, Mantenimientos } from '@entities/admin';
 import { MantenimientoService } from '@entities/maintenance';
 import { EmpresamantenimientoService } from '@entities/maintenance-company';
@@ -28,7 +28,7 @@ import { ListaEquipoComponent } from './lista-equipo/lista-equipo.component';
   selector: 'app-mantenimientos-crear',
   standalone: true,
   imports: [
-    FormsModule,
+    ValidatedFormsModule,
     ListaEquipoComponent,
     CommonModule,
     MostrarerrorComponent,

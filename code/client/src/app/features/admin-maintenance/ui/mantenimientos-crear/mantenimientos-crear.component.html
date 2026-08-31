@@ -131,6 +131,13 @@
           }
         </section>
       }
+      @if (error()) {
+        <app-mostrarerror
+          [inline]="true"
+          [error]="error"
+          [mensaje]="mensajeerror"
+        ></app-mostrarerror>
+      }
       <div class="form-submit">
         <button
           class="btn btn-secondary btn-agregar-equipo"
@@ -154,9 +161,6 @@
 </div>
 @if (agregarequipo()) {
   <app-lista-equipo [agregarequipo]="agregarequipo"> </app-lista-equipo>
-}
-@if (error()) {
-  <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>
 }
 @if (aviso()) {
   <app-aviso

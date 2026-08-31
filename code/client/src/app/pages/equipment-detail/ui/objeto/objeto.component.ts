@@ -10,7 +10,7 @@ import {
   ViewChild,
   WritableSignal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 import {
@@ -47,7 +47,7 @@ const MAX_COMMENT_LENGTH = 1024;
     MostrarerrorComponent,
     EquipmentImagePlaceholderComponent,
     CalendarioComponent,
-    FormsModule,
+    ValidatedFormsModule,
     CustomSelectComponent,
   ],
   templateUrl: './objeto.component.html',

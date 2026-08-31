@@ -81,6 +81,13 @@
       </section>
     }
 
+    @if (errorVisible()) {
+      <app-mostrarerror
+        [inline]="true"
+        [error]="errorVisible"
+        [mensaje]="mensajeError"
+      ></app-mostrarerror>
+    }
     <footer class="purpose-actions">
       <button
         type="button"
@@ -101,13 +108,6 @@
     </footer>
   </form>
 </main>
-
-@if (errorVisible()) {
-  <app-mostrarerror
-    [error]="errorVisible"
-    [mensaje]="mensajeError"
-  ></app-mostrarerror>
-}
 
 @if (confirmacionVisible()) {
   <app-aviso

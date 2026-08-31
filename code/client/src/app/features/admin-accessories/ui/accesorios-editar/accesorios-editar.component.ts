@@ -7,7 +7,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { AccesoriosService } from '@entities/accessory';
 import { Accesorio, Equipos } from '@entities/admin';
 import { EquipoService } from '@entities/equipment';
@@ -23,7 +23,7 @@ import {
 @Component({
   selector: 'app-accesorios-editar',
   imports: [
-    FormsModule,
+    ValidatedFormsModule,
     MostrarerrorComponent,
     AvisoExitoComponent,
     Aviso,

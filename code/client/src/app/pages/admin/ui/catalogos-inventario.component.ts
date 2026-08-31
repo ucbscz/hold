@@ -7,7 +7,7 @@ import {
   OnDestroy,
   ViewChild,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import {
   CatalogoInventario,
   CatalogoInventarioService,
@@ -34,7 +34,7 @@ import { Subscription, finalize } from 'rxjs';
   standalone: true,
   imports: [
     CommonModule,
-    FormsModule,
+    ValidatedFormsModule,
     BuscadorComponent,
     TablePaginationComponent,
     AvisoEliminarComponent,

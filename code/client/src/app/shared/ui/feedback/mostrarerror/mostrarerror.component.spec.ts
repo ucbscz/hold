@@ -34,4 +34,15 @@ describe('MostrarerrorComponent', () => {
 
     expect(component.error()).toBeFalse();
   }));
+
+  it('keeps inline errors visible until dismissed', fakeAsync(() => {
+    fixture.componentRef.setInput('inline', true);
+    fixture.detectChanges();
+    tick(9000);
+    expect(component.error()).toBeTrue();
+    expect(fixture.nativeElement.querySelector('.toast')).toBeNull();
+    expect(getComputedStyle(fixture.nativeElement).position).toBe('static');
+    fixture.nativeElement.querySelector('button').click();
+    expect(component.error()).toBeFalse();
+  }));
 });

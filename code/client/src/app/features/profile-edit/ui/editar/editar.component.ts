@@ -7,7 +7,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { Carrera } from '@entities/admin';
 import { CarreraService } from '@entities/career';
 import { Usuario, UsuarioService, UsuarioServiceAPI } from '@entities/user';
@@ -26,7 +26,7 @@ const CLOSE_SUCCESS_DELAY_MS = 2000;
   selector: 'app-editar',
   imports: [
     CommonModule,
-    FormsModule,
+    ValidatedFormsModule,
     AvisoExitoComponent,
     MostrarerrorComponent,
     PantallaCargaComponent,

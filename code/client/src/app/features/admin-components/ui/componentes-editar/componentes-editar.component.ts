@@ -7,7 +7,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { Componente, Equipos } from '@entities/admin';
 import { ComponenteService } from '@entities/component';
 import { EquipoService } from '@entities/equipment';
@@ -24,7 +24,7 @@ import {
   selector: 'app-componentes-editar',
   standalone: true,
   imports: [
-    FormsModule,
+    ValidatedFormsModule,
     MostrarerrorComponent,
     AvisoExitoComponent,
     Aviso,

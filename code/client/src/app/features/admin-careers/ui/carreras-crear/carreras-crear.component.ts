@@ -6,7 +6,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { CarreraService } from '@entities/career';
 import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
@@ -14,7 +14,12 @@ import { Aviso, AvisoExitoComponent, MostrarerrorComponent } from '@shared/ui';
 @Component({
   selector: 'app-carreras-crear',
   standalone: true,
-  imports: [FormsModule, MostrarerrorComponent, AvisoExitoComponent, Aviso],
+  imports: [
+    ValidatedFormsModule,
+    MostrarerrorComponent,
+    AvisoExitoComponent,
+    Aviso,
+  ],
   templateUrl: './carreras-crear.component.html',
   styleUrl: './carreras-crear.component.css',
 })

@@ -58,17 +58,17 @@
           class="form-input"
           #correoInput="ngModel"
         />
-        @if (correoInput.errors?.["pattern"] && correoInput.touched) {
-          <div class="error-message">
-            El correo debe ser de la forma &#64;ucb.edu.bo
-          </div>
-        }
       </div>
       <div class="form-group">
         <label for="editar-contrasena">Nueva contraseña (opcional)</label>
         <app-password-input
           inputId="editar-contrasena"
           name="contrasena"
+          minlength="8"
+          pattern="^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}$"
+          [validationMessages]="{
+            pattern: 'Incluye una mayúscula, un número y un carácter especial.',
+          }"
           [(ngModel)]="contrasena"
           placeholder="Sin cambios"
         />
@@ -78,6 +78,7 @@
         <app-password-input
           inputId="editar-repetir-contrasena"
           name="repetirContrasena"
+          [fieldErrors]="false"
           [(ngModel)]="repetirContrasena"
           [required]="!!contrasena"
           #confirmacion="ngModel"
@@ -167,6 +168,13 @@
           class="form-input"
         />
       </div>
+      @if (error()) {
+        <app-mostrarerror
+          [inline]="true"
+          [error]="error"
+          [mensaje]="mensajeerror"
+        ></app-mostrarerror>
+      }
       <div class="form-submit">
         <button
           type="submit"
@@ -179,9 +187,6 @@
     </form>
   </div>
 </div>
-@if (error()) {
-  <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>
-}
 @if (aviso()) {
   <app-aviso
     [cerrar]="aviso"

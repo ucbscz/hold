@@ -1,7 +1,7 @@
 <div class="login-container">
   <div class="login-card">
     <h1 class="title">Iniciar sesión</h1>
-    <form (ngSubmit)="login()" class="login-form">
+    <form #form="ngForm" (ngSubmit)="form.valid && login()" class="login-form">
       <div class="form-group">
         <label for="email">Correo electrónico</label>
         <input
@@ -9,6 +9,7 @@
           id="email"
           name="email"
           [(ngModel)]="email"
+          (ngModelChange)="incorrecto = false"
           required
           email
           pattern="^[a-zA-Z0-9._%\+\-]+@ucb\.edu\.bo$"
@@ -16,19 +17,6 @@
           class="form-input"
           #emailInput="ngModel"
         />
-        <div class="error-message">
-          @if (emailInput.invalid && (emailInput.dirty || emailInput.touched)) {
-            @if (emailInput.errors?.["required"]) {
-              <div>El correo electrónico es requerido</div>
-            }
-            @if (emailInput.errors?.["pattern"]) {
-              <div>El correo debe ser de la UCB (&#64;ucb.edu.bo)</div>
-            }
-          }
-          @if (incorrecto == true) {
-            <div>Correo o contraseña incorrectos</div>
-          }
-        </div>
       </div>
       <div class="form-group">
         <label for="password">Contraseña</label>
@@ -38,6 +26,7 @@
             id="password"
             name="contraseña"
             [(ngModel)]="contrasena"
+            (ngModelChange)="incorrecto = false"
             required
             placeholder="••••••••"
             class="form-input password-field__input"
@@ -58,27 +47,21 @@
             ></i>
           </button>
         </div>
-        <div class="error-message">
-          @if (
-            passwordInput.invalid &&
-            (passwordInput.dirty || passwordInput.touched)
-          ) {
-            @if (passwordInput.errors?.["required"]) {
-              <div>La contraseña es requerida</div>
-            }
-            @if (passwordInput.errors?.["minlength"]) {
-              <div>Mínimo 6 caracteres</div>
-            }
-          }
-          @if (incorrecto == true) {
-            <div>Correo o contraseña incorrectos</div>
-          }
-        </div>
       </div>
+      @if (incorrecto) {
+        <p class="field-error" role="alert">Correo o contraseña incorrectos</p>
+      }
+      @if (errorraro()) {
+        <app-mostrarerror
+          [inline]="true"
+          [error]="errorraro"
+          mensaje="No se pudo iniciar sesión. Intenta nuevamente."
+        ></app-mostrarerror>
+      }
       <button
         type="submit"
         class="login-button"
-        [disabled]="!email || !contrasena || loading"
+        [disabled]="form.invalid || loading"
       >
         @if (!loading) {
           <span>Ingresar</span>
@@ -94,9 +77,3 @@
     </form>
   </div>
 </div>
-@if (errorraro()) {
-  <app-mostrarerror
-    [error]="errorraro"
-    mensaje="Error contraseña o usuario invalido"
-  ></app-mostrarerror>
-}

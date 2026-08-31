@@ -7,7 +7,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { Gaveteros, Muebles } from '@entities/admin';
 import { MuebleService } from '@entities/furniture';
 import { GaveteroService } from '@entities/locker';
@@ -22,7 +22,7 @@ import {
 @Component({
   selector: 'app-gaveteros-editar',
   imports: [
-    FormsModule,
+    ValidatedFormsModule,
     MostrarerrorComponent,
     Aviso,
     AvisoExitoComponent,

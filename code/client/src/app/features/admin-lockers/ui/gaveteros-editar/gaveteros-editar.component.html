@@ -80,6 +80,13 @@
           class="form-input"
         />
       </div>
+      @if (error()) {
+        <app-mostrarerror
+          [inline]="true"
+          [error]="error"
+          [mensaje]="mensajeerror"
+        ></app-mostrarerror>
+      }
       <div class="form-submit">
         <button type="submit" class="register-button" [disabled]="!form.valid">
           <span>Confirmar Cambios</span>
@@ -88,9 +95,6 @@
     </form>
   </div>
 </div>
-@if (error()) {
-  <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>
-}
 @if (aviso()) {
   <app-aviso
     [cerrar]="aviso"

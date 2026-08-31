@@ -20,6 +20,24 @@ describe('UsuariosCrearComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('keeps server errors inside the form and lets the user dismiss them without submitting', async () => {
+    fixture.autoDetectChanges();
+    component.mensajeerror = 'El correo ya está registrado.';
+    component.error.set(true);
+    await fixture.whenStable();
+    const error = fixture.nativeElement.querySelector('form app-mostrarerror');
+    expect(error).not.toBeNull();
+    expect(error.textContent).toContain('El correo ya está registrado.');
+    expect(error.querySelector('.toast')).toBeNull();
+    expect(getComputedStyle(error).position).toBe('static');
+    const close = error.querySelector('button');
+    expect(close.type).toBe('button');
+    close.click();
+    await fixture.whenStable();
+    expect(component.error()).toBeFalse();
+    expect(component.aviso()).toBeFalse();
+  });
+
   it('prevents saving a mismatched password, even after the confirmation opens', () => {
     const save = spyOn(
       TestBed.inject(UsuarioServiceAPI),

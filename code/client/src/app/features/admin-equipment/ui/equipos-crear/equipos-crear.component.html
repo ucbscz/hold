@@ -66,6 +66,7 @@
           type="number"
           id="costo_referencia"
           name="costo_referencia"
+          min="0"
           [(ngModel)]="equipo.CostoReferencia"
           required
           max="999999999"
@@ -87,6 +88,13 @@
         ></textarea>
       </div>
 
+      @if (error()) {
+        <app-mostrarerror
+          [inline]="true"
+          [error]="error"
+          [mensaje]="mensajeerror"
+        ></app-mostrarerror>
+      }
       <div class="form-submit">
         <button type="submit" class="register-button" [disabled]="!form.valid">
           <span>Registrar Equipo</span>
@@ -95,9 +103,6 @@
     </form>
   </div>
 </div>
-@if (error()) {
-  <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>
-}
 @if (aviso()) {
   <app-aviso
     [cerrar]="aviso"

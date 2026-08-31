@@ -147,13 +147,20 @@
           <app-custom-select
             id="carrera"
             name="carrera"
+            #carreraInput="ngModel"
             [(ngModel)]="nuevoUsuario.carrera"
             [opciones]="carreras"
-            [invalid]="submitted && !nuevoUsuario.carrera"
+            [invalid]="
+              !!(carreraInput.touched || carreraInput.dirty || submitted) &&
+              !nuevoUsuario.carrera
+            "
             placeholder="Selecciona una carrera"
             required
           ></app-custom-select>
-          @if (submitted && !nuevoUsuario.carrera) {
+          @if (
+            (carreraInput.touched || carreraInput.dirty || submitted) &&
+            !nuevoUsuario.carrera
+          ) {
             <div class="error-message">La carrera no seleccionada</div>
           }
         </div>
@@ -294,6 +301,13 @@
           }
         </div>
       </div>
+      @if (error()) {
+        <app-mostrarerror
+          [inline]="true"
+          [mensaje]="mensajeerror"
+          [error]="error"
+        ></app-mostrarerror>
+      }
       <button type="submit" class="register-button" [disabled]="registrando">
         @if (registrando) {
           <span class="spinner" aria-hidden="true"></span>
@@ -308,9 +322,6 @@
     </form>
   </div>
 </div>
-@if (error()) {
-  <app-mostrarerror [mensaje]="mensajeerror" [error]="error"></app-mostrarerror>
-}
 @if (aviso()) {
   <app-aviso-exito
     [mensaje]="mensajeaviso"

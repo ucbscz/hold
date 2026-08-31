@@ -7,7 +7,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { Usuario, UsuarioServiceAPI, UsuarioService } from '@entities/user';
 import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
@@ -23,7 +23,7 @@ import {
   selector: 'app-usuarios-crear',
   standalone: true,
   imports: [
-    FormsModule,
+    ValidatedFormsModule,
     MostrarerrorComponent,
     Aviso,
     AvisoExitoComponent,

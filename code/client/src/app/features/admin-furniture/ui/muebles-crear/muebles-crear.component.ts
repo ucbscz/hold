@@ -8,7 +8,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { ValidatedFormsModule } from '@shared/lib/forms';
 import { Muebles } from '@entities/admin';
 import { MuebleService } from '@entities/furniture';
 import { BaseTablaComponent } from '@shared/lib/admin-table';
@@ -19,7 +19,7 @@ import { Aviso, AvisoExitoComponent, MostrarerrorComponent } from '@shared/ui';
   standalone: true,
   imports: [
     CustomSelectComponent,
-    FormsModule,
+    ValidatedFormsModule,
     MostrarerrorComponent,
     Aviso,
     AvisoExitoComponent,
