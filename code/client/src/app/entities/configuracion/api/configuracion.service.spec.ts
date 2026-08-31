@@ -49,14 +49,17 @@ describe('ConfiguracionService', () => {
   });
 
   it('searches responsible users using the documented query parameter', () => {
-    service.buscarResponsables('Ana Perez').subscribe();
-    http
-      .expectOne(
-        (request) =>
-          request.url.endsWith('/api/configuracion/responsables') &&
-          request.params.get('buscar') === 'Ana Perez',
-      )
-      .flush([]);
+    const usuarios = [{ Carnet: '123', Nombre: 'Ana Perez' }];
+    const recibido = jasmine.createSpy('recibido');
+    service.buscarResponsables('Ana Perez').subscribe(recibido);
+    const request = http.expectOne(
+      (request) =>
+        request.url.endsWith('/api/configuracion/responsables') &&
+        request.params.get('buscar') === 'Ana Perez',
+    );
+    expect(request.request.method).toBe('GET');
+    request.flush(usuarios);
+    expect(recibido).toHaveBeenCalledOnceWith(usuarios);
   });
 
   it('should store the configuration returned by the API', () => {

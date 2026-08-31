@@ -179,7 +179,11 @@ for (const test of cases) {
       for (const button of buttons) {
         component.sortColumn = '';
         const column = button.textContent?.trim() ?? '';
-        button.scrollIntoView({ block: 'center', inline: 'center' });
+        button.scrollIntoView({
+          behavior: 'instant',
+          block: 'center',
+          inline: 'center',
+        });
         const rect = button.getBoundingClientRect();
         const hit = document.elementFromPoint(
           rect.left + rect.width / 2,
