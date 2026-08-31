@@ -93,7 +93,10 @@ public class ConfiguracionRepository
         .Where(u => !u.Bloqueado)
         .Select(u => new Usuario
         {
-            Carnet = u.Carnet, Nombre = u.Nombre, ApellidoPaterno = u.ApellidoPaterno,
-            ApellidoMaterno = u.ApellidoMaterno, Rol = u.Rol
+            Carnet = u.Carnet,
+            Nombre = u.Nombre,
+            ApellidoPaterno = u.ApellidoPaterno,
+            ApellidoMaterno = u.ApellidoMaterno,
+            Rol = u.Rol
         });
 }
