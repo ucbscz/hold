@@ -63,12 +63,14 @@ export class AdministradorComponent {
     private usuario: UsuarioService,
   ) {}
   ngOnInit() {
-    if (this.usuario.obtenerUsuario().rol === 'administrador_laboratorio') {
+    const rol = this.usuario.obtenerUsuario().rol?.toLowerCase() ?? '';
+
+    if (rol === 'administrador_laboratorio') {
       this.tablas = ['Prestamos', 'Usuarios'];
     }
     if (this.usuario.estaVacio()) {
       this.router.navigate(['/login']);
-    } else if (this.usuario.obtenerRol() != 'administrador') {
+    } else if (!['administrador', 'administrador_laboratorio'].includes(rol)) {
       this.router.navigate(['/inicio']);
     }
   }

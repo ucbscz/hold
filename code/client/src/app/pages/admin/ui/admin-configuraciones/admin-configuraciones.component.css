@@ -309,6 +309,9 @@
   gap: 12px;
   margin: 20px 0;
 }
+.apply-week-button {
+  margin-top: var(--sp-4);
+}
 .weekly-schedule__day {
   display: grid;
   grid-template-columns:

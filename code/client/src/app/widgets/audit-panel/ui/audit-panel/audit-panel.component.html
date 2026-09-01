@@ -6,7 +6,8 @@
         type="text"
         [(ngModel)]="filtroAdmin"
         (keyup.enter)="cargar()"
-        placeholder="Buscar actor..."
+        placeholder="Buscar por persona, acción, ID, detalle o fecha..."
+        aria-label="Buscar en todos los datos de auditoría"
         class="admin-search"
       />
       @if (filtroAdmin) {

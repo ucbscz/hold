@@ -21,11 +21,12 @@ public class AuditLogController : Controller
         [FromQuery] string? actor,
         [FromQuery] string? accion,
         [FromQuery] DateTime? desde,
-        [FromQuery] DateTime? hasta
+        [FromQuery] DateTime? hasta,
+        [FromQuery] string? buscar
     )
     {
         if (!User.IsInRole("administrador") && entidad is not ("Prestamo" or "Usuario"))
             return Forbid();
-        return ToResponse(await _service.GetFiltered(entidad, actor, accion, desde, hasta));
+        return ToResponse(await _service.GetFiltered(entidad, actor, accion, desde, hasta, buscar));
     }
 }

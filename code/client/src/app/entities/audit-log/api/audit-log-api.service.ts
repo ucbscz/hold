@@ -14,14 +14,14 @@ export class AuditLogApiService {
 
   getAuditLog(
     entidad?: string,
-    actor?: string,
+    buscar?: string,
     accion?: string,
     desde?: string,
     hasta?: string,
   ): Observable<AuditLogDto[]> {
     let params = new HttpParams();
     if (entidad) params = params.set('entidad', entidad);
-    if (actor) params = params.set('actor', actor);
+    if (buscar) params = params.set('buscar', buscar);
     if (accion) params = params.set('accion', accion);
     if (desde) params = params.set('desde', desde);
     if (hasta) params = params.set('hasta', hasta);

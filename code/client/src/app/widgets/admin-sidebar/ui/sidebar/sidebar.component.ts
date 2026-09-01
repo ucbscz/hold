@@ -2,7 +2,6 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   EventEmitter,
-  HostListener,
   Input,
   Output,
   ViewEncapsulation,
@@ -40,11 +39,6 @@ export class SidebarComponent {
   @Input() activeItem = '';
 
   constructor(public sidebarService: SidebarService) {}
-
-  @HostListener('window:scroll')
-  onScroll() {
-    if (this.sidebarService.isOpen()) this.sidebarService.close();
-  }
 
   getIcon(label: string): string {
     return ICONS[label] ?? 'fas fa-circle';

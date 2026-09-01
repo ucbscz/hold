@@ -45,6 +45,7 @@
   scrollbar-color: var(--scrollbar-thumb) transparent;
   scrollbar-width: thin;
   scrollbar-gutter: stable;
+  overscroll-behavior: contain;
 }
 
 .sidebar-menu {

@@ -62,10 +62,11 @@ public class AuditLogService
         string? actor,
         string? accion,
         DateTime? desde,
-        DateTime? hasta
+        DateTime? hasta,
+        string? buscar = null
     )
     {
-        var logs = await _repository.GetFiltered(entidad, actor, accion, desde, hasta);
+        var logs = await _repository.GetFiltered(entidad, actor, accion, desde, hasta, buscar);
 
         return Result<List<AuditLogDto>>.Success(logs);
     }

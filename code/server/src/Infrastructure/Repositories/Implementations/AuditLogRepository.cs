@@ -1,6 +1,7 @@
 using IMT_Reservas.Server.Application.Features.AuditLog;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using AuditLogEntity = IMT_Reservas.Server.Core.Entities.AuditLog;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
@@ -61,7 +62,8 @@ public class AuditLogRepository
         string? actor,
         string? accion,
         DateTime? desde,
-        DateTime? hasta
+        DateTime? hasta,
+        string? buscar = null
     )
     {
         var query = _db.AuditLogs.AsNoTracking().AsQueryable();
@@ -78,6 +80,33 @@ public class AuditLogRepository
         }
         if (!string.IsNullOrWhiteSpace(accion))
             query = query.Where(a => a.Accion == accion);
+        if (!string.IsNullOrWhiteSpace(buscar))
+        {
+            var normalizedSearch = buscar.Trim().ToLowerInvariant();
+            var hasSearchDate = DateTime.TryParseExact(
+                buscar.Trim(),
+                ["d/M/yyyy", "dd/MM/yyyy", "d-M-yyyy", "dd-MM-yyyy", "yyyy-MM-dd"],
+                CultureInfo.InvariantCulture,
+                DateTimeStyles.AssumeLocal,
+                out var searchDate
+            );
+            var searchDateStart = hasSearchDate
+                ? searchDate.Date.ToUniversalTime()
+                : DateTime.MinValue;
+            var searchDateEnd = hasSearchDate
+                ? searchDate.Date.AddDays(1).ToUniversalTime()
+                : DateTime.MinValue;
+
+            query = query.Where(a =>
+                a.AdminCarnet.ToLower().Contains(normalizedSearch)
+                || a.AdminNombre.ToLower().Contains(normalizedSearch)
+                || a.Accion.ToLower().Contains(normalizedSearch)
+                || a.Entidad.ToLower().Contains(normalizedSearch)
+                || (a.EntidadId != null && a.EntidadId.ToLower().Contains(normalizedSearch))
+                || (a.Detalle != null && a.Detalle.ToLower().Contains(normalizedSearch))
+                || (hasSearchDate && a.Timestamp >= searchDateStart && a.Timestamp < searchDateEnd)
+            );
+        }
         if (desde.HasValue)
             query = query.Where(a => a.Timestamp >= desde.Value.ToUniversalTime());
         if (hasta.HasValue)
