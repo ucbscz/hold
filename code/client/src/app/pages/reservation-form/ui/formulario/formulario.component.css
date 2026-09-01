@@ -342,14 +342,8 @@
     height: 112px;
   }
 }
-.identity-upload {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
-  padding: 20px;
-}
 .identity-dialog {
-  width: min(660px, calc(100vw - 24px));
+  width: min(620px, calc(100vw - 24px));
   max-height: calc(100dvh - 24px);
   box-sizing: border-box;
   overflow: auto;
@@ -365,11 +359,17 @@
 }
 .identity-dialog header {
   position: relative;
-  padding: 24px 64px 8px 24px;
+  padding: 24px 64px 20px 24px;
+  border-bottom: 1px solid var(--border);
 }
 .identity-dialog h2 {
   font-size: 20px;
   margin: 0;
+}
+.identity-dialog header p {
+  margin: 6px 0 0;
+  color: var(--ink-secondary);
+  font-size: 15px;
 }
 .identity-dialog h3 {
   font-size: 16px;
@@ -380,10 +380,20 @@
   top: 16px;
   right: 16px;
 }
+.identity-upload {
+  padding: 0 24px;
+}
 .identity-upload section {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
   min-width: 0;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--border);
 }
 .identity-preview {
+  width: 112px;
   aspect-ratio: 1.586;
   background: var(--sidebar);
   border: 1px solid var(--border);
@@ -391,7 +401,6 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  margin-bottom: 12px;
 }
 .identity-preview img {
   width: 100%;
@@ -399,13 +408,62 @@
   object-fit: contain;
 }
 .identity-preview i {
-  font-size: 32px;
+  font-size: 28px;
   color: var(--ink-muted);
+}
+.identity-upload__copy {
+  min-width: 0;
+}
+.identity-upload__copy h3 {
+  margin: 0;
+}
+.identity-upload__copy p {
+  margin: 4px 0 0;
+  color: var(--ink-secondary);
+  font-size: 14px;
+}
+.identity-select-button,
+.identity-cancel-button,
+.identity-save-button {
+  min-height: 48px;
+  padding: 0 18px;
+  border-radius: var(--radius-full);
+  font: 700 15px/1 var(--font);
+  cursor: pointer;
+  transition: var(--btn-transition);
+}
+.identity-select-button,
+.identity-cancel-button {
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-secondary);
+}
+.identity-save-button {
+  border: 0;
+  background: var(--brand);
+  color: var(--brand-text);
+}
+.identity-select-button:disabled,
+.identity-save-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+@media (hover: hover) and (pointer: fine) {
+  .identity-select-button:hover,
+  .identity-cancel-button:hover {
+    border-color: var(--border-strong);
+    background: var(--sidebar);
+    color: var(--ink);
+  }
+  .identity-save-button:hover:not(:disabled) {
+    background: var(--brand-hover);
+  }
 }
 .identity-dialog footer {
   display: flex;
+  gap: 12px;
   justify-content: flex-end;
-  padding: 0 24px 24px;
+  padding: 20px 24px 24px;
 }
 .identity-dialog > p {
   padding: 0 24px;
@@ -463,9 +521,36 @@
   background: #fff;
   object-fit: contain;
 }
+:host ::ng-deep .contract-identity-empty {
+  margin: 0;
+  padding: 14px;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  font-size: 0.8rem;
+  text-align: center;
+}
 @media (max-width: 600px) {
-  .identity-upload {
-    grid-template-columns: 1fr;
+  .identity-upload section {
+    grid-template-columns: 96px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .identity-preview {
+    width: 96px;
+  }
+
+  .identity-select-button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .identity-dialog footer {
+    flex-direction: column-reverse;
+  }
+
+  .identity-cancel-button,
+  .identity-save-button {
+    width: 100%;
   }
 
   :host ::ng-deep .contract-identity table,

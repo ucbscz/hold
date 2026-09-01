@@ -347,6 +347,15 @@
   object-fit: contain;
 }
 
+::ng-deep .contract-document .contract-identity-empty {
+  margin: 0;
+  padding: 14px;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  font-size: 0.8rem;
+  text-align: center;
+}
+
 @keyframes contractFadeIn {
   from {
     opacity: 0;

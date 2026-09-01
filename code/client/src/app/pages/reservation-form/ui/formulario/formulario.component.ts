@@ -203,7 +203,7 @@ export class FormularioComponent implements OnInit {
       año_devolucion: fechaFinal.getFullYear().toString(),
       detalles_clase: escapeHtmlValue(detallesClase),
     });
-    this.contenidoHtml = processedTemplate;
+    this.contenidoHtml = this.renderizarCarnetEnContrato(processedTemplate);
   }
 
   ngOnInit(): void {
@@ -267,6 +267,21 @@ export class FormularioComponent implements OnInit {
       resultado = resultado.replace(regex, valores[clave]);
     }
     return resultado;
+  }
+
+  private renderizarCarnetEnContrato(html: string): string {
+    if (this.carnetFrente && this.carnetAtras) return html;
+
+    const document = new DOMParser().parseFromString(html, 'text/html');
+    const section = document.querySelector('.contract-identity');
+    const table = section?.querySelector('table');
+    if (!section || !table) return html;
+
+    const pending = document.createElement('p');
+    pending.className = 'contract-identity-empty';
+    pending.textContent = 'Carnet pendiente de adjuntar.';
+    table.replaceWith(pending);
+    return document.body.innerHTML;
   }
 
   private formatearDuracion(minutos: number): string {

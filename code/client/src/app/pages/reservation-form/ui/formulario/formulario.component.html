@@ -27,9 +27,7 @@
         >
           <i class="fas fa-id-card" aria-hidden="true"></i>
           {{
-            carnetFrente && carnetAtras
-              ? "Ver carnet adjunto"
-              : "Agregar carnet"
+            carnetFrente && carnetAtras ? "Revisar carnet" : "Adjuntar carnet"
           }}
         </button>
         <button type="button" class="boton boton-firmar" (click)="firmar()">
@@ -46,7 +44,10 @@
 </main>
 <dialog #carnetModal class="identity-dialog" aria-labelledby="identity-title">
   <header>
-    <h2 id="identity-title">Carnet de identidad</h2>
+    <div>
+      <h2 id="identity-title">Adjuntar carnet</h2>
+      <p>Selecciona una foto clara de cada lado.</p>
+    </div>
     <button
       type="button"
       class="modal-close-btn"
@@ -56,15 +57,20 @@
       <i class="fas fa-times"></i>
     </button>
   </header>
-  <div class="identity-upload">
+  <div class="identity-upload" aria-label="Imágenes del carnet">
     <section>
-      <h3>Anverso</h3>
       <div class="identity-preview">
         @if (carnetFrente) {
           <img [src]="carnetFrente" alt="Anverso del carnet adjunto" />
         } @else {
           <i class="fas fa-id-card" aria-hidden="true"></i>
         }
+      </div>
+      <div class="identity-upload__copy">
+        <h3>Anverso</h3>
+        <p>
+          {{ carnetFrente ? "Imagen agregada" : "Foto de la parte frontal" }}
+        </p>
       </div>
       <input
         #frenteInput
@@ -75,21 +81,26 @@
       />
       <button
         type="button"
-        class="btn btn-secondary"
+        class="identity-select-button"
         [disabled]="procesandoCarnet"
         (click)="frenteInput.click()"
       >
-        {{ carnetFrente ? "Cambiar anverso" : "Agregar anverso" }}
+        {{ carnetFrente ? "Cambiar foto" : "Seleccionar foto" }}
       </button>
     </section>
     <section>
-      <h3>Reverso</h3>
       <div class="identity-preview">
         @if (carnetAtras) {
           <img [src]="carnetAtras" alt="Reverso del carnet adjunto" />
         } @else {
           <i class="fas fa-id-card" aria-hidden="true"></i>
         }
+      </div>
+      <div class="identity-upload__copy">
+        <h3>Reverso</h3>
+        <p>
+          {{ carnetAtras ? "Imagen agregada" : "Foto de la parte posterior" }}
+        </p>
       </div>
       <input
         #atrasInput
@@ -100,11 +111,11 @@
       />
       <button
         type="button"
-        class="btn btn-secondary"
+        class="identity-select-button"
         [disabled]="procesandoCarnet"
         (click)="atrasInput.click()"
       >
-        {{ carnetAtras ? "Cambiar reverso" : "Agregar reverso" }}
+        {{ carnetAtras ? "Cambiar foto" : "Seleccionar foto" }}
       </button>
     </section>
   </div>
@@ -117,11 +128,18 @@
   <footer>
     <button
       type="button"
-      class="btn btn-primary"
+      class="identity-cancel-button"
+      (click)="carnetModal.close()"
+    >
+      Cancelar
+    </button>
+    <button
+      type="button"
+      class="identity-save-button"
       [disabled]="procesandoCarnet || !carnetFrente || !carnetAtras"
       (click)="carnetModal.close()"
     >
-      Listo
+      Guardar carnet
     </button>
   </footer>
 </dialog>

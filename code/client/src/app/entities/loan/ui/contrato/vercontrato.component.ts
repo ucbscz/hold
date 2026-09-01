@@ -380,12 +380,34 @@ export class VercontratoComponent
       'data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=';
     const placeholderSrc = `src="${placeholder}"`;
 
-    return html
+    const normalized = html
       .replace(/src=(["'])unsafe:(data:image\/[^"']+)\1/g, 'src=$1$2$1')
       .replace(/src=(["'])\[\[firmausuario\]\]\1/g, placeholderSrc)
       .replace(
         /(<img\b(?=[^>]*\bid=["']firmaUsuarioPlaceholder["'])[^>]*\bsrc=["'])(["'][^>]*>)/i,
         `$1${placeholder}$2`,
       );
+
+    const document = new DOMParser().parseFromString(normalized, 'text/html');
+    const section = document.querySelector('.contract-identity');
+    const table = section?.querySelector('table');
+    const images = ['frente', 'atras'].map((side) =>
+      section?.querySelector<HTMLImageElement>(`img[data-carnet="${side}"]`),
+    );
+    const hasBothSides = images.every((image) => {
+      const source = image?.getAttribute('src') ?? '';
+      return /^data:image\/(?:png|jpeg|gif|webp);base64,[A-Za-z0-9+/]+={0,2}$/i.test(
+        source,
+      );
+    });
+
+    if (section && table && !hasBothSides) {
+      const pending = document.createElement('p');
+      pending.className = 'contract-identity-empty';
+      pending.textContent = 'Carnet no adjunto.';
+      table.replaceWith(pending);
+    }
+
+    return document.body.innerHTML;
   }
 }
