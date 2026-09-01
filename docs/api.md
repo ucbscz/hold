@@ -52,17 +52,17 @@ Validation and domain failures preserve the same structure:
 }
 ```
 
-| Status             | Meaning                                      |
-| ------------------ | -------------------------------------------- |
-| `200 OK`           | Request completed successfully.              |
-| `201 Created`      | Resource created successfully.               |
-| `204 No Content`   | Resource deleted successfully.               |
-| `400 Bad Request`  | Validation or business-rule failure.         |
-| `401 Unauthorized` | Missing or invalid credentials.              |
-| `403 Forbidden`    | Authenticated user does not have permission. |
-| `404 Not Found`    | Resource does not exist or is not visible.   |
-| `409 Conflict`     | Duplicate catalog name/code or referenced record. |
-| `429 Too Many Requests` | Rate limit exceeded; respect `Retry-After`. |
+| Status                  | Meaning                                           |
+| ----------------------- | ------------------------------------------------- |
+| `200 OK`                | Request completed successfully.                   |
+| `201 Created`           | Resource created successfully.                    |
+| `204 No Content`        | Resource deleted successfully.                    |
+| `400 Bad Request`       | Validation or business-rule failure.              |
+| `401 Unauthorized`      | Missing or invalid credentials.                   |
+| `403 Forbidden`         | Authenticated user does not have permission.      |
+| `404 Not Found`         | Resource does not exist or is not visible.        |
+| `409 Conflict`          | Duplicate catalog name/code or referenced record. |
+| `429 Too Many Requests` | Rate limit exceeded; respect `Retry-After`.       |
 
 ## Authentication
 
@@ -114,13 +114,13 @@ All CRUD operations for the following resources use `GET /`, `GET /{id}`, `POST 
 
 Additional catalog routes:
 
-| Method | Route                            | Purpose                                         |
-| ------ | -------------------------------- | ----------------------------------------------- |
-| `GET`  | `/api/equipos?grupoId={id}`      | List equipment units in a group.                |
-| `GET`  | `/api/equipos?gaveteroId={id}`   | List equipment units in a locker.               |
-| `GET`  | `/api/equipos/{id}/prestamos`    | Get equipment loan records. Administrator only. |
-| `GET`  | `/api/gaveteros?muebleId={id}`   | List lockers in a furniture item.               |
-| `GET`  | `/api/grupos?nombre=&categoria=` | Search equipment groups.                        |
+| Method | Route                                   | Purpose                                                 |
+| ------ | --------------------------------------- | ------------------------------------------------------- |
+| `GET`  | `/api/equipos?grupoId={id}`             | List equipment units in a group.                        |
+| `GET`  | `/api/equipos?gaveteroId={id}`          | List equipment units in a locker.                       |
+| `GET`  | `/api/equipos/{id}/prestamos`           | Get equipment loan records. Administrator only.         |
+| `GET`  | `/api/gaveteros?muebleId={id}`          | List lockers in a furniture item.                       |
+| `GET`  | `/api/grupos?nombre=&categoria=`        | Search equipment groups.                                |
 | `GET`  | `/api/grupos/{id}/componentes?pagina=1` | Authenticated component inspection, 100 items per page. |
 
 Equipment group payloads expose `TiempoMaximoPrestamoDias` (1 to 365). This group-level value applies to every physical unit in the group and is required for create and update operations.
@@ -138,21 +138,22 @@ Room and origin payloads are `{ "Id": 1, "Nombre": "Sala principal" }`. Equipmen
 
 ## Loans, Availability, and Contracts
 
-| Method   | Route                            | Purpose                                                                |
-| -------- | -------------------------------- | ---------------------------------------------------------------------- |
-| `GET`    | `/api/prestamos`                 | List all loans for administrators or own loans for regular users.      |
-| `GET`    | `/api/prestamos/{id}`            | Get a loan.                                                            |
-| `POST`   | `/api/prestamos`                 | Create a loan request.                                                 |
-| `PATCH`  | `/api/prestamos/{id}/estado`     | Managers change state; owners may only cancel their pending/approved loans. |
-| `PATCH`  | `/api/prestamos/{id}/observacion` | Managers update `{ "Observacion": "..." }`, max 1024 characters; audited. |
-| `DELETE` | `/api/prestamos/{id}`            | Soft-delete a loan.                                                    |
-| `GET`    | `/api/prestamos/elegibilidad`    | Get reservation eligibility for the authenticated user.                |
-| `GET`    | `/api/prestamos?carnet=&estado=` | Filter loans; non-admin users are restricted to their own carnet.      |
-| `POST`   | `/api/contratos`                 | Upload or create a contract for a loan. Multipart form data.           |
-| `GET`    | `/api/contratos/{prestamoId}`    | Get a contract by loan id.                                             |
-| `DELETE` | `/api/contratos/{prestamoId}`    | Delete a contract.                                                     |
-| `POST`   | `/api/carrito/disponibilidad`    | Calculate availability after validating each group's maximum duration. |
-| `POST`   | `/api/avisos`                    | Create an availability watch for the authenticated user.               |
+| Method   | Route                             | Purpose                                                                     |
+| -------- | --------------------------------- | --------------------------------------------------------------------------- |
+| `GET`    | `/api/prestamos`                  | List all loans for administrators or own loans for regular users.           |
+| `GET`    | `/api/prestamos/{id}`             | Get a loan.                                                                 |
+| `POST`   | `/api/prestamos`                  | Create a loan request.                                                      |
+| `PATCH`  | `/api/prestamos/{id}/estado`      | Managers change state; owners may only cancel their pending/approved loans. |
+| `PATCH`  | `/api/prestamos/{id}/observacion` | Managers update `{ "Observacion": "..." }`, max 1024 characters; audited.   |
+| `DELETE` | `/api/prestamos/{id}`             | Soft-delete a loan.                                                         |
+| `GET`    | `/api/prestamos/elegibilidad`     | Get reservation eligibility for the authenticated user.                     |
+| `GET`    | `/api/prestamos?carnet=&estado=`  | Filter loans; non-admin users are restricted to their own carnet.           |
+| `POST`   | `/api/contratos`                  | Upload or create a contract for a loan. Multipart form data.                |
+| `GET`    | `/api/contratos/{prestamoId}`     | Get a contract by loan id.                                                  |
+| `GET`    | `/api/contratos/firmante`         | Get the authenticated contract signer name, id and signature.               |
+| `DELETE` | `/api/contratos/{prestamoId}`     | Delete a contract.                                                          |
+| `POST`   | `/api/carrito/disponibilidad`     | Calculate availability after validating each group's maximum duration.      |
+| `POST`   | `/api/avisos`                     | Create an availability watch for the authenticated user.                    |
 
 Rejection requires a nonempty `Observacion` (max 1024), stored as `MotivoRechazo`. `AutorizadoPor` records the approving actor and `EntregadoPor` the delivery actor; clients cannot supply these identities when creating loans. Pending loans precede other states; within a priority, teachers precede administrative borrowers, then students, newest request first. Priority never overrides availability.
 

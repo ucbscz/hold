@@ -2,6 +2,7 @@ using Ardalis.Result;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Application.Features.AuditLog;
+using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using ContratoEntity = IMT_Reservas.Server.Core.Entities.Contrato;
 
@@ -12,6 +13,7 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
     private readonly PrestamoReadRepository _prestamos;
     private readonly ContractHtmlProcessor _contractHtml;
     private readonly AuditLogService _audit;
+    private readonly ConfiguracionService _configuracion;
 
     public ContratoService(
         ContratoRepository repository,
@@ -19,13 +21,15 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
         IValidator<ContratoDto> validator,
         PrestamoReadRepository prestamos,
         ContractHtmlProcessor contractHtml,
-        AuditLogService audit
+        AuditLogService audit,
+        ConfiguracionService configuracion
     )
         : base(repository, validator, mapper, audit)
     {
         _prestamos = prestamos;
         _contractHtml = contractHtml;
         _audit = audit;
+        _configuracion = configuracion;
     }
 
     public async Task<Result<ContratoDto>> CreateForPrestamo(
@@ -38,7 +42,13 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
 
         try
         {
-            sanitizedHtml = _contractHtml.Sanitize(htmlContent);
+            var config = await _configuracion.GetConfiguracion(cancellationToken);
+            sanitizedHtml = _contractHtml.RenderInstitutionalSigner(
+                htmlContent,
+                config.NombreJefeCarrera,
+                config.CarnetJefeCarrera ?? "No registrado",
+                config.FirmaJefeCarreraBase64
+            );
         }
         catch (ArgumentException exception)
         {
@@ -79,6 +89,19 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
         return result;
     }
 
+    public async Task<FirmanteContratoDto> GetInstitutionalSigner(
+        CancellationToken cancellationToken = default
+    )
+    {
+        var config = await _configuracion.GetConfiguracion(cancellationToken);
+        return new FirmanteContratoDto
+        {
+            Nombre = config.NombreJefeCarrera,
+            Carnet = config.CarnetJefeCarrera ?? string.Empty,
+            FirmaBase64 = config.FirmaJefeCarreraBase64,
+        };
+    }
+
     public override async Task<Result<object>> Delete(int prestamoId)
     {
         var result = await Repository.Delete(prestamoId);
@@ -115,6 +138,13 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
         dto.ContratoHtml = _contractHtml.RenderEquipment(
             dto.ContratoHtml ?? string.Empty,
             await _prestamos.GetContractEquipment(prestamoId, cancellationToken)
+        );
+        var config = await _configuracion.GetConfiguracion(cancellationToken);
+        dto.ContratoHtml = _contractHtml.RenderInstitutionalSigner(
+            dto.ContratoHtml,
+            config.NombreJefeCarrera,
+            config.CarnetJefeCarrera ?? "No registrado",
+            config.FirmaJefeCarreraBase64
         );
 
         return Result<ContratoDto>.Success(dto);

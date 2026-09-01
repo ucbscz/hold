@@ -36,6 +36,8 @@ public sealed partial class ContractHtmlProcessor
         "style",
         "data-grupo-id",
         "data-carnet",
+        "data-contract-field",
+        "data-contract-image",
     ];
 
     private readonly HtmlSanitizer _sanitizer;
@@ -112,6 +114,43 @@ public sealed partial class ContractHtmlProcessor
         return document.Body?.InnerHtml ?? string.Empty;
     }
 
+    public string RenderInstitutionalSigner(
+        string html,
+        string name,
+        string carnet,
+        string signature
+    )
+    {
+        var document = _parser.ParseDocument($"<body>{Sanitize(html)}</body>");
+        SetText(document, "institutional-name", name);
+        SetText(document, "institutional-carnet", carnet);
+
+        foreach (var element in document.QuerySelectorAll("strong"))
+        {
+            if (element.TextContent.Trim() == "Job Angel Ledezma Pérez")
+                element.TextContent = name;
+            else if (element.TextContent.Trim() == "5268336 CB")
+                element.TextContent = carnet;
+        }
+
+        var legacyName = document.QuerySelector(".signature > div:first-child > p");
+        if (legacyName != null)
+            legacyName.TextContent = name;
+
+        if (SafeImageDataUri().IsMatch(signature))
+        {
+            foreach (var image in document.QuerySelectorAll(
+                "img[data-contract-image='institutional-signature']"
+            ))
+                image.SetAttribute("src", signature);
+
+            var legacySignature = document.QuerySelector(".signature > div:first-child > img");
+            legacySignature?.SetAttribute("src", signature);
+        }
+
+        return document.Body?.InnerHtml ?? string.Empty;
+    }
+
     private static void SetCellValue(
         IDocument document,
         string className,
@@ -128,6 +167,12 @@ public sealed partial class ContractHtmlProcessor
 
     private static string FormatOptionalCode(string? value) =>
         string.IsNullOrWhiteSpace(value) ? "No registrado" : value.Trim();
+
+    private static void SetText(IDocument document, string field, string value)
+    {
+        foreach (var element in document.QuerySelectorAll($"[data-contract-field='{field}']"))
+            element.TextContent = value;
+    }
 
     [GeneratedRegex(
         "^data:image/(?:png|jpeg|gif|webp);base64,[A-Za-z0-9+/]+={0,2}$",

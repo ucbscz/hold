@@ -110,6 +110,11 @@ export class FormularioComponent implements OnInit {
   idCarrera: number | null = null;
   nombreCarrera: string = '';
   nombreMateria: string = '';
+  private firmanteContrato: {
+    Nombre: string;
+    Carnet: string;
+    FirmaBase64: string;
+  } | null = null;
 
   constructor(
     private readonly http: HttpClient,
@@ -160,14 +165,21 @@ export class FormularioComponent implements OnInit {
     }
 
     const config = this.configuracionService.configuracionActual();
+    const nombreFirmante =
+      this.firmanteContrato?.Nombre ?? config?.NombreJefeCarrera ?? '';
+    const carnetFirmante = this.firmanteContrato?.Carnet ?? '';
 
-    const base64Firma = config?.FirmaJefeCarreraBase64 ?? '';
+    const base64Firma =
+      this.firmanteContrato?.FirmaBase64 ??
+      config?.FirmaJefeCarreraBase64 ??
+      '';
     const firmaSrc = base64Firma.startsWith('data:')
       ? base64Firma
       : `data:image/png;base64,${base64Firma}`;
 
     const processedTemplate = this.reemplazarMarcadores(this.templateCrudo, {
-      nombre_jefe_carrera: escapeHtmlValue(config?.NombreJefeCarrera ?? ''),
+      nombre_jefe_carrera: escapeHtmlValue(nombreFirmante),
+      carnet_jefe_carrera: escapeHtmlValue(carnetFirmante || 'No registrado'),
       firma_jefe_carrera: firmaSrc,
       carnet_frente: this.carnetFrente,
       carnet_atras: this.carnetAtras,
@@ -195,6 +207,18 @@ export class FormularioComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.mandarprestamo.obtenerFirmanteContrato().subscribe({
+      next: (firmante) => {
+        this.firmanteContrato = firmante;
+        this.actualizarContrato();
+      },
+      error: () => {
+        this.mensajeerror =
+          'No se pudieron cargar los datos del responsable institucional.';
+        this.error.set(true);
+      },
+    });
+
     this.route.queryParams.subscribe((params) => {
       this.destinoPrestamo = params['destino'] || 'Casa';
       this.idCarrera = params['idCarrera'] ? Number(params['idCarrera']) : null;

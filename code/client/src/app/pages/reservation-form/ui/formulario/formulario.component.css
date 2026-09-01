@@ -417,13 +417,65 @@
 .botones-container .boton {
   padding-inline: 1rem;
 }
+:host ::ng-deep .contract-identity {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #cbd5e1;
+  break-inside: avoid;
+}
+:host ::ng-deep .contract-identity > strong {
+  display: block;
+  margin-bottom: 12px;
+  color: #1f2937;
+  font-size: 0.9rem;
+  text-align: center;
+}
+:host ::ng-deep .contract-identity table {
+  table-layout: fixed;
+  margin: 0;
+  border: 0;
+}
+:host ::ng-deep .contract-identity td {
+  width: 50%;
+  padding: 12px;
+  border: 0;
+  background: #f8fafc;
+}
+:host ::ng-deep .contract-identity td + td {
+  border-left: 12px solid #fff;
+}
+:host ::ng-deep .contract-identity td p {
+  margin-bottom: 8px;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
 :host ::ng-deep .contract-identity img {
-  max-width: 100%;
-  max-height: 220px;
+  display: block;
+  width: 100%;
+  max-width: 85.6mm;
+  height: auto;
+  aspect-ratio: 85.6 / 54;
+  margin: 0 auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
   object-fit: contain;
 }
 @media (max-width: 600px) {
   .identity-upload {
     grid-template-columns: 1fr;
+  }
+
+  :host ::ng-deep .contract-identity table,
+  :host ::ng-deep .contract-identity tbody,
+  :host ::ng-deep .contract-identity tr {
+    display: table;
+    width: 100%;
+  }
+
+  :host ::ng-deep .contract-identity td {
+    display: table-cell;
   }
 }

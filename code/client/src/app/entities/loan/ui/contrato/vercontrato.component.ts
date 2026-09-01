@@ -336,8 +336,30 @@ export class VercontratoComponent
                   display: block;
                   width: 85.6mm;
                   height: 54mm;
-                  margin: 12px auto;
+                  margin: 6px auto;
+                  border: 1px solid #aaa;
+                  border-radius: 4px;
                   break-inside: avoid;
+                }
+                .contract-identity {
+                  margin-top: 18px;
+                  padding-top: 12px;
+                  border-top: 1px solid #aaa;
+                  break-inside: avoid;
+                }
+                .contract-identity > strong {
+                  display: block;
+                  margin-bottom: 8px;
+                  text-align: center;
+                }
+                .contract-identity table { margin: 0; table-layout: fixed; }
+                .contract-identity td { border: 0; padding: 8px; }
+                .contract-identity td + td { border-left: 8px solid #fff; }
+                .contract-identity td p {
+                  margin-bottom: 6px;
+                  color: #475569;
+                  font-weight: 700;
+                  text-align: center;
                 }
                 @page { margin: 15mm; }
               </style>

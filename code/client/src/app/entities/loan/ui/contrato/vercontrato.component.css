@@ -294,6 +294,59 @@
   text-align: center;
 }
 
+::ng-deep .contract-document .contract-identity {
+  margin-top: 32px;
+  padding-top: 20px;
+  border-top: 1px solid #cbd5e1;
+  break-inside: avoid;
+}
+
+::ng-deep .contract-document .contract-identity > strong {
+  display: block;
+  margin-bottom: 12px;
+  color: #1f2937;
+  font-size: 0.9rem;
+  text-align: center;
+}
+
+::ng-deep .contract-document .contract-identity table {
+  table-layout: fixed;
+  margin: 0;
+  border: 0;
+}
+
+::ng-deep .contract-document .contract-identity td {
+  width: 50%;
+  padding: 12px;
+  border: 0;
+  background: #f8fafc;
+}
+
+::ng-deep .contract-document .contract-identity td + td {
+  border-left: 12px solid #fff;
+}
+
+::ng-deep .contract-document .contract-identity td p {
+  margin-bottom: 8px;
+  color: #475569;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+::ng-deep .contract-document img[data-carnet] {
+  display: block;
+  width: 100%;
+  max-width: 85.6mm;
+  height: auto;
+  aspect-ratio: 85.6 / 54;
+  margin: 0 auto;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  background: #fff;
+  object-fit: contain;
+}
+
 @keyframes contractFadeIn {
   from {
     opacity: 0;
@@ -382,6 +435,18 @@
   ::ng-deep .contract-document .signature {
     grid-template-columns: 1fr;
     gap: 24px;
+  }
+
+  ::ng-deep .contract-document .contract-identity table,
+  ::ng-deep .contract-document .contract-identity tbody,
+  ::ng-deep .contract-document .contract-identity tr {
+    display: table;
+    width: 100%;
+  }
+
+  ::ng-deep .contract-document .contract-identity td {
+    display: table-cell;
+    white-space: normal;
   }
 }
 
@@ -474,16 +539,4 @@
   .contract-modal-footer {
     display: none;
   }
-}
-:host ::ng-deep .contract-document img[data-carnet] {
-  display: block;
-  max-width: 100%;
-  width: 320px;
-  height: 205px;
-  object-fit: contain;
-  margin: 12px auto;
-}
-:host ::ng-deep .contract-document .contract-identity {
-  table-layout: fixed;
-  break-inside: avoid;
 }
