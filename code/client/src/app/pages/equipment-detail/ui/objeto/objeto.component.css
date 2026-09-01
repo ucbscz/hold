@@ -114,12 +114,39 @@
 .equipment-resources {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  width: calc(100% - 4rem);
+  max-width: 896px;
+  margin: -0.5rem auto 2rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.equipment-resources h2,
+.equipment-resources p {
+  margin: 0;
+}
+.equipment-resources h2 {
+  font-size: 1rem;
+  font-weight: 800;
+}
+.equipment-resources p {
+  margin-top: 0.25rem;
+  color: var(--ink-secondary);
+  font-size: 0.82rem;
+}
+.equipment-resources__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
   flex-wrap: wrap;
   gap: 0.75rem;
-  margin-block: 1rem 1.5rem;
 }
 .equipment-resources .ficha-link {
+  min-height: 44px;
   margin: 0;
+  text-decoration: none;
 }
 .equipment-resources i {
   color: var(--ink-muted);
@@ -320,6 +347,19 @@
   white-space: nowrap;
 }
 @media (max-width: 480px) {
+  .equipment-resources {
+    width: calc(100% - 2rem);
+    align-items: stretch;
+    flex-direction: column;
+    margin-top: 0;
+  }
+  .equipment-resources__actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .equipment-resources__actions .btn {
+    width: 100%;
+  }
   .acciones-compra {
     flex-direction: column;
   }

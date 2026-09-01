@@ -18,6 +18,23 @@ describe('ObjetoComponent', () => {
     expect(component).toBeTruthy();
   });
 
+  it('places technical resources outside the main equipment detail', () => {
+    component.cargando = false;
+    component.producto.nombre = 'Equipo de prueba';
+    component.producto.url_data_sheet = 'https://example.com/ficha.pdf';
+    fixture.detectChanges();
+
+    const details = fixture.nativeElement.querySelector('.contenedor-objeto');
+    const resources = fixture.nativeElement.querySelector(
+      '.equipment-resources',
+    );
+    expect(resources).not.toBeNull();
+    expect(details.contains(resources)).toBeFalse();
+    expect(details.nextElementSibling).toBe(resources);
+    expect(resources.textContent).toContain('Ver componentes');
+    expect(resources.textContent).toContain('Ver ficha técnica');
+  });
+
   it('muestra el acceso para volver al inicio de comentarios cuando corresponde', () => {
     component.cargando = false;
     component.mostrarBotonSubir.set(true);

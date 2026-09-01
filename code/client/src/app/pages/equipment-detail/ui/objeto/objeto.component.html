@@ -42,22 +42,6 @@
           <dd>{{ producto.TiempoMaximoPrestamoDias }} días</dd>
         </div>
       </dl>
-      <div class="equipment-resources">
-        <button class="btn btn-secondary" (click)="mostrarComponentes = true">
-          <i class="fas fa-microchip"></i> Ver componentes
-        </button>
-
-        @if (producto.url_data_sheet) {
-          <a
-            class="ficha-link"
-            [href]="producto.url_data_sheet"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <i class="fas fa-file-alt"></i> Ver ficha técnica
-          </a>
-        }
-      </div>
       <div class="seccion-compra">
         <p class="disponibilidad-texto">
           @if (consultandoDisponibilidad) {
@@ -125,6 +109,30 @@
       </div>
     </div>
   </div>
+
+  <section class="equipment-resources" aria-labelledby="technical-info-title">
+    <div>
+      <h2 id="technical-info-title">Información técnica</h2>
+      <p>Consulta las piezas incluidas y la documentación del equipo.</p>
+    </div>
+    <div class="equipment-resources__actions">
+      <button class="btn btn-secondary" (click)="mostrarComponentes = true">
+        <i class="fas fa-microchip" aria-hidden="true"></i>
+        Ver componentes
+      </button>
+      @if (producto.url_data_sheet) {
+        <a
+          class="btn btn-secondary ficha-link"
+          [href]="producto.url_data_sheet"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <i class="fas fa-file-alt" aria-hidden="true"></i>
+          Ver ficha técnica
+        </a>
+      }
+    </div>
+  </section>
 
   <section
     #comentariosSection
