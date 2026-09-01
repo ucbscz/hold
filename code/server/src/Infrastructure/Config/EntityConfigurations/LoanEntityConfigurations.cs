@@ -61,6 +61,7 @@ internal sealed class PrestamoConfiguration : IEntityTypeConfiguration<Prestamo>
         entity.Property(e => e.DestinoPrestamo).HasMaxLength(50).HasColumnName("destino_prestamo").HasDefaultValue("Universidad");
         entity.Property(e => e.IdCarrera).HasColumnName("id_carrera");
         entity.Property(e => e.NombreMateria).HasMaxLength(255).HasColumnName("nombre_materia");
+        entity.Property(e => e.Guardado).HasColumnName("guardado").HasDefaultValue(false);
         entity.Property(e => e.EstadoEliminado).HasColumnName(DatabaseColumns.EstadoEliminado);
         entity.HasOne(e => e.Usuario).WithMany().HasForeignKey(e => e.Carnet).IsRequired();
         entity.HasOne(e => e.Contrato).WithMany().HasForeignKey(e => e.IdContrato);

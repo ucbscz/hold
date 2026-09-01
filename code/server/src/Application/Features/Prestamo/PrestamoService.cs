@@ -253,6 +253,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         var emitter = actor ?? "Sistema";
 
         await NotifyStatusChange(
+            id,
             loan.Carnet!,
             parsedState.Value,
             observacion,
@@ -282,6 +283,30 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         await Audit!.Log(AuditAccion.Editar, typeof(PrestamoEntity).Name, id.ToString(CultureInfo.InvariantCulture),
             JsonSerializer.Serialize(new { anterior = previous, observacion = loan.Observacion }));
         return await _queries.Get(id, token);
+    }
+
+    public async Task<Result<PrestamoDto>> SetSaved(
+        int id,
+        string carnet,
+        bool saved,
+        CancellationToken cancellationToken
+    )
+    {
+        var loan = await Repository.FindById(id, cancellationToken);
+
+        if (loan == null || !string.Equals(loan.Carnet, carnet, StringComparison.Ordinal))
+            return Result<PrestamoDto>.NotFound();
+
+        loan.Guardado = saved;
+        await Repository.UpdateTracked(loan, cancellationToken);
+        await Audit!.Log(
+            AuditAccion.Editar,
+            typeof(PrestamoEntity).Name,
+            id.ToString(CultureInfo.InvariantCulture),
+            saved ? "Préstamo guardado para volver a solicitar" : "Préstamo quitado de guardados"
+        );
+
+        return await _queries.Get(id, cancellationToken);
     }
 
     private static bool ReleasesAvailability(EstadoPrestamo estado) =>
@@ -371,6 +396,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
     }
 
     private async Task NotifyStatusChange(
+        int prestamoId,
         string carnet,
         EstadoPrestamo estado,
         string? observacion,
@@ -392,7 +418,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
                     string.IsNullOrWhiteSpace(observacion)
                         ? "Tu solicitud de préstamo fue aprobada. Ya puedes revisar los detalles de recogida."
                         : $"Tu solicitud de préstamo fue aprobada. Detalle: {approvalDetail}",
-                    NotificacionService.BuildEmitterDetail(emitter, approvalDetail)
+                    NotificacionService.BuildEmitterDetail(emitter, approvalDetail, prestamoId)
                 );
                 break;
             case EstadoPrestamo.Rechazado:
@@ -405,7 +431,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
                         : $"Tu solicitud de préstamo fue rechazada: {observacion}",
                     NotificacionService.BuildEmitterDetail(
                         emitter,
-                        observacion ?? "Solicitud rechazada."
+                        observacion ?? "Solicitud rechazada.",
+                        prestamoId
                     )
                 );
                 break;
@@ -417,7 +444,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
                     userMessage,
                     NotificacionService.BuildEmitterDetail(
                         emitter,
-                        observacion ?? "Equipo devuelto con observaciones."
+                        observacion ?? "Equipo devuelto con observaciones.",
+                        prestamoId
                     )
                 );
                 break;
@@ -495,6 +523,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         {
             "parcialmente_operativo" => EstadoEquipo.ParcialmenteOperativo,
             "inoperativo" => EstadoEquipo.Inoperativo,
+            "en_mantenimiento" => EstadoEquipo.EnMantenimiento,
             _ => EstadoEquipo.Operativo,
         };
 
@@ -539,7 +568,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         string estadoPrestamo,
         int page = 1,
         int pageSize = PrestamoReadRepository.MaxPageSize,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        bool? guardado = null
     )
     {
         if (string.IsNullOrEmpty(carnetUsuario))
@@ -550,7 +580,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             estadoPrestamo,
             page,
             pageSize,
-            cancellationToken
+            cancellationToken,
+            guardado
         );
     }
 
@@ -559,7 +590,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         string estadoPrestamo,
         int page = 1,
         int pageSize = PrestamoReadRepository.MaxPageSize,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        bool? guardado = null
     )
     {
 
@@ -578,7 +610,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             estado,
             page,
             pageSize,
-            cancellationToken
+            cancellationToken,
+            guardado
         );
     }
 }

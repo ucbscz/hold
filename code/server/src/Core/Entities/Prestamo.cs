@@ -20,6 +20,7 @@ public class Prestamo : Entity
     public string DestinoPrestamo { get; set; } = "Universidad";
     public int? IdCarrera { get; set; }
     public string? NombreMateria { get; set; }
+    public bool Guardado { get; set; }
 
     public Usuario? Usuario { get; set; }
     public Contrato? Contrato { get; set; }

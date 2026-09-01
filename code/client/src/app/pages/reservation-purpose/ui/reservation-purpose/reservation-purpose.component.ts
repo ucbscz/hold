@@ -9,11 +9,11 @@ import { CarritoService, LoanReturnNavigationService } from '@features/cart';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   Aviso,
-  AvisoExitoComponent,
   CustomSelectComponent,
   MostrarerrorComponent,
   OpcionSelect,
   PantallaCargaComponent,
+  ToastService,
 } from '@shared/ui';
 import { finalize } from 'rxjs';
 
@@ -25,7 +25,6 @@ type DestinoPrestamo = 'Universidad' | 'Casa' | 'Clase';
   imports: [
     ValidatedFormsModule,
     Aviso,
-    AvisoExitoComponent,
     CustomSelectComponent,
     MostrarerrorComponent,
     PantallaCargaComponent,
@@ -36,7 +35,6 @@ type DestinoPrestamo = 'Universidad' | 'Casa' | 'Clase';
 export class ReservationPurposeComponent implements OnInit {
   readonly errorVisible = signal(false);
   readonly confirmacionVisible = signal(false);
-  readonly exitoVisible = signal(false);
   readonly cargando = signal(false);
   readonly esDocente: boolean;
   destinoPrestamo: DestinoPrestamo = 'Universidad';
@@ -54,6 +52,7 @@ export class ReservationPurposeComponent implements OnInit {
     private readonly carreraService: CarreraService,
     private readonly loanReturnNavigation: LoanReturnNavigationService,
     private readonly router: Router,
+    private readonly toast: ToastService,
   ) {
     this.esDocente =
       this.usuarioService.obtenerUsuario().rol?.toLowerCase() === 'docente';
@@ -149,7 +148,8 @@ export class ReservationPurposeComponent implements OnInit {
       .subscribe({
         next: () => {
           this.carritoService.vaciarCarrito();
-          this.exitoVisible.set(true);
+          this.toast.success('El préstamo se ha realizado con éxito.');
+          void this.loanReturnNavigation.returnToPreviousPage();
         },
         error: (error) => {
           this.mensajeError = extractErrorMessage(
@@ -184,10 +184,6 @@ export class ReservationPurposeComponent implements OnInit {
       return false;
     }
     return true;
-  }
-
-  redirigirAnterior(): void {
-    void this.loanReturnNavigation.returnToPreviousPage();
   }
 
   seleccionValida(): boolean {

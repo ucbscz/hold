@@ -7,3 +7,4 @@ export * from './feedback/aviso-exito/aviso-exito.component';
 export * from './feedback/aviso/aviso.component';
 export * from './feedback/mostrarerror/mostrarerror.component';
 export * from './feedback/pantalla-carga/pantalla-carga.component';
+export * from './feedback/toast/toast.service';

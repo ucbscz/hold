@@ -158,6 +158,12 @@
                   @if (n.Contenido) {
                     <span class="notif__body">{{ n.Contenido }}</span>
                   }
+                  @if (textoAccionNotificacion(n); as textoAccion) {
+                    <span class="notif__action">
+                      {{ textoAccion }}
+                      <i class="fas fa-arrow-right" aria-hidden="true"></i>
+                    </span>
+                  }
                   @if (tieneDetalleOrganizado(n)) {
                     @if (
                       expandedNotificationId() === n.Id &&

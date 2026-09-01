@@ -1,0 +1,61 @@
+<div class="prestamos-container">
+  <div class="prestamos-list">
+    @for (item of datosPaginados | keyvalue: keepOrder; track item.key) {
+      <article class="prestamo-item">
+        <div class="item-header">
+          <div class="usuario-info">
+            <h3 class="usuario-nombre">
+              <i class="fas fa-bookmark hist-icon" aria-hidden="true"></i>
+              {{ item.value.equipos[0].NombreGrupoEquipo || 'Préstamo guardado' }}{{ item.value.equipos.length > 1 ? ' …' : '' }}
+            </h3>
+            <span class="cantidad-equipos">{{ item.value.equipos.length }} equipo{{ item.value.equipos.length === 1 ? '' : 's' }}</span>
+          </div>
+          <span class="codigo-imt">Préstamo #{{ item.key }}</span>
+        </div>
+        <div class="fechas-info">
+          <div class="fecha-item">
+            <span class="fecha-label"><i class="fas fa-calendar-days"></i> Solicitud original:</span>
+            <span class="fecha-valor">{{ item.value.datosgrupo.FechaSolicitud | date: 'dd/MM/yyyy HH:mm' : 'America/La_Paz' }}</span>
+          </div>
+          <div class="fecha-item">
+            <span class="fecha-label"><i class="fas fa-circle-info"></i> Uso:</span>
+            <span class="fecha-valor">{{ item.value.datosgrupo.DestinoPrestamo || 'No especificado' }}</span>
+          </div>
+        </div>
+        <div class="botones">
+          <app-recursos-prestamo [prestamos]="item.value.equipos" />
+          <button type="button" class="btn btn-sm btn-ghost" (click)="abrirVista(item.value.equipos)">Ver detalles</button>
+          <button
+            type="button"
+            class="btn btn-sm btn-primary"
+            [disabled]="preparando.has(item.key)"
+            (click)="prepararDeNuevo(item.key, item.value.equipos)"
+          >
+            <i class="fas fa-rotate-right" aria-hidden="true"></i>
+            {{ preparando.has(item.key) ? 'Preparando…' : 'Preparar de nuevo' }}
+          </button>
+        </div>
+      </article>
+    }
+    @if (datosFiltrados.size === 0) {
+      <div class="hist-empty">
+        <i class="far fa-bookmark"></i>
+        <strong>Aún no guardaste ningún préstamo</strong>
+        <p>Guarda una solicitud de tu historial para preparar los mismos equipos con menos pasos.</p>
+      </div>
+    }
+  </div>
+  <app-table-pagination
+    [totalItems]="totalRegistros"
+    [page]="paginaActual"
+    [pageSize]="tamanoPagina"
+    (pageChange)="cambiarPagina($event)"
+  ></app-table-pagination>
+</div>
+
+@if (abrirVistaPrestamos) {
+  <app-vista-prestamos [prestamos]="prestamosVista" (cerrar)="cerrarVista()"></app-vista-prestamos>
+}
+@if (error()) {
+  <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>
+}

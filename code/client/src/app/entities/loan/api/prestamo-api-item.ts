@@ -6,6 +6,8 @@ export interface PrestamoApiItem {
   TelefonoUsuario: string | null;
   NombreGrupoEquipo: string | null;
   CodigoImt: string | null;
+  CodigoUcb?: string | null;
+  NumeroSerial?: string | null;
   FechaSolicitud: string | Date | null;
   FechaPrestamoEsperada: string | Date | null;
   FechaPrestamo: string | Date | null;
@@ -26,4 +28,6 @@ export interface PrestamoApiItem {
   TipoUsuario?: string | null;
   IdCarrera?: number | null;
   NombreMateria?: string | null;
+  GrupoEquipoId?: number[] | null;
+  Guardado?: boolean;
 }

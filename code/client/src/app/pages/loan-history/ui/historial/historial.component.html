@@ -63,7 +63,14 @@
   </div>
 
   <div class="items-wrapper" role="tabpanel">
-    @if (item == "Activo") {
+    @if (item == "Guardados") {
+      <app-guardados
+        [filtroTexto]="filtroTexto"
+        [fechaDesde]="fechaDesde"
+        [fechaHasta]="fechaHasta"
+        [refreshTrigger]="refreshTrigger"
+      ></app-guardados>
+    } @else if (item == "Activo") {
       <app-activo
         [filtroTexto]="filtroTexto"
         [fechaDesde]="fechaDesde"

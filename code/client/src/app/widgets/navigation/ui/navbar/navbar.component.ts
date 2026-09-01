@@ -75,7 +75,7 @@ export class NavbarComponent {
       return;
     }
 
-    const isAdmin = rol === 'administrador';
+    const isAdmin = ['administrador', 'administrador_laboratorio'].includes(rol);
     const isInAdminMode = isAdmin && cleanUrl.includes('/administracion');
 
     this.showProfile.set(true);
@@ -144,10 +144,19 @@ export class NavbarComponent {
     if (!notificacion.Leido) {
       this.notifStore.marcarLeida(notificacion.Id);
     }
+    const destino = this.destinoNotificacion(notificacion);
+
+    if (destino) {
+      this.showNotifications.set(false);
+      this.expandedNotificationId.set(null);
+      void this.router.navigate([destino.ruta], {
+        queryParams: destino.estado ? { estado: destino.estado } : undefined,
+      });
+      return;
+    }
+
     this.expandedNotificationId.set(
-      this.expandedNotificationId() === notificacion.Id
-        ? null
-        : notificacion.Id,
+      this.expandedNotificationId() === notificacion.Id ? null : notificacion.Id,
     );
   }
 
@@ -229,7 +238,9 @@ export class NavbarComponent {
   }
 
   esAdministrador(): boolean {
-    return this.usuario.obtenerRol() === 'administrador';
+    return ['administrador', 'administrador_laboratorio'].includes(
+      this.usuario.obtenerRol(),
+    );
   }
 
   seleccionarTabNotificaciones(tab: 'usuario' | 'admin'): void {
@@ -297,5 +308,39 @@ export class NavbarComponent {
 
   private formatearEstadoEquipo(estado: string): string {
     return estado.replace(/_/g, ' ');
+  }
+
+  textoAccionNotificacion(notificacion: Notificacion): string | null {
+    const destino = this.destinoNotificacion(notificacion);
+    if (!destino) return null;
+    return destino.ruta === '/administracion'
+      ? 'Abrir gestión de préstamos'
+      : destino.ruta === '/inicio'
+        ? 'Buscar equipos disponibles'
+        : 'Ver en mi historial';
+  }
+
+  private destinoNotificacion(notificacion: Notificacion): {
+    ruta: string;
+    estado?: string;
+  } | null {
+    switch (notificacion.Tipo) {
+      case 'PrestamoAprobado':
+        return { ruta: '/historial', estado: 'aprobado' };
+      case 'PrestamoRechazado':
+        return { ruta: '/historial', estado: 'rechazado' };
+      case 'PrestamoAtrasado':
+        return { ruta: '/historial', estado: 'atrasado' };
+      case 'RecordatorioDevolucion':
+      case 'EquipoObservacion':
+        return { ruta: '/historial' };
+      case 'DisponibilidadLiberada':
+        return { ruta: '/inicio' };
+      case 'AdminNuevoPrestamo':
+      case 'AdminPrestamoAtrasado':
+        return { ruta: '/administracion' };
+      default:
+        return null;
+    }
   }
 }

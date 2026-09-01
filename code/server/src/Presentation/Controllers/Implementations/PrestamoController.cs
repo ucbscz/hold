@@ -19,6 +19,7 @@ public class PrestamoController : Controller
     public async Task<IActionResult> GetAll(
         [FromQuery] string? carnet = null,
         [FromQuery] string? estado = null,
+        [FromQuery] bool? guardado = null,
         [FromQuery] int pagina = 1,
         [FromQuery] int tamanoPagina = PrestamoReadRepository.MaxPageSize,
         CancellationToken cancellationToken = default
@@ -33,7 +34,8 @@ public class PrestamoController : Controller
                         string.Empty,
                         pagina,
                         tamanoPagina,
-                        cancellationToken
+                        cancellationToken,
+                        guardado
                     )
                 );
 
@@ -43,7 +45,8 @@ public class PrestamoController : Controller
                     estado ?? string.Empty,
                     pagina,
                     tamanoPagina,
-                    cancellationToken
+                    cancellationToken,
+                    guardado
                 )
             );
         }
@@ -54,7 +57,8 @@ public class PrestamoController : Controller
                 estado ?? string.Empty,
                 pagina,
                 tamanoPagina,
-                cancellationToken
+                cancellationToken,
+                guardado
             )
         );
     }
@@ -126,5 +130,19 @@ public class PrestamoController : Controller
     [HttpPatch("{id:int}/observacion")]
     public async Task<IActionResult> UpdateObservation(int id, [FromBody] PrestamoDto dto, CancellationToken token) =>
         ToResponse(await _service.UpdateObservation(id, dto.Observacion, token));
+
+    [HttpPatch("{id:int}/guardado")]
+    public async Task<IActionResult> SetSaved(
+        int id,
+        [FromBody] PrestamoDto dto,
+        CancellationToken cancellationToken
+    ) => ToResponse(
+        await _service.SetSaved(
+            id,
+            User.Identity?.Name ?? string.Empty,
+            dto.Guardado,
+            cancellationToken
+        )
+    );
 
 }

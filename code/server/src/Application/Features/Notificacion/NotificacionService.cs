@@ -77,12 +77,17 @@ public class NotificacionService
         return Result<object>.Success(null!);
     }
 
-    public static string BuildEmitterDetail(string emitter, string? reason = null) =>
+    public static string BuildEmitterDetail(
+        string emitter,
+        string? reason = null,
+        int? prestamoId = null
+    ) =>
         JsonSerializer.Serialize(
             new
             {
                 emisor = string.IsNullOrWhiteSpace(emitter) ? "Sistema" : emitter,
                 motivo = reason,
+                prestamoId,
                 fecha = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
             }
         );

@@ -20,6 +20,8 @@ public class PrestamoDto
     public int? IdContrato { get; set; }
     public string? NombreGrupoEquipo { get; set; }
     public string? CodigoImt { get; set; }
+    public string? CodigoUcb { get; set; }
+    public string? NumeroSerial { get; set; }
     public string? UbicacionEquipo { get; set; }
     public string? NombreGavetero { get; set; }
     public string? NombreMueble { get; set; }
@@ -33,4 +35,5 @@ public class PrestamoDto
     public int? IdCarrera { get; set; }
     public string? NombreMateria { get; set; }
     public string? TipoUsuario { get; set; }
+    public bool Guardado { get; set; }
 }

@@ -18,9 +18,9 @@ import { extractErrorMessage } from '@shared/lib/error';
 import { escapeHtmlValue } from '@shared/lib/html';
 import {
   Aviso,
-  AvisoExitoComponent,
   MostrarerrorComponent,
   PantallaCargaComponent,
+  ToastService,
 } from '@shared/ui';
 import { finalize } from 'rxjs';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -37,7 +37,6 @@ const SERVER_ERROR_STATUS = 500;
     MostrarerrorComponent,
     PantallaCargaComponent,
     Aviso,
-    AvisoExitoComponent,
   ],
   templateUrl: './formulario.component.html',
   styleUrl: './formulario.component.css',
@@ -102,10 +101,6 @@ export class FormularioComponent implements OnInit {
   aviso: WritableSignal<boolean> = signal(false);
   mensajeaviso: string =
     'Aviso desconocido , si ve esto es un error , avise al soporte si puede o intente mas tarde';
-  avisoexito: WritableSignal<boolean> = signal(false);
-  mensajeexito: string =
-    'Aviso de exito desconocido , si ve esto es un error , avise al soporte si puede o intente mas tarde';
-
   destinoPrestamo: string = 'Casa';
   idCarrera: number | null = null;
   nombreCarrera: string = '';
@@ -126,6 +121,7 @@ export class FormularioComponent implements OnInit {
     private readonly route: ActivatedRoute,
     private readonly router: Router,
     private readonly configuracionService: ConfiguracionService,
+    private readonly toast: ToastService,
   ) {}
 
   templateCrudo: string = '';
@@ -337,9 +333,9 @@ export class FormularioComponent implements OnInit {
       .pipe(finalize(() => (this.cargando = false)))
       .subscribe({
         next: (_response) => {
-          this.mensajeexito = 'El préstamo ha sido creado exitosamente.';
-          this.avisoexito.set(true);
           this.carrito.vaciarCarrito();
+          this.toast.success('El préstamo se ha realizado con éxito.');
+          void this.loanReturnNavigation.returnToPreviousPage();
         },
         error: (error) => {
           this.error.set(true);
@@ -358,10 +354,6 @@ export class FormularioComponent implements OnInit {
           }
         },
       });
-  }
-
-  redirigirAnterior(): void {
-    void this.loanReturnNavigation.returnToPreviousPage();
   }
 
   volverAlDestino(): void {

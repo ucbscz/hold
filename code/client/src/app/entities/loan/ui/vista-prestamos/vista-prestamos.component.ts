@@ -19,4 +19,25 @@ export class VistaPrestamosComponent {
     const obs = this.prestamos[0]?.Observacion?.trim();
     return obs && obs.toLowerCase() !== 'string' ? obs : 'Sin observación';
   }
+
+  get prestamoPrincipal(): PrestamoDto | null {
+    return this.prestamos[0] ?? null;
+  }
+
+  get nombreSolicitante(): string {
+    const prestamo = this.prestamoPrincipal;
+    if (!prestamo) return 'Sin solicitante registrado';
+
+    return (
+      [prestamo.NombreUsuario, prestamo.ApellidoPaternoUsuario]
+        .filter(Boolean)
+        .join(' ') ||
+      prestamo.CarnetUsuario ||
+      'Sin solicitante registrado'
+    );
+  }
+
+  get estado(): string {
+    return this.prestamoPrincipal?.EstadoPrestamo || 'Sin estado';
+  }
 }

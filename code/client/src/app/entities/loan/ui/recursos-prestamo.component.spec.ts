@@ -45,10 +45,10 @@ describe('RecursosPrestamoComponent', () => {
       Object.assign(new PrestamoDto(), {
         EstadoPrestamo: 'activo',
         NombreGrupoEquipo: 'Sensor',
-        Ubicacion_Equipo: 'Laboratorio',
-        Nombre_Mueble: 'Mueble 1',
-        Nombre_Gavetero: 'Gaveta 2',
-        Administrador_Ambiente: 'Fernando Terrazas',
+        UbicacionEquipo: 'Laboratorio',
+        NombreMueble: 'Mueble 1',
+        NombreGavetero: 'Gaveta 2',
+        AdministradorAmbiente: 'Fernando Terrazas',
       }),
     ];
     fixture.detectChanges();

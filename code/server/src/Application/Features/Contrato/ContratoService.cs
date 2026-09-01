@@ -139,13 +139,6 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
             dto.ContratoHtml ?? string.Empty,
             await _prestamos.GetContractEquipment(prestamoId, cancellationToken)
         );
-        var config = await _configuracion.GetConfiguracion(cancellationToken);
-        dto.ContratoHtml = _contractHtml.RenderInstitutionalSigner(
-            dto.ContratoHtml,
-            config.NombreJefeCarrera,
-            config.CarnetJefeCarrera ?? "No registrado",
-            config.FirmaJefeCarreraBase64
-        );
 
         return Result<ContratoDto>.Success(dto);
     }

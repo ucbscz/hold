@@ -1,6 +1,8 @@
 import { Component, Input, signal } from '@angular/core';
 import { PrestamoDto } from '@entities/admin';
 import { VercontratoComponent } from './contrato/vercontrato.component';
+import { PrestamosAPIService } from '../api/prestamos-api.service';
+import { ToastService } from '@shared/ui';
 
 @Component({
   selector: 'app-recursos-prestamo',
@@ -22,6 +24,17 @@ import { VercontratoComponent } from './contrato/vercontrato.component';
         (click)="ubicacion.showModal()"
       >
         <i class="fas fa-location-dot" aria-hidden="true"></i> Ver ubicación
+      </button>
+    }
+    @if (prestamos.length) {
+      <button
+        type="button"
+        class="btn btn-sm btn-ghost"
+        [disabled]="actualizandoGuardado()"
+        (click)="alternarGuardado()"
+      >
+        <i [class]="estaGuardado ? 'fas fa-bookmark' : 'far fa-bookmark'" aria-hidden="true"></i>
+        {{ estaGuardado ? 'Quitar de guardados' : 'Guardar para repetir' }}
       </button>
     }
     @if (contratoVisible() && prestamos.length) {
@@ -50,34 +63,40 @@ import { VercontratoComponent } from './contrato/vercontrato.component';
               @if (equipo.CodigoImt) {
                 <span>IMT {{ equipo.CodigoImt }}</span>
               }
+              @if (equipo.CodigoUcb) {
+                <span>UCB {{ equipo.CodigoUcb }}</span>
+              }
+              @if (equipo.NumeroSerial) {
+                <span>Serie {{ equipo.NumeroSerial }}</span>
+              }
             </h3>
             <dl>
               <div>
                 <dt>Ambiente</dt>
                 <dd>
-                  {{ equipo.Ubicacion_Equipo || 'Sin ambiente asignado' }}
+                  {{ equipo.UbicacionEquipo || 'Sin ambiente asignado' }}
                 </dd>
               </div>
               <div>
                 <dt>Mueble</dt>
-                <dd>{{ equipo.Nombre_Mueble || 'Sin mueble asignado' }}</dd>
+                <dd>{{ equipo.NombreMueble || 'Sin mueble asignado' }}</dd>
               </div>
               <div>
                 <dt>Gavetero</dt>
-                <dd>{{ equipo.Nombre_Gavetero || 'Sin gavetero asignado' }}</dd>
+                <dd>{{ equipo.NombreGavetero || 'Sin gavetero asignado' }}</dd>
               </div>
               <div>
                 <dt>Administrador de laboratorio</dt>
                 <dd>
                   {{
-                    equipo.Administrador_Ambiente || 'Sin responsable asignado'
+                    equipo.AdministradorAmbiente || 'Sin responsable asignado'
                   }}
                 </dd>
               </div>
-              @if (equipo.Ubicacion_Mueble) {
+              @if (equipo.UbicacionMueble) {
                 <div>
                   <dt>Referencia</dt>
-                  <dd>{{ equipo.Ubicacion_Mueble }}</dd>
+                  <dd>{{ equipo.UbicacionMueble }}</dd>
                 </div>
               }
             </dl>
@@ -173,6 +192,38 @@ import { VercontratoComponent } from './contrato/vercontrato.component';
 export class RecursosPrestamoComponent {
   @Input() prestamos: PrestamoDto[] = [];
   readonly contratoVisible = signal(false);
+  readonly actualizandoGuardado = signal(false);
+
+  constructor(
+    private readonly prestamosApi: PrestamosAPIService,
+    private readonly toast: ToastService,
+  ) {}
+
+  get estaGuardado(): boolean {
+    return this.prestamos[0]?.Guardado ?? false;
+  }
+
+  alternarGuardado(): void {
+    const id = this.prestamos[0]?.Id;
+    if (!id || this.actualizandoGuardado()) return;
+
+    const nuevoEstado = !this.estaGuardado;
+    this.actualizandoGuardado.set(true);
+    this.prestamosApi.actualizarGuardado(id, nuevoEstado).subscribe({
+      next: () => {
+        for (const prestamo of this.prestamos) prestamo.Guardado = nuevoEstado;
+        this.toast.success(
+          nuevoEstado
+            ? 'Préstamo guardado. Podrás prepararlo de nuevo desde tu historial.'
+            : 'Préstamo quitado de guardados.',
+        );
+        this.actualizandoGuardado.set(false);
+      },
+      error: () => {
+        this.actualizandoGuardado.set(false);
+      },
+    });
+  }
   get tieneContrato(): boolean {
     return this.prestamos.some((p) => Number(p.IdContrato) > 0);
   }

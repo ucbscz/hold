@@ -22,6 +22,8 @@ export class PrestamosAPIService {
       TelefonoUsuario: item.TelefonoUsuario,
       NombreGrupoEquipo: item.NombreGrupoEquipo,
       CodigoImt: item.CodigoImt,
+      CodigoUcb: item.CodigoUcb ?? null,
+      NumeroSerial: item.NumeroSerial ?? null,
       FechaSolicitud: item.FechaSolicitud
         ? new Date(item.FechaSolicitud)
         : null,
@@ -41,15 +43,17 @@ export class PrestamosAPIService {
       EntregadoPor: item.EntregadoPor,
       EstadoPrestamo: item.EstadoPrestamo,
       IdContrato: item.IdContrato,
-      Ubicacion_Equipo: item.UbicacionEquipo ?? null,
-      Nombre_Gavetero: item.NombreGavetero ?? null,
-      Nombre_Mueble: item.NombreMueble ?? null,
-      Ubicacion_Mueble: item.UbicacionMueble ?? null,
-      Administrador_Ambiente: item.AdministradorAmbiente ?? null,
+      UbicacionEquipo: item.UbicacionEquipo ?? null,
+      NombreGavetero: item.NombreGavetero ?? null,
+      NombreMueble: item.NombreMueble ?? null,
+      UbicacionMueble: item.UbicacionMueble ?? null,
+      AdministradorAmbiente: item.AdministradorAmbiente ?? null,
       TipoUsuario: item.TipoUsuario ?? null,
       DestinoPrestamo: item.DestinoPrestamo,
       IdCarrera: item.IdCarrera ?? null,
       NombreMateria: item.NombreMateria ?? null,
+      GrupoEquipoId: item.GrupoEquipoId ?? [],
+      Guardado: item.Guardado ?? false,
     };
   }
 
@@ -142,8 +146,23 @@ export class PrestamosAPIService {
     });
   }
 
-  obtenerPrestamosPorUsuario(carnet: string, estadoPrestamo: string) {
-    const APIurl = `${this.url}?carnet=${encodeURIComponent(carnet)}&estado=${encodeURIComponent(estadoPrestamo)}`;
+  actualizarGuardado(id: number, guardado: boolean) {
+    return this.http.patch(`${this.url}/${id}/guardado`, {
+      Guardado: guardado,
+    });
+  }
+
+  obtenerPrestamosPorUsuario(
+    carnet: string,
+    estadoPrestamo: string,
+    guardado?: boolean,
+  ) {
+    const params = new URLSearchParams({
+      carnet,
+      estado: estadoPrestamo,
+    });
+    if (guardado !== undefined) params.set('guardado', String(guardado));
+    const APIurl = `${this.url}?${params.toString()}`;
     return this.http
       .get<ApiResponse<PrestamoApiItem[]> | PrestamoApiItem[]>(APIurl)
       .pipe(

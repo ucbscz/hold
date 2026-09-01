@@ -1,72 +1,123 @@
-<div class="form-container adaptativo">
-  <button class="btn-close" (click)="cerrarVista()">
-    <img src="assets/x.png" alt="Cerrar" />
-  </button>
-  <div class="tabla-wrapper">
-    <table class="vista-table">
-      <thead>
-        <tr>
-          <th>Equipo</th>
-          <th>Codigo IMT</th>
-          <th>Ubicación para recoger</th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (prestamo of prestamos; track $index) {
-          <tr>
-            <td>{{ prestamo.NombreGrupoEquipo }}</td>
-            <td>{{ prestamo.CodigoImt || "Pendiente de asignación" }}</td>
-            <td>
-              <strong>{{
-                prestamo.Ubicacion_Equipo || "Ambiente sin asignar"
-              }}</strong>
-              @if (prestamo.Nombre_Mueble) {
-                <span>{{ prestamo.Nombre_Mueble }}</span>
-              }
-              @if (prestamo.Nombre_Gavetero) {
-                <span>{{ prestamo.Nombre_Gavetero }}</span>
-              }
-            </td>
-          </tr>
+<article class="loan-detail" role="dialog" aria-modal="true" aria-labelledby="loan-detail-title">
+  <header class="loan-detail__header">
+    <div class="loan-detail__heading">
+      <span class="loan-detail__icon" aria-hidden="true"><i class="fas fa-handshake"></i></span>
+      <div>
+        <h2 id="loan-detail-title">Detalle del préstamo</h2>
+        @if (prestamoPrincipal?.Id) {
+          <p>Solicitud #{{ prestamoPrincipal?.Id }}</p>
         }
-      </tbody>
-    </table>
-  </div>
-  @if (prestamos.length > 0) {
-    @if (prestamos[0].IdContrato) {
-      <button class="btn btn-secondary" (click)="contratoVisible.set(true)">
-        <i class="fas fa-file-signature" aria-hidden="true"></i> Ver y descargar
-        contrato
-      </button>
-    }
-    <dl class="loan-actors">
-      <dt>Responsable del ambiente</dt>
-      <dd>
-        {{ prestamos[0].Administrador_Ambiente || "Sin responsable asignado" }}
-      </dd>
-      <dt>Solicitante</dt>
-      <dd>
-        {{ prestamos[0].NombreUsuario }}
-        {{ prestamos[0].ApellidoPaternoUsuario }}
-      </dd>
-      <dt>Autorizado y aprobado por</dt>
-      <dd>{{ prestamos[0].AutorizadoPor || "Sin autorización registrada" }}</dd>
-      <dt>Entregado por</dt>
-      <dd>{{ prestamos[0].EntregadoPor || "Sin entrega registrada" }}</dd>
-      @if (prestamos[0].MotivoRechazo) {
-        <dt>Motivo del rechazo</dt>
-        <dd>{{ prestamos[0].MotivoRechazo }}</dd>
-      }
-    </dl>
-    <div class="observacion-general">
-      <span class="obs-label">Observaciones del préstamo:</span>
-      <p class="obs-texto">{{ observacionTexto() }}</p>
+      </div>
     </div>
-  }
-</div>
+    <span class="status-badge">{{ estado }}</span>
+    <button type="button" class="modal-close-btn" aria-label="Cerrar detalle del préstamo" (click)="cerrarVista()">
+      <i class="fas fa-times" aria-hidden="true"></i>
+    </button>
+  </header>
+
+  <div class="loan-detail__body">
+    <section class="detail-section" aria-labelledby="equipment-title">
+      <div class="section-heading">
+        <div>
+          <h3 id="equipment-title">Equipos y ubicación de recogida</h3>
+          <p>{{ prestamos.length }} equipo{{ prestamos.length === 1 ? '' : 's' }} asignado{{ prestamos.length === 1 ? '' : 's' }}</p>
+        </div>
+        @if (prestamoPrincipal?.IdContrato) {
+          <button type="button" class="btn btn-secondary" (click)="contratoVisible.set(true)">
+            <i class="fas fa-file-signature" aria-hidden="true"></i>
+            Ver contrato
+          </button>
+        }
+      </div>
+
+      <div class="equipment-list">
+        @for (prestamo of prestamos; track $index) {
+          <article class="equipment-item">
+            <div class="equipment-item__identity">
+              <span class="equipment-item__index">{{ $index + 1 }}</span>
+              <div>
+                <h4>{{ prestamo.NombreGrupoEquipo || 'Equipo sin nombre' }}</h4>
+                <div class="equipment-codes" aria-label="Códigos de identificación">
+                  <span><strong>IMT</strong> {{ prestamo.CodigoImt || 'No asignado' }}</span>
+                  @if (prestamo.CodigoUcb) {
+                    <span><strong>UCB</strong> {{ prestamo.CodigoUcb }}</span>
+                  }
+                  @if (prestamo.NumeroSerial) {
+                    <span><strong>Serie</strong> {{ prestamo.NumeroSerial }}</span>
+                  }
+                </div>
+              </div>
+            </div>
+            <div class="location-path">
+              <div>
+                <span>Ambiente</span>
+                <strong>{{ prestamo.UbicacionEquipo || 'Sin ambiente asignado' }}</strong>
+              </div>
+              <i class="fas fa-chevron-right" aria-hidden="true"></i>
+              <div>
+                <span>Mueble</span>
+                <strong>{{ prestamo.NombreMueble || 'Sin mueble asignado' }}</strong>
+              </div>
+              <i class="fas fa-chevron-right" aria-hidden="true"></i>
+              <div>
+                <span>Gavetero</span>
+                <strong>{{ prestamo.NombreGavetero || 'Sin gavetero asignado' }}</strong>
+              </div>
+            </div>
+            @if (prestamo.UbicacionMueble) {
+              <p class="location-reference">
+                <i class="fas fa-location-dot" aria-hidden="true"></i>
+                {{ prestamo.UbicacionMueble }}
+              </p>
+            }
+          </article>
+        }
+      </div>
+    </section>
+
+    @if (prestamoPrincipal) {
+      <section class="detail-section" aria-labelledby="people-title">
+        <h3 id="people-title">Personas responsables</h3>
+        <dl class="people-grid">
+          <div>
+            <dt>Solicitante</dt>
+            <dd>{{ nombreSolicitante }}</dd>
+            @if (prestamoPrincipal.CarnetUsuario) {
+              <small>C.I. {{ prestamoPrincipal.CarnetUsuario }}</small>
+            }
+          </div>
+          <div>
+            <dt>Responsable del ambiente</dt>
+            <dd>{{ prestamoPrincipal.AdministradorAmbiente || 'Sin responsable asignado' }}</dd>
+          </div>
+          <div>
+            <dt>Autorizado por</dt>
+            <dd>{{ prestamoPrincipal.AutorizadoPor || 'Pendiente de autorización' }}</dd>
+          </div>
+          <div>
+            <dt>Entregado por</dt>
+            <dd>{{ prestamoPrincipal.EntregadoPor || 'Pendiente de entrega' }}</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="detail-section notes-section" aria-labelledby="notes-title">
+        <h3 id="notes-title">Anotaciones</h3>
+        @if (prestamoPrincipal.MotivoRechazo) {
+          <div class="note note--danger">
+            <strong>Motivo del rechazo</strong>
+            <p>{{ prestamoPrincipal.MotivoRechazo }}</p>
+          </div>
+        }
+        <div class="note">
+          <strong>Observaciones del préstamo</strong>
+          <p>{{ observacionTexto() }}</p>
+        </div>
+      </section>
+    }
+  </div>
+</article>
+
 @if (contratoVisible() && prestamos.length) {
-  <app-vercontrato
-    [vercontraro]="contratoVisible"
-    [idprestamo]="prestamos[0].Id"
-  />
+  <app-vercontrato [vercontraro]="contratoVisible" [idprestamo]="prestamos[0].Id" />
 }

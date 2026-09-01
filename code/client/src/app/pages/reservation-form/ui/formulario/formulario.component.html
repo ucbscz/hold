@@ -162,10 +162,3 @@
     (aceptar)="confirmarprestamo()"
   ></app-aviso>
 }
-@if (avisoexito()) {
-  <app-aviso-exito
-    [exito]="avisoexito"
-    [mensaje]="mensajeexito"
-    (accion)="redirigirAnterior()"
-  ></app-aviso-exito>
-}

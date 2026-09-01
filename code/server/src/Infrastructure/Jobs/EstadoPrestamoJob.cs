@@ -272,6 +272,7 @@ public class EstadoPrestamoJob
             new
             {
                 emisor = "Sistema",
+                prestamoId = loan.Id,
                 carnet = loan.CarnetUsuario,
                 producto = loan.NombreGrupoEquipo,
                 motivo,

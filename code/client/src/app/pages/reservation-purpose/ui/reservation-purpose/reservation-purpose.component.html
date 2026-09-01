@@ -117,14 +117,6 @@
   ></app-aviso>
 }
 
-@if (exitoVisible()) {
-  <app-aviso-exito
-    [exito]="exitoVisible"
-    mensaje="El préstamo se ha realizado con éxito."
-    (accion)="redirigirAnterior()"
-  ></app-aviso-exito>
-}
-
 @if (cargando()) {
   <app-pantalla-carga></app-pantalla-carga>
 }

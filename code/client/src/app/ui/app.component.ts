@@ -9,7 +9,11 @@ import {
   RouterOutlet,
 } from '@angular/router';
 import { LoanReturnNavigationService } from '@features/cart';
-import { PantallaCargaComponent } from '@shared/ui';
+import {
+  AvisoExitoComponent,
+  PantallaCargaComponent,
+  ToastService,
+} from '@shared/ui';
 import { NavbarComponent } from '@widgets/navigation';
 
 @Component({
@@ -20,6 +24,7 @@ import { NavbarComponent } from '@widgets/navigation';
     NavbarComponent,
     RouterOutlet,
     PantallaCargaComponent,
+    AvisoExitoComponent,
     CommonModule,
   ],
 })
@@ -29,6 +34,7 @@ export class AppComponent {
   constructor(
     private readonly router: Router,
     private readonly loanReturnNavigation: LoanReturnNavigationService,
+    readonly toast: ToastService,
   ) {
     this.router.events.subscribe((event) => {
       if (event instanceof NavigationStart) {

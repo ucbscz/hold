@@ -6,3 +6,10 @@
 @if (cargando()) {
   <app-pantalla-carga></app-pantalla-carga>
 }
+
+@if (toast.visible()) {
+  <app-aviso-exito
+    [exito]="toast.visible"
+    [mensaje]="toast.message()"
+  ></app-aviso-exito>
+}

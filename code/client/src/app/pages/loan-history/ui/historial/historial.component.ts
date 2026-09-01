@@ -1,5 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { FlatpickrDirective } from '@shared/lib/directives';
 import { OpcionSelect } from '@shared/ui';
 import flatpickr from 'flatpickr';
@@ -10,6 +11,8 @@ import { CanceladoComponent } from './cancelado/cancelado.component';
 import { FinalizadoComponent } from './finalizado/finalizado.component';
 import { PendienteComponent } from './pendiente/pendiente.component';
 import { RechazadoComponent } from './rechazado/rechazado.component';
+import { GuardadosComponent } from './guardados/guardados.component';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-historial',
@@ -21,6 +24,7 @@ import { RechazadoComponent } from './rechazado/rechazado.component';
     FinalizadoComponent,
     PendienteComponent,
     RechazadoComponent,
+    GuardadosComponent,
     FormsModule,
     FlatpickrDirective,
   ],
@@ -30,6 +34,7 @@ import { RechazadoComponent } from './rechazado/rechazado.component';
 export class HistorialComponent implements OnInit, OnDestroy {
   readonly estados: OpcionSelect[] = [
     { value: 'Pendiente', label: 'Pendientes' },
+    { value: 'Guardados', label: 'Guardados' },
     { value: 'Activo', label: 'Activos' },
     { value: 'Aprobado', label: 'Aprobados' },
     { value: 'Rechazado', label: 'Rechazados' },
@@ -45,8 +50,18 @@ export class HistorialComponent implements OnInit, OnDestroy {
   fpDesde?: flatpickr.Instance;
   fpHasta?: flatpickr.Instance;
   private pollInterval?: ReturnType<typeof setInterval>;
+  private querySubscription?: Subscription;
+
+  constructor(private readonly route: ActivatedRoute) {}
 
   ngOnInit(): void {
+    this.querySubscription = this.route.queryParamMap.subscribe((params) => {
+      const requestedState = params.get('estado')?.toLowerCase();
+      const match = this.estados.find(
+        (estado) => String(estado.value).toLowerCase() === requestedState,
+      );
+      if (match) this.item = String(match.value);
+    });
     this.pollInterval = setInterval(() => {
       if (!document.hidden) this.refreshTrigger++;
     }, 30000);
@@ -54,6 +69,7 @@ export class HistorialComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     if (this.pollInterval) clearInterval(this.pollInterval);
+    this.querySubscription?.unsubscribe();
   }
 
   seleccionarEstado(valor: unknown): void {

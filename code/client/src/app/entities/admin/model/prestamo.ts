@@ -6,6 +6,8 @@ export class PrestamoDto extends BaseModel {
   TelefonoUsuario: string | null = null;
   NombreGrupoEquipo: string | null = null;
   CodigoImt: string | null = null;
+  CodigoUcb: string | null = null;
+  NumeroSerial: string | null = null;
   FechaSolicitud: Date | null = null;
   FechaPrestamoEsperada: Date | null = null;
   FechaPrestamo: Date | null = null;
@@ -16,16 +18,18 @@ export class PrestamoDto extends BaseModel {
   AutorizadoPor?: string | null = null;
   EntregadoPor?: string | null = null;
   EstadoPrestamo: string | null = null;
-  Ubicacion_Equipo: string | null = null;
-  Nombre_Gavetero: string | null = null;
-  Nombre_Mueble: string | null = null;
-  Ubicacion_Mueble: string | null = null;
-  Administrador_Ambiente: string | null = null;
+  UbicacionEquipo: string | null = null;
+  NombreGavetero: string | null = null;
+  NombreMueble: string | null = null;
+  UbicacionMueble: string | null = null;
+  AdministradorAmbiente: string | null = null;
   IdContrato: string | null = null;
   TipoUsuario: string | null = null;
   DestinoPrestamo: string | null = null;
   IdCarrera: number | null = null;
   NombreMateria: string | null = null;
+  GrupoEquipoId: number[] = [];
+  Guardado = false;
   constructor() {
     super();
     this.CarnetUsuario = null;
@@ -34,6 +38,8 @@ export class PrestamoDto extends BaseModel {
     this.TelefonoUsuario = null;
     this.NombreGrupoEquipo = null;
     this.CodigoImt = null;
+    this.CodigoUcb = null;
+    this.NumeroSerial = null;
     this.FechaSolicitud = null;
     this.FechaPrestamoEsperada = null;
     this.FechaPrestamo = null;
@@ -42,14 +48,16 @@ export class PrestamoDto extends BaseModel {
     this.Observacion = null;
     this.EstadoPrestamo = null;
     this.IdContrato = null;
-    this.Ubicacion_Equipo = null;
-    this.Nombre_Gavetero = null;
-    this.Nombre_Mueble = null;
-    this.Ubicacion_Mueble = null;
-    this.Administrador_Ambiente = null;
+    this.UbicacionEquipo = null;
+    this.NombreGavetero = null;
+    this.NombreMueble = null;
+    this.UbicacionMueble = null;
+    this.AdministradorAmbiente = null;
     this.TipoUsuario = null;
     this.DestinoPrestamo = null;
     this.IdCarrera = null;
     this.NombreMateria = null;
+    this.GrupoEquipoId = [];
+    this.Guardado = false;
   }
 }

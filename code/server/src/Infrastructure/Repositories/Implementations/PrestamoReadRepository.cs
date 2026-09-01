@@ -61,7 +61,8 @@ public sealed class PrestamoReadRepository
         EstadoPrestamo? estado,
         int page = 1,
         int pageSize = MaxPageSize,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        bool? guardado = null
     )
     {
         var safePageSize = Math.Clamp(pageSize, 1, MaxPageSize);
@@ -72,7 +73,8 @@ public sealed class PrestamoReadRepository
                 estado,
                 (safePage - 1) * safePageSize,
                 safePageSize,
-                cancellationToken
+                cancellationToken,
+                guardado
             )
         );
     }
@@ -82,7 +84,8 @@ public sealed class PrestamoReadRepository
         EstadoPrestamo? estado,
         int offset,
         int limit,
-        CancellationToken cancellationToken = default
+        CancellationToken cancellationToken = default,
+        bool? guardado = null
     )
     {
         var safeOffset = Math.Max(0, offset);
@@ -95,6 +98,9 @@ public sealed class PrestamoReadRepository
         if (estado.HasValue)
             query = query.Where(loan => loan.EstadoPrestamo == estado.Value);
 
+        if (guardado.HasValue)
+            query = query.Where(loan => loan.Guardado == guardado.Value);
+
         var pageIds = await (
             from loan in query
             join user in _dbContext.Usuarios.AsNoTracking().IgnoreQueryFilters()
@@ -106,7 +112,11 @@ public sealed class PrestamoReadRepository
                 (loan.EstadoPrestamo == EstadoPrestamo.Finalizado
                     || loan.EstadoPrestamo == EstadoPrestamo.Cancelado
                     || loan.EstadoPrestamo == EstadoPrestamo.Rechazado) ? 1 : 0,
-                user != null && user.Rol == TipoUsuario.Docente ? 0 : user != null && user.Rol == TipoUsuario.Administrativo ? 1 : 2,
+                user != null && user.Rol == TipoUsuario.Administrador ? 0
+                    : user != null && user.Rol == TipoUsuario.Administrador_Laboratorio ? 1
+                    : user != null && user.Rol == TipoUsuario.Docente ? 2
+                    : user != null && user.Rol == TipoUsuario.Administrativo ? 3
+                    : 4,
                 loan.FechaSolicitud descending,
                 loan.Id descending
             select loan.Id
@@ -256,7 +266,11 @@ public sealed class PrestamoReadRepository
                 (prestamo.EstadoPrestamo == EstadoPrestamo.Finalizado
                     || prestamo.EstadoPrestamo == EstadoPrestamo.Cancelado
                     || prestamo.EstadoPrestamo == EstadoPrestamo.Rechazado) ? 1 : 0,
-                usuario != null && usuario.Rol == TipoUsuario.Docente ? 0 : usuario != null && usuario.Rol == TipoUsuario.Administrativo ? 1 : 2,
+                usuario != null && usuario.Rol == TipoUsuario.Administrador ? 0
+                    : usuario != null && usuario.Rol == TipoUsuario.Administrador_Laboratorio ? 1
+                    : usuario != null && usuario.Rol == TipoUsuario.Docente ? 2
+                    : usuario != null && usuario.Rol == TipoUsuario.Administrativo ? 3
+                    : 4,
                 prestamo.FechaSolicitud descending,
                 prestamo.Id descending
             select new
@@ -281,8 +295,12 @@ public sealed class PrestamoReadRepository
                 prestamo.DestinoPrestamo,
                 prestamo.IdCarrera,
                 prestamo.NombreMateria,
+                prestamo.Guardado,
+                GrupoEquipoId = detalle != null ? (int?)detalle.IdGrupoEquipo : null,
                 NombreGrupoEquipo = grupoReserva != null ? grupoReserva.Nombre : null,
                 CodigoImt = equipo != null ? (int?)equipo.CodigoImt : null,
+                CodigoUcb = equipo != null ? equipo.CodigoUcb : null,
+                NumeroSerial = equipo != null ? equipo.NumeroSerial : null,
                 UbicacionEquipo = ambiente != null ? ambiente.Nombre : null,
                 AdministradorAmbiente = responsable != null
                     ? (responsable.Nombre + " " + responsable.ApellidoPaterno + " " + responsable.ApellidoMaterno).Trim() : null,
@@ -314,8 +332,12 @@ public sealed class PrestamoReadRepository
             DestinoPrestamo = row.DestinoPrestamo,
             IdCarrera = row.IdCarrera,
             NombreMateria = row.NombreMateria,
+            Guardado = row.Guardado,
+            GrupoEquipoId = row.GrupoEquipoId.HasValue ? [row.GrupoEquipoId.Value] : [],
             NombreGrupoEquipo = row.NombreGrupoEquipo,
             CodigoImt = row.CodigoImt?.ToString(CultureInfo.InvariantCulture),
+            CodigoUcb = row.CodigoUcb,
+            NumeroSerial = row.NumeroSerial,
             UbicacionEquipo = row.UbicacionEquipo,
             NombreGavetero = row.NombreGavetero,
             NombreMueble = row.NombreMueble,
