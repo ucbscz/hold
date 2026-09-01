@@ -152,26 +152,56 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (!validation.IsValid)
             return validation.ToResult<UsuarioDto>();
 
-        if (await _queries.ExistsByCarnet(dto.Carnet!))
+        var deletedUser = await Repository.GetDeletedByCarnet(dto.Carnet!);
+
+        if (deletedUser == null && await _queries.ExistsByCarnet(dto.Carnet!))
             return Result<UsuarioDto>.Error("Carnet ya existe");
 
-        if (await _queries.ExistsByEmail(dto.Email!))
+        if (await _queries.ExistsByEmail(dto.Email!, deletedUser?.Carnet))
             return Result<UsuarioDto>.Error("Email ya existe");
 
         if (
             !string.IsNullOrWhiteSpace(dto.Telefono)
-            && await _queries.ExistsByTelefono(dto.Telefono)
+            && await _queries.ExistsByTelefono(dto.Telefono, deletedUser?.Carnet)
         )
             return Result<UsuarioDto>.Error("Teléfono ya registrado");
 
-        var entity = MapToEntity(dto);
+        var entity = deletedUser ?? MapToEntity(dto);
+
+        if (deletedUser != null)
+        {
+            _mapper.Update(dto, entity);
+            entity.EstadoEliminado = false;
+            entity.Bloqueado = false;
+            entity.MotivoBloqueo = null;
+            entity.RefreshToken = null;
+            entity.RefreshTokenExpiry = null;
+            entity.ImagenFrenteCarnet = null;
+            entity.ImagenAtrasCarnet = null;
+        }
+
         entity.Contrasena = BCryptLib.HashPassword(dto.Contrasena, workFactor: 12);
-        var result = await CreateEntity(entity);
+        Result<UsuarioDto> result;
+
+        if (deletedUser == null)
+        {
+            result = await CreateEntity(entity);
+        }
+        else
+        {
+            await Repository.UpdateEntity(entity);
+            result = Result<UsuarioDto>.Success(_mapper.ToDto(entity));
+        }
 
         if (result.IsSuccess && result.Value != null)
         {
             result.Value.CarreraNombre = await _queries.GetCarreraName(entity.IdCarrera);
-            await Audit!.Log(AuditAccion.Crear, typeof(UsuarioEntity).Name, entity.Carnet);
+            await Audit!.Log(
+                AuditAccion.Crear,
+                typeof(UsuarioEntity).Name,
+                entity.Carnet,
+                deletedUser == null ? null : "Cuenta recreada a partir de un carnet eliminado"
+            );
         }
 
         return result;

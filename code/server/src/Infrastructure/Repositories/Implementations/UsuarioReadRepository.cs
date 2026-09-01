@@ -105,9 +105,10 @@ public sealed class UsuarioReadRepository
 
     public Task<bool> ExistsByEmail(
         string email,
+        string? excludeCarnet = null,
         CancellationToken cancellationToken = default
     ) => _dbContext.Usuarios.IgnoreQueryFilters().AnyAsync(
-        user => user.Email == email,
+        user => user.Email == email && user.Carnet != excludeCarnet,
         cancellationToken
     );
 

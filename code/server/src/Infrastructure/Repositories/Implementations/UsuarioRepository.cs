@@ -38,6 +38,13 @@ public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
         cancellationToken
     );
 
+    public Task<UsuarioEntity?> GetDeletedByCarnet(
+        string carnet,
+        CancellationToken cancellationToken = default
+    ) => DbContext
+        .Usuarios.IgnoreQueryFilters()
+        .FirstOrDefaultAsync(user => user.Carnet == carnet && user.EstadoEliminado, cancellationToken);
+
     public async Task<Result<object>> Delete(string carnet)
     {
         var entity = await DbContext.Usuarios.FirstOrDefaultAsync(user =>
