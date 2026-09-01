@@ -79,7 +79,8 @@ export class GuardadosComponent extends HistorialBase {
     }
 
     if (cantidades.size === 0) {
-      this.mensajeerror = 'Este préstamo no conserva grupos de equipos que puedan volver a solicitarse.';
+      this.mensajeerror =
+        'Este préstamo no conserva grupos de equipos que puedan volver a solicitarse.';
       this.error.set(true);
       return;
     }
@@ -111,7 +112,8 @@ export class GuardadosComponent extends HistorialBase {
       },
       error: () => {
         this.preparando.delete(idPrestamo);
-        this.mensajeerror = 'No se pudieron preparar los equipos. Intenta nuevamente.';
+        this.mensajeerror =
+          'No se pudieron preparar los equipos. Intenta nuevamente.';
         this.error.set(true);
       },
     });

@@ -75,7 +75,9 @@ export class NavbarComponent {
       return;
     }
 
-    const isAdmin = ['administrador', 'administrador_laboratorio'].includes(rol);
+    const isAdmin = ['administrador', 'administrador_laboratorio'].includes(
+      rol,
+    );
     const isInAdminMode = isAdmin && cleanUrl.includes('/administracion');
 
     this.showProfile.set(true);
@@ -156,7 +158,9 @@ export class NavbarComponent {
     }
 
     this.expandedNotificationId.set(
-      this.expandedNotificationId() === notificacion.Id ? null : notificacion.Id,
+      this.expandedNotificationId() === notificacion.Id
+        ? null
+        : notificacion.Id,
     );
   }
 

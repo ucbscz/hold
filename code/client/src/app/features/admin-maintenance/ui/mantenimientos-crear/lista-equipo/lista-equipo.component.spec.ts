@@ -41,7 +41,9 @@ describe('ListaEquipoComponent', () => {
     button.click();
     await fixture.whenStable();
     expect(
-      fixture.nativeElement.querySelector('tbody td:nth-child(2)').textContent.trim(),
+      fixture.nativeElement
+        .querySelector('tbody td:nth-child(2)')
+        .textContent.trim(),
     ).toBe('Equipo B');
     component.terminoBusqueda = 'Equipo';
     component.buscar();

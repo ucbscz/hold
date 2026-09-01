@@ -23,7 +23,10 @@
     <label class="select-all">
       <input
         type="checkbox"
-        [checked]="equiposDisponibles.length > 0 && equiposMarcados.size === equiposDisponibles.length"
+        [checked]="
+          equiposDisponibles.length > 0 &&
+          equiposMarcados.size === equiposDisponibles.length
+        "
         (change)="alternarTodosVisibles($any($event.target).checked)"
       />
       Seleccionar visibles
@@ -35,19 +38,33 @@
       [opciones]="gruposOpciones"
       placeholder="Seleccionar grupo de equipos"
     ></app-custom-select>
-    <button type="button" class="btn btn-secondary" [disabled]="grupoSeleccionado === null" (click)="seleccionarGrupo()">
+    <button
+      type="button"
+      class="btn btn-secondary"
+      [disabled]="grupoSeleccionado === null"
+      (click)="seleccionarGrupo()"
+    >
       Seleccionar grupo
     </button>
-    <button type="button" class="btn btn-primary" [disabled]="equiposMarcados.size === 0" (click)="agregarSeleccionados()">
+    <button
+      type="button"
+      class="btn btn-primary"
+      [disabled]="equiposMarcados.size === 0"
+      (click)="agregarSeleccionados()"
+    >
       <i class="fas fa-plus" aria-hidden="true"></i>
-      Agregar {{ equiposMarcados.size || '' }} equipo{{ equiposMarcados.size === 1 ? '' : 's' }}
+      Agregar {{ equiposMarcados.size || "" }} equipo{{
+        equiposMarcados.size === 1 ? "" : "s"
+      }}
     </button>
   </div>
   <div class="table-responsive">
     <table class="data-table">
       <thead>
         <tr>
-          <th class="selection-column"><span class="sr-only">Seleccionar</span></th>
+          <th class="selection-column">
+            <span class="sr-only">Seleccionar</span>
+          </th>
           @for (columna of columnas; track columna) {
             <th scope="col" [attr.aria-sort]="ariaOrdenColumna(columna)">
               <button
@@ -87,7 +104,9 @@
                 equipo.CostoReferencia | currency: "Bs " : "symbol" : "1.2-2"
               }}
             </td>
-            <td class="actions-column">{{ equipoMarcado(equipo) ? 'Seleccionado' : 'Disponible' }}</td>
+            <td class="actions-column">
+              {{ equipoMarcado(equipo) ? "Seleccionado" : "Disponible" }}
+            </td>
           </tr>
         }
         @if (equiposDisponibles.length === 0) {

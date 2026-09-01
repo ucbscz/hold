@@ -33,7 +33,10 @@ import { ToastService } from '@shared/ui';
         [disabled]="actualizandoGuardado()"
         (click)="alternarGuardado()"
       >
-        <i [class]="estaGuardado ? 'fas fa-bookmark' : 'far fa-bookmark'" aria-hidden="true"></i>
+        <i
+          [class]="estaGuardado ? 'fas fa-bookmark' : 'far fa-bookmark'"
+          aria-hidden="true"
+        ></i>
         {{ estaGuardado ? 'Quitar de guardados' : 'Guardar para repetir' }}
       </button>
     }

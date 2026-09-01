@@ -1,7 +1,14 @@
-<article class="loan-detail" role="dialog" aria-modal="true" aria-labelledby="loan-detail-title">
+<article
+  class="loan-detail"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="loan-detail-title"
+>
   <header class="loan-detail__header">
     <div class="loan-detail__heading">
-      <span class="loan-detail__icon" aria-hidden="true"><i class="fas fa-handshake"></i></span>
+      <span class="loan-detail__icon" aria-hidden="true"
+        ><i class="fas fa-handshake"></i
+      ></span>
       <div>
         <h2 id="loan-detail-title">Detalle del préstamo</h2>
         @if (prestamoPrincipal?.Id) {
@@ -10,7 +17,12 @@
       </div>
     </div>
     <span class="status-badge">{{ estado }}</span>
-    <button type="button" class="modal-close-btn" aria-label="Cerrar detalle del préstamo" (click)="cerrarVista()">
+    <button
+      type="button"
+      class="modal-close-btn"
+      aria-label="Cerrar detalle del préstamo"
+      (click)="cerrarVista()"
+    >
       <i class="fas fa-times" aria-hidden="true"></i>
     </button>
   </header>
@@ -20,10 +32,19 @@
       <div class="section-heading">
         <div>
           <h3 id="equipment-title">Equipos y ubicación de recogida</h3>
-          <p>{{ prestamos.length }} equipo{{ prestamos.length === 1 ? '' : 's' }} asignado{{ prestamos.length === 1 ? '' : 's' }}</p>
+          <p>
+            {{ prestamos.length }} equipo{{
+              prestamos.length === 1 ? "" : "s"
+            }}
+            asignado{{ prestamos.length === 1 ? "" : "s" }}
+          </p>
         </div>
         @if (prestamoPrincipal?.IdContrato) {
-          <button type="button" class="btn btn-secondary" (click)="contratoVisible.set(true)">
+          <button
+            type="button"
+            class="btn btn-secondary"
+            (click)="contratoVisible.set(true)"
+          >
             <i class="fas fa-file-signature" aria-hidden="true"></i>
             Ver contrato
           </button>
@@ -36,14 +57,22 @@
             <div class="equipment-item__identity">
               <span class="equipment-item__index">{{ $index + 1 }}</span>
               <div>
-                <h4>{{ prestamo.NombreGrupoEquipo || 'Equipo sin nombre' }}</h4>
-                <div class="equipment-codes" aria-label="Códigos de identificación">
-                  <span><strong>IMT</strong> {{ prestamo.CodigoImt || 'No asignado' }}</span>
+                <h4>{{ prestamo.NombreGrupoEquipo || "Equipo sin nombre" }}</h4>
+                <div
+                  class="equipment-codes"
+                  aria-label="Códigos de identificación"
+                >
+                  <span
+                    ><strong>IMT</strong>
+                    {{ prestamo.CodigoImt || "No asignado" }}</span
+                  >
                   @if (prestamo.CodigoUcb) {
                     <span><strong>UCB</strong> {{ prestamo.CodigoUcb }}</span>
                   }
                   @if (prestamo.NumeroSerial) {
-                    <span><strong>Serie</strong> {{ prestamo.NumeroSerial }}</span>
+                    <span
+                      ><strong>Serie</strong> {{ prestamo.NumeroSerial }}</span
+                    >
                   }
                 </div>
               </div>
@@ -51,17 +80,23 @@
             <div class="location-path">
               <div>
                 <span>Ambiente</span>
-                <strong>{{ prestamo.UbicacionEquipo || 'Sin ambiente asignado' }}</strong>
+                <strong>{{
+                  prestamo.UbicacionEquipo || "Sin ambiente asignado"
+                }}</strong>
               </div>
               <i class="fas fa-chevron-right" aria-hidden="true"></i>
               <div>
                 <span>Mueble</span>
-                <strong>{{ prestamo.NombreMueble || 'Sin mueble asignado' }}</strong>
+                <strong>{{
+                  prestamo.NombreMueble || "Sin mueble asignado"
+                }}</strong>
               </div>
               <i class="fas fa-chevron-right" aria-hidden="true"></i>
               <div>
                 <span>Gavetero</span>
-                <strong>{{ prestamo.NombreGavetero || 'Sin gavetero asignado' }}</strong>
+                <strong>{{
+                  prestamo.NombreGavetero || "Sin gavetero asignado"
+                }}</strong>
               </div>
             </div>
             @if (prestamo.UbicacionMueble) {
@@ -88,20 +123,34 @@
           </div>
           <div>
             <dt>Responsable del ambiente</dt>
-            <dd>{{ prestamoPrincipal.AdministradorAmbiente || 'Sin responsable asignado' }}</dd>
+            <dd>
+              {{
+                prestamoPrincipal.AdministradorAmbiente ||
+                  "Sin responsable asignado"
+              }}
+            </dd>
           </div>
           <div>
             <dt>Autorizado por</dt>
-            <dd>{{ prestamoPrincipal.AutorizadoPor || 'Pendiente de autorización' }}</dd>
+            <dd>
+              {{
+                prestamoPrincipal.AutorizadoPor || "Pendiente de autorización"
+              }}
+            </dd>
           </div>
           <div>
             <dt>Entregado por</dt>
-            <dd>{{ prestamoPrincipal.EntregadoPor || 'Pendiente de entrega' }}</dd>
+            <dd>
+              {{ prestamoPrincipal.EntregadoPor || "Pendiente de entrega" }}
+            </dd>
           </div>
         </dl>
       </section>
 
-      <section class="detail-section notes-section" aria-labelledby="notes-title">
+      <section
+        class="detail-section notes-section"
+        aria-labelledby="notes-title"
+      >
         <h3 id="notes-title">Anotaciones</h3>
         @if (prestamoPrincipal.MotivoRechazo) {
           <div class="note note--danger">
@@ -119,5 +168,8 @@
 </article>
 
 @if (contratoVisible() && prestamos.length) {
-  <app-vercontrato [vercontraro]="contratoVisible" [idprestamo]="prestamos[0].Id" />
+  <app-vercontrato
+    [vercontraro]="contratoVisible"
+    [idprestamo]="prestamos[0].Id"
+  />
 }

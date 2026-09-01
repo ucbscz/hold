@@ -62,7 +62,9 @@ export class ListaEquipoComponent extends Tabla {
   }
 
   equipoMarcado(equipo: Equipos): boolean {
-    return equipo.CodigoImt !== null && this.equiposMarcados.has(equipo.CodigoImt);
+    return (
+      equipo.CodigoImt !== null && this.equiposMarcados.has(equipo.CodigoImt)
+    );
   }
 
   alternarTodosVisibles(marcado: boolean): void {
