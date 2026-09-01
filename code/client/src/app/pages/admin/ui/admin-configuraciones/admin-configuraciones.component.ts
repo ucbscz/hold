@@ -16,7 +16,11 @@ import {
   ConfiguracionService,
 } from '@entities/configuracion';
 import { FirmaComponent } from '@features/signature';
-import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
+import {
+  AvisoExitoComponent,
+  CustomSelectComponent,
+  OpcionSelect,
+} from '@shared/ui';
 import { FlatpickrDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error/error-handler';
 import {
@@ -36,6 +40,7 @@ import {
     FirmaComponent,
     CustomSelectComponent,
     FlatpickrDirective,
+    AvisoExitoComponent,
   ],
   templateUrl: './admin-configuraciones.component.html',
   styleUrls: ['./admin-configuraciones.component.css'],
@@ -53,6 +58,7 @@ export class AdminConfiguracionesComponent implements OnInit {
   readonly guardando = signal(false);
   readonly mensaje = signal('');
   readonly error = signal(false);
+  readonly exito = signal(false);
   horarioInicioHora = 8;
   horarioInicioMinuto = 0;
   horarioFinHora = 18;
@@ -341,8 +347,14 @@ export class AdminConfiguracionesComponent implements OnInit {
   }
 
   private mostrarMensaje(msg: string, esError: boolean): void {
+    if (!esError) {
+      this.mensaje.set('');
+      this.error.set(false);
+      this.exito.set(true);
+      return;
+    }
     this.mensaje.set(msg);
-    this.error.set(esError);
+    this.error.set(true);
     window.clearTimeout(this.messageTimer);
     this.messageTimer = window.setTimeout(() => this.mensaje.set(''), 5000);
   }

@@ -339,13 +339,11 @@
       </section>
 
       <footer class="config-actions">
-        <p
-          class="config-message"
-          [class.config-message--error]="error()"
-          aria-live="polite"
-        >
-          {{ mensaje() }}
-        </p>
+        @if (error() && mensaje()) {
+          <p class="config-message config-message--error" aria-live="polite">
+            {{ mensaje() }}
+          </p>
+        }
         <button
           type="submit"
           class="btn btn-primary"
@@ -375,4 +373,10 @@
     (firma)="guardarfirma($event)"
     [clickfirma]="clickfirma"
   ></app-firma>
+}
+@if (exito()) {
+  <app-aviso-exito
+    [exito]="exito"
+    mensaje="Configuración guardada exitosamente"
+  ></app-aviso-exito>
 }

@@ -68,6 +68,11 @@ describe('AdminConfiguracionesComponent', () => {
         FirmaJefeCarreraBase64: 'firma-nueva',
       }),
     );
+    fixture.detectChanges();
+    expect(
+      fixture.nativeElement.querySelector('app-aviso-exito'),
+    ).not.toBeNull();
+    expect(fixture.nativeElement.querySelector('.config-message')).toBeNull();
   });
 
   it('shows inline errors without submitting and blocks empty numeric values', async () => {
