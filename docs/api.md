@@ -145,9 +145,10 @@ Room and origin payloads are `{ "Id": 1, "Nombre": "Sala principal" }`. Equipmen
 | `POST`   | `/api/prestamos`                  | Create a loan request.                                                      |
 | `PATCH`  | `/api/prestamos/{id}/estado`      | Managers change state; owners may only cancel their pending/approved loans. |
 | `PATCH`  | `/api/prestamos/{id}/observacion` | Managers update `{ "Observacion": "..." }`, max 1024 characters; audited.   |
+| `PATCH`  | `/api/prestamos/{id}/guardado`    | Owners save or remove a loan template with `{ "Guardado": true }`.          |
 | `DELETE` | `/api/prestamos/{id}`             | Soft-delete a loan.                                                         |
 | `GET`    | `/api/prestamos/elegibilidad`     | Get reservation eligibility for the authenticated user.                     |
-| `GET`    | `/api/prestamos?carnet=&estado=`  | Filter loans; non-admin users are restricted to their own carnet.           |
+| `GET`    | `/api/prestamos?carnet=&estado=&guardado=` | Filter loans; non-admin users are restricted to their own carnet.  |
 | `POST`   | `/api/contratos`                  | Upload or create a contract for a loan. Multipart form data.                |
 | `GET`    | `/api/contratos/{prestamoId}`     | Get a contract by loan id.                                                  |
 | `GET`    | `/api/contratos/firmante`         | Get the authenticated contract signer name, id and signature.               |
@@ -183,7 +184,7 @@ The global limit is 180 requests/minute per authenticated identity or anonymous 
 
 | Method | Route            | Purpose                                                                                                                |
 | ------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/auditoria` | Query audit entries. Administrator only. Supports `entidad`, `actor` (name or carnet), `accion`, `desde`, and `hasta`. |
+| `GET`  | `/api/auditoria` | Query audit entries. Administrator only. Supports `buscar`, `entidad`, `actor` (name or carnet), `accion`, `desde`, and `hasta`. |
 | `GET`  | `/api/health`    | Health check for the API and database.                                                                                 |
 
 ## Business Rules

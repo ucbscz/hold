@@ -60,7 +60,7 @@ create type estado_disponibilidad as enum ('disponible', 'mantenimiento', 'ocupa
 
 alter type estado_disponibilidad owner to postgres;
 
-create type estado_equipo as enum ('operativo', 'parcialmente_operativo', 'inoperativo');
+create type estado_equipo as enum ('operativo', 'parcialmente_operativo', 'inoperativo', 'en_mantenimiento');
 
 alter type estado_equipo owner to postgres;
 
@@ -465,7 +465,8 @@ create table prestamos
     id_carrera                integer
         constraint "Prestamo_Carrera_fk"
             references carreras,
-    nombre_materia            varchar(255)
+    nombre_materia            varchar(255),
+    guardado                  boolean default false not null
 );
 
 comment on column prestamos.id_prestamo is 'Código del préstamo';
@@ -480,6 +481,10 @@ create index idx_prestamos_fechas
 
 create index ix_prestamos_carnet_estado
     on prestamos (carnet, estado_prestamo, estado_eliminado);
+
+create index ix_prestamos_guardados_usuario
+    on prestamos (carnet, fecha_solicitud desc)
+    where guardado = true and estado_eliminado = false;
 
 create table detalles_prestamos
 (
@@ -1576,8 +1581,8 @@ BEGIN
     END IF;
 
     IF p_estado_equipo_nuevo IS NOT NULL THEN
-        IF lower(p_estado_equipo_nuevo) NOT IN ('operativo', 'inoperativo', 'parcialmente_operativo') THEN
-            RAISE EXCEPTION 'Valor inválido para estado_equipo: "%". Debe ser ''operativo'', ''inoperativo'', o ''parcialmente_operativo''.', p_estado_equipo_nuevo;
+        IF lower(p_estado_equipo_nuevo) NOT IN ('operativo', 'inoperativo', 'parcialmente_operativo', 'en_mantenimiento') THEN
+            RAISE EXCEPTION 'Valor inválido para estado_equipo: "%".', p_estado_equipo_nuevo;
         END IF;
     END IF;
 
