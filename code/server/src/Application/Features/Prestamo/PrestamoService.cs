@@ -382,12 +382,17 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         switch (estado)
         {
             case EstadoPrestamo.Aprobado:
+                var approvalDetail = string.IsNullOrWhiteSpace(observacion)
+                    ? "Solicitud aprobada."
+                    : observacion.Trim();
                 await _notifications.Create(
                     carnet,
                     TipoNotificacion.PrestamoAprobado,
                     "Préstamo aprobado",
-                    "Tu solicitud de préstamo fue aprobada. Ya puedes revisar los detalles de recogida.",
-                    NotificacionService.BuildEmitterDetail(emitter, "Solicitud aprobada.")
+                    string.IsNullOrWhiteSpace(observacion)
+                        ? "Tu solicitud de préstamo fue aprobada. Ya puedes revisar los detalles de recogida."
+                        : $"Tu solicitud de préstamo fue aprobada. Detalle: {approvalDetail}",
+                    NotificacionService.BuildEmitterDetail(emitter, approvalDetail)
                 );
                 break;
             case EstadoPrestamo.Rechazado:

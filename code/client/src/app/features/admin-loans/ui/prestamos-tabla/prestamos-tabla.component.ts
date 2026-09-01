@@ -187,9 +187,9 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   vercontrato: WritableSignal<boolean> = signal(false);
   prestamoSeleccionado: PrestamoDto = new PrestamoDto();
   prestamoKeySeleccionado: number = 0;
-  avisorechazar: WritableSignal<boolean> = signal(false);
-  mensajeavisorechazar: string =
-    '¿Está seguro de rechazar el préstamo seleccionado?';
+  decisionPrestamo: 'aprobado' | 'rechazado' | null = null;
+  detalleDecision = '';
+  procesandoDecision = false;
   avisocancelar: WritableSignal<boolean> = signal(false);
   mensajeavisocancelar: string =
     '¿Está seguro de cancelar el préstamo seleccionado?';
@@ -236,7 +236,6 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   fechaPrestamoHasta = '';
   private busquedaActual?: [string, string];
   abrirVista: boolean = false;
-  motivoRechazo = '';
   observacionEditar = '';
   editandoObservacion: number | null = null;
 
@@ -514,9 +513,9 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     const prestamo = this.prestamos.get(key);
     if (!prestamo || !this.puedeAprobar(prestamo)) return;
 
-    this.mensajeaviso = '¿Está seguro de aprobar el préstamo seleccionado?';
     this.prestamoKeySeleccionado = key;
-    this.aviso.set(true);
+    this.detalleDecision = '';
+    this.decisionPrestamo = 'aprobado';
   }
 
   puedeAprobar(prestamo: PrestamoAgrupados): boolean {
@@ -525,10 +524,19 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     return !!inicio && inicio.getTime() > Date.now();
   }
   aprobarprestamo(key: number) {
+    if (this.procesandoDecision) return;
+    this.procesandoDecision = true;
     this.prestamosapi
-      .cambiarEstadoPrestamo(this.prestamos.get(key)!.datosgrupo.Id, 'aprobado')
+      .cambiarEstadoPrestamo(
+        this.prestamos.get(key)!.datosgrupo.Id,
+        'aprobado',
+        this.detalleDecision.trim() || undefined,
+      )
+      .pipe(finalize(() => (this.procesandoDecision = false)))
       .subscribe({
         next: (_response) => {
+          this.procesandoDecision = false;
+          this.cerrarDecision();
           this.mensajeexito = 'Préstamo aprobado con éxito.';
           this.exito.set(true);
           this.auditRefresh++;
@@ -540,25 +548,26 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
           this.error.set(true);
         },
       });
-    this.prestamoKeySeleccionado = 0;
   }
   validarrechazo(key: number) {
-    this.motivoRechazo = '';
-    this.mensajeavisorechazar =
-      '¿Está seguro de rechazar el préstamo seleccionado?';
+    this.detalleDecision = '';
     this.prestamoKeySeleccionado = key;
-    this.avisorechazar.set(true);
+    this.decisionPrestamo = 'rechazado';
   }
   rechazarprestamo(key: number) {
-    if (!this.motivoRechazo.trim()) return;
+    if (!this.detalleDecision.trim() || this.procesandoDecision) return;
+    this.procesandoDecision = true;
     this.prestamosapi
       .cambiarEstadoPrestamo(
         this.prestamos.get(key)!.datosgrupo.Id,
         'rechazado',
-        this.motivoRechazo.trim(),
+        this.detalleDecision.trim(),
       )
+      .pipe(finalize(() => (this.procesandoDecision = false)))
       .subscribe({
         next: (_response) => {
+          this.procesandoDecision = false;
+          this.cerrarDecision();
           this.mensajeexito = 'Préstamo rechazado con éxito.';
           this.exito.set(true);
           this.auditRefresh++;
@@ -570,6 +579,12 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
           this.error.set(true);
         },
       });
+  }
+
+  cerrarDecision(): void {
+    if (this.procesandoDecision) return;
+    this.decisionPrestamo = null;
+    this.detalleDecision = '';
     this.prestamoKeySeleccionado = 0;
   }
 

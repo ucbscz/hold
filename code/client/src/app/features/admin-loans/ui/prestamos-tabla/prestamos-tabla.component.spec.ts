@@ -2,6 +2,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { withDefaultTestingProviders } from '@shared/lib/testing';
 import { PrestamoDto } from '@entities/admin';
 import { PrestamoAgrupados } from '@entities/loan';
+import { of, throwError } from 'rxjs';
 import { PrestamosTablaComponent } from './prestamos-tabla.component';
 
 describe('PrestamosTablaComponent', () => {
@@ -289,6 +290,55 @@ describe('PrestamosTablaComponent', () => {
     ]);
 
     expect(component.puedeAprobar(prestamo)).toBeFalse();
+  });
+
+  it('sends and preserves an approval annotation through retries', () => {
+    cargarPrestamos([
+      crearPrestamo({
+        id: 8,
+        nombre: 'Usuario',
+        fechaPrestamoEsperada: '2030-06-13T10:00:00',
+      }),
+    ]);
+    const api = component['prestamosapi'];
+    const request = spyOn(api, 'cambiarEstadoPrestamo');
+    request.and.returnValue(throwError(() => new Error('Offline')));
+
+    component.validaraprobacion(8);
+    component.detalleDecision = 'Autorizado para la práctica de laboratorio';
+    component.aprobarprestamo(8);
+
+    expect(component.prestamoKeySeleccionado).toBe(8);
+    expect(component.decisionPrestamo).toBe('aprobado');
+    request.and.returnValue(of({}));
+    component.aprobarprestamo(8);
+    expect(request).toHaveBeenCalledWith(
+      8,
+      'aprobado',
+      'Autorizado para la práctica de laboratorio',
+    );
+    expect(component.decisionPrestamo).toBeNull();
+  });
+
+  it('requires and sends the rejection reason', () => {
+    cargarPrestamos([crearPrestamo({ id: 9, nombre: 'Usuario' })]);
+    const request = spyOn(
+      component['prestamosapi'],
+      'cambiarEstadoPrestamo',
+    ).and.returnValue(of({}));
+
+    component.validarrechazo(9);
+    component.rechazarprestamo(9);
+    expect(request).not.toHaveBeenCalled();
+    component.detalleDecision = 'El equipo está reservado para mantenimiento';
+    component.rechazarprestamo(9);
+
+    expect(request).toHaveBeenCalledWith(
+      9,
+      'rechazado',
+      'El equipo está reservado para mantenimiento',
+    );
+    expect(component.decisionPrestamo).toBeNull();
   });
 
   it('exports the same data columns shown in the loan table', () => {

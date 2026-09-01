@@ -371,47 +371,83 @@
 @if (exito()) {
   <app-aviso-exito [exito]="exito" [mensaje]="mensajeexito"></app-aviso-exito>
 }
-@if (aviso()) {
-  <app-aviso
-    [cerrar]="aviso"
-    [mensaje]="mensajeaviso"
-    (aceptar)="aprobarprestamo(prestamoKeySeleccionado)"
-  ></app-aviso>
-}
-@if (avisorechazar()) {
+@if (decisionPrestamo) {
   <div class="devuelto-overlay">
     <section
       class="devuelto-modal"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="rechazo-title"
+      aria-labelledby="decision-title"
     >
       <button
         class="modal-close-btn"
         aria-label="Cerrar"
-        (click)="avisorechazar.set(false)"
+        [disabled]="procesandoDecision"
+        (click)="cerrarDecision()"
       >
         <i class="fas fa-times"></i>
       </button>
-      <h2 id="rechazo-title">Motivo del rechazo</h2>
+      <h2 id="decision-title">
+        {{
+          decisionPrestamo === "aprobado"
+            ? "Aprobar préstamo"
+            : "Rechazar préstamo"
+        }}
+      </h2>
+      <p class="decision-description">
+        {{
+          decisionPrestamo === "aprobado"
+            ? "Puedes añadir una anotación para dejar constancia de la decisión."
+            : "Indica el motivo para informar al usuario y dejarlo registrado."
+        }}
+      </p>
+      <label class="decision-label" for="detalle-decision">
+        {{
+          decisionPrestamo === "aprobado"
+            ? "Anotación (opcional)"
+            : "Motivo del rechazo"
+        }}
+      </label>
       <textarea
+        id="detalle-decision"
         class="observaciones-input"
-        aria-label="Motivo del rechazo"
         maxlength="1024"
-        [(ngModel)]="motivoRechazo"
+        rows="5"
+        [placeholder]="
+          decisionPrestamo === 'aprobado'
+            ? 'Ejemplo: autorizado para la práctica de laboratorio'
+            : 'Explica brevemente por qué se rechaza la solicitud'
+        "
+        [(ngModel)]="detalleDecision"
       ></textarea>
+      <span class="decision-counter"> {{ detalleDecision.length }}/1024 </span>
       <div class="devuelto-actions">
-        <button class="btn btn-secondary" (click)="avisorechazar.set(false)">
+        <button
+          class="btn btn-secondary"
+          [disabled]="procesandoDecision"
+          (click)="cerrarDecision()"
+        >
           Cancelar
         </button>
         <button
           class="btn btn-primary"
-          [disabled]="!motivoRechazo.trim()"
+          [disabled]="
+            procesandoDecision ||
+            (decisionPrestamo === 'rechazado' && !detalleDecision.trim())
+          "
           (click)="
-            rechazarprestamo(prestamoKeySeleccionado); avisorechazar.set(false)
+            decisionPrestamo === 'aprobado'
+              ? aprobarprestamo(prestamoKeySeleccionado)
+              : rechazarprestamo(prestamoKeySeleccionado)
           "
         >
-          Rechazar préstamo
+          {{
+            procesandoDecision
+              ? "Guardando..."
+              : decisionPrestamo === "aprobado"
+                ? "Aprobar préstamo"
+                : "Rechazar préstamo"
+          }}
         </button>
       </div>
     </section>

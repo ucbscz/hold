@@ -488,6 +488,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var result = await Sut.UpdateStatus(
             prestamoId,
             "aprobado",
+            "Autorizado para la práctica de laboratorio",
             actorCarnet: Carnet
         );
 
@@ -498,6 +499,9 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         );
         using var detail = JsonDocument.Parse(notification.Detalle!);
         detail.RootElement.GetProperty("emisor").GetString().Should().Be("Test User");
+        detail.RootElement.GetProperty("motivo").GetString()
+            .Should().Be("Autorizado para la práctica de laboratorio");
+        notification.Contenido.Should().Contain("Autorizado para la práctica de laboratorio");
     }
 
     [Test]
