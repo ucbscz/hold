@@ -307,6 +307,7 @@ builder.Services.AddScoped<AuditLogRepository>();
 builder.Services.AddScoped<AuditLogService>();
 builder.Services.AddScoped<NotificacionRepository>();
 builder.Services.AddScoped<NotificacionService>();
+builder.Services.AddScoped<EstadoMantenimientoJob>();
 builder.Services.AddScoped<AvisoDisponibilidadRepository>();
 builder.Services.AddScoped<AvisoDisponibilidadService>();
 builder.Services.AddScoped<ComentarioEquipoRepository>();
@@ -393,6 +394,11 @@ if (hangfireEnabled)
         "estado-prestamo",
         job => job.Execute(CancellationToken.None),
         "*/10 * * * *"
+    );
+    RecurringJob.AddOrUpdate<EstadoMantenimientoJob>(
+        "estado-mantenimiento",
+        job => job.Execute(CancellationToken.None),
+        "* * * * *"
     );
 }
 

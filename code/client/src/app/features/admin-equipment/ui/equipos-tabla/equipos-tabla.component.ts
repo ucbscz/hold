@@ -72,7 +72,12 @@ export class EquiposTablaComponent extends Tabla {
   ];
 
   estadoSeleccionado = '';
-  estadosDisponibles = ['operativo', 'parcialmente_operativo', 'inoperativo'];
+  estadosDisponibles = [
+    'operativo',
+    'parcialmente_operativo',
+    'inoperativo',
+    'en_mantenimiento',
+  ];
   readonly estadoFiltroOpciones: OpcionSelect[] = [
     { value: '', label: 'Todos los estados' },
     { value: 'operativo', label: 'Operativo' },

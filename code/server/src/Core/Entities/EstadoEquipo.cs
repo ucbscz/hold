@@ -12,4 +12,7 @@ public enum EstadoEquipo
 
     [PgName("inoperativo")]
     Inoperativo,
+
+    [PgName("en_mantenimiento")]
+    EnMantenimiento,
 }

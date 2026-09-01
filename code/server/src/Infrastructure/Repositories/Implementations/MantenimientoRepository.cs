@@ -194,4 +194,63 @@ public class MantenimientoRepository : Repository<MantenimientoEntity, Mantenimi
         await DbContext.SaveChangesAsync();
         await AddDetalles(mantenimientoId, codigosImt, tipos, descripciones);
     }
+
+    public async Task<List<(int Id, int CodigoImt, EstadoEquipo Estado)>> SyncEquipmentStates(
+        DateTime now,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var activeEquipmentIds = await (
+            from detail in DbContext.DetallesMantenimientos.IgnoreQueryFilters()
+            join maintenance in DbContext.Mantenimientos
+                on detail.IdMantenimiento equals maintenance.Id
+            where
+                !detail.EstadoEliminado
+                && !maintenance.EstadoEliminado
+                && maintenance.FechaMantenimiento <= now
+                && maintenance.FechaFinalMantenimiento > now
+            select detail.IdEquipo
+        ).Distinct().ToListAsync(cancellationToken);
+
+        var changed = await DbContext
+            .Equipos.Where(equipment =>
+                !equipment.EstadoEliminado
+                && (
+                    (activeEquipmentIds.Contains(equipment.Id)
+                        && equipment.EstadoEquipo == EstadoEquipo.Operativo)
+                    || (!activeEquipmentIds.Contains(equipment.Id)
+                        && equipment.EstadoEquipo == EstadoEquipo.EnMantenimiento)
+                )
+            )
+            .Select(equipment => new
+            {
+                equipment.Id,
+                equipment.CodigoImt,
+                Active = activeEquipmentIds.Contains(equipment.Id),
+            })
+            .ToListAsync(cancellationToken);
+
+        if (changed.Count == 0)
+            return [];
+
+        var changedIds = changed.Select(item => item.Id).ToArray();
+        var entities = await DbContext
+            .Equipos.Where(equipment => changedIds.Contains(equipment.Id))
+            .ToListAsync(cancellationToken);
+
+        foreach (var equipment in entities)
+            equipment.EstadoEquipo = activeEquipmentIds.Contains(equipment.Id)
+                ? EstadoEquipo.EnMantenimiento
+                : EstadoEquipo.Operativo;
+
+        await DbContext.SaveChangesAsync(cancellationToken);
+
+        return changed
+            .Select(item => (
+                item.Id,
+                item.CodigoImt,
+                item.Active ? EstadoEquipo.EnMantenimiento : EstadoEquipo.Operativo
+            ))
+            .ToList();
+    }
 }

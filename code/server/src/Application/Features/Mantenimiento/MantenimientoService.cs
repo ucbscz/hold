@@ -5,6 +5,7 @@ using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Application.Features.AuditLog;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+using IMT_Reservas.Server.Infrastructure.Jobs;
 using MantenimientoEntity = IMT_Reservas.Server.Core.Entities.Mantenimiento;
 
 namespace IMT_Reservas.Server.Application.Features.Mantenimiento;
@@ -13,15 +14,21 @@ public class MantenimientoService
     : Service<MantenimientoEntity, MantenimientoRepository, MantenimientoDto>
 {
     private readonly EmpresaMantenimientoRepository _empresaRepository;
+    private readonly EstadoMantenimientoJob _estadoJob;
 
     public MantenimientoService(
         MantenimientoRepository repository,
         EmpresaMantenimientoRepository empresaRepository,
         MantenimientoMapper mapper,
         IValidator<MantenimientoDto> validator,
-        AuditLogService audit
+        AuditLogService audit,
+        EstadoMantenimientoJob estadoJob
     )
-        : base(repository, validator, mapper, audit) => _empresaRepository = empresaRepository;
+        : base(repository, validator, mapper, audit)
+    {
+        _empresaRepository = empresaRepository;
+        _estadoJob = estadoJob;
+    }
 
     public override async Task<Result<MantenimientoDto>> Create(MantenimientoDto dto)
     {
@@ -48,6 +55,7 @@ public class MantenimientoService
             dto.TiposMantenimiento,
             dto.DescripcionesEquipo
         );
+        await _estadoJob.Execute(CancellationToken.None);
         await Audit!.Log(
             AuditAccion.Crear,
             typeof(MantenimientoEntity).Name,
@@ -85,6 +93,8 @@ public class MantenimientoService
             );
         }
 
+        await _estadoJob.Execute(CancellationToken.None);
+
         await Audit!.Log(
             AuditAccion.Editar,
             typeof(MantenimientoEntity).Name,
@@ -93,6 +103,16 @@ public class MantenimientoService
         );
 
         return await Repository.Get(id);
+    }
+
+    public override async Task<Result<object>> Delete(int id)
+    {
+        var result = await base.Delete(id);
+
+        if (result.IsSuccess)
+            await _estadoJob.Execute(CancellationToken.None);
+
+        return result;
     }
 
     private async Task ResolveEmpresa(MantenimientoDto dto)

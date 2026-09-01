@@ -158,6 +158,7 @@ public sealed class PrestamoEstadoRepository
     {
         EstadoEquipo.ParcialmenteOperativo => "parcialmente_operativo",
         EstadoEquipo.Inoperativo => "inoperativo",
+        EstadoEquipo.EnMantenimiento => "en_mantenimiento",
         _ => "operativo",
     };
 }

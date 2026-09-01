@@ -19,10 +19,35 @@
       }
     </div>
   </div>
+  <div class="selection-toolbar">
+    <label class="select-all">
+      <input
+        type="checkbox"
+        [checked]="equiposDisponibles.length > 0 && equiposMarcados.size === equiposDisponibles.length"
+        (change)="alternarTodosVisibles($any($event.target).checked)"
+      />
+      Seleccionar visibles
+    </label>
+    <app-custom-select
+      class="group-select"
+      [(ngModel)]="grupoSeleccionado"
+      [ngModelOptions]="{ standalone: true }"
+      [opciones]="gruposOpciones"
+      placeholder="Seleccionar grupo de equipos"
+    ></app-custom-select>
+    <button type="button" class="btn btn-secondary" [disabled]="grupoSeleccionado === null" (click)="seleccionarGrupo()">
+      Seleccionar grupo
+    </button>
+    <button type="button" class="btn btn-primary" [disabled]="equiposMarcados.size === 0" (click)="agregarSeleccionados()">
+      <i class="fas fa-plus" aria-hidden="true"></i>
+      Agregar {{ equiposMarcados.size || '' }} equipo{{ equiposMarcados.size === 1 ? '' : 's' }}
+    </button>
+  </div>
   <div class="table-responsive">
     <table class="data-table">
       <thead>
         <tr>
+          <th class="selection-column"><span class="sr-only">Seleccionar</span></th>
           @for (columna of columnas; track columna) {
             <th scope="col" [attr.aria-sort]="ariaOrdenColumna(columna)">
               <button
@@ -45,6 +70,14 @@
       <tbody>
         @for (equipo of equiposDisponibles; track equipo.Id) {
           <tr>
+            <td class="selection-column">
+              <input
+                type="checkbox"
+                [checked]="equipoMarcado(equipo)"
+                [attr.aria-label]="'Seleccionar ' + equipo.NombreGrupoEquipo"
+                (change)="alternarEquipo(equipo, $any($event.target).checked)"
+              />
+            </td>
             <td>{{ equipo.NombreGrupoEquipo }}</td>
             <td>{{ equipo.EstadoEquipo }}</td>
             <td>{{ equipo.Ubicacion }}</td>
@@ -54,20 +87,12 @@
                 equipo.CostoReferencia | currency: "Bs " : "symbol" : "1.2-2"
               }}
             </td>
-            <td class="actions-column">
-              <button
-                class="btn-icon btn-add"
-                (click)="agregarEquipo(equipo)"
-                title="Agregar equipo"
-              >
-                <i class="fas fa-plus"></i>
-              </button>
-            </td>
+            <td class="actions-column">{{ equipoMarcado(equipo) ? 'Seleccionado' : 'Disponible' }}</td>
           </tr>
         }
         @if (equiposDisponibles.length === 0) {
           <tr>
-            <td colspan="6" class="empty-table">
+            <td colspan="7" class="empty-table">
               <div class="empty-state">
                 <i class="fas fa-search fa-3x"></i>
                 <p>No se encontraron equipos</p>
@@ -79,14 +104,6 @@
     </table>
   </div>
 </div>
-@if (agregarEquipoSeleccionado()) {
-  <app-formulario-datos
-    [agregarEquipoSeleccionado]="agregarEquipoSeleccionado"
-    [equipo]="equipoSeleccionado"
-    [agregarequipo]="agregarequipo"
-  >
-  </app-formulario-datos>
-}
 @if (error()) {
   <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>
 }

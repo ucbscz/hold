@@ -5,16 +5,19 @@ import { Equipos } from '@entities/admin';
 import { EquipoService } from '@entities/equipment';
 import { AdminTableSort, Tabla } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
-import { MostrarerrorComponent } from '@shared/ui';
+import {
+  CustomSelectComponent,
+  MostrarerrorComponent,
+  OpcionSelect,
+} from '@shared/ui';
 import { MantenimientosServiceEquipos } from '../../../model/mantenimientos-equipos.service';
-import { FormularioDatosComponent } from './formulario-datos/formulario-datos.component';
 
 @Component({
   selector: 'app-lista-equipo',
   imports: [
     CommonModule,
     FormsModule,
-    FormularioDatosComponent,
+    CustomSelectComponent,
     MostrarerrorComponent,
   ],
   templateUrl: './lista-equipo.component.html',
@@ -24,9 +27,10 @@ export class ListaEquipoComponent extends Tabla {
   @Input() agregarequipo: WritableSignal<boolean> = signal(true);
   equipos: Equipos[] = [];
   equiposcopia: Equipos[] = [];
-  equipoSeleccionado: Equipos = new Equipos();
   terminoBusqueda: string = '';
-  agregarEquipoSeleccionado: WritableSignal<boolean> = signal(false);
+  equiposMarcados = new Set<number>();
+  grupoSeleccionado: number | null = null;
+  gruposOpciones: OpcionSelect[] = [];
   override sortColumn = 'Nombre';
   override columnas = ['Nombre', 'Estado', 'Ubicación', 'Código IMT', 'Costo'];
 
@@ -43,9 +47,11 @@ export class ListaEquipoComponent extends Tabla {
   ngOnInit() {
     this.cargarEquipos();
   }
-  agregarEquipo(equipo: Equipos) {
-    this.equipoSeleccionado = equipo;
-    this.agregarEquipoSeleccionado.set(true);
+  alternarEquipo(equipo: Equipos, marcado: boolean): void {
+    if (equipo.CodigoImt === null) return;
+
+    if (marcado) this.equiposMarcados.add(equipo.CodigoImt);
+    else this.equiposMarcados.delete(equipo.CodigoImt);
   }
 
   equipoYaSeleccionado(equipo: Equipos): boolean {
@@ -55,14 +61,68 @@ export class ListaEquipoComponent extends Tabla {
     );
   }
 
-  limpiarEquipoSeleccionado() {
-    this.equipoSeleccionado = new Equipos();
+  equipoMarcado(equipo: Equipos): boolean {
+    return equipo.CodigoImt !== null && this.equiposMarcados.has(equipo.CodigoImt);
+  }
+
+  alternarTodosVisibles(marcado: boolean): void {
+    for (const equipo of this.equiposDisponibles) {
+      if (equipo.CodigoImt === null) continue;
+      if (marcado) this.equiposMarcados.add(equipo.CodigoImt);
+      else this.equiposMarcados.delete(equipo.CodigoImt);
+    }
+  }
+
+  seleccionarGrupo(): void {
+    if (this.grupoSeleccionado === null) return;
+
+    for (const equipo of this.equiposDisponibles) {
+      if (
+        equipo.IdGrupoEquipo === Number(this.grupoSeleccionado) &&
+        equipo.CodigoImt !== null
+      ) {
+        this.equiposMarcados.add(equipo.CodigoImt);
+      }
+    }
+  }
+
+  agregarSeleccionados(): void {
+    for (const equipo of this.equiposDisponibles) {
+      if (
+        equipo.CodigoImt === null ||
+        !this.equiposMarcados.has(equipo.CodigoImt)
+      ) {
+        continue;
+      }
+
+      this.mantenimientoequipos.agregarEquipoMantenimiento(
+        equipo.CodigoImt,
+        'preventivo',
+        '',
+        equipo.NombreGrupoEquipo || 'Equipo',
+      );
+    }
+
+    this.equiposMarcados.clear();
+    this.regresar();
   }
   cargarEquipos() {
     this.equiposapi.obtenerEquipos().subscribe({
       next: (data: Equipos[]) => {
         this.equipos = data;
         this.equiposcopia = [...this.equipos];
+        this.gruposOpciones = Array.from(
+          new Map(
+            data
+              .filter((equipo) => equipo.IdGrupoEquipo !== null)
+              .map((equipo) => [
+                equipo.IdGrupoEquipo!,
+                equipo.NombreGrupoEquipo || `Grupo ${equipo.IdGrupoEquipo}`,
+              ]),
+          ),
+        )
+          .sort((a, b) => a[1].localeCompare(b[1], 'es'))
+          .map(([value, label]) => ({ value, label }));
         this.buscar();
       },
       error: (error) => {

@@ -11,6 +11,7 @@ public class EquipoValidator : AbstractValidator<EquipoDto>
         "operativo",
         "parcialmente_operativo",
         "inoperativo",
+        "en_mantenimiento",
     ];
 
     public EquipoValidator(ApplicationDbContext dbContext)

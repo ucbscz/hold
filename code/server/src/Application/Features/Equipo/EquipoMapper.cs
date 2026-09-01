@@ -36,6 +36,7 @@ public partial class EquipoMapper : IMapper<EquipoEntity, EquipoDto>
         {
             EstadoEquipo.ParcialmenteOperativo => "parcialmente_operativo",
             EstadoEquipo.Inoperativo => "inoperativo",
+            EstadoEquipo.EnMantenimiento => "en_mantenimiento",
             _ => "operativo",
         };
 
@@ -44,6 +45,7 @@ public partial class EquipoMapper : IMapper<EquipoEntity, EquipoDto>
         {
             "parcialmente_operativo" => EstadoEquipo.ParcialmenteOperativo,
             "inoperativo" => EstadoEquipo.Inoperativo,
+            "en_mantenimiento" => EstadoEquipo.EnMantenimiento,
             _ => EstadoEquipo.Operativo,
         };
 
