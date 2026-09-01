@@ -18,7 +18,7 @@ public class MantenimientoControllerTests
     [SetUp]
     public void SetUp()
     {
-        _serviceMock = new Mock<MantenimientoService>(null!, null!, null!, null!, null!);
+        _serviceMock = new Mock<MantenimientoService>(null!, null!, null!, null!, null!, null!);
         _controller = new MantenimientoController(_serviceMock.Object);
     }
 

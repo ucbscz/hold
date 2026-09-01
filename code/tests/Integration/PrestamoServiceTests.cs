@@ -178,6 +178,52 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     }
 
     [Test]
+    public async Task QueryPage_UsesTheCompleteRolePriorityBeforeRequestTime()
+    {
+        var roles = new[]
+        {
+            (Carnet: "ROOT", Role: TipoUsuario.Administrador),
+            (Carnet: "LAB", Role: TipoUsuario.Administrador_Laboratorio),
+            (Carnet: "DOC", Role: TipoUsuario.Docente),
+            (Carnet: "ADM", Role: TipoUsuario.Administrativo),
+            (Carnet: "EST", Role: TipoUsuario.Estudiante),
+        };
+
+        foreach (var (carnet, role) in roles)
+        {
+            Db.Usuarios.Add(new Usuario
+            {
+                Carnet = carnet,
+                Nombre = carnet,
+                ApellidoPaterno = "Prioridad",
+                Email = $"{carnet.ToLowerInvariant()}@ucb.edu.bo",
+                Contrasena = "hashed",
+                Rol = role,
+            });
+        }
+
+        var now = DateTime.UtcNow;
+        var loans = roles.Select((item, index) => new Prestamo
+        {
+            Carnet = item.Carnet,
+            EstadoPrestamo = EstadoPrestamo.Pendiente,
+            FechaSolicitud = now.AddMinutes(index * 30),
+            FechaPrestamoEsperada = now.AddDays(1),
+            FechaDevolucionEsperada = now.AddDays(1).AddHours(1),
+        }).ToList();
+        Db.Prestamos.AddRange(loans);
+        await Db.SaveChangesAsync();
+
+        var result = await new PrestamoReadRepository(Db).GetPage(null, null, 0, 20);
+
+        result
+            .Where(loan => roles.Any(role => role.Carnet == loan.CarnetUsuario))
+            .Select(loan => loan.CarnetUsuario)
+            .Should()
+            .ContainInOrder("ROOT", "LAB", "DOC", "ADM", "EST");
+    }
+
+    [Test]
     public async Task AutomaticStateBatch_HasDeterministicMaximumSize()
     {
         Db.Prestamos.AddRange(
@@ -722,6 +768,33 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().AllSatisfy(p => p.EstadoPrestamo.Should().Be("pendiente"));
+    }
+
+    [Test]
+    public async Task GetHistory_FilterBySaved_ReturnsOnlySavedLoans()
+    {
+        var start = DateTime.UtcNow.AddDays(1);
+        var created = await Sut.Create(
+            BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3))
+        );
+        await Sut.SetSaved(created.Value.Id!.Value, Carnet, true, CancellationToken.None);
+
+        var saved = await Sut.GetHistory(
+            Carnet,
+            "todos",
+            cancellationToken: CancellationToken.None,
+            guardado: true
+        );
+        var notSaved = await Sut.GetHistory(
+            Carnet,
+            "todos",
+            cancellationToken: CancellationToken.None,
+            guardado: false
+        );
+
+        saved.Value.Should().ContainSingle();
+        saved.Value.Should().AllSatisfy(loan => loan.Guardado.Should().BeTrue());
+        notSaved.Value.Should().BeEmpty();
     }
 
     [Test]

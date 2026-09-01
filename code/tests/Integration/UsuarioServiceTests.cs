@@ -160,6 +160,29 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     }
 
     [Test]
+    public async Task Create_DeletedCarnet_ReactivatesTheAccount()
+    {
+        var deletedDto = BuildValidUsuario("U001", "anterior@ucb.edu.bo");
+        var deleted = new UsuarioMapper().ToEntity(deletedDto);
+        deleted.EstadoEliminado = true;
+        deleted.Bloqueado = true;
+        deleted.MotivoBloqueo = "Cuenta anterior";
+        Db.Usuarios.Add(deleted);
+        await Db.SaveChangesAsync();
+
+        var result = await Sut.Create(
+            BuildValidUsuario("U001", "nueva@ucb.edu.bo", telefono: "78888888")
+        );
+
+        result.IsSuccess.Should().BeTrue();
+        var stored = await Db.Usuarios.IgnoreQueryFilters().SingleAsync(user => user.Carnet == "U001");
+        stored.EstadoEliminado.Should().BeFalse();
+        stored.Bloqueado.Should().BeFalse();
+        stored.Email.Should().Be("nueva@ucb.edu.bo");
+        BCryptLib.Verify("Test@1234", stored.Contrasena).Should().BeTrue();
+    }
+
+    [Test]
     public async Task Create_DuplicateEmail_ReturnsError()
     {
         await Sut.Create(BuildValidUsuario("U001", "shared@ucb.edu.bo"));

@@ -135,4 +135,36 @@ public class MantenimientoRepositoryTests
 
         result.Should().BeTrue();
     }
+
+    [Test]
+    public async Task SyncEquipmentStates_TracksTheActiveMaintenanceWindow()
+    {
+        var now = DateTime.UtcNow;
+        var equipment = new Equipo
+        {
+            Id = 10,
+            CodigoImt = 123,
+            EstadoEquipo = EstadoEquipo.Operativo,
+            FechaIngresoEquipo = DateOnly.FromDateTime(DateTime.Today),
+        };
+        var maintenance = new Mantenimiento
+        {
+            Id = 1,
+            FechaMantenimiento = now.AddMinutes(-10),
+            FechaFinalMantenimiento = now.AddMinutes(10),
+        };
+        _dbContext.AddRange(equipment, maintenance);
+        _dbContext.DetallesMantenimientos.Add(new DetalleMantenimiento
+        {
+            IdEquipo = equipment.Id,
+            IdMantenimiento = maintenance.Id,
+        });
+        await _dbContext.SaveChangesAsync();
+
+        await _repository.SyncEquipmentStates(now);
+        equipment.EstadoEquipo.Should().Be(EstadoEquipo.EnMantenimiento);
+
+        await _repository.SyncEquipmentStates(now.AddMinutes(11));
+        equipment.EstadoEquipo.Should().Be(EstadoEquipo.Operativo);
+    }
 }
