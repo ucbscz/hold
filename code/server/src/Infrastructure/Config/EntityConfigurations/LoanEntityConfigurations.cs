@@ -28,6 +28,7 @@ internal sealed class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         entity.Property(e => e.EstadoEliminado).HasColumnName(DatabaseColumns.EstadoEliminado);
         entity.Property(e => e.ImagenFrenteCarnet).HasColumnName("imagen_frente_carnet");
         entity.Property(e => e.ImagenAtrasCarnet).HasColumnName("imagen_atras_carnet");
+        entity.Property(e => e.ImagenFirma).HasColumnName("imagen_firma");
         entity.Property(e => e.RefreshToken).HasColumnName("refresh_token");
         entity.Property(e => e.RefreshTokenExpiry).HasColumnName("refresh_token_expiry");
         entity.HasOne<Carrera>().WithMany().HasForeignKey(e => e.IdCarrera).IsRequired();

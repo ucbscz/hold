@@ -90,6 +90,7 @@ export class UsuarioServiceAPI {
       EmailReferencia: usuario.email_referencia,
       ImagenFrenteCarnet: usuario.imagen_frente_carnet,
       ImagenAtrasCarnet: usuario.imagen_atras_carnet,
+      ImagenFirma: usuario.imagen_firma,
     };
     return this.http
       .put<ApiResponse<UsuarioApiItem>>(`${this.apiUrl}/perfil`, envio)
@@ -158,6 +159,7 @@ export class UsuarioServiceAPI {
       motivo_bloqueo: item.MotivoBloqueo ?? null,
       imagen_frente_carnet: item.ImagenFrenteCarnet ?? null,
       imagen_atras_carnet: item.ImagenAtrasCarnet ?? null,
+      imagen_firma: item.ImagenFirma ?? null,
     };
   }
 

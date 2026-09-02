@@ -54,7 +54,8 @@
 .terms-page aside {
   margin-top: 1.5rem;
   padding: 1rem;
-  border-left: 3px solid var(--brand);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink-secondary);
   font-size: 0.82rem;

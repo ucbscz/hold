@@ -16,6 +16,7 @@ export class Usuario {
   motivo_bloqueo?: string | null;
   imagen_frente_carnet?: string | null;
   imagen_atras_carnet?: string | null;
+  imagen_firma?: string | null;
   constructor() {
     this.id = '';
     this.carnet = null;
@@ -32,5 +33,6 @@ export class Usuario {
     this.email_referencia = null;
     this.imagen_frente_carnet = null;
     this.imagen_atras_carnet = null;
+    this.imagen_firma = null;
   }
 }

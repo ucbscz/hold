@@ -9,8 +9,9 @@ RUN dotnet publish "IMT_Reservas.Server.csproj" -c Release -o /app/publish --no-
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 ENV ASPNETCORE_HTTP_PORTS=8080
-USER app
 WORKDIR /app
 COPY --from=build /app/publish .
+RUN mkdir -p /app/data-protection-keys && chown -R app:app /app/data-protection-keys
+USER app
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "IMT_Reservas.Server.dll"]

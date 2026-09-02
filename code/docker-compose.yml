@@ -59,8 +59,11 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_HTTP_PORTS: 8080
       HttpsRedirection__Enabled: "false"
+      DataProtection__KeysPath: /app/data-protection-keys
       Elasticsearch__Uri: http://ucb_elastic:9200
       Redis__ConnectionString: ucb_redis:6379
+    volumes:
+      - ucb_dataprotection_keys:/app/data-protection-keys
     depends_on:
       ucb_db:
         condition: service_healthy
@@ -91,3 +94,4 @@ volumes:
   ucb_db_data:
   ucb_redis_data:
   ucb_elastic_data:
+  ucb_dataprotection_keys:

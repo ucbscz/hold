@@ -71,6 +71,9 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
         RuleFor(usuario => usuario.ImagenAtrasCarnet)
             .Must(image => image == null || image.Length <= 5 * 1024 * 1024)
             .WithMessage("La imagen posterior del carnet no puede superar 5 MB");
+        RuleFor(usuario => usuario.ImagenFirma)
+            .Must(image => image == null || image.Length <= 1024 * 1024)
+            .WithMessage("La firma no puede superar 1 MB");
 
         RuleFor(usuario => usuario.IdCarrera)
             .MustAsync(

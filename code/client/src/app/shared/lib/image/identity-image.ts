@@ -36,7 +36,8 @@ export function identityDataUrlToBase64(
 
 export function identityBase64ToDataUrl(
   value: string | null | undefined,
+  mimeType = 'image/jpeg',
 ): string {
   if (!value) return '';
-  return value.startsWith('data:') ? value : `data:image/jpeg;base64,${value}`;
+  return value.startsWith('data:') ? value : `data:${mimeType};base64,${value}`;
 }

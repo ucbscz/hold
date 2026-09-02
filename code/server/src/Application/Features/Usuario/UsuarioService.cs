@@ -16,7 +16,7 @@ namespace IMT_Reservas.Server.Application.Features.Usuario;
 
 public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioDto>
 {
-    public const string TermsVersion = "2026-09-01";
+    public const string TermsVersion = "2026-09-02";
     private static readonly TimeSpan UsuarioCacheTtl = TimeSpan.FromMinutes(30);
     private readonly UsuarioMapper _mapper;
     private readonly JwtService _jwtService;
@@ -178,6 +178,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         dto.ImagenFrenteCarnet = _sensitiveData.Protect(dto.ImagenFrenteCarnet);
         dto.ImagenAtrasCarnet = _sensitiveData.Protect(dto.ImagenAtrasCarnet);
+        dto.ImagenFirma = _sensitiveData.Protect(dto.ImagenFirma);
         var entity = deletedUser ?? MapToEntity(dto);
 
         if (deletedUser != null)
@@ -190,6 +191,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             entity.RefreshTokenExpiry = null;
             entity.ImagenFrenteCarnet = dto.ImagenFrenteCarnet;
             entity.ImagenAtrasCarnet = dto.ImagenAtrasCarnet;
+            entity.ImagenFirma = dto.ImagenFirma;
         }
 
         entity.Contrasena = BCryptLib.HashPassword(dto.Contrasena, workFactor: 12);
@@ -208,7 +210,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (result.IsSuccess && result.Value != null)
         {
             result.Value.CarreraNombre = await _queries.GetCarreraName(entity.IdCarrera);
-            UnprotectIdentityImages(result.Value);
+            ClearProfileDocuments(result.Value);
             await Audit!.Log(
                 AuditAccion.Crear,
                 typeof(UsuarioEntity).Name,
@@ -255,6 +257,9 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         dto.ImagenAtrasCarnet = dto.ImagenAtrasCarnet == null
             ? existing.ImagenAtrasCarnet
             : _sensitiveData.Protect(dto.ImagenAtrasCarnet);
+        dto.ImagenFirma = dto.ImagenFirma == null
+            ? existing.ImagenFirma
+            : _sensitiveData.Protect(dto.ImagenFirma);
 
         var validation = await Validator.ValidateAsync(dto, cancellationToken);
 
@@ -290,8 +295,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             existing.IdCarrera,
             cancellationToken
         );
-        resultDto.ImagenFrenteCarnet = null;
-        resultDto.ImagenAtrasCarnet = null;
+        ClearProfileDocuments(resultDto);
 
         _ = await _cacheRepository.Remove(CacheKeys.Usuario(carnet));
         await Audit!.Log(AuditAccion.Editar, typeof(UsuarioEntity).Name, carnet);
@@ -332,8 +336,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         var dto = _mapper.ToDto(user);
         dto.CarreraNombre = await _queries.GetCarreraName(user.IdCarrera);
-        dto.ImagenFrenteCarnet = null;
-        dto.ImagenAtrasCarnet = null;
+        ClearProfileDocuments(dto);
 
         _ = await _cacheRepository.Set(cacheKey, dto, UsuarioCacheTtl);
 
@@ -355,7 +358,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             user.IdCarrera,
             cancellationToken
         );
-        UnprotectIdentityImages(dto);
+        UnprotectProfileDocuments(dto);
         return Result<UsuarioDto>.Success(dto);
     }
 
@@ -388,8 +391,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         var dto = _mapper.ToDto(user);
         dto.CarreraNombre = carreraNombre;
-        dto.ImagenFrenteCarnet = null;
-        dto.ImagenAtrasCarnet = null;
+        ClearProfileDocuments(dto);
 
         var accessToken = _jwtService.GenerateAccessToken(dto);
         var refreshToken = JwtService.GenerateRefreshToken();
@@ -433,8 +435,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         var dto = _mapper.ToDto(user);
         dto.CarreraNombre = carreraNombre;
-        dto.ImagenFrenteCarnet = null;
-        dto.ImagenAtrasCarnet = null;
+        ClearProfileDocuments(dto);
 
         var newAccessToken = _jwtService.GenerateAccessToken(dto);
         var newRefreshToken = JwtService.GenerateRefreshToken();
@@ -501,9 +502,17 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         dto.Rol = existing.Rol.ToString().ToLowerInvariant();
     }
 
-    private void UnprotectIdentityImages(UsuarioDto dto)
+    private void UnprotectProfileDocuments(UsuarioDto dto)
     {
         dto.ImagenFrenteCarnet = _sensitiveData.Unprotect(dto.ImagenFrenteCarnet);
         dto.ImagenAtrasCarnet = _sensitiveData.Unprotect(dto.ImagenAtrasCarnet);
+        dto.ImagenFirma = _sensitiveData.Unprotect(dto.ImagenFirma);
+    }
+
+    private static void ClearProfileDocuments(UsuarioDto dto)
+    {
+        dto.ImagenFrenteCarnet = null;
+        dto.ImagenAtrasCarnet = null;
+        dto.ImagenFirma = null;
     }
 }

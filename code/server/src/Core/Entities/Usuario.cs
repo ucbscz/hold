@@ -20,6 +20,7 @@ public class Usuario : Entity
     public string? MotivoBloqueo { get; set; }
     public byte[]? ImagenFrenteCarnet { get; set; }
     public byte[]? ImagenAtrasCarnet { get; set; }
+    public byte[]? ImagenFirma { get; set; }
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiry { get; set; }
 }

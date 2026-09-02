@@ -16,11 +16,17 @@ import {
   processIdentityImage,
 } from '@shared/lib/image/identity-image';
 import { MostrarerrorComponent, ToastService } from '@shared/ui';
+import { FirmaComponent } from '@features/signature';
 import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-editar',
-  imports: [CommonModule, ValidatedFormsModule, MostrarerrorComponent],
+  imports: [
+    CommonModule,
+    ValidatedFormsModule,
+    MostrarerrorComponent,
+    FirmaComponent,
+  ],
   templateUrl: './editar.component.html',
   styleUrl: './editar.component.css',
 })
@@ -36,6 +42,8 @@ export class EditarComponent {
   procesandoCarnet = false;
   carnetFrentePreview = '';
   carnetAtrasPreview = '';
+  firmaPreview = '';
+  clickfirma: WritableSignal<boolean> = signal(false);
   mostrarContrasena = false;
 
   constructor(
@@ -51,6 +59,14 @@ export class EditarComponent {
     this.carnetAtrasPreview = identityBase64ToDataUrl(
       this.localUsuario.imagen_atras_carnet,
     );
+    this.firmaPreview = identityBase64ToDataUrl(
+      this.localUsuario.imagen_firma,
+      'image/png',
+    );
+  }
+  guardarFirma(signatureData: string): void {
+    this.firmaPreview = signatureData;
+    this.localUsuario.imagen_firma = identityDataUrlToBase64(signatureData);
   }
   confirmar() {
     if (this.cargando || this.procesandoCarnet) return;

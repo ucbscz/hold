@@ -81,11 +81,56 @@
 .traceability-note {
   margin: -0.75rem 0 1.25rem;
   padding: 0.75rem;
-  border-left: 3px solid var(--brand);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   color: var(--ink-secondary);
   background: var(--sidebar);
   font-size: 0.82rem;
   line-height: 1.5;
+}
+.signature-fieldset {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0.25rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.signature-fieldset legend {
+  padding: 0 0.35rem;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+.signature-fieldset > p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+}
+.signature-preview {
+  display: grid;
+  min-height: 112px;
+  padding: 0.75rem;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  background: var(--surface);
+}
+.signature-preview img {
+  width: min(100%, 280px);
+  max-height: 96px;
+  object-fit: contain;
+}
+.signature-preview i {
+  font-size: 1.5rem;
+}
+.signature-preview span {
+  font-size: 0.78rem;
+}
+.signature-button {
+  justify-self: center;
+  min-width: 150px;
 }
 .section-heading {
   margin: 0.5rem 0 0;

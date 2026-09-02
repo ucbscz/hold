@@ -66,11 +66,6 @@ export class FormularioComponent implements OnInit {
       if (cara === 'frente') this.carnetFrente = data;
       else this.carnetAtras = data;
       this.actualizarContrato();
-      if (this.firma)
-        this.contenidoHtml = this.insertarFirmaEnContrato(
-          this.contenidoHtml,
-          this.firma,
-        );
     } catch (error) {
       this.mensajeerror =
         error instanceof Error
@@ -186,7 +181,11 @@ export class FormularioComponent implements OnInit {
       año_devolucion: fechaFinal.getFullYear().toString(),
       detalles_clase: escapeHtmlValue(detallesClase),
     });
-    this.contenidoHtml = this.renderizarCarnetEnContrato(processedTemplate);
+    const contratoConCarnet =
+      this.renderizarCarnetEnContrato(processedTemplate);
+    this.contenidoHtml = this.firma
+      ? this.insertarFirmaEnContrato(contratoConCarnet, this.firma)
+      : contratoConCarnet;
   }
 
   ngOnInit(): void {
@@ -196,6 +195,7 @@ export class FormularioComponent implements OnInit {
           profile.imagen_frente_carnet,
         );
         this.carnetAtras = identityBase64ToDataUrl(profile.imagen_atras_carnet);
+        this.firma = identityBase64ToDataUrl(profile.imagen_firma, 'image/png');
         this.actualizarContrato();
       },
     });

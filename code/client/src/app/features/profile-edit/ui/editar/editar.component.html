@@ -11,8 +11,8 @@
   <div class="form-content">
     <h2>Editar perfil</h2>
     <p class="traceability-note">
-      Tu nombre, apellidos, correo y carrera son datos institucionales. Un
-      administrador debe corregirlos para conservar la trazabilidad.
+      Tu nombre, apellidos, correo y carrera son datos institucionales. En caso
+      de querer editarlos, contacta con un administrador
     </p>
     <form #form="ngForm" (ngSubmit)="confirmar()">
       <div class="form-group">
@@ -119,6 +119,25 @@
           </section>
         </div>
       </fieldset>
+      <fieldset class="signature-fieldset">
+        <legend>Firma</legend>
+        <p>Se utilizará automáticamente en tus próximos contratos.</p>
+        <div class="signature-preview">
+          @if (firmaPreview) {
+            <img [src]="firmaPreview" alt="Firma guardada" />
+          } @else {
+            <i class="fas fa-signature" aria-hidden="true"></i>
+            <span>No tienes una firma guardada</span>
+          }
+        </div>
+        <button
+          type="button"
+          class="identity-button signature-button"
+          (click)="clickfirma.set(true)"
+        >
+          {{ firmaPreview ? "Cambiar firma" : "Agregar firma" }}
+        </button>
+      </fieldset>
       <p class="section-heading">Contacto de referencia</p>
       <div class="form-group">
         <label for="nombre_referencia">Nombre</label>
@@ -180,3 +199,9 @@
     </form>
   </div>
 </div>
+@if (clickfirma()) {
+  <app-firma
+    (firma)="guardarFirma($event)"
+    [clickfirma]="clickfirma"
+  ></app-firma>
+}

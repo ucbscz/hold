@@ -15,4 +15,5 @@ export interface UsuarioApiItem {
   MotivoBloqueo?: string | null;
   ImagenFrenteCarnet?: string | null;
   ImagenAtrasCarnet?: string | null;
+  ImagenFirma?: string | null;
 }

@@ -425,6 +425,7 @@ create table usuarios
             references carreras,
     imagen_frente_carnet bytea,
     imagen_atras_carnet  bytea,
+    imagen_firma         bytea,
     refresh_token        text,
     refresh_token_expiry timestamp with time zone,
     bloqueado            boolean      default false                      not null,

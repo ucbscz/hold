@@ -439,18 +439,22 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
         var front = new byte[] { 1, 2, 3, 4, 5 };
         var back = new byte[] { 6, 7, 8, 9, 10 };
+        var signature = new byte[] { 11, 12, 13, 14, 15 };
         var dto = BuildValidUsuario("U001", "u001@ucb.edu.bo", contrasena: null);
         dto.ImagenFrenteCarnet = front;
         dto.ImagenAtrasCarnet = back;
+        dto.ImagenFirma = signature;
 
         var result = await Sut.UpdateProfile("U001", dto);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.ImagenFrenteCarnet.Should().Equal(front);
         result.Value.ImagenAtrasCarnet.Should().Equal(back);
+        result.Value.ImagenFirma.Should().Equal(signature);
         var stored = Db.Usuarios.Single(user => user.Carnet == "U001");
         stored.ImagenFrenteCarnet.Should().NotEqual(front);
         stored.ImagenAtrasCarnet.Should().NotEqual(back);
+        stored.ImagenFirma.Should().NotEqual(signature);
     }
 
     [Test]
