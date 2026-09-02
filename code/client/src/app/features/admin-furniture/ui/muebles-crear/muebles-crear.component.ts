@@ -1,8 +1,9 @@
 import { CatalogoInventarioService } from '@entities/equipment';
-import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
+import { CustomSelectComponent, OpcionSelect, ToastService } from '@shared/ui';
 import {
   Component,
   EventEmitter,
+  inject,
   Input,
   Output,
   signal,
@@ -13,7 +14,7 @@ import { Muebles } from '@entities/admin';
 import { MuebleService } from '@entities/furniture';
 import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
-import { Aviso, AvisoExitoComponent, MostrarerrorComponent } from '@shared/ui';
+import { Aviso, MostrarerrorComponent } from '@shared/ui';
 @Component({
   selector: 'app-muebles-crear',
   standalone: true,
@@ -22,12 +23,12 @@ import { Aviso, AvisoExitoComponent, MostrarerrorComponent } from '@shared/ui';
     ValidatedFormsModule,
     MostrarerrorComponent,
     Aviso,
-    AvisoExitoComponent,
   ],
   templateUrl: './muebles-crear.component.html',
   styleUrl: './muebles-crear.component.css',
 })
 export class MueblesCrearComponent extends BaseTablaComponent {
+  private readonly toast = inject(ToastService);
   @Input() botoncrear: WritableSignal<boolean> = signal(true);
   @Output() Actualizar = new EventEmitter<void>();
   mueble: Muebles = new Muebles();
@@ -53,12 +54,13 @@ export class MueblesCrearComponent extends BaseTablaComponent {
     this.aviso.set(true);
   }
   registrar() {
+    if (!this.iniciarEnvio()) return;
     this.muebleapi.crearMueble(this.mueble).subscribe({
       next: (_response) => {
         this.Actualizar.emit();
-        this.mensajeexito =
-          'Mueble ' + this.mueble.Nombre + ' creado exitosamente';
-        this.exito.set(true);
+        this.finalizarEnvio();
+        this.toast.success(`Mueble ${this.mueble.Nombre} creado exitosamente.`);
+        this.cerrar();
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -67,6 +69,7 @@ export class MueblesCrearComponent extends BaseTablaComponent {
         );
         this.mensajeerror = errorMsg;
         this.error.set(true);
+        this.finalizarEnvio();
       },
     });
   }

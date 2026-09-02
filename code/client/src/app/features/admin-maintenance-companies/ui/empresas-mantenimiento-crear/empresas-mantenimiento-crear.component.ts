@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  inject,
   Input,
   Output,
   signal,
@@ -11,20 +12,16 @@ import { EmpresaMantenimiento } from '@entities/admin';
 import { EmpresamantenimientoService } from '@entities/maintenance-company';
 import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
-import { Aviso, AvisoExitoComponent, MostrarerrorComponent } from '@shared/ui';
+import { Aviso, MostrarerrorComponent, ToastService } from '@shared/ui';
 @Component({
   selector: 'app-empresas-mantenimiento-crear',
   standalone: true,
-  imports: [
-    ValidatedFormsModule,
-    MostrarerrorComponent,
-    Aviso,
-    AvisoExitoComponent,
-  ],
+  imports: [ValidatedFormsModule, MostrarerrorComponent, Aviso],
   templateUrl: './empresas-mantenimiento-crear.component.html',
   styleUrl: './empresas-mantenimiento-crear.component.css',
 })
 export class EmpresasMantenimientoCrearComponent extends BaseTablaComponent {
+  private readonly toast = inject(ToastService);
   @Input() botoncrear: WritableSignal<boolean> = signal(true);
   @Output() Actualizar = new EventEmitter<void>();
   empresaMantenimiento: EmpresaMantenimiento = new EmpresaMantenimiento();
@@ -38,14 +35,15 @@ export class EmpresasMantenimientoCrearComponent extends BaseTablaComponent {
     this.aviso.set(true);
   }
   registrar() {
+    if (!this.iniciarEnvio()) return;
     this.empresaMantenimientoapi
       .crearEmpresaMantenimiento(this.empresaMantenimiento)
       .subscribe({
         next: () => {
           this.Actualizar.emit();
-          this.mensajeexito =
-            'Empresa de mantenimiento creada Satisfactoriamente';
-          this.exito.set(true);
+          this.finalizarEnvio();
+          this.toast.success('Empresa de mantenimiento creada correctamente.');
+          this.cerrar();
         },
         error: (error) => {
           const errorMsg = extractErrorMessage(
@@ -54,6 +52,7 @@ export class EmpresasMantenimientoCrearComponent extends BaseTablaComponent {
           );
           this.mensajeerror = errorMsg;
           this.error.set(true);
+          this.finalizarEnvio();
         },
       });
   }

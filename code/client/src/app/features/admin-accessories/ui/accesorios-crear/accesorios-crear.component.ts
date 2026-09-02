@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  inject,
   Input,
   Output,
   signal,
@@ -14,10 +15,10 @@ import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   Aviso,
-  AvisoExitoComponent,
   CustomSelectComponent,
   MostrarerrorComponent,
   OpcionSelect,
+  ToastService,
 } from '@shared/ui';
 @Component({
   selector: 'app-accesorios-crear',
@@ -26,13 +27,13 @@ import {
     ValidatedFormsModule,
     MostrarerrorComponent,
     Aviso,
-    AvisoExitoComponent,
     CustomSelectComponent,
   ],
   templateUrl: './accesorios-crear.component.html',
   styleUrl: './accesorios-crear.component.css',
 })
 export class AccesoriosCrearComponent extends BaseTablaComponent {
+  private readonly toast = inject(ToastService);
   @Input() botoncrear: WritableSignal<boolean> = signal(true);
   @Output() Actualizar = new EventEmitter<void>();
   equipos: Equipos[] = [];
@@ -72,11 +73,13 @@ export class AccesoriosCrearComponent extends BaseTablaComponent {
   }
 
   registrar() {
+    if (!this.iniciarEnvio()) return;
     this.accesorioapi.crearAccesorio(this.accesorio).subscribe({
       next: (_response) => {
         this.Actualizar.emit();
-        this.mensajeexito = 'Accesorio creado exitosamente.';
-        this.exito.set(true);
+        this.finalizarEnvio();
+        this.toast.success('Accesorio creado exitosamente.');
+        this.cerrar();
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -85,6 +88,7 @@ export class AccesoriosCrearComponent extends BaseTablaComponent {
         );
         this.mensajeerror = errorMsg;
         this.error.set(true);
+        this.finalizarEnvio();
       },
     });
   }

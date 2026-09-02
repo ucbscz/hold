@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   EventEmitter,
+  inject,
   Input,
   Output,
   signal,
@@ -16,10 +17,10 @@ import { FlatpickrDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   Aviso,
-  AvisoExitoComponent,
   CustomSelectComponent,
   MostrarerrorComponent,
   OpcionSelect,
+  ToastService,
 } from '@shared/ui';
 import { Options } from 'flatpickr/dist/types/options';
 import { MantenimientosServiceEquipos } from '../../model/mantenimientos-equipos.service';
@@ -33,7 +34,6 @@ import { ListaEquipoComponent } from './lista-equipo/lista-equipo.component';
     CommonModule,
     MostrarerrorComponent,
     Aviso,
-    AvisoExitoComponent,
     CustomSelectComponent,
     FlatpickrDirective,
   ],
@@ -41,6 +41,7 @@ import { ListaEquipoComponent } from './lista-equipo/lista-equipo.component';
   styleUrl: './mantenimientos-crear.component.css',
 })
 export class MantenimientosCrearComponent extends BaseTablaComponent {
+  private readonly toast = inject(ToastService);
   @Input() botoncrear: WritableSignal<boolean> = signal(true);
   @Output() Actualizar = new EventEmitter<void>();
   agregarequipo: WritableSignal<boolean> = signal(false);
@@ -169,6 +170,7 @@ export class MantenimientosCrearComponent extends BaseTablaComponent {
     this.aviso.set(true);
   }
   registrar() {
+    if (!this.iniciarEnvio()) return;
     const mantenimientoParaEnvio = {
       FechaMantenimiento: this.mantenimiento.FechaMantenimiento,
       FechaFinalDeMantenimiento: this.mantenimiento.FechaFinalDeMantenimiento,
@@ -184,8 +186,9 @@ export class MantenimientosCrearComponent extends BaseTablaComponent {
       .subscribe({
         next: (_response) => {
           this.Actualizar.emit();
-          this.mensajeexito = 'Mantenimiento creado con éxito.';
-          this.exito.set(true);
+          this.finalizarEnvio();
+          this.toast.success('Mantenimiento creado con éxito.');
+          this.cerrar();
         },
         error: (error) => {
           const errorMsg = extractErrorMessage(
@@ -194,6 +197,7 @@ export class MantenimientosCrearComponent extends BaseTablaComponent {
           );
           this.mensajeerror = errorMsg;
           this.error.set(true);
+          this.finalizarEnvio();
         },
       });
   }

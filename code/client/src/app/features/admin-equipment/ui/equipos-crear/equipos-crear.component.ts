@@ -2,6 +2,7 @@ import { CatalogoSelectorComponent } from '../catalogo-selector.component';
 import {
   Component,
   EventEmitter,
+  inject,
   Input,
   Output,
   signal,
@@ -16,10 +17,10 @@ import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   Aviso,
-  AvisoExitoComponent,
   CustomSelectComponent,
   MostrarerrorComponent,
   OpcionSelect,
+  ToastService,
 } from '@shared/ui';
 @Component({
   selector: 'app-equipos-crear',
@@ -29,13 +30,13 @@ import {
     CatalogoSelectorComponent,
     MostrarerrorComponent,
     Aviso,
-    AvisoExitoComponent,
     CustomSelectComponent,
   ],
   templateUrl: './equipos-crear.component.html',
   styleUrl: './equipos-crear.component.css',
 })
 export class EquiposCrearComponent extends BaseTablaComponent {
+  private readonly toast = inject(ToastService);
   @Input() botoncrear: WritableSignal<boolean> = signal(true);
   @Output() Actualizar = new EventEmitter<void>();
   grupoequipo: GrupoEquipo[] = [];
@@ -112,6 +113,7 @@ export class EquiposCrearComponent extends BaseTablaComponent {
     this.aviso.set(true);
   }
   registrar() {
+    if (!this.iniciarEnvio()) return;
     this.equipo.IdGrupoEquipo = this.grupoequipoSeleccionado!.id;
     this.equipo.NombreGrupoEquipo = this.grupoequipoSeleccionado!.nombre;
     this.equipo.IdGavetero = this.gaveteroSeleccionado?.Id ?? null;
@@ -121,8 +123,9 @@ export class EquiposCrearComponent extends BaseTablaComponent {
       next: () => {
         this.Actualizar.emit();
         this.grupoequipoSeleccionado = null;
-        this.mensajeexito = 'Equipo creado con exito';
-        this.exito.set(true);
+        this.finalizarEnvio();
+        this.toast.success('Equipo creado con éxito.');
+        this.cerrar();
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -131,6 +134,7 @@ export class EquiposCrearComponent extends BaseTablaComponent {
         );
         this.mensajeerror = errorMsg;
         this.error.set(true);
+        this.finalizarEnvio();
       },
     });
   }

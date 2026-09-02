@@ -90,7 +90,11 @@
         ></app-mostrarerror>
       }
       <div class="form-submit">
-        <button type="submit" class="register-button" [disabled]="!form.valid">
+        <button
+          type="submit"
+          class="register-button"
+          [disabled]="!form.valid || procesando"
+        >
           <span>Registrar Empresa</span>
         </button>
       </div>
@@ -103,11 +107,4 @@
     [mensaje]="mensajeaviso"
     (aceptar)="registrar()"
   ></app-aviso>
-}
-@if (exito()) {
-  <app-aviso-exito
-    [exito]="exito"
-    [mensaje]="mensajeexito"
-    (accion)="cerrar()"
-  ></app-aviso-exito>
 }

@@ -194,7 +194,7 @@
         <button
           type="submit"
           class="register-button"
-          [disabled]="!form.valid || !contrasenasValidas"
+          [disabled]="!form.valid || !contrasenasValidas || procesando"
         >
           <span>Crear Usuario</span>
         </button>
@@ -208,11 +208,4 @@
     [mensaje]="mensajeaviso"
     (aceptar)="registrar()"
   ></app-aviso>
-}
-@if (exito()) {
-  <app-aviso-exito
-    [exito]="exito"
-    [mensaje]="mensajeexito"
-    (accion)="cerrar()"
-  ></app-aviso-exito>
 }

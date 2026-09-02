@@ -13,11 +13,11 @@ import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   Aviso,
-  AvisoExitoComponent,
   CustomSelectComponent,
   MostrarerrorComponent,
   OpcionSelect,
   PasswordInputComponent,
+  ToastService,
 } from '@shared/ui';
 @Component({
   selector: 'app-usuarios-crear',
@@ -26,7 +26,6 @@ import {
     ValidatedFormsModule,
     MostrarerrorComponent,
     Aviso,
-    AvisoExitoComponent,
     CustomSelectComponent,
     PasswordInputComponent,
   ],
@@ -34,6 +33,7 @@ import {
   styleUrl: './usuarios-crear.component.css',
 })
 export class UsuariosCrearComponent extends BaseTablaComponent {
+  private readonly toast = inject(ToastService);
   @Input() botoncrear: WritableSignal<boolean> = signal(true);
   @Output() Actualizar = new EventEmitter<void>();
   @Input() carreras: string[] = [];
@@ -70,14 +70,15 @@ export class UsuariosCrearComponent extends BaseTablaComponent {
     this.aviso.set(true);
   }
   registrar() {
-    if (!this.contrasenasValidas) return;
+    if (!this.contrasenasValidas || !this.iniciarEnvio()) return;
     this.usuarioApi
       .registrarCuenta(this.usuario, this.contrasena, this.usuario.rol!)
       .subscribe({
         next: (_response) => {
           this.Actualizar.emit();
-          this.mensajeexito = 'Usuario creado exitosamente';
-          this.exito.set(true);
+          this.finalizarEnvio();
+          this.toast.success('Usuario creado exitosamente.');
+          this.cerrar();
         },
         error: (error) => {
           const errorMsg = extractErrorMessage(
@@ -86,6 +87,7 @@ export class UsuariosCrearComponent extends BaseTablaComponent {
           );
           this.mensajeerror = errorMsg;
           this.error.set(true);
+          this.finalizarEnvio();
         },
       });
   }

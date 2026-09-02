@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  inject,
   Input,
   Output,
   signal,
@@ -14,9 +15,9 @@ import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   Aviso,
-  AvisoExitoComponent,
   CustomSelectComponent,
   MostrarerrorComponent,
+  ToastService,
 } from '@shared/ui';
 @Component({
   selector: 'app-gaveteros-crear',
@@ -25,13 +26,13 @@ import {
     ValidatedFormsModule,
     MostrarerrorComponent,
     Aviso,
-    AvisoExitoComponent,
     CustomSelectComponent,
   ],
   templateUrl: './gaveteros-crear.component.html',
   styleUrl: './gaveteros-crear.component.css',
 })
 export class GaveterosCrearComponent extends BaseTablaComponent {
+  private readonly toast = inject(ToastService);
   @Input() botoncrear: WritableSignal<boolean> = signal(true);
   @Output() Actualizar = new EventEmitter<void>();
   muebles: string[] = [];
@@ -65,11 +66,13 @@ export class GaveterosCrearComponent extends BaseTablaComponent {
     this.aviso.set(true);
   }
   registrar() {
+    if (!this.iniciarEnvio()) return;
     this.gaveteroapi.crearGavetero(this.gavetero).subscribe({
       next: (_response) => {
         this.Actualizar.emit();
-        this.mensajeexito = 'Gavetero registrado con exito';
-        this.exito.set(true);
+        this.finalizarEnvio();
+        this.toast.success('Gavetero registrado con éxito.');
+        this.cerrar();
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -78,6 +81,7 @@ export class GaveterosCrearComponent extends BaseTablaComponent {
         );
         this.mensajeerror = errorMsg;
         this.error.set(true);
+        this.finalizarEnvio();
       },
     });
   }

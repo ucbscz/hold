@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  inject,
   Input,
   Output,
   signal,
@@ -12,9 +13,9 @@ import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   Aviso,
-  AvisoExitoComponent,
   CustomSelectComponent,
   MostrarerrorComponent,
+  ToastService,
 } from '@shared/ui';
 @Component({
   selector: 'app-grupos-equipos-crear',
@@ -23,13 +24,13 @@ import {
     ValidatedFormsModule,
     MostrarerrorComponent,
     Aviso,
-    AvisoExitoComponent,
     CustomSelectComponent,
   ],
   templateUrl: './grupos-equipos-crear.component.html',
   styleUrl: './grupos-equipos-crear.component.css',
 })
 export class GruposEquiposCrearComponent extends BaseTablaComponent {
+  private readonly toast = inject(ToastService);
   @Input() botoncrear: WritableSignal<boolean> = signal(true);
   @Input() categorias: string[] = [];
   @Output() Actualizar = new EventEmitter<void>();
@@ -42,11 +43,13 @@ export class GruposEquiposCrearComponent extends BaseTablaComponent {
     this.aviso.set(true);
   }
   registrar() {
+    if (!this.iniciarEnvio()) return;
     this.grupoEquipoapi.crearGrupoEquipo(this.grupoEquipo).subscribe({
       next: (_response) => {
         this.Actualizar.emit();
-        this.mensajeexito = 'Grupo de equipo registrado exitosamente';
-        this.exito.set(true);
+        this.finalizarEnvio();
+        this.toast.success('Grupo de equipo registrado exitosamente.');
+        this.cerrar();
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -55,6 +58,7 @@ export class GruposEquiposCrearComponent extends BaseTablaComponent {
         );
         this.mensajeerror = errorMsg;
         this.error.set(true);
+        this.finalizarEnvio();
       },
     });
   }

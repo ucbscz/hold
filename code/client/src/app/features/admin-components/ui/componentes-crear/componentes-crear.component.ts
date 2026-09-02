@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  inject,
   Input,
   Output,
   signal,
@@ -14,10 +15,10 @@ import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   Aviso,
-  AvisoExitoComponent,
   CustomSelectComponent,
   MostrarerrorComponent,
   OpcionSelect,
+  ToastService,
 } from '@shared/ui';
 @Component({
   selector: 'app-componentes-crear',
@@ -25,7 +26,6 @@ import {
   imports: [
     ValidatedFormsModule,
     MostrarerrorComponent,
-    AvisoExitoComponent,
     Aviso,
     CustomSelectComponent,
   ],
@@ -33,6 +33,7 @@ import {
   styleUrl: './componentes-crear.component.css',
 })
 export class ComponentesCrearComponent extends BaseTablaComponent {
+  private readonly toast = inject(ToastService);
   @Input() botoncrear: WritableSignal<boolean> = signal(true);
   @Output() Actualizar = new EventEmitter<void>();
   equipos: Equipos[] = [];
@@ -72,15 +73,18 @@ export class ComponentesCrearComponent extends BaseTablaComponent {
     this.aviso.set(true);
   }
   registrar() {
+    if (!this.iniciarEnvio()) return;
     this.componenteService.crearComponente(this.componente).subscribe({
       next: (_response) => {
         this.Actualizar.emit();
-        this.mensajeexito = 'Componente creado con exito';
-        this.exito.set(true);
+        this.finalizarEnvio();
+        this.toast.success('Componente creado con éxito.');
+        this.cerrar();
       },
       error: (_error) => {
         this.mensajeerror = 'Error al crear el componente , Intente mas tarde ';
         this.error.set(true);
+        this.finalizarEnvio();
       },
     });
   }

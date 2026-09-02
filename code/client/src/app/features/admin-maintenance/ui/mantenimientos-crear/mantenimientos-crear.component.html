@@ -150,7 +150,7 @@
           (click)="validarcreacion()"
           type="submit"
           class="btn btn-primary register-button"
-          [disabled]="!form.valid || !validarFecha()"
+          [disabled]="!form.valid || !validarFecha() || procesando"
         >
           <i class="fas fa-check"></i>
           <span>Registrar mantenimiento</span>
@@ -168,11 +168,4 @@
     [mensaje]="mensajeaviso"
     (aceptar)="registrar()"
   ></app-aviso>
-}
-@if (exito()) {
-  <app-aviso-exito
-    [exito]="exito"
-    [mensaje]="mensajeexito"
-    (accion)="cerrar()"
-  ></app-aviso-exito>
 }

@@ -1,6 +1,7 @@
 import {
   Component,
   EventEmitter,
+  inject,
   Input,
   Output,
   signal,
@@ -11,20 +12,16 @@ import { Categorias } from '@entities/admin';
 import { CategoriaService } from '@entities/category';
 import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
-import { Aviso, AvisoExitoComponent, MostrarerrorComponent } from '@shared/ui';
+import { Aviso, MostrarerrorComponent, ToastService } from '@shared/ui';
 @Component({
   selector: 'app-categorias-crear',
   standalone: true,
-  imports: [
-    ValidatedFormsModule,
-    MostrarerrorComponent,
-    AvisoExitoComponent,
-    Aviso,
-  ],
+  imports: [ValidatedFormsModule, MostrarerrorComponent, Aviso],
   templateUrl: './categorias-crear.component.html',
   styleUrl: './categorias-crear.component.css',
 })
 export class CategoriasCrearComponent extends BaseTablaComponent {
+  private readonly toast = inject(ToastService);
   @Input() botoncrear: WritableSignal<boolean> = signal(true);
   @Output() Actualizar = new EventEmitter<void>();
   nombreCategoria: string = '';
@@ -41,6 +38,7 @@ export class CategoriasCrearComponent extends BaseTablaComponent {
     this.aviso.set(true);
   }
   registrar() {
+    if (!this.iniciarEnvio()) return;
     const categoria: Categorias = {
       Id: 0,
       Nombre: this.nombreCategoria,
@@ -48,8 +46,9 @@ export class CategoriasCrearComponent extends BaseTablaComponent {
     this.categoriaService.crearCategoria(categoria).subscribe({
       next: (_response) => {
         this.Actualizar.emit();
-        this.mensajeexito = 'Categoria creada exitosamente';
-        this.exito.set(true);
+        this.finalizarEnvio();
+        this.toast.success('Categoría creada exitosamente.');
+        this.cerrar();
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
@@ -58,6 +57,7 @@ export class CategoriasCrearComponent extends BaseTablaComponent {
         );
         this.mensajeerror = errorMsg;
         this.error.set(true);
+        this.finalizarEnvio();
       },
     });
   }
