@@ -22,7 +22,10 @@ public class CarritoService
         _configuracionRepository = configuracionRepository;
     }
 
-    public async Task<Result<List<CarritoDto>>> GetDisponibilidad(CarritoDto request)
+    public async Task<Result<List<CarritoDto>>> GetDisponibilidad(
+        CarritoDto request,
+        CancellationToken cancellationToken = default
+    )
     {
         if (
             request.FechaInicio == null
@@ -66,7 +69,7 @@ public class CarritoService
                 HorarioReserva.Mensaje
             );
 
-        var limits = await _repository.GetLoanLimitsByGroups(groupIds);
+        var limits = await _repository.GetLoanLimitsByGroups(groupIds, cancellationToken);
         var duration = fechaFin - fechaInicio;
         var exceeded = limits.Values
             .Where(limit => duration > TimeSpan.FromDays(limit.MaximoDias))
@@ -78,16 +81,18 @@ public class CarritoService
                 $"El grupo '{exceeded.Nombre}' permite préstamos de hasta {exceeded.MaximoDias} día(s)"
             );
 
-        var cantidades = await _repository.GetCantidadesByGrupos(groupIds);
+        var cantidades = await _repository.GetCantidadesByGrupos(groupIds, cancellationToken);
         var prestamosActivos = await _repository.GetPrestamosActivosEnRango(
             groupIds,
             fechaInicio,
-            fechaFin
+            fechaFin,
+            cancellationToken
         );
         var mantenimientosActivos = await _repository.GetMantenimientosActivosEnRango(
             groupIds,
             fechaInicio,
-            fechaFin
+            fechaFin,
+            cancellationToken
         );
         var unavailableByGroup = prestamosActivos
             .Concat(mantenimientosActivos)

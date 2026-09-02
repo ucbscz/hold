@@ -10,10 +10,14 @@ public partial class UsuarioMapper : IMapper<UsuarioEntity, UsuarioDto>
 {
     [MapperIgnoreTarget(nameof(UsuarioDto.Contrasena))]
     [MapperIgnoreTarget(nameof(UsuarioDto.CarreraNombre))]
+    [MapperIgnoreTarget(nameof(UsuarioDto.AceptaTerminos))]
     public partial UsuarioDto ToDto(UsuarioEntity entity);
 
+    [MapperIgnoreSource(nameof(UsuarioDto.AceptaTerminos))]
     public partial UsuarioEntity ToEntity(UsuarioDto dto);
 
+    [MapperIgnoreSource(nameof(UsuarioDto.AceptaTerminos))]
+    [MapperIgnoreSource(nameof(UsuarioDto.Contrasena))]
     public partial void Update(UsuarioDto source, UsuarioEntity destination);
 
     public partial IQueryable<UsuarioDto> ProjectTo(IQueryable<UsuarioEntity> source);

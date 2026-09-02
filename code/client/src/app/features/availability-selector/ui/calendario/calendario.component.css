@@ -139,14 +139,15 @@
 }
 
 .availability-selector__day--range {
-  background: var(--interactive-subtle);
+  border-color: #c79a00;
+  background: #fff0a3;
 }
 
 .availability-selector__day--selected {
   border-color: var(--brand);
   color: var(--brand-text);
   background: var(--brand);
-  box-shadow: var(--shadow-xs);
+  box-shadow: inset 0 0 0 2px var(--ink);
 }
 
 .availability-selector__day:disabled {
@@ -209,9 +210,9 @@
 }
 
 .availability-selector__field-switch button.is-active {
-  border-color: var(--brand-hover);
-  background: var(--interactive-subtle);
-  box-shadow: 0 0 0 2px rgba(255, 215, 0, 0.18);
+  border-color: #8a6d00;
+  background: #fff3b0;
+  box-shadow: 0 0 0 2px rgba(138, 109, 0, 0.2);
 }
 
 .availability-selector__time-field {

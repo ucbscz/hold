@@ -319,8 +319,8 @@ export class NavbarComponent {
     if (!destino) return null;
     return destino.ruta === '/administracion'
       ? 'Abrir gestión de préstamos'
-      : destino.ruta === '/inicio'
-        ? 'Buscar equipos disponibles'
+      : destino.ruta.startsWith('/equipo/')
+        ? 'Ver equipo'
         : 'Ver en mi historial';
   }
 
@@ -339,12 +339,31 @@ export class NavbarComponent {
       case 'EquipoObservacion':
         return { ruta: '/historial' };
       case 'DisponibilidadLiberada':
-        return { ruta: '/inicio' };
+        return this.destinoEquipoDisponible(notificacion);
       case 'AdminNuevoPrestamo':
       case 'AdminPrestamoAtrasado':
         return { ruta: '/administracion' };
       default:
         return null;
     }
+  }
+
+  private destinoEquipoDisponible(notificacion: Notificacion): {
+    ruta: string;
+  } {
+    const detail = notificacion.Detalle
+      ? this.parseJsonDetalle(notificacion.Detalle)
+      : null;
+    const groupId =
+      detail && typeof detail === 'object'
+        ? Number((detail as Record<string, unknown>)['grupoEquipoId'])
+        : Number.NaN;
+
+    return {
+      ruta:
+        Number.isInteger(groupId) && groupId > 0
+          ? `/equipo/${groupId}`
+          : '/inicio',
+    };
   }
 }

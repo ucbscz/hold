@@ -793,6 +793,13 @@ app-administrador .table-responsive {
   scrollbar-color: var(--scrollbar-thumb) transparent !important;
 }
 
+app-administrador .table-responsive .table-responsive {
+  overflow-x: visible !important;
+  margin: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
 app-administrador .table-responsive::-webkit-scrollbar {
   display: block !important;
   width: var(--scrollbar-size) !important;
@@ -840,7 +847,7 @@ app-administrador .table-responsive::-webkit-scrollbar-track {
 }
 
 .table-scroll {
-  overflow-x: auto;
+  overflow-x: visible;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -1056,6 +1063,7 @@ app-administrador .table-responsive::-webkit-scrollbar-track {
 }
 .inline-panel table {
   width: 100%;
+  min-width: 52rem;
   border-collapse: collapse;
 }
 .inline-panel th {

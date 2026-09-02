@@ -1,3 +1,4 @@
+using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,10 @@ public class CarritoRepository
 
     public CarritoRepository(ApplicationDbContext dbContext) => _dbContext = dbContext;
 
-    public async Task<Dictionary<int, int>> GetCantidadesByGrupos(List<int> grupoIds)
+    public async Task<Dictionary<int, int>> GetCantidadesByGrupos(
+        List<int> grupoIds,
+        CancellationToken cancellationToken = default
+    )
     {
         if (grupoIds.Count == 0)
             return [];
@@ -24,11 +28,16 @@ public class CarritoRepository
             )
             .GroupBy(e => e.IdGrupoEquipo)
             .Select(group => new { GrupoId = group.Key, Cantidad = group.Count() })
-            .ToDictionaryAsync(group => group.GrupoId, group => group.Cantidad);
+            .ToDictionaryAsync(
+                group => group.GrupoId,
+                group => group.Cantidad,
+                cancellationToken
+            );
     }
 
     public async Task<Dictionary<int, (string Nombre, int MaximoDias)>> GetLoanLimitsByGroups(
-        IReadOnlyCollection<int> grupoIds
+        IReadOnlyCollection<int> grupoIds,
+        CancellationToken cancellationToken = default
     ) =>
         await _dbContext
             .GruposEquipos.AsNoTracking()
@@ -38,12 +47,18 @@ public class CarritoRepository
                 group => new ValueTuple<string, int>(
                     group.Nombre,
                     group.TiempoMaximoPrestamoDias
-                )
+                ),
+                cancellationToken
             );
 
     public async Task<
         List<(int IdGrupoEquipo, int IdEquipo)>
-    > GetPrestamosActivosEnRango(List<int> grupoIds, DateTime fechaInicio, DateTime fechaFin)
+    > GetPrestamosActivosEnRango(
+        List<int> grupoIds,
+        DateTime fechaInicio,
+        DateTime fechaFin,
+        CancellationToken cancellationToken = default
+    )
     {
         var rows = await (
             from detalle in _dbContext.DetallesPrestamos.AsNoTracking()
@@ -52,11 +67,8 @@ public class CarritoRepository
             join equipo in _dbContext.Equipos.AsNoTracking() on detalle.IdEquipo equals equipo.Id
             where
                 grupoIds.Contains(equipo.IdGrupoEquipo)
-                && (
-                    prestamo.EstadoPrestamo == EstadoPrestamo.Pendiente
-                    || prestamo.EstadoPrestamo == EstadoPrestamo.Activo
-                    || prestamo.EstadoPrestamo == EstadoPrestamo.Aprobado
-                    || prestamo.EstadoPrestamo == EstadoPrestamo.Atrasado
+                && PrestamoAvailabilityPolicy.BlockingStates.Contains(
+                    prestamo.EstadoPrestamo
                 )
                 && prestamo.FechaPrestamoEsperada < fechaFin
                 && prestamo.FechaDevolucionEsperada > fechaInicio
@@ -74,9 +86,12 @@ public class CarritoRepository
         );
     }
 
-    public async Task<
-        List<(int IdGrupoEquipo, int IdEquipo)>
-    > GetMantenimientosActivosEnRango(List<int> grupoIds, DateTime fechaInicio, DateTime fechaFin)
+    public async Task<List<(int IdGrupoEquipo, int IdEquipo)>> GetMantenimientosActivosEnRango(
+        List<int> grupoIds,
+        DateTime fechaInicio,
+        DateTime fechaFin,
+        CancellationToken cancellationToken = default
+    )
     {
         var rows = await (
             from detalle in _dbContext.DetallesMantenimientos.AsNoTracking()
@@ -94,7 +109,7 @@ public class CarritoRepository
                 mantenimiento.FechaMantenimiento,
                 mantenimiento.FechaFinalMantenimiento,
             }
-        ).ToListAsync();
+        ).ToListAsync(cancellationToken);
 
         return rows.ConvertAll(r =>
             (r.IdGrupoEquipo, r.Id)

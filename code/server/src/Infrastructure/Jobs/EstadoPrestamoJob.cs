@@ -173,6 +173,11 @@ public class EstadoPrestamoJob
                     Titulo = "Préstamo rechazado",
                     Contenido =
                         "Tu solicitud fue rechazada automáticamente por exceder la fecha de inicio.",
+                    Detalle = BuildLoanDetail(
+                        loan,
+                        "La solicitud no fue recogida antes de la fecha de inicio acordada.",
+                        loan.FechaPrestamoEsperada
+                    ),
                 })
                 .ToList()
         );
@@ -245,6 +250,12 @@ public class EstadoPrestamoJob
                         Titulo = "Disponibilidad liberada",
                         Contenido =
                             $"Un equipo que esperabas está disponible el {watch.Fecha:dd/MM/yyyy HH:mm}.",
+                        Detalle = JsonSerializer.Serialize(new
+                        {
+                            emisor = "Sistema",
+                            grupoEquipoId = watch.IdGrupoEquipo,
+                            fecha = watch.Fecha.ToString("dd/MM/yyyy HH:mm"),
+                        }),
                     }
                 );
                 notified.Add(watch.Id);

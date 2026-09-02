@@ -1,6 +1,9 @@
+using System.Data;
+using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
@@ -35,95 +38,109 @@ public sealed class PrestamoDisponibilidadRepository
         if (requiredQuantity <= 0 || endDate <= startDate)
             return false;
 
-        var unassignedReservations = await _dbContext
-            .DetallesPrestamos.Join(
-                _dbContext.Prestamos,
-                detail => detail.IdPrestamo,
-                loan => loan.Id,
-                (detail, loan) => new { Detail = detail, Loan = loan }
-            )
-            .CountAsync(
-                reservation =>
-                    reservation.Detail.IdGrupoEquipo == grupoEquipoId
-                    && reservation.Detail.IdEquipo == null
-                    && reservation.Loan.EstadoPrestamo == EstadoPrestamo.Pendiente
-                    && reservation.Loan.FechaPrestamoEsperada < endDate
-                    && reservation.Loan.FechaDevolucionEsperada > startDate,
-                cancellationToken
-            );
-
-        var requiredAvailableQuantity = requiredQuantity + unassignedReservations;
         var availableQuantity = await AvailableEquipos(
                 grupoEquipoId,
                 startDate,
                 endDate
             )
-            .Take(requiredAvailableQuantity)
+            .Take(requiredQuantity)
             .CountAsync(cancellationToken);
 
-        return availableQuantity >= requiredAvailableQuantity;
+        return availableQuantity >= requiredQuantity;
     }
 
     public async Task<bool> AssignEquiposOnApproval(
         int prestamoId,
+        string actor,
         CancellationToken cancellationToken = default
     )
     {
-        var loan = await _dbContext.Prestamos.FirstOrDefaultAsync(
-            item => item.Id == prestamoId,
-            cancellationToken
-        );
-
-        if (loan == null)
-            return false;
-
-        var details = await _dbContext
-            .DetallesPrestamos.Where(detail =>
-                detail.IdPrestamo == prestamoId
-                && !detail.EstadoEliminado
-                && detail.IdEquipo == null
+        await using var transaction = _dbContext.Database.IsRelational()
+            ? await _dbContext.Database.BeginTransactionAsync(
+                IsolationLevel.Serializable,
+                cancellationToken
             )
-            .ToListAsync(cancellationToken);
+            : null;
 
-        if (details.Count == 0)
-            return true;
-
-        var requiredByGroup = details
-            .GroupBy(detail => detail.IdGrupoEquipo)
-            .ToDictionary(group => group.Key, group => group.Count());
-        var candidatesByGroup = new Dictionary<int, Queue<int>>();
-
-        foreach (var required in requiredByGroup)
+        try
         {
-            var candidateIds = await AvailableEquipos(
-                    required.Key,
-                    loan.FechaPrestamoEsperada,
-                    loan.FechaDevolucionEsperada
+            var loan = await _dbContext.Prestamos.FirstOrDefaultAsync(
+                item => item.Id == prestamoId,
+                cancellationToken
+            );
+
+            if (loan == null || loan.EstadoPrestamo != EstadoPrestamo.Pendiente)
+                return false;
+
+            var details = await _dbContext
+                .DetallesPrestamos.Where(detail =>
+                    detail.IdPrestamo == prestamoId && !detail.EstadoEliminado
                 )
-                .OrderBy(equipment => equipment.Id)
-                .Select(equipment => equipment.Id)
-                .Take(required.Value)
                 .ToListAsync(cancellationToken);
 
-            if (candidateIds.Count < required.Value)
+            if (details.Count == 0)
                 return false;
 
-            candidatesByGroup[required.Key] = new Queue<int>(candidateIds);
-        }
+            var requiredByGroup = details
+                .GroupBy(detail => detail.IdGrupoEquipo)
+                .ToDictionary(group => group.Key, group => group.Count());
+            var candidatesByGroup = new Dictionary<int, Queue<int>>();
 
-        foreach (var detail in details)
+            foreach (var required in requiredByGroup)
+            {
+                var candidateIds = await AvailableEquipos(
+                        required.Key,
+                        loan.FechaPrestamoEsperada,
+                        loan.FechaDevolucionEsperada
+                    )
+                    .OrderBy(equipment => equipment.Id)
+                    .Select(equipment => equipment.Id)
+                    .Take(required.Value)
+                    .ToListAsync(cancellationToken);
+
+                if (candidateIds.Count < required.Value)
+                    return false;
+
+                candidatesByGroup[required.Key] = new Queue<int>(candidateIds);
+            }
+
+            foreach (var detail in details)
+            {
+                if (
+                    !candidatesByGroup.TryGetValue(detail.IdGrupoEquipo, out var available)
+                    || available.Count == 0
+                )
+                    return false;
+
+                detail.IdEquipo = available.Dequeue();
+            }
+
+            loan.EstadoPrestamo = EstadoPrestamo.Aprobado;
+            loan.AutorizadoPor = actor;
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            if (transaction != null)
+                await transaction.CommitAsync(cancellationToken);
+
+            return true;
+        }
+        catch (DbUpdateException exception)
+            when (exception.InnerException is PostgresException
+            {
+                SqlState: PostgresErrorCodes.SerializationFailure,
+            })
         {
-            if (
-                !candidatesByGroup.TryGetValue(detail.IdGrupoEquipo, out var available)
-                || available.Count == 0
-            )
-                return false;
-
-            detail.IdEquipo = available.Dequeue();
+            if (transaction != null)
+                await transaction.RollbackAsync(cancellationToken);
+            return false;
         }
-
-        await _dbContext.SaveChangesAsync(cancellationToken);
-        return true;
+        catch (PostgresException exception)
+            when (exception.SqlState == PostgresErrorCodes.SerializationFailure)
+        {
+            if (transaction != null)
+                await transaction.RollbackAsync(cancellationToken);
+            return false;
+        }
     }
 
     private IQueryable<Equipo> AvailableEquipos(
@@ -143,11 +160,8 @@ public sealed class PrestamoDisponibilidadRepository
             )
             .Any(activeLoan =>
                 activeLoan.Detail.IdEquipo == equipment.Id
-                && (
-                    activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Aprobado
-                    || activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Pendiente
-                    || activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Activo
-                    || activeLoan.Loan.EstadoPrestamo == EstadoPrestamo.Atrasado
+                && PrestamoAvailabilityPolicy.BlockingStates.Contains(
+                    activeLoan.Loan.EstadoPrestamo
                 )
                 && activeLoan.Loan.FechaPrestamoEsperada < endDate
                 && activeLoan.Loan.FechaDevolucionEsperada > startDate

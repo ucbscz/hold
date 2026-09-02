@@ -3,6 +3,7 @@ using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Application.Features.AuditLog;
 using IMT_Reservas.Server.Application.Features.Configuracion;
+using IMT_Reservas.Server.Application.Security;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using ContratoEntity = IMT_Reservas.Server.Core.Entities.Contrato;
 
@@ -14,6 +15,7 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
     private readonly ContractHtmlProcessor _contractHtml;
     private readonly AuditLogService _audit;
     private readonly ConfiguracionService _configuracion;
+    private readonly SensitiveDataProtector _sensitiveData;
 
     public ContratoService(
         ContratoRepository repository,
@@ -22,7 +24,8 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
         PrestamoReadRepository prestamos,
         ContractHtmlProcessor contractHtml,
         AuditLogService audit,
-        ConfiguracionService configuracion
+        ConfiguracionService configuracion,
+        SensitiveDataProtector sensitiveData
     )
         : base(repository, validator, mapper, audit)
     {
@@ -30,6 +33,7 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
         _contractHtml = contractHtml;
         _audit = audit;
         _configuracion = configuracion;
+        _sensitiveData = sensitiveData;
     }
 
     public async Task<Result<ContratoDto>> CreateForPrestamo(
@@ -61,6 +65,8 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
         if (!validation.IsValid)
             return validation.ToResult<ContratoDto>();
 
+        dto.ContratoHtml = _sensitiveData.Protect(sanitizedHtml);
+
         var loan = await Repository.FindPrestamoById(prestamoId, cancellationToken);
 
         if (loan == null)
@@ -86,6 +92,7 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
             "Contrato registrado para el préstamo"
         );
 
+        result.Value.ContratoHtml = sanitizedHtml;
         return result;
     }
 
@@ -136,7 +143,7 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
 
         var dto = MapToDto(result.Value);
         dto.ContratoHtml = _contractHtml.RenderEquipment(
-            dto.ContratoHtml ?? string.Empty,
+            _sensitiveData.Unprotect(dto.ContratoHtml ?? string.Empty),
             await _prestamos.GetContractEquipment(prestamoId, cancellationToken)
         );
 

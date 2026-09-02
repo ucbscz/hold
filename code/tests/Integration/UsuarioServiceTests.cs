@@ -7,6 +7,7 @@ using IMT_Reservas.Server.Application.Features.Jwt;
 using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Application.Features.Usuario;
 using IMT_Reservas.Server.Application.Features.Contrato;
+using IMT_Reservas.Server.Application.Security;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
@@ -16,6 +17,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging.Abstractions;
+using Microsoft.AspNetCore.DataProtection;
 using Moq;
 using CarreraEntity = IMT_Reservas.Server.Core.Entities.Carrera;
 namespace IMT_Reservas.Tests.Integration;
@@ -69,7 +71,11 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
             audit,
             notifications,
             authRepository,
-            queries
+            queries,
+            new SensitiveDataProtector(
+                new EphemeralDataProtectionProvider(),
+                NullLogger<SensitiveDataProtector>.Instance
+            )
         );
     }
 
@@ -346,6 +352,21 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     }
 
     [Test]
+    public async Task Update_ProfileWithoutPassword_PreservesPasswordHash()
+    {
+        await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
+        var previousHash = Db.Usuarios.Single(user => user.Carnet == "U001").Contrasena;
+
+        var result = await Sut.UpdateProfile(
+            "U001",
+            BuildValidUsuario("U001", "u001@ucb.edu.bo", contrasena: null)
+        );
+
+        result.IsSuccess.Should().BeTrue();
+        Db.Usuarios.Single(user => user.Carnet == "U001").Contrasena.Should().Be(previousHash);
+    }
+
+    [Test]
     public async Task Update_DuplicateTelefonoOtherUser_ReturnsError()
     {
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo", telefono: "77777777"));
@@ -386,10 +407,50 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         var dto = BuildValidUsuario("U001", "u001@ucb.edu.bo", contrasena: null);
         dto.Rol = "administrador";
 
-        var result = await Sut.Update("U001", dto, callerCarnet: "U001");
+        var result = await Sut.UpdateProfile("U001", dto);
 
         result.IsSuccess.Should().BeTrue();
         Db.Usuarios.Single(u => u.Carnet == "U001").Rol.Should().Be(TipoUsuario.Estudiante);
+    }
+
+    [Test]
+    public async Task Update_OwnProfile_PreservesTraceableIdentityFields()
+    {
+        await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
+        var dto = BuildValidUsuario("ALTERADO", "alterado@ucb.edu.bo", "78888888", null);
+        dto.Nombre = "Nombre alterado";
+        dto.ApellidoPaterno = "Apellido alterado";
+        dto.IdCarrera = 999;
+
+        var result = await Sut.Update("U001", dto, callerCarnet: "U001");
+
+        result.IsSuccess.Should().BeTrue();
+        var stored = Db.Usuarios.Single(user => user.Carnet == "U001");
+        stored.Nombre.Should().Be("Test");
+        stored.ApellidoPaterno.Should().Be("Usuario");
+        stored.Email.Should().Be("u001@ucb.edu.bo");
+        stored.IdCarrera.Should().Be(1);
+        stored.Telefono.Should().Be("78888888");
+    }
+
+    [Test]
+    public async Task Update_Profile_EncryptsIdentityImagesAtRestAndReturnsPlainBytes()
+    {
+        await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
+        var front = new byte[] { 1, 2, 3, 4, 5 };
+        var back = new byte[] { 6, 7, 8, 9, 10 };
+        var dto = BuildValidUsuario("U001", "u001@ucb.edu.bo", contrasena: null);
+        dto.ImagenFrenteCarnet = front;
+        dto.ImagenAtrasCarnet = back;
+
+        var result = await Sut.UpdateProfile("U001", dto);
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.ImagenFrenteCarnet.Should().Equal(front);
+        result.Value.ImagenAtrasCarnet.Should().Equal(back);
+        var stored = Db.Usuarios.Single(user => user.Carnet == "U001");
+        stored.ImagenFrenteCarnet.Should().NotEqual(front);
+        stored.ImagenAtrasCarnet.Should().NotEqual(back);
     }
 
     [Test]
@@ -540,6 +601,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
             Email = email,
             Telefono = telefono,
             Contrasena = contrasena,
-            IdCarrera = 1
+            IdCarrera = 1,
+            AceptaTerminos = true
         };
 }

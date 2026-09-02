@@ -130,15 +130,26 @@ public sealed class PrestamoEstadoRepository
         if (ids.Count == 0)
             return;
 
-        await _dbContext
+        if (_dbContext.Database.IsRelational())
+        {
+            await _dbContext
+                .Prestamos.Where(loan => ids.Contains(loan.Id))
+                .ExecuteUpdateAsync(
+                    update => update.SetProperty(loan => loan.EstadoPrestamo, estado),
+                    cancellationToken
+                );
+            return;
+        }
+
+        var loans = await _dbContext
             .Prestamos.Where(loan => ids.Contains(loan.Id))
-            .ExecuteUpdateAsync(
-                update => update.SetProperty(loan => loan.EstadoPrestamo, estado),
-                cancellationToken
-            );
+            .ToListAsync(cancellationToken);
+        foreach (var loan in loans)
+            loan.EstadoPrestamo = estado;
+        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
-    private static Task<List<PrestamoDto>> GetBatch(
+    private Task<List<PrestamoDto>> GetBatch(
         IQueryable<PrestamoEntity> query,
         CancellationToken cancellationToken
     ) => query
@@ -150,7 +161,19 @@ public sealed class PrestamoEstadoRepository
         {
             Id = loan.Id,
             CarnetUsuario = loan.Carnet ?? string.Empty,
+            FechaPrestamoEsperada = loan.FechaPrestamoEsperada,
             FechaDevolucionEsperada = loan.FechaDevolucionEsperada,
+            NombreGrupoEquipo = _dbContext
+                .DetallesPrestamos.Where(detail =>
+                    detail.IdPrestamo == loan.Id && !detail.EstadoEliminado
+                )
+                .Join(
+                    _dbContext.GruposEquipos,
+                    detail => detail.IdGrupoEquipo,
+                    group => group.Id,
+                    (_, group) => group.Nombre
+                )
+                .FirstOrDefault(),
         })
         .ToListAsync(cancellationToken);
 

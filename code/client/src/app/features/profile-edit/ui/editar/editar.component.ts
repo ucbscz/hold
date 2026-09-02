@@ -8,30 +8,19 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { ValidatedFormsModule } from '@shared/lib/forms';
-import { Carrera } from '@entities/admin';
-import { CarreraService } from '@entities/career';
 import { Usuario, UsuarioService, UsuarioServiceAPI } from '@entities/user';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
-  AvisoExitoComponent,
-  CustomSelectComponent,
-  MostrarerrorComponent,
-  PantallaCargaComponent,
-} from '@shared/ui';
+  identityBase64ToDataUrl,
+  identityDataUrlToBase64,
+  processIdentityImage,
+} from '@shared/lib/image/identity-image';
+import { MostrarerrorComponent, ToastService } from '@shared/ui';
 import { finalize } from 'rxjs';
-
-const CLOSE_SUCCESS_DELAY_MS = 2000;
 
 @Component({
   selector: 'app-editar',
-  imports: [
-    CommonModule,
-    ValidatedFormsModule,
-    AvisoExitoComponent,
-    MostrarerrorComponent,
-    PantallaCargaComponent,
-    CustomSelectComponent,
-  ],
+  imports: [CommonModule, ValidatedFormsModule, MostrarerrorComponent],
   templateUrl: './editar.component.html',
   styleUrl: './editar.component.css',
 })
@@ -40,50 +29,41 @@ export class EditarComponent {
   @Input() usuario: Usuario = new Usuario();
   @Output() guardado = new EventEmitter<Usuario>();
   localUsuario: Usuario = new Usuario();
-  exito: WritableSignal<boolean> = signal(false);
-  mensajeexito: string = '';
   error: WritableSignal<boolean> = signal(false);
   mensajeerror: string = '';
-  carreras: string[] = [];
   contrasena: string = '';
   cargando: boolean = false;
+  procesandoCarnet = false;
+  carnetFrentePreview = '';
+  carnetAtrasPreview = '';
+  mostrarContrasena = false;
 
   constructor(
     private readonly usuarioApi: UsuarioServiceAPI,
-    private readonly carrerasAPI: CarreraService,
     private readonly usuarioStore: UsuarioService,
+    private readonly toast: ToastService,
   ) {}
   ngOnInit() {
     this.localUsuario = { ...this.usuario };
-    this.cargarcarrera();
-  }
-  cargarcarrera() {
-    this.carrerasAPI.obtenerCarreras().subscribe({
-      next: (data: Carrera[]) => {
-        this.carreras = data.map((carrera) => carrera.Nombre ?? '');
-      },
-      error: (error) => {
-        const errorMsg = extractErrorMessage(
-          error,
-          'Error al obtener las carreras, intente mas tarde',
-        );
-        this.mensajeerror = errorMsg;
-        this.error.set(true);
-      },
-    });
+    this.carnetFrentePreview = identityBase64ToDataUrl(
+      this.localUsuario.imagen_frente_carnet,
+    );
+    this.carnetAtrasPreview = identityBase64ToDataUrl(
+      this.localUsuario.imagen_atras_carnet,
+    );
   }
   confirmar() {
+    if (this.cargando || this.procesandoCarnet) return;
     this.cargando = true;
     this.usuarioApi
-      .editarUsuario(this.localUsuario, this.contrasena)
+      .actualizarPerfil(this.localUsuario, this.contrasena)
       .pipe(finalize(() => (this.cargando = false)))
       .subscribe({
-        next: () => {
-          this.usuarioStore.actualizarUsuario({ ...this.localUsuario });
-          this.guardado.emit({ ...this.localUsuario });
-          this.mensajeexito = 'Perfil actualizado correctamente';
-          this.exito.set(true);
-          setTimeout(() => this.cerrar(), CLOSE_SUCCESS_DELAY_MS);
+        next: (usuarioActualizado) => {
+          this.usuarioStore.actualizarUsuario(usuarioActualizado);
+          this.guardado.emit(usuarioActualizado);
+          this.toast.success('Perfil actualizado correctamente.');
+          this.cerrar();
         },
         error: (error) => {
           const errorMsg = extractErrorMessage(
@@ -94,6 +74,31 @@ export class EditarComponent {
           this.error.set(true);
         },
       });
+  }
+
+  async cargarCarnet(event: Event, cara: 'frente' | 'atras'): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.procesandoCarnet = true;
+    try {
+      const dataUrl = await processIdentityImage(file);
+      const base64 = identityDataUrlToBase64(dataUrl);
+      if (cara === 'frente') {
+        this.carnetFrentePreview = dataUrl;
+        this.localUsuario.imagen_frente_carnet = base64;
+      } else {
+        this.carnetAtrasPreview = dataUrl;
+        this.localUsuario.imagen_atras_carnet = base64;
+      }
+    } catch (error) {
+      this.mensajeerror =
+        error instanceof Error ? error.message : 'No se pudo leer la imagen.';
+      this.error.set(true);
+      input.value = '';
+    } finally {
+      this.procesandoCarnet = false;
+    }
   }
   cerrar() {
     this.botoneditar.set(false);

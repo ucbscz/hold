@@ -2,6 +2,7 @@ using System.Data;
 using Ardalis.Result;
 using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Application.Features.Prestamo;
+using IMT_Reservas.Server.Application.Security;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
@@ -17,19 +18,22 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
     private readonly ContractHtmlProcessor _contractHtml;
     private readonly PrestamoReadRepository _queries;
     private readonly PrestamoDisponibilidadRepository _availability;
+    private readonly SensitiveDataProtector _sensitiveData;
 
     public PrestamoRepository(
         ApplicationDbContext dbContext,
         PrestamoMapper mapper,
         ContractHtmlProcessor contractHtml,
         PrestamoReadRepository queries,
-        PrestamoDisponibilidadRepository availability
+        PrestamoDisponibilidadRepository availability,
+        SensitiveDataProtector sensitiveData
     )
         : base(dbContext, mapper)
     {
         _contractHtml = contractHtml;
         _queries = queries;
         _availability = availability;
+        _sensitiveData = sensitiveData;
     }
 
     public override Task<Result<List<PrestamoDto>>> GetAll() => _queries.GetAll();
@@ -78,6 +82,27 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                 return Result<PrestamoEntity>.Error(durationViolation);
             }
 
+            foreach (var request in groupIds.GroupBy(id => id))
+            {
+                if (
+                    !await _availability.HasAvailableEquipos(
+                        request.Key,
+                        request.Count(),
+                        entity.FechaPrestamoEsperada,
+                        entity.FechaDevolucionEsperada,
+                        cancellationToken
+                    )
+                )
+                {
+                    if (transaction != null)
+                        await transaction.RollbackAsync(cancellationToken);
+
+                    return Result<PrestamoEntity>.Error(
+                        "No hay suficientes unidades disponibles en el horario seleccionado"
+                    );
+                }
+            }
+
             DbContext.Prestamos.Add(entity);
             await DbContext.SaveChangesAsync(cancellationToken);
 
@@ -91,14 +116,6 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
             );
             await DbContext.SaveChangesAsync(cancellationToken);
 
-            if (!await _availability.AssignEquiposOnApproval(entity.Id, cancellationToken))
-            {
-                await RollbackCreate(transaction, entity.Id, cancellationToken);
-                return Result<PrestamoEntity>.Error(
-                    "No hay suficientes unidades disponibles en el horario seleccionado"
-                );
-            }
-
             if (!string.IsNullOrWhiteSpace(contractHtml))
             {
                 var equipment = await _queries.GetContractEquipment(
@@ -107,7 +124,9 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                 );
                 var contract = new Contrato
                 {
-                    ContratoHtml = _contractHtml.RenderEquipment(contractHtml, equipment),
+                    ContratoHtml = _sensitiveData.Protect(
+                        _contractHtml.RenderEquipment(contractHtml, equipment)
+                    ),
                 };
 
                 DbContext.Contratos.Add(contract);

@@ -14,6 +14,8 @@ public class CarritoController : Controller
     public CarritoController(CarritoService service) => _service = service;
 
     [HttpPost("disponibilidad")]
-    public async Task<IActionResult> DisponibilidadEquipos([FromBody] CarritoDto request) =>
-        ToResponse(await _service.GetDisponibilidad(request));
+    public async Task<IActionResult> DisponibilidadEquipos(
+        [FromBody] CarritoDto request,
+        CancellationToken cancellationToken
+    ) => ToResponse(await _service.GetDisponibilidad(request, cancellationToken));
 }

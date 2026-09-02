@@ -104,7 +104,7 @@ public class MantenimientoRepositoryTests
     }
 
     [Test]
-    public async Task HasScheduleConflict_PendingLoanForEquipment_ReturnsTrue()
+    public async Task HasScheduleConflict_PendingLoanForEquipment_ReturnsFalse()
     {
         var start = DateTime.UtcNow.AddDays(1);
         var end = start.AddHours(2);
@@ -133,7 +133,7 @@ public class MantenimientoRepositoryTests
 
         var result = await _repository.HasScheduleConflict([123], start, end);
 
-        result.Should().BeTrue();
+        result.Should().BeFalse();
     }
 
     [Test]

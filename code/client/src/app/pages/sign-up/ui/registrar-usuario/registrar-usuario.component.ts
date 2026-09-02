@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component, signal, WritableSignal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Carrera } from '@entities/admin';
 import { CarreraService } from '@entities/career';
 import { Usuario, UsuarioService, UsuarioServiceAPI } from '@entities/user';
@@ -21,6 +21,7 @@ import { switchMap } from 'rxjs';
     MostrarerrorComponent,
     AvisoExitoComponent,
     CustomSelectComponent,
+    RouterLink,
   ],
   templateUrl: './registrar-usuario.component.html',
   styleUrl: './registrar-usuario.component.css',
@@ -34,6 +35,7 @@ export class RegistrarUsuarioComponent {
   carreras: string[] = [];
   submitted: boolean = false;
   registrando: boolean = false;
+  aceptaTerminos = false;
   error: WritableSignal<boolean> = signal(false);
   mensajeerror: string = '';
   aviso: WritableSignal<boolean> = signal(false);
@@ -68,7 +70,8 @@ export class RegistrarUsuarioComponent {
       form.invalid ||
       this.password !== this.confirmPassword ||
       this.validartelefono(this.nuevoUsuario.telefono) ||
-      !this.nuevoUsuario.carrera
+      !this.nuevoUsuario.carrera ||
+      !this.aceptaTerminos
     ) {
       return;
     }
@@ -80,7 +83,12 @@ export class RegistrarUsuarioComponent {
     this.aviso.set(false);
     this.nuevoUsuario.rol = 'usuario';
     this.registrarcuenta
-      .registrarCuenta(this.nuevoUsuario, this.password, 'estudiante')
+      .registrarCuenta(
+        this.nuevoUsuario,
+        this.password,
+        'estudiante',
+        this.aceptaTerminos,
+      )
       .pipe(
         switchMap(() => {
           registroCompletado = true;

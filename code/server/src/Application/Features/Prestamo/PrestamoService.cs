@@ -187,9 +187,16 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
                 "No se puede aprobar una reserva cuyo horario de inicio ya venció"
             );
 
+        var actor = string.IsNullOrWhiteSpace(actorCarnet) ? "Sistema"
+            : await _queries.GetUsuarioDisplayName(actorCarnet, cancellationToken);
+
         if (parsedState.Value == EstadoPrestamo.Aprobado)
         {
-            var assigned = await _availability.AssignEquiposOnApproval(id, cancellationToken);
+            var assigned = await _availability.AssignEquiposOnApproval(
+                id,
+                actor,
+                cancellationToken
+            );
 
             if (!assigned)
                 return Result<PrestamoDto>.Error(
@@ -199,8 +206,6 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         }
 
         loan.EstadoPrestamo = parsedState.Value;
-        var actor = string.IsNullOrWhiteSpace(actorCarnet) ? "Sistema"
-            : await _queries.GetUsuarioDisplayName(actorCarnet, cancellationToken);
         if (parsedState == EstadoPrestamo.Aprobado) loan.AutorizadoPor = actor;
         if (parsedState == EstadoPrestamo.Activo) loan.EntregadoPor = actor;
         if (parsedState == EstadoPrestamo.Rechazado) loan.MotivoRechazo = observacion!.Trim();

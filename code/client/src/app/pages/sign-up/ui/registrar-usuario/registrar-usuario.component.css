@@ -450,3 +450,21 @@
     font-size: 0.85rem;
   }
 }
+.terms-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.65rem;
+  color: var(--ink-secondary);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+.terms-consent input {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.1rem;
+  accent-color: var(--brand-hover);
+}
+.terms-consent a {
+  color: var(--interactive-text);
+  font-weight: 700;
+}

@@ -77,6 +77,21 @@ export const INLINE_SEARCH_STYLES = `
   .clear-search:active {
     transform: translateY(-50%) scale(0.92);
   }
+  .equipment-identifiers,
+  .equipment-location {
+    display: grid;
+    gap: 0.2rem;
+    min-width: 10rem;
+    line-height: 1.35;
+  }
+  .equipment-identifiers strong {
+    color: var(--ink);
+    font-size: 0.7rem;
+  }
+  .equipment-location span:not(:first-child) {
+    color: var(--ink-muted);
+    font-size: 0.75rem;
+  }
 
   @media (max-width: 768px) {
     .audit-filters {

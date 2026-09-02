@@ -344,6 +344,9 @@
   border: 1px solid var(--border);
 }
 .ver-disponibilidad-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   white-space: nowrap;
 }
 @media (max-width: 480px) {

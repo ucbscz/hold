@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
+import { ApiResponse, extractApiValue } from '@shared/api';
 import { map } from 'rxjs';
 import { Usuario } from '../model/usuario';
 import { UsuarioApiItem } from './usuario-api-item';
@@ -13,7 +14,12 @@ export class UsuarioServiceAPI {
   private readonly apiUrl = environment.apiUrl + '/api/usuarios';
   constructor(private readonly http: HttpClient) {}
 
-  registrarCuenta(usuario: Usuario, contrasena: string, rol: string | null) {
+  registrarCuenta(
+    usuario: Usuario,
+    contrasena: string,
+    rol: string | null,
+    aceptaTerminos = false,
+  ) {
     if (!rol) {
       rol = 'Estudiante';
     }
@@ -31,6 +37,7 @@ export class UsuarioServiceAPI {
       TelefonoReferencia: usuario.telefono_referencia,
       NombreReferencia: usuario.nombre_referencia,
       EmailReferencia: usuario.email_referencia,
+      AceptaTerminos: aceptaTerminos,
     };
     return this.http.post(this.apiUrl, envio);
   }
@@ -62,6 +69,35 @@ export class UsuarioServiceAPI {
       EmailReferencia: usuario.email_referencia,
     };
     return this.http.put<Usuario>(`${this.apiUrl}/${envio.Carnet}`, envio);
+  }
+
+  obtenerPerfil() {
+    return this.http
+      .get<ApiResponse<UsuarioApiItem>>(`${this.apiUrl}/perfil`)
+      .pipe(
+        map((response) =>
+          this.mapearUsuario(extractApiValue(response, {} as UsuarioApiItem)),
+        ),
+      );
+  }
+
+  actualizarPerfil(usuario: Usuario, contrasena: string) {
+    const envio = {
+      Telefono: usuario.telefono,
+      Contrasena: contrasena || null,
+      TelefonoReferencia: usuario.telefono_referencia,
+      NombreReferencia: usuario.nombre_referencia,
+      EmailReferencia: usuario.email_referencia,
+      ImagenFrenteCarnet: usuario.imagen_frente_carnet,
+      ImagenAtrasCarnet: usuario.imagen_atras_carnet,
+    };
+    return this.http
+      .put<ApiResponse<UsuarioApiItem>>(`${this.apiUrl}/perfil`, envio)
+      .pipe(
+        map((response) =>
+          this.mapearUsuario(extractApiValue(response, {} as UsuarioApiItem)),
+        ),
+      );
   }
 
   obtenerUsuarios() {
@@ -120,6 +156,8 @@ export class UsuarioServiceAPI {
       carrera: item.CarreraNombre,
       bloqueado: item.Bloqueado ?? false,
       motivo_bloqueo: item.MotivoBloqueo ?? null,
+      imagen_frente_carnet: item.ImagenFrenteCarnet ?? null,
+      imagen_atras_carnet: item.ImagenAtrasCarnet ?? null,
     };
   }
 

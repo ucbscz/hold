@@ -161,7 +161,7 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
     }
 
     [Test]
-    public async Task GetDisponibilidad_PendienteLoan_ReducesCapacity()
+    public async Task GetDisponibilidad_PendienteLoan_DoesNotReduceCapacity()
     {
         var fechaInicio = BusinessStart;
         var fechaFin = BusinessStart.AddDays(2);
@@ -171,7 +171,7 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
         var result = await Sut.GetDisponibilidad(request);
 
         result.IsSuccess.Should().BeTrue();
-        result.Value.Should().AllSatisfy(d => d.CantidadDisponible.Should().Be(Total - 1));
+        result.Value.Should().AllSatisfy(d => d.CantidadDisponible.Should().Be(Total));
     }
 
     [Test]

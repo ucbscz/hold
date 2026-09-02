@@ -11,11 +11,15 @@ import {
 import { Carrito } from '@entities/cart';
 import { ConfiguracionService } from '@entities/configuracion';
 import { PrestamosAPIService } from '@entities/loan';
-import { UsuarioService } from '@entities/user';
+import { UsuarioService, UsuarioServiceAPI } from '@entities/user';
 import { CarritoService, LoanReturnNavigationService } from '@features/cart';
 import { FirmaComponent } from '@features/signature';
 import { extractErrorMessage } from '@shared/lib/error';
 import { escapeHtmlValue } from '@shared/lib/html';
+import {
+  identityBase64ToDataUrl,
+  processIdentityImage,
+} from '@shared/lib/image/identity-image';
 import {
   Aviso,
   MostrarerrorComponent,
@@ -56,29 +60,9 @@ export class FormularioComponent implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (!file) return;
-    if (
-      !['image/jpeg', 'image/png', 'image/webp'].includes(file.type) ||
-      file.size > 5 * 1024 * 1024
-    ) {
-      this.mensajeerror =
-        'Selecciona una imagen JPG, PNG o WebP de hasta 5 MB.';
-      this.error.set(true);
-      input.value = '';
-      return;
-    }
     this.procesandoCarnet = true;
     try {
-      const bitmap = await createImageBitmap(file);
-      const scale = Math.min(1, 1200 / Math.max(bitmap.width, bitmap.height));
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(bitmap.width * scale);
-      canvas.height = Math.round(bitmap.height * scale);
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Imagen no disponible');
-      ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-      bitmap.close();
-      const data = canvas.toDataURL('image/jpeg', 0.8);
-      if (data.length > 650000) throw new Error('Imagen demasiado grande');
+      const data = await processIdentityImage(file);
       if (cara === 'frente') this.carnetFrente = data;
       else this.carnetAtras = data;
       this.actualizarContrato();
@@ -87,9 +71,11 @@ export class FormularioComponent implements OnInit {
           this.contenidoHtml,
           this.firma,
         );
-    } catch {
+    } catch (error) {
       this.mensajeerror =
-        'No se pudo leer la imagen. Prueba con una fotografía más pequeña.';
+        error instanceof Error
+          ? error.message
+          : 'No se pudo leer la imagen. Prueba con una fotografía más pequeña.';
       this.error.set(true);
     } finally {
       this.procesandoCarnet = false;
@@ -116,6 +102,7 @@ export class FormularioComponent implements OnInit {
     private readonly renderer: Renderer2,
     private readonly carrito: CarritoService,
     private readonly usuario: UsuarioService,
+    private readonly usuarioApi: UsuarioServiceAPI,
     private readonly mandarprestamo: PrestamosAPIService,
     private readonly loanReturnNavigation: LoanReturnNavigationService,
     private readonly route: ActivatedRoute,
@@ -203,6 +190,16 @@ export class FormularioComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    this.usuarioApi.obtenerPerfil().subscribe({
+      next: (profile) => {
+        this.carnetFrente = identityBase64ToDataUrl(
+          profile.imagen_frente_carnet,
+        );
+        this.carnetAtras = identityBase64ToDataUrl(profile.imagen_atras_carnet);
+        this.actualizarContrato();
+      },
+    });
+
     this.mandarprestamo.obtenerFirmanteContrato().subscribe({
       next: (firmante) => {
         this.firmanteContrato = firmante;

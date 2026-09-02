@@ -24,6 +24,7 @@ using IMT_Reservas.Server.Application.Features.Notificacion;
 using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Application.Features.Usuario;
 using IMT_Reservas.Server.Application.Features.Inventario;
+using IMT_Reservas.Server.Application.Security;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using IMT_Reservas.Server.Infrastructure.Jobs;
@@ -31,6 +32,7 @@ using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using IMT_Reservas.Server.Presentation.Errors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -115,6 +117,10 @@ builder.Services.AddSwaggerGen(options =>
     );
 });
 builder.Services.AddHealthChecks();
+var dataProtection = builder.Services.AddDataProtection().SetApplicationName("UCBHold");
+var dataProtectionKeysPath = builder.Configuration["DataProtection:KeysPath"];
+if (!string.IsNullOrWhiteSpace(dataProtectionKeysPath))
+    dataProtection.PersistKeysToFileSystem(new DirectoryInfo(dataProtectionKeysPath));
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
 builder.Services.AddSingleton<JwtSvc>();
@@ -163,6 +169,7 @@ builder.Services.AddSingleton<ContractHtmlProcessor>();
 builder.Services.AddScoped<ComponenteRepository>();
 builder.Services.AddScoped<CarritoRepository>();
 builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddSingleton<SensitiveDataProtector>();
 builder.Services.AddScoped<CarritoService>();
 builder.Services.AddScoped<PrestamoService>();
 builder.Services.AddScoped<EquipoService>();
@@ -393,7 +400,7 @@ if (hangfireEnabled)
     RecurringJob.AddOrUpdate<EstadoPrestamoJob>(
         "estado-prestamo",
         job => job.Execute(CancellationToken.None),
-        "*/10 * * * *"
+        "* * * * *"
     );
     RecurringJob.AddOrUpdate<EstadoMantenimientoJob>(
         "estado-mantenimiento",

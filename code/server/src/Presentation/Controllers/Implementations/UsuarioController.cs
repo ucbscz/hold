@@ -16,6 +16,31 @@ public class UsuarioController : Controller
 
     public UsuarioController(UsuarioService service) => _service = service;
 
+    [HttpGet("perfil")]
+    public async Task<IActionResult> GetProfile(CancellationToken cancellationToken) =>
+        ToResponse(
+            await _service.GetProfile(
+                User.Identity?.Name ?? string.Empty,
+                cancellationToken
+            )
+        );
+
+    [HttpPut("perfil")]
+    public async Task<IActionResult> UpdateProfile(
+        [FromBody] UsuarioDto dto,
+        CancellationToken cancellationToken
+    )
+    {
+        var carnet = User.Identity?.Name ?? string.Empty;
+        return ToResponse(
+            await _service.UpdateProfile(
+                carnet,
+                dto,
+                cancellationToken
+            )
+        );
+    }
+
     [Authorize(Roles = Permisos.Gestion)]
     [HttpGet]
     public async Task<IActionResult> GetAll(
@@ -43,9 +68,20 @@ public class UsuarioController : Controller
     }
 
     [HttpPut("{carnet}")]
-    public async Task<IActionResult> Update(string carnet, [FromBody] UsuarioDto dto) =>
+    public async Task<IActionResult> Update(
+        string carnet,
+        [FromBody] UsuarioDto dto,
+        CancellationToken cancellationToken
+    ) =>
         ToResponse(
-            await _service.Update(carnet, dto, User.Identity?.Name, User.PuedeGestionar(), User.IsInRole("administrador_laboratorio"))
+            await _service.Update(
+                carnet,
+                dto,
+                User.Identity?.Name,
+                User.PuedeGestionar(),
+                User.IsInRole("administrador_laboratorio"),
+                cancellationToken
+            )
         );
 
     [Authorize(Roles = "administrador")]

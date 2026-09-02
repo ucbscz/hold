@@ -1,80 +1,53 @@
 <div class="form-container">
-  <button class="btn-close" (click)="cerrar()">
-    <img src="assets/x.png" alt="Cerrar" />
+  <button
+    type="button"
+    class="btn-close"
+    (click)="cerrar()"
+    [disabled]="cargando"
+    aria-label="Cerrar"
+  >
+    <img src="assets/x.png" alt="" />
   </button>
   <div class="form-content">
-    <h2>Editar Usuario</h2>
+    <h2>Editar perfil</h2>
+    <p class="traceability-note">
+      Tu nombre, apellidos, correo y carrera son datos institucionales. Un
+      administrador debe corregirlos para conservar la trazabilidad.
+    </p>
     <form #form="ngForm" (ngSubmit)="confirmar()">
       <div class="form-group">
-        <label for="nombre">Nombre</label>
-        <input
-          type="text"
-          id="nombre"
-          name="nombre"
-          [(ngModel)]="localUsuario.nombre"
-          required
-          maxlength="30"
-          placeholder="Nombre del usuario"
-          class="form-input"
-        />
-      </div>
-      <div class="form-group">
-        <label for="apellido_paterno">Apellido Paterno</label>
-        <input
-          type="text"
-          id="apellido_paterno"
-          name="apellido_paterno"
-          [(ngModel)]="localUsuario.apellido_paterno"
-          required
-          maxlength="30"
-          placeholder="Apellido paterno del usuario"
-          class="form-input"
-        />
-      </div>
-      <div class="form-group">
-        <label for="apellido_materno">Apellido Materno</label>
-        <input
-          type="text"
-          id="apellido_materno"
-          name="apellido_materno"
-          [(ngModel)]="localUsuario.apellido_materno"
-          required
-          maxlength="30"
-          placeholder="Apellido materno del usuario"
-          class="form-input"
-        />
-      </div>
-      <div class="form-group">
-        <label for="correo">Correo Institucional</label>
-        <input
-          type="email"
-          id="correo"
-          name="correo"
-          [(ngModel)]="localUsuario.correo"
-          required
-          maxlength="50"
-          pattern="^[a-zA-Z0-9._%\+\-]+@ucb\.edu\.bo$"
-          placeholder="ejemplo@ucb.edu.bo"
-          class="form-input"
-          #correoInput="ngModel"
-        />
-      </div>
-      <div class="form-group">
-        <label for="contrasena">Contraseña</label>
-        <input
-          type="password"
-          id="contrasena"
-          name="contrasena"
-          minlength="8"
-          pattern="^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}$"
-          [validationMessages]="{
-            pattern: 'Incluye una mayúscula, un número y un carácter especial.',
-          }"
-          [(ngModel)]="contrasena"
-          maxlength="30"
-          placeholder="Contraseña del usuario"
-          class="form-input"
-        />
+        <label for="contrasena">Nueva contraseña</label>
+        <div class="password-field">
+          <input
+            [type]="mostrarContrasena ? 'text' : 'password'"
+            id="contrasena"
+            name="contrasena"
+            minlength="8"
+            pattern="^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}$"
+            [validationMessages]="{
+              pattern:
+                'Incluye una mayúscula, un número y un carácter especial.',
+            }"
+            [(ngModel)]="contrasena"
+            maxlength="72"
+            placeholder="Déjala vacía para conservarla"
+            class="form-input"
+          />
+          <button
+            type="button"
+            class="password-field__toggle"
+            (click)="mostrarContrasena = !mostrarContrasena"
+            [attr.aria-label]="
+              mostrarContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'
+            "
+          >
+            <i
+              class="fas"
+              [class.fa-eye]="!mostrarContrasena"
+              [class.fa-eye-slash]="mostrarContrasena"
+            ></i>
+          </button>
+        </div>
       </div>
       <div class="form-group">
         <label for="telefono">Teléfono</label>
@@ -90,31 +63,77 @@
           class="form-input"
         />
       </div>
+      <fieldset class="identity-fieldset">
+        <legend>Carnet de identidad</legend>
+        <p>Guarda ambas caras para reutilizarlas en futuras solicitudes.</p>
+        <div class="identity-grid">
+          <section>
+            <div class="identity-preview">
+              @if (carnetFrentePreview) {
+                <img [src]="carnetFrentePreview" alt="Anverso del carnet" />
+              } @else {
+                <i class="fas fa-id-card" aria-hidden="true"></i>
+              }
+            </div>
+            <strong>Anverso</strong>
+            <input
+              #frenteInput
+              type="file"
+              hidden
+              accept="image/jpeg,image/png,image/webp"
+              (change)="cargarCarnet($event, 'frente')"
+            />
+            <button
+              type="button"
+              class="identity-button"
+              [disabled]="procesandoCarnet"
+              (click)="frenteInput.click()"
+            >
+              {{ carnetFrentePreview ? "Cambiar" : "Agregar" }}
+            </button>
+          </section>
+          <section>
+            <div class="identity-preview">
+              @if (carnetAtrasPreview) {
+                <img [src]="carnetAtrasPreview" alt="Reverso del carnet" />
+              } @else {
+                <i class="fas fa-id-card" aria-hidden="true"></i>
+              }
+            </div>
+            <strong>Reverso</strong>
+            <input
+              #atrasInput
+              type="file"
+              hidden
+              accept="image/jpeg,image/png,image/webp"
+              (change)="cargarCarnet($event, 'atras')"
+            />
+            <button
+              type="button"
+              class="identity-button"
+              [disabled]="procesandoCarnet"
+              (click)="atrasInput.click()"
+            >
+              {{ carnetAtrasPreview ? "Cambiar" : "Agregar" }}
+            </button>
+          </section>
+        </div>
+      </fieldset>
+      <p class="section-heading">Contacto de referencia</p>
       <div class="form-group">
-        <label for="carrera">Carrera</label>
-        <app-custom-select
-          id="carrera"
-          name="carrera"
-          [(ngModel)]="localUsuario.carrera"
-          [opciones]="carreras"
-          placeholder="Selecciona una carrera"
-          required
-        ></app-custom-select>
-      </div>
-      <div class="form-group">
-        <label for="nombre_referencia">Nombre de Referencia</label>
+        <label for="nombre_referencia">Nombre</label>
         <input
           type="text"
           id="nombre_referencia"
           name="nombre_referencia"
-          maxlength="30"
+          maxlength="32"
           [(ngModel)]="localUsuario.nombre_referencia"
           placeholder="Nombre de referencia"
           class="form-input"
         />
       </div>
       <div class="form-group">
-        <label for="telefono_referencia">Teléfono de Referencia</label>
+        <label for="telefono_referencia">Teléfono</label>
         <input
           type="tel"
           id="telefono_referencia"
@@ -127,15 +146,15 @@
         />
       </div>
       <div class="form-group">
-        <label for="email_referencia">Email de Referencia</label>
+        <label for="email_referencia">Correo</label>
         <input
           type="email"
           id="email_referencia"
           name="email_referencia"
-          maxlength="50"
+          maxlength="255"
           pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
           [(ngModel)]="localUsuario.email_referencia"
-          placeholder="Email de referencia"
+          placeholder="correo@ejemplo.com"
           class="form-input"
         />
       </div>
@@ -147,20 +166,17 @@
         ></app-mostrarerror>
       }
       <div class="form-submit">
-        <button type="submit" class="register-button" [disabled]="!form.valid">
-          <span>Confirmar Cambios</span>
+        <button
+          type="submit"
+          class="register-button"
+          [disabled]="!form.valid || cargando || procesandoCarnet"
+        >
+          @if (cargando) {
+            <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>
+          }
+          <span>{{ cargando ? "Guardando..." : "Guardar cambios" }}</span>
         </button>
       </div>
     </form>
   </div>
 </div>
-@if (exito()) {
-  <app-aviso-exito
-    [exito]="exito"
-    [mensaje]="mensajeexito"
-    (accion)="cerrar()"
-  ></app-aviso-exito>
-}
-@if (cargando) {
-  <app-pantalla-carga></app-pantalla-carga>
-}

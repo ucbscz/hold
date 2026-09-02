@@ -19,4 +19,5 @@ public class UsuarioDto
     public string? EmailReferencia { get; set; }
     public byte[]? ImagenFrenteCarnet { get; set; }
     public byte[]? ImagenAtrasCarnet { get; set; }
+    public bool? AceptaTerminos { get; set; }
 }

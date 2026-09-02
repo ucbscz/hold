@@ -46,7 +46,9 @@ import { INLINE_SEARCH_STYLES } from './inline-search.styles';
             <thead>
               <tr>
                 <th>ID</th>
-                <th>Equipos</th>
+                <th>Equipo</th>
+                <th>Identificación</th>
+                <th>Ubicación</th>
                 <th>Estado</th>
                 <th>Solicitud</th>
                 <th>Devolución Esperada</th>
@@ -60,6 +62,36 @@ import { INLINE_SEARCH_STYLES } from './inline-search.styles';
                 <tr>
                   <td>#{{ p.Id }}</td>
                   <td>{{ p.NombreGrupoEquipo || '—' }}</td>
+                  <td>
+                    <div class="equipment-identifiers">
+                      <span
+                        ><strong>IMT</strong>
+                        {{ p.CodigoImt || 'No asignado' }}</span
+                      >
+                      @if (p.CodigoUcb) {
+                        <span><strong>UCB</strong> {{ p.CodigoUcb }}</span>
+                      }
+                      @if (p.NumeroSerial) {
+                        <span><strong>Serie</strong> {{ p.NumeroSerial }}</span>
+                      }
+                    </div>
+                  </td>
+                  <td>
+                    <div class="equipment-location">
+                      <span>{{
+                        p.UbicacionEquipo || 'Sin ambiente asignado'
+                      }}</span>
+                      @if (p.NombreMueble) {
+                        <span>Mueble: {{ p.NombreMueble }}</span>
+                      }
+                      @if (p.NombreGavetero) {
+                        <span>Gavetero: {{ p.NombreGavetero }}</span>
+                      }
+                      @if (p.UbicacionMueble) {
+                        <span>Referencia: {{ p.UbicacionMueble }}</span>
+                      }
+                    </div>
+                  </td>
                   <td>
                     <span
                       [class]="
@@ -104,7 +136,13 @@ export class PrestamosInlineComponent implements OnInit {
     return this.items.filter(
       (p) =>
         p.Id?.toString().includes(texto) ||
-        (p.NombreGrupoEquipo ?? '').toLowerCase().includes(texto),
+        (p.NombreGrupoEquipo ?? '').toLowerCase().includes(texto) ||
+        (p.CodigoImt ?? '').toLowerCase().includes(texto) ||
+        (p.CodigoUcb ?? '').toLowerCase().includes(texto) ||
+        (p.NumeroSerial ?? '').toLowerCase().includes(texto) ||
+        (p.UbicacionEquipo ?? '').toLowerCase().includes(texto) ||
+        (p.NombreMueble ?? '').toLowerCase().includes(texto) ||
+        (p.NombreGavetero ?? '').toLowerCase().includes(texto),
     );
   }
 

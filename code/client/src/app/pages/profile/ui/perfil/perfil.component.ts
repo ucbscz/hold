@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, signal, WritableSignal } from '@angular/core';
+import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { ReactiveFormsModule } from '@angular/forms';
-import { Usuario, UsuarioService } from '@entities/user';
+import { Usuario, UsuarioService, UsuarioServiceAPI } from '@entities/user';
 import { EditarComponent } from '@features/profile-edit';
 @Component({
   selector: 'app-perfil',
@@ -10,11 +10,22 @@ import { EditarComponent } from '@features/profile-edit';
   templateUrl: './perfil.component.html',
   styleUrls: ['./perfil.component.css'],
 })
-export class PerfilComponent {
+export class PerfilComponent implements OnInit {
   editar: WritableSignal<boolean> = signal(false);
   usuario: Usuario = new Usuario();
-  constructor(private readonly usuarioS: UsuarioService) {
+  constructor(
+    private readonly usuarioS: UsuarioService,
+    private readonly usuarioApi: UsuarioServiceAPI,
+  ) {
     this.usuario = this.usuarioS.obtenerUsuario();
+  }
+  ngOnInit(): void {
+    this.usuarioApi.obtenerPerfil().subscribe({
+      next: (usuario) => {
+        this.usuario = usuario;
+        this.usuarioS.actualizarUsuario(usuario);
+      },
+    });
   }
   toggleEdit() {
     this.editar.set(!this.editar());

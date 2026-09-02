@@ -1,0 +1,62 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: var(--sidebar);
+  color: var(--ink);
+  font-family: var(--font);
+}
+.terms-page {
+  width: min(100% - 2rem, 760px);
+  margin: 0 auto;
+  padding: 3rem 0 5rem;
+}
+.terms-page header {
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.terms-page header p,
+.terms-page header span {
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+}
+.terms-page h1 {
+  margin: 0.5rem 0;
+  font-size: clamp(1.75rem, 4vw, 2.5rem);
+  letter-spacing: 0;
+}
+.terms-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--interactive-text);
+  font-size: 0.85rem;
+  font-weight: 800;
+  text-decoration: none;
+}
+.terms-page article {
+  padding-top: 1rem;
+}
+.terms-page section {
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.terms-page h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+.terms-page section p {
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+.terms-page aside {
+  margin-top: 1.5rem;
+  padding: 1rem;
+  border-left: 3px solid var(--brand);
+  background: var(--surface);
+  color: var(--ink-secondary);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}

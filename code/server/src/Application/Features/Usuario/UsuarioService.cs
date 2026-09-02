@@ -6,6 +6,7 @@ using IMT_Reservas.Server.Application.Features.AuditLog;
 using IMT_Reservas.Server.Application.Features.Cache;
 using IMT_Reservas.Server.Application.Features.Jwt;
 using IMT_Reservas.Server.Application.Features.Notificacion;
+using IMT_Reservas.Server.Application.Security;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.Extensions.Options;
 using BCryptLib = BCrypt.Net.BCrypt;
@@ -15,6 +16,7 @@ namespace IMT_Reservas.Server.Application.Features.Usuario;
 
 public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioDto>
 {
+    public const string TermsVersion = "2026-09-01";
     private static readonly TimeSpan UsuarioCacheTtl = TimeSpan.FromMinutes(30);
     private readonly UsuarioMapper _mapper;
     private readonly JwtService _jwtService;
@@ -23,6 +25,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
     private readonly NotificacionService _notifications;
     private readonly UsuarioAuthRepository _authRepository;
     private readonly UsuarioReadRepository _queries;
+    private readonly SensitiveDataProtector _sensitiveData;
 
     public UsuarioService(
         UsuarioRepository repository,
@@ -34,7 +37,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         AuditLogService audit,
         NotificacionService notifications,
         UsuarioAuthRepository authRepository,
-        UsuarioReadRepository queries
+        UsuarioReadRepository queries,
+        SensitiveDataProtector sensitiveData
     )
         : base(repository, validator, mapper, audit)
     {
@@ -45,6 +49,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         _notifications = notifications;
         _authRepository = authRepository;
         _queries = queries;
+        _sensitiveData = sensitiveData;
     }
 
     public async Task<Result<object>> SetBlocked(
@@ -140,6 +145,11 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (!isAdmin)
             dto.Rol = null;
 
+        if (!isAdmin && dto.AceptaTerminos != true)
+            return Result<UsuarioDto>.Error(
+                "Debes aceptar los términos y condiciones para crear tu cuenta"
+            );
+
         if (isLabAdmin && dto.Rol is "administrador" or "administrador_laboratorio")
             return Result<UsuarioDto>.Forbidden();
         dto.Bloqueado = false;
@@ -166,6 +176,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         )
             return Result<UsuarioDto>.Error("Teléfono ya registrado");
 
+        dto.ImagenFrenteCarnet = _sensitiveData.Protect(dto.ImagenFrenteCarnet);
+        dto.ImagenAtrasCarnet = _sensitiveData.Protect(dto.ImagenAtrasCarnet);
         var entity = deletedUser ?? MapToEntity(dto);
 
         if (deletedUser != null)
@@ -176,8 +188,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             entity.MotivoBloqueo = null;
             entity.RefreshToken = null;
             entity.RefreshTokenExpiry = null;
-            entity.ImagenFrenteCarnet = null;
-            entity.ImagenAtrasCarnet = null;
+            entity.ImagenFrenteCarnet = dto.ImagenFrenteCarnet;
+            entity.ImagenAtrasCarnet = dto.ImagenAtrasCarnet;
         }
 
         entity.Contrasena = BCryptLib.HashPassword(dto.Contrasena, workFactor: 12);
@@ -196,11 +208,20 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (result.IsSuccess && result.Value != null)
         {
             result.Value.CarreraNombre = await _queries.GetCarreraName(entity.IdCarrera);
+            UnprotectIdentityImages(result.Value);
             await Audit!.Log(
                 AuditAccion.Crear,
                 typeof(UsuarioEntity).Name,
                 entity.Carnet,
-                deletedUser == null ? null : "Cuenta recreada a partir de un carnet eliminado"
+                JsonSerializer.Serialize(new
+                {
+                    cuentaRecreada = deletedUser != null,
+                    aceptoTerminos = dto.AceptaTerminos == true,
+                    versionTerminos = dto.AceptaTerminos == true ? TermsVersion : null,
+                    fechaAceptacion = dto.AceptaTerminos == true
+                        ? (DateTime?)DateTime.UtcNow
+                        : null,
+                })
             );
         }
 
@@ -212,22 +233,33 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         UsuarioDto dto,
         string? callerCarnet,
         bool isAdmin = false,
-        bool isLabAdmin = false
+        bool isLabAdmin = false,
+        CancellationToken cancellationToken = default
     )
     {
         if (!isAdmin && !string.Equals(callerCarnet, carnet, StringComparison.Ordinal))
             return Result<UsuarioDto>.Forbidden();
 
-        dto.Rol = dto.Rol?.Trim().ToLowerInvariant();
-        var validation = await Validator.ValidateAsync(dto);
-
-        if (!validation.IsValid)
-            return validation.ToResult<UsuarioDto>();
-
-        var existing = await Repository.GetTrackedByCarnet(carnet);
+        var existing = await Repository.GetTrackedByCarnet(carnet, cancellationToken);
 
         if (existing == null)
             return Result<UsuarioDto>.NotFound();
+
+        if (!isAdmin)
+            PreserveTraceableFields(dto, existing);
+
+        dto.Rol = dto.Rol?.Trim().ToLowerInvariant();
+        dto.ImagenFrenteCarnet = dto.ImagenFrenteCarnet == null
+            ? existing.ImagenFrenteCarnet
+            : _sensitiveData.Protect(dto.ImagenFrenteCarnet);
+        dto.ImagenAtrasCarnet = dto.ImagenAtrasCarnet == null
+            ? existing.ImagenAtrasCarnet
+            : _sensitiveData.Protect(dto.ImagenAtrasCarnet);
+
+        var validation = await Validator.ValidateAsync(dto, cancellationToken);
+
+        if (!validation.IsValid)
+            return validation.ToResult<UsuarioDto>();
 
         if (isLabAdmin && (existing.Rol is Core.Entities.TipoUsuario.Administrador or Core.Entities.TipoUsuario.Administrador_Laboratorio
             || dto.Rol is "administrador" or "administrador_laboratorio"))
@@ -237,31 +269,52 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         if (
             !string.IsNullOrWhiteSpace(dto.Telefono)
-            && await _queries.ExistsByTelefono(dto.Telefono, carnet)
+            && await _queries.ExistsByTelefono(dto.Telefono, carnet, cancellationToken)
         )
             return Result<UsuarioDto>.Error("Teléfono ya registrado");
 
-        if (!isAdmin)
-            dto.Rol = null;
-
-        await ResolveCarrera(dto);
+        if (isAdmin)
+            await ResolveCarrera(dto, cancellationToken);
         _mapper.Update(dto, existing);
 
-        if ((dto.IdCarrera ?? 0) > 0)
+        if (isAdmin && (dto.IdCarrera ?? 0) > 0)
             existing.IdCarrera = dto.IdCarrera!.Value;
 
         if (!string.IsNullOrWhiteSpace(dto.Contrasena))
             existing.Contrasena = BCryptLib.HashPassword(dto.Contrasena, workFactor: 12);
 
-        await Repository.UpdateEntity(existing);
+        await Repository.UpdateEntity(existing, cancellationToken: cancellationToken);
 
         var resultDto = _mapper.ToDto(existing);
-        resultDto.CarreraNombre = await _queries.GetCarreraName(existing.IdCarrera);
+        resultDto.CarreraNombre = await _queries.GetCarreraName(
+            existing.IdCarrera,
+            cancellationToken
+        );
+        resultDto.ImagenFrenteCarnet = null;
+        resultDto.ImagenAtrasCarnet = null;
 
         _ = await _cacheRepository.Remove(CacheKeys.Usuario(carnet));
         await Audit!.Log(AuditAccion.Editar, typeof(UsuarioEntity).Name, carnet);
 
         return Result<UsuarioDto>.Success(resultDto);
+    }
+
+    public async Task<Result<UsuarioDto>> UpdateProfile(
+        string carnet,
+        UsuarioDto dto,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var result = await Update(
+            carnet,
+            dto,
+            carnet,
+            cancellationToken: cancellationToken
+        );
+
+        return result.IsSuccess
+            ? await GetProfile(carnet, cancellationToken)
+            : result;
     }
 
     public async Task<Result<UsuarioDto>> Get(string carnet)
@@ -279,9 +332,30 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         var dto = _mapper.ToDto(user);
         dto.CarreraNombre = await _queries.GetCarreraName(user.IdCarrera);
+        dto.ImagenFrenteCarnet = null;
+        dto.ImagenAtrasCarnet = null;
 
         _ = await _cacheRepository.Set(cacheKey, dto, UsuarioCacheTtl);
 
+        return Result<UsuarioDto>.Success(dto);
+    }
+
+    public async Task<Result<UsuarioDto>> GetProfile(
+        string carnet,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var user = await _queries.GetByCarnet(carnet, cancellationToken);
+
+        if (user == null)
+            return Result<UsuarioDto>.NotFound();
+
+        var dto = _mapper.ToDto(user);
+        dto.CarreraNombre = await _queries.GetCarreraName(
+            user.IdCarrera,
+            cancellationToken
+        );
+        UnprotectIdentityImages(dto);
         return Result<UsuarioDto>.Success(dto);
     }
 
@@ -314,6 +388,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         var dto = _mapper.ToDto(user);
         dto.CarreraNombre = carreraNombre;
+        dto.ImagenFrenteCarnet = null;
+        dto.ImagenAtrasCarnet = null;
 
         var accessToken = _jwtService.GenerateAccessToken(dto);
         var refreshToken = JwtService.GenerateRefreshToken();
@@ -357,6 +433,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         var dto = _mapper.ToDto(user);
         dto.CarreraNombre = carreraNombre;
+        dto.ImagenFrenteCarnet = null;
+        dto.ImagenAtrasCarnet = null;
 
         var newAccessToken = _jwtService.GenerateAccessToken(dto);
         var newRefreshToken = JwtService.GenerateRefreshToken();
@@ -395,7 +473,10 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         return deleteResult;
     }
 
-    private async Task ResolveCarrera(UsuarioDto dto)
+    private async Task ResolveCarrera(
+        UsuarioDto dto,
+        CancellationToken cancellationToken = default
+    )
     {
         if ((dto.IdCarrera ?? 0) > 0)
             return;
@@ -403,6 +484,26 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (string.IsNullOrWhiteSpace(dto.CarreraNombre))
             return;
 
-        dto.IdCarrera = await _queries.FindCarreraIdByName(dto.CarreraNombre);
+        dto.IdCarrera = await _queries.FindCarreraIdByName(
+            dto.CarreraNombre,
+            cancellationToken
+        );
+    }
+
+    private static void PreserveTraceableFields(UsuarioDto dto, UsuarioEntity existing)
+    {
+        dto.Carnet = existing.Carnet;
+        dto.Nombre = existing.Nombre;
+        dto.ApellidoPaterno = existing.ApellidoPaterno;
+        dto.ApellidoMaterno = existing.ApellidoMaterno;
+        dto.Email = existing.Email;
+        dto.IdCarrera = existing.IdCarrera;
+        dto.Rol = existing.Rol.ToString().ToLowerInvariant();
+    }
+
+    private void UnprotectIdentityImages(UsuarioDto dto)
+    {
+        dto.ImagenFrenteCarnet = _sensitiveData.Unprotect(dto.ImagenFrenteCarnet);
+        dto.ImagenAtrasCarnet = _sensitiveData.Unprotect(dto.ImagenAtrasCarnet);
     }
 }

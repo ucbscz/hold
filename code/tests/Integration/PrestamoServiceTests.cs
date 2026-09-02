@@ -5,12 +5,15 @@ using IMT_Reservas.Server.Application.Features.Usuario;
 using Microsoft.AspNetCore.Http;
 using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Application.Features.Contrato;
+using IMT_Reservas.Server.Application.Security;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using IMT_Reservas.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Logging.Abstractions;
 namespace IMT_Reservas.Tests.Integration;
 
 [TestFixture]
@@ -19,6 +22,10 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     private const string Carnet = "U001";
     private const int GrupoId = 1;
     private const int EquipoId = 1;
+    private readonly SensitiveDataProtector _sensitiveData = new(
+        new EphemeralDataProtectionProvider(),
+        NullLogger<SensitiveDataProtector>.Instance
+    );
 
     protected override PrestamoService CreateService(ApplicationDbContext db)
     {
@@ -32,7 +39,8 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
             mapper,
             new ContractHtmlProcessor(),
             queries,
-            availability
+            availability,
+            _sensitiveData
         );
         var validator = new PrestamoValidator(db, configRepo);
 
@@ -246,6 +254,32 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     }
 
     [Test]
+    public async Task AutomaticStateBatch_SelectsExpiredPendingAndApprovedLoansForRejection()
+    {
+        var now = DateTime.UtcNow;
+        var expiredPending = BuildLoan(EstadoPrestamo.Pendiente, now.AddHours(-2));
+        var expiredApproved = BuildLoan(EstadoPrestamo.Aprobado, now.AddHours(-1));
+        var futurePending = BuildLoan(EstadoPrestamo.Pendiente, now.AddHours(1));
+        var active = BuildLoan(EstadoPrestamo.Activo, now.AddHours(-2));
+        Db.Prestamos.AddRange(expiredPending, expiredApproved, futurePending, active);
+        await Db.SaveChangesAsync();
+        var repository = new PrestamoEstadoRepository(Db);
+
+        var expired = await repository.GetExpiredPendingLoans(now);
+        await repository.MarkAsRejected(expired.Select(loan => loan.Id!.Value).ToList());
+
+        expired.Select(loan => loan.Id).Should().BeEquivalentTo(
+            [expiredPending.Id, expiredApproved.Id]
+        );
+        Db.ChangeTracker.Clear();
+        var rejectedIds = await Db.Prestamos
+            .Where(loan => loan.EstadoPrestamo == EstadoPrestamo.Rechazado)
+            .Select(loan => loan.Id)
+            .ToListAsync();
+        rejectedIds.Should().BeEquivalentTo([expiredPending.Id, expiredApproved.Id]);
+    }
+
+    [Test]
     public async Task QueryPage_WhenRequestIsCancelled_StopsDatabaseWork()
     {
         using var cancellation = new CancellationTokenSource();
@@ -266,7 +300,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
 
         result.IsSuccess.Should().BeTrue();
         Db.DetallesPrestamos.Should().HaveCount(1);
-        Db.DetallesPrestamos.Single().IdEquipo.Should().Be(EquipoId);
+        Db.DetallesPrestamos.Single().IdEquipo.Should().BeNull();
 
         var auditEntry = Db.AuditLogs.Single(entry => entry.Entidad == nameof(Prestamo));
         using var auditDetail = JsonDocument.Parse(auditEntry.Detalle!);
@@ -399,7 +433,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     }
 
     [Test]
-    public async Task Create_EquipoPendienteInSameDates_ReturnsError()
+    public async Task Create_EquipoPendienteInSameDates_DoesNotBlockAvailability()
     {
         var fechaInicio = DateTime.UtcNow.AddDays(1);
         var fechaFin = fechaInicio.AddDays(3);
@@ -407,8 +441,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
 
         var result = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, fechaInicio, fechaFin));
 
-        result.IsSuccess.Should().BeFalse();
-        result.Errors.Should().Contain(e => e.Contains("disponible"));
+        result.IsSuccess.Should().BeTrue();
     }
 
     [Test]
@@ -607,7 +640,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     }
 
     [Test]
-    public async Task Create_WritesAssignedEquipmentIntoContractImmediately()
+    public async Task ApprovedLoan_RendersAssignedEquipmentIntoContract()
     {
         const string contract = """
             <table><tr>
@@ -624,17 +657,27 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         );
         dto.Contrato = contract;
         var createResult = await Sut.Create(dto);
+        var approvalResult = await Sut.UpdateStatus(createResult.Value.Id!.Value, "aprobado");
 
         createResult.IsSuccess.Should().BeTrue();
-        var savedContract = Db.Contratos.Single().ContratoHtml;
-        savedContract.Should().Contain(">1</td>");
-        savedContract.Should().Contain(">UCB-001</td>");
-        savedContract.Should().Contain(">SER-001</td>");
-        savedContract.Should().NotContain("Pendiente de asignación");
+        approvalResult.IsSuccess.Should().BeTrue();
+        var savedContract = _sensitiveData.Unprotect(
+            Db.Contratos.Single().ContratoHtml ?? string.Empty
+        );
+        var rendered = new ContractHtmlProcessor().RenderEquipment(
+            savedContract,
+            await new PrestamoReadRepository(Db).GetContractEquipment(
+                createResult.Value.Id!.Value
+            )
+        );
+        rendered.Should().Contain(">1</td>");
+        rendered.Should().Contain(">UCB-001</td>");
+        rendered.Should().Contain(">SER-001</td>");
+        rendered.Should().NotContain("Pendiente de asignación");
     }
 
     [Test]
-    public async Task Create_WritesEveryPhysicalCodeForMultipleUnits()
+    public async Task ApprovedLoan_RendersEveryPhysicalCodeForMultipleUnits()
     {
         Db.Equipos.Add(new Equipo
         {
@@ -664,12 +707,20 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         dto.Contrato = contract;
 
         var result = await Sut.Create(dto);
+        var approvalResult = await Sut.UpdateStatus(result.Value.Id!.Value, "aprobado");
 
         result.IsSuccess.Should().BeTrue();
-        var savedContract = Db.Contratos.Single().ContratoHtml;
-        savedContract.Should().Contain(">1, 2</td>");
-        savedContract.Should().Contain(">UCB-001, No registrado</td>");
-        savedContract.Should().Contain(">SER-001, SER-002</td>");
+        approvalResult.IsSuccess.Should().BeTrue();
+        var savedContract = _sensitiveData.Unprotect(
+            Db.Contratos.Single().ContratoHtml ?? string.Empty
+        );
+        var rendered = new ContractHtmlProcessor().RenderEquipment(
+            savedContract,
+            await new PrestamoReadRepository(Db).GetContractEquipment(result.Value.Id!.Value)
+        );
+        rendered.Should().Contain(">1, 2</td>");
+        rendered.Should().Contain(">UCB-001, No registrado</td>");
+        rendered.Should().Contain(">SER-001, SER-002</td>");
     }
 
     [Test]
@@ -738,12 +789,14 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var result = await Sut.Create(dto);
 
         result.IsSuccess.Should().BeTrue();
-        var savedContract = Db.Contratos.Single().ContratoHtml;
+        var savedContract = _sensitiveData.Unprotect(
+            Db.Contratos.Single().ContratoHtml ?? string.Empty
+        );
         savedContract.Should().NotContain("script");
         savedContract.Should().NotContain("onclick");
         savedContract.Should().NotContain("onerror");
         savedContract.Should().NotContain("javascript:");
-        savedContract.Should().Contain(">1</td>");
+        savedContract.Should().Contain("Por definirse");
     }
 
     [Test]
@@ -957,4 +1010,13 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
             FechaDevolucionEsperada = normalizedStart + duration,
         };
     }
+
+    private static Prestamo BuildLoan(EstadoPrestamo state, DateTime start) => new()
+    {
+        Carnet = Carnet,
+        EstadoPrestamo = state,
+        FechaSolicitud = start.AddHours(-1),
+        FechaPrestamoEsperada = start,
+        FechaDevolucionEsperada = start.AddHours(1),
+    };
 }

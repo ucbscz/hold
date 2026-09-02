@@ -308,6 +308,25 @@
           [error]="error"
         ></app-mostrarerror>
       }
+      <label class="terms-consent">
+        <input
+          type="checkbox"
+          name="aceptaTerminos"
+          [(ngModel)]="aceptaTerminos"
+          required
+        />
+        <span>
+          He leído y acepto los
+          <a routerLink="/terminos" target="_blank" rel="noopener">
+            términos y condiciones </a
+          >.
+        </span>
+      </label>
+      @if (submitted && !aceptaTerminos) {
+        <div class="error-message">
+          Debes aceptar los términos para continuar.
+        </div>
+      }
       <button type="submit" class="register-button" [disabled]="registrando">
         @if (registrando) {
           <span class="spinner" aria-hidden="true"></span>

@@ -1,6 +1,7 @@
 using System.Globalization;
 using Ardalis.Result;
 using IMT_Reservas.Server.Application.Features.Mantenimiento;
+using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Core.Abstraction;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
@@ -121,11 +122,8 @@ public class MantenimientoRepository : Repository<MantenimientoEntity, Mantenimi
             .AnyAsync(item =>
                 item.Detail.IdEquipo != null
                 && equipmentIds.Contains(item.Detail.IdEquipo.Value)
-                && (
-                    item.Loan.EstadoPrestamo == EstadoPrestamo.Pendiente
-                    || item.Loan.EstadoPrestamo == EstadoPrestamo.Aprobado
-                    || item.Loan.EstadoPrestamo == EstadoPrestamo.Activo
-                    || item.Loan.EstadoPrestamo == EstadoPrestamo.Atrasado
+                && PrestamoAvailabilityPolicy.BlockingStates.Contains(
+                    item.Loan.EstadoPrestamo
                 )
                 && item.Loan.FechaPrestamoEsperada < end
                 && item.Loan.FechaDevolucionEsperada > start
