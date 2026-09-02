@@ -4,13 +4,13 @@ This guide describes how to run UCB Hold locally for development, testing and re
 
 ## Requirements
 
-| Tool | Minimum version | Check |
-| --- | --- | --- |
-| .NET SDK | 8.0 LTS | `dotnet --version` |
-| Node.js | 22.x LTS | `node -v` |
-| npm | Bundled with Node.js | `npm -v` |
-| Docker Desktop | Current stable | `docker -v` |
-| Git | Current stable | `git --version` |
+| Tool           | Minimum version      | Check              |
+| -------------- | -------------------- | ------------------ |
+| .NET SDK       | 8.0 LTS              | `dotnet --version` |
+| Node.js        | 22.x LTS             | `node -v`          |
+| npm            | Bundled with Node.js | `npm -v`           |
+| Docker Desktop | Current stable       | `docker -v`        |
+| Git            | Current stable       | `git --version`    |
 
 ## Repository Layout
 
@@ -39,6 +39,7 @@ Jwt__Key=<local-secret-with-at-least-32-characters>
 Redis__ConnectionString=ucb_redis:6379
 Redis__Enabled=true
 Hangfire__Enabled=true
+DataProtection__KeysPath=/app/data-protection-keys
 ```
 
 Generate a development key:
@@ -80,12 +81,14 @@ cd code
 docker compose up --build
 ```
 
-| Service | URL |
-| --- | --- |
-| Frontend | http://localhost:4200 |
+Docker Compose mounts `ucb_dataprotection_keys` at `/app/data-protection-keys`. Back up this volume with the database and do not replace it during routine deployments; it is required to decrypt saved carnet images, profile signatures, and contracts.
+
+| Service     | URL                   |
+| ----------- | --------------------- |
+| Frontend    | http://localhost:4200 |
 | Backend API | http://localhost:5000 |
-| PostgreSQL | localhost:5432 |
-| Redis | localhost:6379 |
+| PostgreSQL  | localhost:5432        |
+| Redis       | localhost:6379        |
 
 ### Hybrid Local Development
 
@@ -110,11 +113,11 @@ cd code/client
 npm start
 ```
 
-| Service | URL |
-| --- | --- |
-| Frontend | http://localhost:4200 |
-| Backend API | https://localhost:7216 |
-| Swagger | https://localhost:7216/swagger |
+| Service     | URL                            |
+| ----------- | ------------------------------ |
+| Frontend    | http://localhost:4200          |
+| Backend API | https://localhost:7216         |
+| Swagger     | https://localhost:7216/swagger |
 
 ## Verification
 
@@ -135,6 +138,8 @@ npx tsc -p tsconfig.spec.json --noEmit
 npm run test:coverage
 npm run build
 ```
+
+The frontend runtime image contains only the compiled Angular output served by unprivileged Nginx. Development-only build dependencies are not copied into the production image. Run `npm audit --omit=dev` as the release security gate; also review the full `npm audit` report when updating Angular tooling.
 
 ## Database Restore
 
@@ -158,12 +163,12 @@ pg_restore -U postgres -d IMT_Reservas --clean --if-exists artifacts/releases/da
 
 ## Troubleshooting
 
-| Issue | Resolution |
-| --- | --- |
-| `.NET SDK not found` | Install .NET 8 SDK and restart the terminal. |
-| PostgreSQL or Redis refuses connection | Run `cd code && docker compose up -d ucb_db ucb_redis`. |
-| Backend cannot read secrets | Run the `dotnet user-secrets` commands from `code/server`. |
-| Database schema is outdated | Restore the current release backup, or recreate an empty database with `code/database/schema.sql`. |
-| Port `4200` is already in use | Run Angular with another port, for example `ng serve --port 4300`. |
-| Frontend dependencies are missing | Run `npm install` from `code/client`. |
-| Docker backend restarts | Inspect logs with `docker logs -f ucb_server`. |
+| Issue                                  | Resolution                                                                                         |
+| -------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `.NET SDK not found`                   | Install .NET 8 SDK and restart the terminal.                                                       |
+| PostgreSQL or Redis refuses connection | Run `cd code && docker compose up -d ucb_db ucb_redis`.                                            |
+| Backend cannot read secrets            | Run the `dotnet user-secrets` commands from `code/server`.                                         |
+| Database schema is outdated            | Restore the current release backup, or recreate an empty database with `code/database/schema.sql`. |
+| Port `4200` is already in use          | Run Angular with another port, for example `ng serve --port 4300`.                                 |
+| Frontend dependencies are missing      | Run `npm install` from `code/client`.                                                              |
+| Docker backend restarts                | Inspect logs with `docker logs -f ucb_server`.                                                     |

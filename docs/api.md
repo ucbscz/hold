@@ -93,6 +93,8 @@ Notification details show `Emisor`: the full name of the administrator who perfo
 
 Both management roles can list, create, update and block borrowers. Laboratory administrators cannot create, promote, edit or block either administrator role. Anonymous registration never grants privileged roles. `administrativo` is a borrower, not an administrator. Only root can delete users.
 
+`GET /api/usuarios/perfil` and `PUT /api/usuarios/perfil` are the only user endpoints that expose or accept `ImagenFrenteCarnet`, `ImagenAtrasCarnet`, and `ImagenFirma`. These byte arrays are encrypted at rest and returned only to their owner. Generic user lists, login responses, refresh responses, and administrative user responses omit them. A saved signature is inserted automatically into future contract drafts; finalized contracts retain their own immutable encrypted copy.
+
 ## Equipment Catalog
 
 All CRUD operations for the following resources use `GET /`, `GET /{id}`, `POST /`, `PUT /{id}`, and `DELETE /{id}`. Write operations are administrator-only.
@@ -114,16 +116,19 @@ All CRUD operations for the following resources use `GET /`, `GET /{id}`, `POST 
 
 Additional catalog routes:
 
-| Method | Route                                   | Purpose                                                 |
-| ------ | --------------------------------------- | ------------------------------------------------------- |
-| `GET`  | `/api/equipos?grupoId={id}`             | List equipment units in a group.                        |
-| `GET`  | `/api/equipos?gaveteroId={id}`          | List equipment units in a locker.                       |
-| `GET`  | `/api/equipos/{id}/prestamos`           | Get equipment loan records. Administrator only.         |
-| `GET`  | `/api/gaveteros?muebleId={id}`          | List lockers in a furniture item.                       |
-| `GET`  | `/api/grupos?nombre=&categoria=`        | Search equipment groups.                                |
-| `GET`  | `/api/grupos/{id}/componentes?pagina=1` | Authenticated component inspection, 100 items per page. |
+| Method | Route                                   | Purpose                                                     |
+| ------ | --------------------------------------- | ----------------------------------------------------------- |
+| `GET`  | `/api/equipos?grupoId={id}`             | List equipment units in a group.                            |
+| `GET`  | `/api/equipos?gaveteroId={id}`          | List equipment units in a locker.                           |
+| `GET`  | `/api/equipos/{id}/prestamos`           | Get equipment loan records. Administrator only.             |
+| `GET`  | `/api/gaveteros?muebleId={id}`          | List lockers in a furniture item.                           |
+| `GET`  | `/api/grupos?nombre=&categoria=`        | Search equipment groups.                                    |
+| `GET`  | `/api/grupos/{id}/componentes?pagina=1` | Authenticated component inspection, 100 items per page.     |
+| `POST` | `/api/grupos/importar`                  | Root-only product metadata preview from a public HTTPS URL. |
 
 Equipment group payloads expose `TiempoMaximoPrestamoDias` (1 to 365). This group-level value applies to every physical unit in the group and is required for create and update operations.
+
+`POST /api/grupos/importar` accepts `{ "Url": "https://..." }` and never persists data. It extracts JSON-LD Product or OpenGraph metadata into a preview that the administrator must review and submit through the regular group endpoint. Requests reject credentials, non-HTTPS URLs, nonstandard ports, local/private/reserved addresses and unsafe redirects; DNS is revalidated at connection time, redirects are limited to three, the timeout is eight seconds, and the response is limited to one megabyte of HTML.
 
 Room and origin payloads are `{ "Id": 1, "Nombre": "Sala principal" }`. Equipment writes use nullable `IdAmbiente` and `IdProcedencia`; read DTOs retain `Ubicacion`/`Procedencia` as resolved names. Catalog deletion fails with 409 when equipment references the entry. `CodigoUcb` is optional and unique when provided; serial numbers are never generated. `CostoReferencia` is expressed in Bolivianos.
 
@@ -138,23 +143,23 @@ Room and origin payloads are `{ "Id": 1, "Nombre": "Sala principal" }`. Equipmen
 
 ## Loans, Availability, and Contracts
 
-| Method   | Route                             | Purpose                                                                     |
-| -------- | --------------------------------- | --------------------------------------------------------------------------- |
-| `GET`    | `/api/prestamos`                  | List all loans for administrators or own loans for regular users.           |
-| `GET`    | `/api/prestamos/{id}`             | Get a loan.                                                                 |
-| `POST`   | `/api/prestamos`                  | Create a loan request.                                                      |
-| `PATCH`  | `/api/prestamos/{id}/estado`      | Managers change state; owners may only cancel their pending/approved loans. |
-| `PATCH`  | `/api/prestamos/{id}/observacion` | Managers update `{ "Observacion": "..." }`, max 1024 characters; audited.   |
-| `PATCH`  | `/api/prestamos/{id}/guardado`    | Owners save or remove a loan template with `{ "Guardado": true }`.          |
-| `DELETE` | `/api/prestamos/{id}`             | Soft-delete a loan.                                                         |
-| `GET`    | `/api/prestamos/elegibilidad`     | Get reservation eligibility for the authenticated user.                     |
-| `GET`    | `/api/prestamos?carnet=&estado=&guardado=` | Filter loans; non-admin users are restricted to their own carnet.  |
-| `POST`   | `/api/contratos`                  | Upload or create a contract for a loan. Multipart form data.                |
-| `GET`    | `/api/contratos/{prestamoId}`     | Get a contract by loan id.                                                  |
-| `GET`    | `/api/contratos/firmante`         | Get the authenticated contract signer name, id and signature.               |
-| `DELETE` | `/api/contratos/{prestamoId}`     | Delete a contract.                                                          |
-| `POST`   | `/api/carrito/disponibilidad`     | Calculate availability after validating each group's maximum duration.      |
-| `POST`   | `/api/avisos`                     | Create an availability watch for the authenticated user.                    |
+| Method   | Route                                      | Purpose                                                                     |
+| -------- | ------------------------------------------ | --------------------------------------------------------------------------- |
+| `GET`    | `/api/prestamos`                           | List all loans for administrators or own loans for regular users.           |
+| `GET`    | `/api/prestamos/{id}`                      | Get a loan.                                                                 |
+| `POST`   | `/api/prestamos`                           | Create a loan request.                                                      |
+| `PATCH`  | `/api/prestamos/{id}/estado`               | Managers change state; owners may only cancel their pending/approved loans. |
+| `PATCH`  | `/api/prestamos/{id}/observacion`          | Managers update `{ "Observacion": "..." }`, max 1024 characters; audited.   |
+| `PATCH`  | `/api/prestamos/{id}/guardado`             | Owners save or remove a loan template with `{ "Guardado": true }`.          |
+| `DELETE` | `/api/prestamos/{id}`                      | Soft-delete a loan.                                                         |
+| `GET`    | `/api/prestamos/elegibilidad`              | Get reservation eligibility for the authenticated user.                     |
+| `GET`    | `/api/prestamos?carnet=&estado=&guardado=` | Filter loans; non-admin users are restricted to their own carnet.           |
+| `POST`   | `/api/contratos`                           | Upload or create a contract for a loan. Multipart form data.                |
+| `GET`    | `/api/contratos/{prestamoId}`              | Get a contract by loan id.                                                  |
+| `GET`    | `/api/contratos/firmante`                  | Get the authenticated contract signer name, id and signature.               |
+| `DELETE` | `/api/contratos/{prestamoId}`              | Delete a contract.                                                          |
+| `POST`   | `/api/carrito/disponibilidad`              | Calculate availability after validating each group's maximum duration.      |
+| `POST`   | `/api/avisos`                              | Create an availability watch for the authenticated user.                    |
 
 Rejection requires a nonempty `Observacion` (max 1024), stored as `MotivoRechazo`. `AutorizadoPor` records the approving actor and `EntregadoPor` the delivery actor; clients cannot supply these identities when creating loans. Pending loans precede other states; within a priority, teachers precede administrative borrowers, then students, newest request first. Priority never overrides availability.
 
@@ -182,10 +187,10 @@ The global limit is 180 requests/minute per authenticated identity or anonymous 
 
 ## Audit and Health
 
-| Method | Route            | Purpose                                                                                                                |
-| ------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Method | Route            | Purpose                                                                                                                          |
+| ------ | ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | `GET`  | `/api/auditoria` | Query audit entries. Administrator only. Supports `buscar`, `entidad`, `actor` (name or carnet), `accion`, `desde`, and `hasta`. |
-| `GET`  | `/api/health`    | Health check for the API and database.                                                                                 |
+| `GET`  | `/api/health`    | Health check for the API and database.                                                                                           |
 
 ## Business Rules
 

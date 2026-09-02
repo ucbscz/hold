@@ -8,35 +8,35 @@ UCB Hold uses PostgreSQL 14+ with Entity Framework Core 8. The database name use
 
 ## Schema Overview
 
-| Table | Purpose | Soft delete |
-| --- | --- | --- |
-| `usuarios` | User identity, contact data and role. | Yes |
-| `prestamos` | Loan lifecycle, user ownership and date range. | Yes |
-| `detalles_prestamos` | Equipment groups requested in each loan. | Yes |
-| `grupos_equipos` | Catalog-level grouping, including the maximum loan duration shared by equivalent units. | Yes |
-| `equipos` | Physical equipment units with unique `codigo_imt` and `codigo_ucb` identifiers, serial number and condition. | Yes |
-| `ambientes` | Named rooms referenced by `equipos.id_ambiente`. | Yes |
-| `procedencias` | Acquisition origins referenced by `equipos.id_procedencia`. | Yes |
-| `configuraciones_sistema` | Global opening hours and weekly/date exceptions in `horarios` JSONB. | No |
-| `categorias` | Equipment classification. | Yes |
-| `carreras` | Academic programs associated with users. | Yes |
-| `muebles` | Storage furniture. | Yes |
-| `gaveteros` | Storage lockers inside furniture. | Yes |
-| `accesorios` | Accessories assigned to equipment groups. | Yes |
-| `componentes` | Internal or related components. | Yes |
-| `empresas_mantenimiento` | Maintenance providers. | Yes |
-| `mantenimientos` | Maintenance events. | Yes |
-| `detalles_mantenimientos` | Equipment involved in a maintenance event. | Yes |
-| `contratos` | Generated contract HTML for loans. | No |
+| Table                     | Purpose                                                                                                      | Soft delete |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------ | ----------- |
+| `usuarios`                | User identity, contact data and role.                                                                        | Yes         |
+| `prestamos`               | Loan lifecycle, user ownership and date range.                                                               | Yes         |
+| `detalles_prestamos`      | Equipment groups requested in each loan.                                                                     | Yes         |
+| `grupos_equipos`          | Catalog-level grouping, including the maximum loan duration shared by equivalent units.                      | Yes         |
+| `equipos`                 | Physical equipment units with unique `codigo_imt` and `codigo_ucb` identifiers, serial number and condition. | Yes         |
+| `ambientes`               | Named rooms referenced by `equipos.id_ambiente`.                                                             | Yes         |
+| `procedencias`            | Acquisition origins referenced by `equipos.id_procedencia`.                                                  | Yes         |
+| `configuraciones_sistema` | Global opening hours and weekly/date exceptions in `horarios` JSONB.                                         | No          |
+| `categorias`              | Equipment classification.                                                                                    | Yes         |
+| `carreras`                | Academic programs associated with users.                                                                     | Yes         |
+| `muebles`                 | Storage furniture.                                                                                           | Yes         |
+| `gaveteros`               | Storage lockers inside furniture.                                                                            | Yes         |
+| `accesorios`              | Accessories assigned to equipment groups.                                                                    | Yes         |
+| `componentes`             | Internal or related components.                                                                              | Yes         |
+| `empresas_mantenimiento`  | Maintenance providers.                                                                                       | Yes         |
+| `mantenimientos`          | Maintenance events.                                                                                          | Yes         |
+| `detalles_mantenimientos` | Equipment involved in a maintenance event.                                                                   | Yes         |
+| `contratos`               | Generated contract HTML for loans.                                                                           | No          |
 
 ## PostgreSQL Enums
 
-| Enum | Values | Used by |
-| --- | --- | --- |
-| `estado_prestamo` | `pendiente`, `aprobado`, `activo`, `finalizado`, `rechazado`, `cancelado` | `prestamos` |
-| `estado_equipo` | `operativo`, `parcialmente_operativo`, `inoperativo` | `equipos` |
-| `tipo_usuario` | `docente`, `administrativo`, `administrador`, `administrador_laboratorio`, `estudiante` | `usuarios` |
-| `tipo_mantenimiento` | `correctivo`, `preventivo` | `detalles_mantenimientos` |
+| Enum                 | Values                                                                                  | Used by                   |
+| -------------------- | --------------------------------------------------------------------------------------- | ------------------------- |
+| `estado_prestamo`    | `pendiente`, `aprobado`, `activo`, `finalizado`, `rechazado`, `cancelado`               | `prestamos`               |
+| `estado_equipo`      | `operativo`, `parcialmente_operativo`, `inoperativo`                                    | `equipos`                 |
+| `tipo_usuario`       | `docente`, `administrativo`, `administrador`, `administrador_laboratorio`, `estudiante` | `usuarios`                |
+| `tipo_mantenimiento` | `correctivo`, `preventivo`                                                              | `detalles_mantenimientos` |
 
 The backend maps PostgreSQL enums with `PgName` and `NpgsqlDataSourceBuilder.MapEnum<T>()`.
 
@@ -46,15 +46,17 @@ The backend maps PostgreSQL enums with `PgName` and `NpgsqlDataSourceBuilder.Map
 
 ## Derived Data
 
-| Data | Source of truth | Maintenance mechanism |
-| --- | --- | --- |
-| Equipment group quantity | Active `equipos` by group | Database triggers and repository recalculation |
-| Average equipment cost | Active `equipos` by group | Database triggers and repository recalculation |
-| Furniture locker count | Active `gaveteros` by furniture | Database triggers and repository recalculation |
-| Loan detail deletion | Parent loan soft delete | Logical cascade |
-| Maintenance detail deletion | Parent maintenance soft delete | Logical cascade |
+| Data                        | Source of truth                 | Maintenance mechanism                          |
+| --------------------------- | ------------------------------- | ---------------------------------------------- |
+| Equipment group quantity    | Active `equipos` by group       | Database triggers and repository recalculation |
+| Average equipment cost      | Active `equipos` by group       | Database triggers and repository recalculation |
+| Furniture locker count      | Active `gaveteros` by furniture | Database triggers and repository recalculation |
+| Loan detail deletion        | Parent loan soft delete         | Logical cascade                                |
+| Maintenance detail deletion | Parent maintenance soft delete  | Logical cascade                                |
 
 Derived values exist to speed up administrative screens. Business logic should still validate critical decisions, especially availability, at the service layer.
+
+`usuarios.imagen_frente_carnet`, `usuarios.imagen_atras_carnet`, and `usuarios.imagen_firma` store ASP.NET Core Data Protection payloads rather than raw image bytes. The key ring must persist across deployments; losing it makes existing protected documents unreadable. Final contract HTML remains separately protected so later profile-signature changes do not alter historical contracts.
 
 ## Availability and Duration Rules
 
@@ -64,23 +66,23 @@ An equipment unit is unavailable when an overlapping loan is `pendiente`, `aprob
 
 ## Indexes
 
-| Index | Purpose |
-| --- | --- |
-| `idx_usuarios_email_estado` | Login and email lookup. |
-| `idx_usuarios_nombre_estado` | User listing and search. |
-| `idx_prestamos_temporal_usuario_estado` | Loan history and date filters. |
-| `idx_mantenimientos_temporal_empresa_estado` | Maintenance history by provider and date. |
-| `idx_grupos_equipos_busqueda` | Equipment group catalog search. |
-| `idx_equipos_agrupacion` | Joins between physical units and groups. |
-| `idx_detalles_prestamos_por_prestamo` | Loan detail lookups. |
-| `idx_detalles_mantenimientos_por_mantenimiento` | Maintenance detail lookups. |
+| Index                                           | Purpose                                   |
+| ----------------------------------------------- | ----------------------------------------- |
+| `idx_usuarios_email_estado`                     | Login and email lookup.                   |
+| `idx_usuarios_nombre_estado`                    | User listing and search.                  |
+| `idx_prestamos_temporal_usuario_estado`         | Loan history and date filters.            |
+| `idx_mantenimientos_temporal_empresa_estado`    | Maintenance history by provider and date. |
+| `idx_grupos_equipos_busqueda`                   | Equipment group catalog search.           |
+| `idx_equipos_agrupacion`                        | Joins between physical units and groups.  |
+| `idx_detalles_prestamos_por_prestamo`           | Loan detail lookups.                      |
+| `idx_detalles_mantenimientos_por_mantenimiento` | Maintenance detail lookups.               |
 
 ## Views
 
-| View | Purpose |
-| --- | --- |
+| View                                 | Purpose                                                  |
+| ------------------------------------ | -------------------------------------------------------- |
 | `vw_equipos_necesitan_mantenimiento` | Lists equipment that may require preventive maintenance. |
-| `vw_ubicaciones_grupos_equipos` | Exposes physical location by furniture and locker. |
+| `vw_ubicaciones_grupos_equipos`      | Exposes physical location by furniture and locker.       |
 
 ## Initialize Database
 
