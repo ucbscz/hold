@@ -174,6 +174,7 @@ builder.Services.AddScoped<CarritoService>();
 builder.Services.AddScoped<PrestamoService>();
 builder.Services.AddScoped<EquipoService>();
 builder.Services.AddScoped<GrupoEquipoService>();
+builder.Services.AddSingleton<GrupoEquipoImportacionService>();
 builder.Services.AddScoped<MantenimientoService>();
 builder.Services.AddScoped<GaveteroService>();
 builder.Services.AddScoped<ContratoService>();

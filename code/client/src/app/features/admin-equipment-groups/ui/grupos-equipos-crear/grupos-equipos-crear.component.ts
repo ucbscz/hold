@@ -11,6 +11,7 @@ import { ValidatedFormsModule } from '@shared/lib/forms';
 import { GrupoEquipo, GrupoequipoService } from '@entities/equipment-group';
 import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
+import { finalize } from 'rxjs';
 import {
   Aviso,
   CustomSelectComponent,
@@ -35,12 +36,45 @@ export class GruposEquiposCrearComponent extends BaseTablaComponent {
   @Input() categorias: string[] = [];
   @Output() Actualizar = new EventEmitter<void>();
   grupoEquipo: GrupoEquipo = new GrupoEquipo();
+  urlImportacion = '';
+  importando = false;
+  importacionCompleta = false;
   constructor(private readonly grupoEquipoapi: GrupoequipoService) {
     super();
   }
   validarregistro() {
     this.mensajeaviso = 'Desea registrar el nuevo grupo de equipo?';
     this.aviso.set(true);
+  }
+  importar(): void {
+    const url = this.urlImportacion.trim();
+    if (this.importando || !url) return;
+    this.importando = true;
+    this.importacionCompleta = false;
+    this.error.set(false);
+    this.grupoEquipoapi
+      .importarDesdeUrl(url)
+      .pipe(finalize(() => (this.importando = false)))
+      .subscribe({
+        next: (preview) => {
+          this.grupoEquipo.nombre = preview.Nombre || this.grupoEquipo.nombre;
+          this.grupoEquipo.modelo = preview.Modelo || this.grupoEquipo.modelo;
+          this.grupoEquipo.marca = preview.Marca || this.grupoEquipo.marca;
+          this.grupoEquipo.descripcion =
+            preview.Descripcion || this.grupoEquipo.descripcion;
+          this.grupoEquipo.link = preview.UrlImagen || this.grupoEquipo.link;
+          this.grupoEquipo.url_data_sheet =
+            preview.UrlDataSheet || this.grupoEquipo.url_data_sheet;
+          this.importacionCompleta = true;
+        },
+        error: (error) => {
+          this.mensajeerror = extractErrorMessage(
+            error,
+            'No se pudo importar la información de esa página.',
+          );
+          this.error.set(true);
+        },
+      });
   }
   registrar() {
     if (!this.iniciarEnvio()) return;

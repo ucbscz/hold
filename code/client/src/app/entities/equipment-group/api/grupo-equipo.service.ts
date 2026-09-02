@@ -19,6 +19,15 @@ export interface ComponenteGrupo {
   CodigoImtEquipo?: string;
   PrecioReferencia?: number;
 }
+export interface GrupoEquipoImportacion {
+  Nombre: string;
+  Modelo: string;
+  Marca: string;
+  Descripcion: string;
+  UrlImagen?: string | null;
+  UrlDataSheet?: string | null;
+  UrlOrigen: string;
+}
 @Injectable({
   providedIn: 'root',
 })
@@ -113,6 +122,24 @@ export class GrupoequipoService {
     return this.http
       .post<unknown>(this.apiUrl, envio)
       .pipe(tap(() => this.invalidarCache()));
+  }
+
+  importarDesdeUrl(url: string): Observable<GrupoEquipoImportacion> {
+    return this.http
+      .post<ApiResponse<GrupoEquipoImportacion>>(`${this.apiUrl}/importar`, {
+        Url: url,
+      })
+      .pipe(
+        map((response) =>
+          extractApiValue(response, {
+            Nombre: '',
+            Modelo: '',
+            Marca: '',
+            Descripcion: '',
+            UrlOrigen: url,
+          }),
+        ),
+      );
   }
 
   obtenersinfiltroGruposEquipos(): Observable<GrupoEquipo[]> {

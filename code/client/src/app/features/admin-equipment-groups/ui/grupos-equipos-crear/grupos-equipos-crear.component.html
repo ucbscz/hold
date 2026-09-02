@@ -4,6 +4,45 @@
   </button>
   <div class="form-content">
     <h2>Registrar Grupo de Equipo</h2>
+    <section class="url-import" aria-labelledby="url-import-title">
+      <div>
+        <strong id="url-import-title">Importar desde una página</strong>
+        <span>Revisa los datos recuperados antes de registrar.</span>
+      </div>
+      <div class="url-import__controls">
+        <input
+          type="url"
+          name="urlImportacion"
+          maxlength="2048"
+          [(ngModel)]="urlImportacion"
+          (ngModelChange)="importacionCompleta = false; error.set(false)"
+          placeholder="https://fabricante.com/producto"
+          class="form-input"
+          aria-label="URL pública del producto"
+        />
+        <button
+          type="button"
+          class="import-button"
+          [disabled]="importando || !urlImportacion.trim()"
+          (click)="importar()"
+        >
+          <i
+            class="fas"
+            [class.fa-spinner]="importando"
+            [class.fa-spin]="importando"
+            [class.fa-download]="!importando"
+            aria-hidden="true"
+          ></i>
+          {{ importando ? "Importando..." : "Importar" }}
+        </button>
+      </div>
+      @if (importacionCompleta) {
+        <p class="url-import__success" role="status">
+          Datos recuperados. Completa los campos faltantes y confirma el
+          registro.
+        </p>
+      }
+    </section>
     <form #form="ngForm" (ngSubmit)="validarregistro()">
       <div class="form-group">
         <label for="nombre">Nombre</label>
@@ -120,7 +159,7 @@
         <button
           type="submit"
           class="register-button"
-          [disabled]="!form.valid || procesando"
+          [disabled]="!form.valid || procesando || importando"
         >
           <span>Registrar Grupo de Equipo</span>
         </button>

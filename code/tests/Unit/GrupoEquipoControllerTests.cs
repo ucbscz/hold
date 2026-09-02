@@ -21,7 +21,11 @@ public class GrupoEquipoControllerTests
     {
         _serviceMock = new Mock<GrupoEquipoService>(null!, null!, null!, null!, null!, null!);
         _comentariosMock = new Mock<ComentarioEquipoService>(null!, null!);
-        _controller = new GrupoEquipoController(_serviceMock.Object, _comentariosMock.Object);
+        _controller = new GrupoEquipoController(
+            _serviceMock.Object,
+            _comentariosMock.Object,
+            new GrupoEquipoImportacionService()
+        );
     }
 
     [Test]
@@ -99,5 +103,16 @@ public class GrupoEquipoControllerTests
         var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
         var value = okResult.Value as Response<List<GrupoEquipoDto>>;
         value!.Value.Should().HaveCount(1);
+    }
+
+    [Test]
+    public async Task Importar_PrivateAddress_ReturnsBadRequest()
+    {
+        var result = await _controller.Importar(
+            new GrupoEquipoImportacionSolicitudDto { Url = "https://127.0.0.1/producto" },
+            CancellationToken.None
+        );
+
+        result.Should().BeOfType<BadRequestObjectResult>();
     }
 }

@@ -11,11 +11,17 @@ public class GrupoEquipoController : Controller
 {
     private readonly GrupoEquipoService _service;
     private readonly ComentarioEquipoService _comentarios;
+    private readonly GrupoEquipoImportacionService _importador;
 
-    public GrupoEquipoController(GrupoEquipoService service, ComentarioEquipoService comentarios)
+    public GrupoEquipoController(
+        GrupoEquipoService service,
+        ComentarioEquipoService comentarios,
+        GrupoEquipoImportacionService importador
+    )
     {
         _service = service;
         _comentarios = comentarios;
+        _importador = importador;
     }
 
     [HttpGet]
@@ -59,6 +65,13 @@ public class GrupoEquipoController : Controller
     }
 
     [Authorize(Roles = "administrador")]
+    [HttpPost("importar")]
+    public async Task<IActionResult> Importar(
+        [FromBody] GrupoEquipoImportacionSolicitudDto dto,
+        CancellationToken cancellationToken
+    ) => ToResponse(await _importador.Preview(dto.Url, cancellationToken));
+
+    [Authorize(Roles = "administrador")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] GrupoEquipoDto dto)
     {
@@ -78,4 +91,9 @@ public class GrupoEquipoController : Controller
 
     private string CurrentCarnet => User.Identity?.Name ?? string.Empty;
     private bool IsAdmin => User.IsInRole("administrador");
+}
+
+public sealed class GrupoEquipoImportacionSolicitudDto
+{
+    public string? Url { get; set; }
 }
