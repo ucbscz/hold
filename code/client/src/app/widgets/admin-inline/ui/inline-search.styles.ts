@@ -1,4 +1,15 @@
 export const INLINE_SEARCH_STYLES = `
+  .inline-panel,
+  .inline-panel table,
+  .inline-panel td {
+    color: var(--ink);
+  }
+  .inline-panel th {
+    color: var(--ink-secondary);
+  }
+  .inline-panel td {
+    vertical-align: top;
+  }
   .audit-filters {
     display: flex;
     gap: 0.625rem;
@@ -87,6 +98,10 @@ export const INLINE_SEARCH_STYLES = `
   .equipment-identifiers strong {
     color: var(--ink);
     font-size: 0.7rem;
+  }
+  .equipment-identifiers span,
+  .equipment-location span {
+    color: var(--ink-secondary);
   }
   .equipment-location span:not(:first-child) {
     color: var(--ink-muted);

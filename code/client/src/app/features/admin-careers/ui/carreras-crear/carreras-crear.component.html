@@ -12,6 +12,7 @@
           id="nombre"
           name="nombre"
           [(ngModel)]="nombreCarrera"
+          (ngModelChange)="error.set(false)"
           required
           maxlength="50"
           minlength="3"
@@ -22,6 +23,7 @@
       @if (error()) {
         <app-mostrarerror
           [inline]="true"
+          [dismissible]="false"
           [error]="error"
           [mensaje]="mensajeerror"
         ></app-mostrarerror>

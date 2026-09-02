@@ -147,7 +147,6 @@
   border-color: var(--brand);
   color: var(--brand-text);
   background: var(--brand);
-  box-shadow: inset 0 0 0 2px var(--ink);
 }
 
 .availability-selector__day:disabled {

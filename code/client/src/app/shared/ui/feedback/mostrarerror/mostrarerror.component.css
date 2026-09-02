@@ -19,6 +19,9 @@
   z-index: auto;
 }
 .form-error {
+  display: block;
+}
+.form-error--dismissible {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 44px;
   align-items: center;

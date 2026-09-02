@@ -160,6 +160,7 @@ export class CalendarioComponent {
 
   get horasDisponibles(): HoraOpcion[] {
     const fecha = this.obtenerFecha(this.campoActivo) ?? this.minimoInicio;
+    const horaSeleccionada = `${this.dosDigitos(fecha.getHours())}:${this.dosDigitos(fecha.getMinutes())}`;
     const horario = this.horario(fecha);
     const intervalo =
       this.configuracionService.configuracionActual()
@@ -167,7 +168,8 @@ export class CalendarioComponent {
     return this.horas.filter((hora) => {
       const [h, m] = hora.value.split(':').map(Number);
       return (
-        (h * 60 + m - horario.InicioMinutos) % intervalo === 0 &&
+        ((h * 60 + m - horario.InicioMinutos) % intervalo === 0 ||
+          hora.value === horaSeleccionada) &&
         !this.horaDeshabilitada(this.campoActivo, hora.value)
       );
     });
@@ -566,22 +568,7 @@ export class CalendarioComponent {
       return this.limiteDelDia(fecha, this.horario(fecha).InicioMinutos);
     }
 
-    fecha.setMinutes(
-      Math.ceil(
-        fecha.getMinutes() /
-          (this.configuracionService.configuracionActual()
-            ?.TiempoMinimoReservaMinutos ?? 30),
-      ) *
-        (this.configuracionService.configuracionActual()
-          ?.TiempoMinimoReservaMinutos ?? 30),
-    );
-    if (fecha <= new Date()) {
-      fecha.setMinutes(
-        fecha.getMinutes() +
-          (this.configuracionService.configuracionActual()
-            ?.TiempoMinimoReservaMinutos ?? 30),
-      );
-    }
+    fecha.setMinutes(fecha.getMinutes() + 1);
     if (
       fecha.getHours() * 60 + fecha.getMinutes() >
       this.horario(fecha).FinMinutos -

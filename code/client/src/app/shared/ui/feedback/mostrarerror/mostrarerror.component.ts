@@ -14,6 +14,7 @@ import {
 })
 export class MostrarerrorComponent implements OnInit, OnDestroy {
   @Input() @HostBinding('class.inline-error') inline = false;
+  @Input() dismissible = true;
   @Input() error!: WritableSignal<boolean>;
   @Input() mensaje: string = 'Error desconocido , intente mas tarde';
 

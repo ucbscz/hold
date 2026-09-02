@@ -1,14 +1,20 @@
 @if (inline) {
-  <div class="form-error" role="alert">
+  <div
+    class="form-error"
+    [class.form-error--dismissible]="dismissible"
+    role="alert"
+  >
     <p>{{ mensaje }}</p>
-    <button
-      type="button"
-      class="form-error__close"
-      (click)="cerrar()"
-      aria-label="Cerrar error"
-    >
-      <img src="assets/x.png" alt="" />
-    </button>
+    @if (dismissible) {
+      <button
+        type="button"
+        class="form-error__close"
+        (click)="cerrar()"
+        aria-label="Cerrar error"
+      >
+        <img src="assets/x.png" alt="" />
+      </button>
+    }
   </div>
 } @else {
   <div class="toast" role="alert" aria-live="assertive">
