@@ -52,4 +52,35 @@ describe('DisponibilidadService', () => {
     expect(request.request.method).toBe('POST');
     request.flush({ Value: [] });
   });
+
+  it('should request a whole calendar in one batch and preserve local dates', () => {
+    let result: { Fecha: Date; Disponible: boolean }[] = [];
+
+    service
+      .obtenerDisponibilidadCalendario(
+        new Date(2026, 8, 3, 9),
+        new Date(2026, 8, 3, 9, 30),
+        new Date(2026, 8, 1),
+        new Date(2026, 8, 30),
+        [{ idGrupoEquipo: 7, cantidad: 2 }],
+      )
+      .subscribe((value) => (result = value));
+
+    const request = http.expectOne((candidate) =>
+      candidate.url.endsWith('/api/carrito/disponibilidad/calendario'),
+    );
+    expect(request.request.method).toBe('POST');
+    expect(request.request.body.Grupos).toEqual([
+      { IdGrupoEquipo: 7, Cantidad: 2 },
+    ]);
+    request.flush({
+      Value: [
+        { Fecha: '2026-09-03T00:00:00Z', Disponible: false },
+        { Fecha: '2026-09-04T00:00:00Z', Disponible: true },
+      ],
+    });
+
+    expect(result.map((item) => item.Fecha.getDate())).toEqual([3, 4]);
+    expect(result.map((item) => item.Disponible)).toEqual([false, true]);
+  });
 });

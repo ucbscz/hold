@@ -123,4 +123,71 @@ public class CarritoService
 
         return Result<List<CarritoDto>>.Success(response);
     }
+
+    public async Task<Result<List<DisponibilidadDiaDto>>> GetDisponibilidadCalendario(
+        DisponibilidadCalendarioDto request,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (
+            request.FechaInicio == null
+            || request.FechaFin == null
+            || request.FechaDesde == null
+            || request.FechaHasta == null
+            || request.Grupos.Count == 0
+        )
+            return Result<List<DisponibilidadDiaDto>>.Invalid();
+
+        var fechaInicio = request.FechaInicio.Value;
+        var fechaFin = request.FechaFin.Value;
+        var fechaDesde = request.FechaDesde.Value.Date;
+        var fechaHasta = request.FechaHasta.Value.Date;
+        if (fechaFin <= fechaInicio || fechaHasta < fechaDesde || (fechaHasta - fechaDesde).TotalDays > 42)
+            return Result<List<DisponibilidadDiaDto>>.Invalid();
+
+        var cantidadesSolicitadas = request.Grupos
+            .Where(group => group.IdGrupoEquipo > 0 && group.Cantidad > 0)
+            .GroupBy(group => group.IdGrupoEquipo)
+            .ToDictionary(group => group.Key, group => group.Sum(item => item.Cantidad));
+        if (cantidadesSolicitadas.Count == 0 || cantidadesSolicitadas.Count > MaxGroupsPerRequest)
+            return Result<List<DisponibilidadDiaDto>>.Invalid();
+
+        var ids = cantidadesSolicitadas.Keys.ToList();
+        var duracion = fechaFin - fechaInicio;
+        var inicioCobertura = CombinarFechaYHora(fechaDesde, fechaInicio);
+        var finCobertura = CombinarFechaYHora(fechaHasta, fechaInicio).Add(duracion);
+        var totales = await _repository.GetCantidadesByGrupos(ids, cancellationToken);
+        var ocupados = await _repository.GetEquiposOcupadosEnRango(
+            ids,
+            inicioCobertura,
+            finCobertura,
+            cancellationToken
+        );
+
+        var resultado = new List<DisponibilidadDiaDto>();
+        for (var fecha = fechaDesde; fecha <= fechaHasta; fecha = fecha.AddDays(1))
+        {
+            var inicio = CombinarFechaYHora(fecha, fechaInicio);
+            var fin = inicio.Add(duracion);
+            var disponible = cantidadesSolicitadas.All(group =>
+            {
+                var ocupadosDelGrupo = ocupados
+                    .Where(item =>
+                        item.IdGrupoEquipo == group.Key
+                        && item.FechaInicio < fin
+                        && item.FechaFin > inicio
+                    )
+                    .Select(item => item.IdEquipo)
+                    .Distinct()
+                    .Count();
+                return (totales.GetValueOrDefault(group.Key) - ocupadosDelGrupo) >= group.Value;
+            });
+            resultado.Add(new DisponibilidadDiaDto { Fecha = fecha, Disponible = disponible });
+        }
+
+        return Result<List<DisponibilidadDiaDto>>.Success(resultado);
+    }
+
+    private static DateTime CombinarFechaYHora(DateTime fecha, DateTime hora) =>
+        new(fecha.Year, fecha.Month, fecha.Day, hora.Hour, hora.Minute, hora.Second, DateTimeKind.Utc);
 }

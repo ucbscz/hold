@@ -33,4 +33,11 @@ export class PerfilComponent implements OnInit {
   onGuardado(actualizado: Usuario) {
     this.usuario = { ...actualizado };
   }
+
+  imagenSrc(imagen: string | null | undefined): string | null {
+    if (!imagen) return null;
+    return imagen.startsWith('data:')
+      ? imagen
+      : `data:image/jpeg;base64,${imagen}`;
+  }
 }

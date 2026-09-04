@@ -75,6 +75,15 @@ describe('CalendarioComponent', () => {
     expect(component.esDiaDeshabilitado(new Date(2030, 0, 7))).toBeFalse();
   });
 
+  it('blocks unavailable start dates before the user selects them', () => {
+    const unavailable = new Date(2030, 0, 7);
+    component.disponibilidadDias = new Map([['2030-01-07', false]]);
+    component.seleccionarCampo('inicio');
+
+    expect(component.esDiaSinDisponibilidad(unavailable)).toBeTrue();
+    expect(component.esDiaDeshabilitado(unavailable)).toBeTrue();
+  });
+
   it('disables dates and times beyond the selected groups maximum duration', () => {
     component.entradaCarrito = {
       1: {

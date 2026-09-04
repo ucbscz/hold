@@ -115,4 +115,55 @@ public class CarritoRepository
             (r.IdGrupoEquipo, r.Id)
         );
     }
+
+    public async Task<List<EquipoOcupado>> GetEquiposOcupadosEnRango(
+        List<int> grupoIds,
+        DateTime fechaInicio,
+        DateTime fechaFin,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var prestamos = await (
+            from detalle in _dbContext.DetallesPrestamos.AsNoTracking()
+            join prestamo in _dbContext.Prestamos.AsNoTracking()
+                on detalle.IdPrestamo equals prestamo.Id
+            join equipo in _dbContext.Equipos.AsNoTracking() on detalle.IdEquipo equals equipo.Id
+            where grupoIds.Contains(equipo.IdGrupoEquipo)
+                && PrestamoAvailabilityPolicy.BlockingStates.Contains(prestamo.EstadoPrestamo)
+                && prestamo.FechaPrestamoEsperada < fechaFin
+                && prestamo.FechaDevolucionEsperada > fechaInicio
+            select new EquipoOcupado(
+                equipo.IdGrupoEquipo,
+                equipo.Id,
+                prestamo.FechaPrestamoEsperada,
+                prestamo.FechaDevolucionEsperada
+            )
+        ).ToListAsync(cancellationToken);
+
+        var mantenimientos = await (
+            from detalle in _dbContext.DetallesMantenimientos.AsNoTracking()
+            join mantenimiento in _dbContext.Mantenimientos.AsNoTracking()
+                on detalle.IdMantenimiento equals mantenimiento.Id
+            join equipo in _dbContext.Equipos.AsNoTracking() on detalle.IdEquipo equals equipo.Id
+            where grupoIds.Contains(equipo.IdGrupoEquipo)
+                && mantenimiento.FechaMantenimiento < fechaFin
+                && mantenimiento.FechaFinalMantenimiento > fechaInicio
+            select new EquipoOcupado(
+                equipo.IdGrupoEquipo,
+                equipo.Id,
+                mantenimiento.FechaMantenimiento,
+                mantenimiento.FechaFinalMantenimiento
+            )
+        ).ToListAsync(cancellationToken);
+
+        prestamos.AddRange(mantenimientos);
+        return prestamos;
+    }
 }
+
+public sealed record EquipoOcupado(
+    int IdGrupoEquipo,
+    int IdEquipo,
+    DateTime FechaInicio,
+    DateTime FechaFin
+);

@@ -46,6 +46,56 @@
       </div>
 
       <hr class="section-divider" />
+      <section
+        class="profile-documents"
+        aria-labelledby="profile-documents-title"
+      >
+        <div class="profile-documents__heading">
+          <div>
+            <p class="section-label" id="profile-documents-title">
+              Documentos registrados
+            </p>
+            <p>Estos documentos se usarán al generar tus próximos contratos.</p>
+          </div>
+        </div>
+        <div class="profile-documents__grid">
+          <figure>
+            @if (imagenSrc(usuario.imagen_frente_carnet); as frente) {
+              <img [src]="frente" alt="Anverso de tu carnet de identidad" />
+            } @else {
+              <div class="profile-documents__empty">
+                <i class="fa-regular fa-id-card"></i
+                ><span>Anverso sin registrar</span>
+              </div>
+            }
+            <figcaption>Anverso del carnet</figcaption>
+          </figure>
+          <figure>
+            @if (imagenSrc(usuario.imagen_atras_carnet); as reverso) {
+              <img [src]="reverso" alt="Reverso de tu carnet de identidad" />
+            } @else {
+              <div class="profile-documents__empty">
+                <i class="fa-regular fa-id-card"></i
+                ><span>Reverso sin registrar</span>
+              </div>
+            }
+            <figcaption>Reverso del carnet</figcaption>
+          </figure>
+        </div>
+        <figure class="profile-documents__signature">
+          @if (imagenSrc(usuario.imagen_firma); as firma) {
+            <img [src]="firma" alt="Tu firma registrada" />
+          } @else {
+            <div class="profile-documents__empty">
+              <i class="fa-solid fa-signature"></i
+              ><span>Firma sin registrar</span>
+            </div>
+          }
+          <figcaption>Firma para contratos</figcaption>
+        </figure>
+      </section>
+
+      <hr class="section-divider" />
       <p class="section-label">Contacto de referencia</p>
       <div class="data-grid">
         <div class="data-item">

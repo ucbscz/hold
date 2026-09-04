@@ -57,8 +57,14 @@
               [class.availability-selector__day--end]="
                 esDiaSeleccionado(dia, 'fin')
               "
+              [class.availability-selector__day--unavailable]="
+                esDiaSinDisponibilidad(dia)
+              "
               [disabled]="esDiaDeshabilitado(dia)"
-              [attr.aria-label]="formatearFecha(dia)"
+              [attr.aria-label]="
+                formatearFecha(dia) +
+                (esDiaSinDisponibilidad(dia) ? ', sin equipos disponibles' : '')
+              "
               (click)="seleccionarDia(dia)"
             >
               {{ dia.getDate() }}
@@ -70,6 +76,12 @@
           }
         }
       </div>
+      @if (campoActivo === "inicio" && disponibilidadDias.size > 0) {
+        <p class="availability-selector__legend">
+          <span aria-hidden="true"></span> No disponible para los equipos
+          seleccionados
+        </p>
+      }
     </div>
 
     <div class="availability-selector__schedule">

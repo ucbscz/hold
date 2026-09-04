@@ -5,6 +5,16 @@ import { finalize, forkJoin, map, Observable, of, shareReplay } from 'rxjs';
 import { Disponibilidad } from '../model/disponibilidad';
 import { DisponibilidadApiItem } from './disponibilidad-api-item';
 import { DisponibilidadApiResponse } from './disponibilidad-api-response';
+
+export interface DisponibilidadDia {
+  Fecha: Date;
+  Disponible: boolean;
+}
+
+interface DisponibilidadDiaApiItem {
+  Fecha: string;
+  Disponible: boolean;
+}
 @Injectable({
   providedIn: 'root',
 })
@@ -55,6 +65,49 @@ export class DisponibilidadService {
 
     this.solicitudesEnCurso.set(cacheKey, solicitud);
     return solicitud;
+  }
+
+  obtenerDisponibilidadCalendario(
+    fechaInicio: Date,
+    fechaFin: Date,
+    fechaDesde: Date,
+    fechaHasta: Date,
+    grupos: Array<{ idGrupoEquipo: number; cantidad: number }>,
+  ): Observable<DisponibilidadDia[]> {
+    return this.http
+      .post<
+        | {
+            Value?: DisponibilidadDiaApiItem[];
+            value?: DisponibilidadDiaApiItem[];
+            data?: DisponibilidadDiaApiItem[];
+          }
+        | DisponibilidadDiaApiItem[]
+      >(`${this.url}/calendario`, {
+        FechaInicio: fechaInicio.toISOString(),
+        FechaFin: fechaFin.toISOString(),
+        FechaDesde: fechaDesde.toISOString(),
+        FechaHasta: fechaHasta.toISOString(),
+        Grupos: grupos.map((grupo) => ({
+          IdGrupoEquipo: grupo.idGrupoEquipo,
+          Cantidad: grupo.cantidad,
+        })),
+      })
+      .pipe(
+        map((response) => {
+          const data = Array.isArray(response)
+            ? response
+            : (response.Value ?? response.value ?? response.data ?? []);
+          return data.map((item) => ({
+            Fecha: this.fechaLocal(item.Fecha),
+            Disponible: item.Disponible,
+          }));
+        }),
+      );
+  }
+
+  private fechaLocal(fecha: string): Date {
+    const [year, month, day] = fecha.slice(0, 10).split('-').map(Number);
+    return new Date(year, month - 1, day);
   }
 
   private consultarLote(

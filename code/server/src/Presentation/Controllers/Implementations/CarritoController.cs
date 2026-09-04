@@ -18,4 +18,10 @@ public class CarritoController : Controller
         [FromBody] CarritoDto request,
         CancellationToken cancellationToken
     ) => ToResponse(await _service.GetDisponibilidad(request, cancellationToken));
+
+    [HttpPost("disponibilidad/calendario")]
+    public async Task<IActionResult> DisponibilidadCalendario(
+        [FromBody] DisponibilidadCalendarioDto request,
+        CancellationToken cancellationToken
+    ) => ToResponse(await _service.GetDisponibilidadCalendario(request, cancellationToken));
 }

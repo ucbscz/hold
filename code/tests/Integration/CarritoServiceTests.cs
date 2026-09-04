@@ -175,6 +175,43 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
     }
 
     [Test]
+    public async Task GetDisponibilidadCalendario_BlocksOnlyDatesWithActiveLoans()
+    {
+        var inicioOcupado = BusinessStart.AddDays(1);
+        await SeedLoan(
+            EstadoPrestamo.Activo,
+            EquipoId,
+            inicioOcupado,
+            inicioOcupado.AddMinutes(30)
+        );
+        await SeedLoan(
+            EstadoPrestamo.Pendiente,
+            EquipoId + 1,
+            BusinessStart.AddDays(2),
+            BusinessStart.AddDays(2).AddMinutes(30)
+        );
+
+        var result = await Sut.GetDisponibilidadCalendario(
+            new DisponibilidadCalendarioDto
+            {
+                FechaInicio = BusinessStart,
+                FechaFin = BusinessStart.AddMinutes(30),
+                FechaDesde = BusinessStart.Date,
+                FechaHasta = BusinessStart.Date.AddDays(2),
+                Grupos = [new GrupoCantidadCarritoDto { IdGrupoEquipo = GrupoId, Cantidad = Total }]
+            }
+        );
+
+        result.IsSuccess.Should().BeTrue();
+        result.Value.Should().ContainSingle(day =>
+            day.Fecha.Date == inicioOcupado.Date && !day.Disponible
+        );
+        result.Value.Should().ContainSingle(day =>
+            day.Fecha.Date == BusinessStart.Date.AddDays(2) && day.Disponible
+        );
+    }
+
+    [Test]
     public async Task GetDisponibilidad_LoanOutsideDateRange_DoesNotReduceCapacity()
     {
         await SeedLoan(

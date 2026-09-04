@@ -12,7 +12,11 @@ import {
   ConfiguracionService,
   horarioParaFecha,
 } from '@entities/configuracion';
-import { Disponibilidad, DisponibilidadService } from '@entities/availability';
+import {
+  Disponibilidad,
+  DisponibilidadDia,
+  DisponibilidadService,
+} from '@entities/availability';
 import { Carrito } from '@entities/cart';
 import { extractErrorMessage } from '@shared/lib/error';
 import { CustomSelectComponent, MostrarerrorComponent } from '@shared/ui';
@@ -41,6 +45,7 @@ export class CalendarioComponent {
     this.carrito = value;
     this.ajustarFinAlLimite();
     this.consultarDisponibilidad();
+    this.consultarDisponibilidadMes();
   }
   @Input() fechaInicioSeleccionada: WritableSignal<Date | null> = signal(null);
   @Input() fechaFinSeleccionada: WritableSignal<Date | null> = signal(null);
@@ -50,6 +55,7 @@ export class CalendarioComponent {
 
   carrito: Carrito = {};
   disponibilidad: Disponibilidad[] = [];
+  disponibilidadDias = new Map<string, boolean>();
   cargando = false;
   consultado = false;
   campoActivo: CampoFecha = 'inicio';
@@ -72,6 +78,7 @@ export class CalendarioComponent {
       this.fechaInicioSeleccionada() ?? this.minimoInicio,
     );
     this.consultarDisponibilidad();
+    this.consultarDisponibilidadMes();
   }
 
   get diasDelMes(): Array<Date | null> {
@@ -197,6 +204,7 @@ export class CalendarioComponent {
       return;
 
     this.mesVisible = siguienteMes;
+    this.consultarDisponibilidadMes();
   }
 
   puedeRetrocederMes(): boolean {
@@ -234,6 +242,7 @@ export class CalendarioComponent {
     }
 
     this.consultarDisponibilidad();
+    this.consultarDisponibilidadMes();
   }
 
   cambiarHora(campo: CampoFecha, valor: string): void {
@@ -261,6 +270,7 @@ export class CalendarioComponent {
     }
 
     this.consultarDisponibilidad();
+    this.consultarDisponibilidadMes();
   }
 
   esDiaDeshabilitado(dia: Date): boolean {
@@ -273,10 +283,17 @@ export class CalendarioComponent {
     if (this.comparaSoloFecha(dia, minimo) < 0) return true;
 
     const limiteMaximo = this.limiteMaximoPrestamo();
-    return (
+    const excedeLimite =
       this.campoActivo === 'fin' &&
       limiteMaximo != null &&
-      this.comparaSoloFecha(dia, limiteMaximo) > 0
+      this.comparaSoloFecha(dia, limiteMaximo) > 0;
+    return excedeLimite || this.esDiaSinDisponibilidad(dia);
+  }
+
+  esDiaSinDisponibilidad(dia: Date): boolean {
+    return (
+      this.campoActivo === 'inicio' &&
+      this.disponibilidadDias.get(this.claveFecha(dia)) === false
     );
   }
 
@@ -405,6 +422,51 @@ export class CalendarioComponent {
     return campo === 'inicio'
       ? this.fechaInicioSeleccionada()
       : this.fechaFinSeleccionada();
+  }
+
+  private consultarDisponibilidadMes(): void {
+    const inicio = this.fechaInicioSeleccionada();
+    const fin = this.fechaFinSeleccionada();
+    const grupos = Object.entries(this.carrito)
+      .map(([id, item]) => ({
+        idGrupoEquipo: Number(id),
+        cantidad: item.cantidad,
+      }))
+      .filter(
+        (grupo) =>
+          Number.isInteger(grupo.idGrupoEquipo) &&
+          grupo.idGrupoEquipo > 0 &&
+          grupo.cantidad > 0,
+      );
+    if (!inicio || !fin || !this.rangoValido || grupos.length === 0) {
+      this.disponibilidadDias.clear();
+      return;
+    }
+
+    const primerDia = this.diasDelMes.find((dia) => dia !== null);
+    const ultimoDia = [...this.diasDelMes]
+      .reverse()
+      .find((dia) => dia !== null);
+    if (!primerDia || !ultimoDia) return;
+
+    this.apiDisponibilidad
+      .obtenerDisponibilidadCalendario(
+        inicio,
+        fin,
+        primerDia,
+        ultimoDia,
+        grupos,
+      )
+      .subscribe({
+        next: (dias) => this.actualizarDisponibilidadDias(dias),
+        error: () => this.disponibilidadDias.clear(),
+      });
+  }
+
+  private actualizarDisponibilidadDias(dias: DisponibilidadDia[]): void {
+    this.disponibilidadDias = new Map(
+      dias.map((dia) => [this.claveFecha(dia.Fecha), dia.Disponible]),
+    );
   }
 
   private normalizarInicio(fecha: Date): Date {
@@ -553,6 +615,10 @@ export class CalendarioComponent {
 
   private dosDigitos(valor: number): string {
     return String(valor).padStart(2, '0');
+  }
+
+  private claveFecha(fecha: Date): string {
+    return `${fecha.getFullYear()}-${this.dosDigitos(fecha.getMonth() + 1)}-${this.dosDigitos(fecha.getDate())}`;
   }
 
   private siguienteBloque(): Date {
