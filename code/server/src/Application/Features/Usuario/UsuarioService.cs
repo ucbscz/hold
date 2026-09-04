@@ -26,6 +26,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
     private readonly UsuarioAuthRepository _authRepository;
     private readonly UsuarioReadRepository _queries;
     private readonly SensitiveDataProtector _sensitiveData;
+    private readonly VerificacionCorreoService _emailVerification;
+    private readonly CodigoGoogleService _googleCodes;
 
     public UsuarioService(
         UsuarioRepository repository,
@@ -38,7 +40,9 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         NotificacionService notifications,
         UsuarioAuthRepository authRepository,
         UsuarioReadRepository queries,
-        SensitiveDataProtector sensitiveData
+        SensitiveDataProtector sensitiveData,
+        VerificacionCorreoService emailVerification,
+        CodigoGoogleService googleCodes
     )
         : base(repository, validator, mapper, audit)
     {
@@ -50,6 +54,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         _authRepository = authRepository;
         _queries = queries;
         _sensitiveData = sensitiveData;
+        _emailVerification = emailVerification;
+        _googleCodes = googleCodes;
     }
 
     public async Task<Result<object>> SetBlocked(
@@ -139,6 +145,23 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
     public async Task<Result<UsuarioDto>> Create(UsuarioDto dto, bool isAdmin, bool isLabAdmin = false)
     {
         dto.Rol = dto.Rol?.Trim().ToLowerInvariant();
+        dto.Email = dto.Email?.Trim().ToLowerInvariant();
+        var googleRegistration = string.IsNullOrWhiteSpace(dto.CodigoGoogle)
+            ? null
+            : await _googleCodes.Get(dto.CodigoGoogle, CancellationToken.None);
+        if (googleRegistration != null && googleRegistration.Tipo != "registro")
+            googleRegistration = null;
+
+        if (!string.IsNullOrWhiteSpace(dto.CodigoGoogle) && googleRegistration == null)
+            return Result<UsuarioDto>.Unauthorized("El registro con Google expiró o ya fue utilizado");
+
+        if (googleRegistration != null)
+        {
+            dto.Email = googleRegistration.Email;
+            dto.Contrasena = $"Gg1!{AuthTokenGenerator.Create()}";
+            dto.EmailVerificado = true;
+        }
+
         if (string.IsNullOrWhiteSpace(dto.Contrasena))
             return Result<UsuarioDto>.Error("Contraseña requerida");
 
@@ -154,6 +177,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             return Result<UsuarioDto>.Forbidden();
         dto.Bloqueado = false;
         dto.MotivoBloqueo = null;
+        dto.EmailVerificado = isAdmin || googleRegistration != null;
 
         await ResolveCarrera(dto);
 
@@ -168,7 +192,14 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             return Result<UsuarioDto>.Error("Carnet ya existe");
 
         if (await _queries.ExistsByEmail(dto.Email!, deletedUser?.Carnet))
-            return Result<UsuarioDto>.Error("Email ya existe");
+        {
+            var existingEmail = await _authRepository.GetTrackedByEmail(dto.Email!);
+            return Result<UsuarioDto>.Error(
+                string.IsNullOrWhiteSpace(existingEmail?.GoogleId)
+                    ? "Email ya existe"
+                    : "El correo ya está registrado. Inicia sesión con Google"
+            );
+        }
 
         if (
             !string.IsNullOrWhiteSpace(dto.Telefono)
@@ -194,6 +225,11 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             entity.ImagenFirma = dto.ImagenFirma;
         }
 
+        entity.EmailVerificado = isAdmin || googleRegistration != null;
+        entity.GoogleId = googleRegistration?.GoogleId;
+        entity.TokenVerificacionHash = null;
+        entity.TokenVerificacionExpira = null;
+
         entity.Contrasena = BCryptLib.HashPassword(dto.Contrasena, workFactor: 12);
         Result<UsuarioDto> result;
 
@@ -209,6 +245,18 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         if (result.IsSuccess && result.Value != null)
         {
+            if (googleRegistration != null)
+            {
+                if (!await _googleCodes.Consume(dto.CodigoGoogle!, CancellationToken.None))
+                    return Result<UsuarioDto>.Conflict("El registro con Google ya fue utilizado");
+            }
+            else if (!isAdmin)
+            {
+                result.Value.EmailVerificacionEnviada = await _emailVerification.Issue(
+                    entity,
+                    CancellationToken.None
+                );
+            }
             result.Value.CarreraNombre = await _queries.GetCarreraName(entity.IdCarrera);
             ClearProfileDocuments(result.Value);
             await Audit!.Log(
@@ -368,6 +416,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         CancellationToken cancellationToken = default
     )
     {
+        email = email.Trim().ToLowerInvariant();
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
             return Result<LoginDto>.Unauthorized("Credenciales requeridas");
 
@@ -388,6 +437,9 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         if (!passwordValid)
             return Result<LoginDto>.Unauthorized("Credenciales inválidas");
+
+        if (!user.EmailVerificado)
+            return Result<LoginDto>.Unauthorized("Debes verificar tu correo antes de iniciar sesión");
 
         var dto = _mapper.ToDto(user);
         dto.CarreraNombre = carreraNombre;

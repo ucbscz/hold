@@ -28,6 +28,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<ConfiguracionSistema> ConfiguracionesSistema { get; set; }
     public DbSet<AvisoDisponibilidad> AvisosDisponibilidad { get; set; }
     public DbSet<ComentarioEquipo> ComentariosEquipos { get; set; }
+    public DbSet<CodigoAutenticacion> CodigosAutenticacion { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

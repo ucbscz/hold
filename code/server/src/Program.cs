@@ -32,8 +32,10 @@ using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using IMT_Reservas.Server.Presentation.Errors;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -128,7 +130,11 @@ builder.Services.AddSingleton<JwtSvc>();
 var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
 
 builder
-    .Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .Services.AddAuthentication(options =>
+    {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
     .AddJwtBearer(options =>
     {
         options.MapInboundClaims = false;
@@ -145,11 +151,28 @@ builder
             NameClaimType = "sub",
             ClockSkew = TimeSpan.Zero,
         };
+    })
+    .AddCookie("GoogleExternal", options =>
+    {
+        options.Cookie.Name = "ucb_google";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+        options.Cookie.SameSite = SameSiteMode.None;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
+    })
+    .AddGoogle("Google", options =>
+    {
+        options.SignInScheme = "GoogleExternal";
+        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
+        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
+        options.CallbackPath = "/api/auth/google/callback";
+        options.SaveTokens = false;
     });
 
 builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<UsuarioAuthRepository>();
 builder.Services.AddScoped<UsuarioReadRepository>();
+builder.Services.AddScoped<CodigoAutenticacionRepository>();
 builder.Services.AddScoped<PrestamoRepository>();
 builder.Services.AddScoped<PrestamoReadRepository>();
 builder.Services.AddScoped<PrestamoEstadoRepository>();
@@ -169,6 +192,11 @@ builder.Services.AddSingleton<ContractHtmlProcessor>();
 builder.Services.AddScoped<ComponenteRepository>();
 builder.Services.AddScoped<CarritoRepository>();
 builder.Services.AddScoped<UsuarioService>();
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
+builder.Services.AddScoped<EmailDeliveryService>();
+builder.Services.AddScoped<VerificacionCorreoService>();
+builder.Services.AddScoped<CodigoGoogleService>();
+builder.Services.AddScoped<AutenticacionGoogleService>();
 builder.Services.AddSingleton<SensitiveDataProtector>();
 builder.Services.AddScoped<CarritoService>();
 builder.Services.AddScoped<PrestamoService>();
@@ -305,7 +333,7 @@ else
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
-    options.MinimumSameSitePolicy = SameSiteMode.Strict;
+    options.MinimumSameSitePolicy = SameSiteMode.Unspecified;
     options.HttpOnly = Microsoft.AspNetCore.CookiePolicy.HttpOnlyPolicy.Always;
     options.Secure = CookieSecurePolicy.Always;
 });
@@ -333,11 +361,21 @@ if (hangfireEnabled)
 }
 
 builder.Services.AddRateLimiter(RequestLimits.Configure);
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders =
+        ForwardedHeaders.XForwardedFor
+        | ForwardedHeaders.XForwardedHost
+        | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 
 var app = builder.Build();
 var useHttpsRedirection = builder.Configuration.GetValue("HttpsRedirection:Enabled", true);
 
+app.UseForwardedHeaders();
 app.UseCookiePolicy();
 
 if (!app.Environment.IsDevelopment() && useHttpsRedirection)

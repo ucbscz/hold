@@ -11,13 +11,20 @@ public partial class UsuarioMapper : IMapper<UsuarioEntity, UsuarioDto>
     [MapperIgnoreTarget(nameof(UsuarioDto.Contrasena))]
     [MapperIgnoreTarget(nameof(UsuarioDto.CarreraNombre))]
     [MapperIgnoreTarget(nameof(UsuarioDto.AceptaTerminos))]
+    [MapperIgnoreTarget(nameof(UsuarioDto.CodigoGoogle))]
+    [MapperIgnoreTarget(nameof(UsuarioDto.EmailVerificacionEnviada))]
     public partial UsuarioDto ToDto(UsuarioEntity entity);
 
     [MapperIgnoreSource(nameof(UsuarioDto.AceptaTerminos))]
+    [MapperIgnoreSource(nameof(UsuarioDto.CodigoGoogle))]
+    [MapperIgnoreSource(nameof(UsuarioDto.EmailVerificacionEnviada))]
     public partial UsuarioEntity ToEntity(UsuarioDto dto);
 
     [MapperIgnoreSource(nameof(UsuarioDto.AceptaTerminos))]
+    [MapperIgnoreSource(nameof(UsuarioDto.CodigoGoogle))]
+    [MapperIgnoreSource(nameof(UsuarioDto.EmailVerificacionEnviada))]
     [MapperIgnoreSource(nameof(UsuarioDto.Contrasena))]
+    [MapperIgnoreTarget(nameof(UsuarioEntity.EmailVerificado))]
     public partial void Update(UsuarioDto source, UsuarioEntity destination);
 
     public partial IQueryable<UsuarioDto> ProjectTo(IQueryable<UsuarioEntity> source);

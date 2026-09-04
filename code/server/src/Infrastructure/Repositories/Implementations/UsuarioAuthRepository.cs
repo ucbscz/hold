@@ -56,6 +56,73 @@ public sealed class UsuarioAuthRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public Task<UsuarioEntity?> GetTrackedByEmail(
+        string email,
+        CancellationToken cancellationToken = default
+    ) => _dbContext.Usuarios.IgnoreQueryFilters().FirstOrDefaultAsync(
+        user => user.Email == email && !user.EstadoEliminado,
+        cancellationToken
+    );
+
+    public async Task SaveVerification(
+        UsuarioEntity user,
+        CancellationToken cancellationToken = default
+    )
+    {
+        _dbContext.Usuarios.Update(user);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<bool> ConfirmEmail(
+        string tokenHash,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (!_dbContext.Database.IsRelational())
+        {
+            var user = await _dbContext.Usuarios.FirstOrDefaultAsync(
+                item => !item.EmailVerificado
+                    && item.TokenVerificacionHash == tokenHash
+                    && item.TokenVerificacionExpira > DateTime.UtcNow,
+                cancellationToken
+            );
+            if (user == null)
+                return false;
+            user.EmailVerificado = true;
+            user.TokenVerificacionHash = null;
+            user.TokenVerificacionExpira = null;
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            return true;
+        }
+
+        return await _dbContext.Usuarios
+            .Where(user => !user.EmailVerificado
+                && user.TokenVerificacionHash == tokenHash
+                && user.TokenVerificacionExpira > DateTime.UtcNow)
+            .ExecuteUpdateAsync(update => update
+                .SetProperty(user => user.EmailVerificado, true)
+                .SetProperty(user => user.TokenVerificacionHash, (string?)null)
+                .SetProperty(user => user.TokenVerificacionExpira, (DateTime?)null),
+                cancellationToken) == 1;
+    }
+
+    public async Task LinkGoogle(
+        string carnet,
+        string googleId,
+        CancellationToken cancellationToken = default
+    )
+    {
+        var user = await _dbContext.Usuarios.FirstAsync(
+            item => item.Carnet == carnet,
+            cancellationToken
+        );
+        user.GoogleId = googleId;
+        user.EmailVerificado = true;
+        user.TokenVerificacionHash = null;
+        user.TokenVerificacionExpira = null;
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<bool> RotateRefreshToken(
         string carnet,
         string currentTokenHash,
@@ -137,6 +204,8 @@ public sealed class UsuarioAuthRepository
                         user.IdCarrera,
                         user.RefreshToken,
                         user.RefreshTokenExpiry,
+                        user.EmailVerificado,
+                        user.GoogleId,
                         career.Nombre
                     )
             )
@@ -164,6 +233,8 @@ public sealed class UsuarioAuthRepository
                 IdCarrera = data.IdCarrera,
                 RefreshToken = data.RefreshToken,
                 RefreshTokenExpiry = data.RefreshTokenExpiry,
+                EmailVerificado = data.EmailVerificado,
+                GoogleId = data.GoogleId,
             },
             data.CarreraNombre
         );
@@ -184,6 +255,8 @@ public sealed class UsuarioAuthRepository
         int IdCarrera,
         string? RefreshToken,
         DateTime? RefreshTokenExpiry,
+        bool EmailVerificado,
+        string? GoogleId,
         string CarreraNombre
     );
 }

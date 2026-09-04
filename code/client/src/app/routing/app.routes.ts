@@ -71,4 +71,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('@pages/terms').then((page) => page.TerminosComponent),
   },
+  {
+    path: 'verificar',
+    loadComponent: () =>
+      import('@pages/email-verification').then(
+        (page) => page.VerificarCorreoComponent,
+      ),
+  },
 ];

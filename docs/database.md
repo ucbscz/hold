@@ -11,6 +11,7 @@ UCB Hold uses PostgreSQL 14+ with Entity Framework Core 8. The database name use
 | Table                     | Purpose                                                                                                      | Soft delete |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------ | ----------- |
 | `usuarios`                | User identity, contact data and role.                                                                        | Yes         |
+| `codigos_autenticacion`   | Hashed, expiring, single-use Google exchange codes.                                                          | No          |
 | `prestamos`               | Loan lifecycle, user ownership and date range.                                                               | Yes         |
 | `detalles_prestamos`      | Equipment groups requested in each loan.                                                                     | Yes         |
 | `grupos_equipos`          | Catalog-level grouping, including the maximum loan duration shared by equivalent units.                      | Yes         |
@@ -57,6 +58,8 @@ The backend maps PostgreSQL enums with `PgName` and `NpgsqlDataSourceBuilder.Map
 Derived values exist to speed up administrative screens. Business logic should still validate critical decisions, especially availability, at the service layer.
 
 `usuarios.imagen_frente_carnet`, `usuarios.imagen_atras_carnet`, and `usuarios.imagen_firma` store ASP.NET Core Data Protection payloads rather than raw image bytes. The key ring must persist across deployments; losing it makes existing protected documents unreadable. Final contract HTML remains separately protected so later profile-signature changes do not alter historical contracts.
+
+`usuarios.email_verificado` blocks local authentication until ownership is confirmed. `token_verificacion_hash` stores SHA-256 output rather than the emailed token and is cleared atomically after confirmation. `google_id` uniquely links an institutional Google identity. `codigos_autenticacion` stores only hashes of ten-minute OAuth exchange codes and removes consumed or expired rows as new codes are issued.
 
 ## Availability and Duration Rules
 

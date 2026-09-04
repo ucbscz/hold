@@ -21,4 +21,7 @@ public class UsuarioDto
     public byte[]? ImagenAtrasCarnet { get; set; }
     public byte[]? ImagenFirma { get; set; }
     public bool? AceptaTerminos { get; set; }
+    public bool? EmailVerificado { get; set; }
+    public string? CodigoGoogle { get; set; }
+    public bool? EmailVerificacionEnviada { get; set; }
 }

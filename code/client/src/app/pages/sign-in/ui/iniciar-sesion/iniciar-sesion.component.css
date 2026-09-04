@@ -161,6 +161,64 @@ label {
   flex-direction: column;
   gap: 0.75rem;
 }
+.login-error {
+  display: grid;
+  gap: 0.625rem;
+  color: var(--error);
+  font-size: 0.875rem;
+}
+.login-error p {
+  margin: 0;
+}
+.resend-button {
+  justify-self: start;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: var(--interactive-text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.auth-separator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--ink-muted);
+  font-size: 0.8rem;
+}
+.auth-separator::before,
+.auth-separator::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background: var(--border);
+}
+.google-button {
+  width: 100%;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.google-button:hover,
+.google-button:focus-visible {
+  border-color: var(--interactive-text);
+  background: var(--surface-muted);
+}
+.google-mark {
+  color: #174ea6;
+  font-size: 1.1rem;
+  font-weight: 800;
+}
 .forgot-password,
 .forgot-password-link a {
   color: var(--interactive-text);

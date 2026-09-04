@@ -64,7 +64,10 @@ export class NavbarComponent {
     const cleanUrl = url.split('?')[0];
     const rol = this.usuario.obtenerRol();
     const isLoginOrRegister =
-      cleanUrl.includes('/login') || cleanUrl.includes('/registro');
+      cleanUrl.includes('/login') ||
+      cleanUrl.includes('/registro') ||
+      cleanUrl.includes('/terminos') ||
+      cleanUrl.includes('/verificar');
 
     if (isLoginOrRegister) {
       this.showHome.set(false);

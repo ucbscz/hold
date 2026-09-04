@@ -429,7 +429,11 @@ create table usuarios
     refresh_token        text,
     refresh_token_expiry timestamp with time zone,
     bloqueado            boolean      default false                      not null,
-    motivo_bloqueo       text
+    motivo_bloqueo       text,
+    email_verificado     boolean default true not null,
+    google_id            varchar(255),
+    token_verificacion_hash varchar(64),
+    token_verificacion_expira timestamp with time zone
 );
 
 alter table usuarios
@@ -520,6 +524,30 @@ create index idx_usuarios_email
 
 create index ix_usuarios_refresh_token
     on usuarios (refresh_token);
+
+create unique index ix_usuarios_google_id
+    on usuarios (google_id)
+    where google_id is not null;
+
+create unique index ix_usuarios_token_verificacion
+    on usuarios (token_verificacion_hash)
+    where token_verificacion_hash is not null;
+
+create table codigos_autenticacion
+(
+    hash                varchar(64) primary key,
+    tipo                varchar(20) not null,
+    email               varchar(255) not null,
+    google_id           varchar(255) not null,
+    nombre              varchar(64) not null,
+    apellido_paterno    varchar(64) not null,
+    apellido_materno    varchar(64) not null,
+    expira              timestamp with time zone not null,
+    usado               boolean default false not null
+);
+
+create index ix_codigos_autenticacion_expira_usado
+    on codigos_autenticacion (expira, usado);
 
 create table audit_logs
 (

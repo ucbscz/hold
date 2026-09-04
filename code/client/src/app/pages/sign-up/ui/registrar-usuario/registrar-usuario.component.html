@@ -99,9 +99,10 @@
             type="email"
             name="correo"
             [(ngModel)]="nuevoUsuario.correo"
+            [readonly]="registroGoogle"
             required
             email
-            maxlength="50"
+            maxlength="255"
             placeholder="tu@ucb.edu.bo"
             pattern="^[a-zA-Z0-9._%\+\-]+@ucb\.edu\.bo$"
             required
@@ -200,107 +201,111 @@
           />
         </div>
       </div>
-      <div class="form-section">
-        <h3>Seguridad</h3>
-        <div class="form-group">
-          <label for="password">Contraseña</label>
-          <div class="password-field">
-            <input
-              [type]="mostrarPassword ? 'text' : 'password'"
-              name="password"
-              [(ngModel)]="password"
-              required
-              minlength="8"
-              pattern="^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}$"
-              placeholder="••••••••"
-              class="form-input password-field__input"
-              #passwordInput="ngModel"
-            />
-            <button
-              type="button"
-              class="password-field__toggle"
-              [attr.aria-label]="
-                mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
-              "
-              (click)="alternarVisibilidadPassword()"
-            >
-              <i
-                class="fas"
-                [class.fa-eye]="!mostrarPassword"
-                [class.fa-eye-slash]="mostrarPassword"
-              ></i>
-            </button>
-          </div>
-          @if (
-            passwordInput.invalid &&
-            (passwordInput.dirty || passwordInput.touched || submitted)
-          ) {
-            <div class="error-message">
-              @if (passwordInput.errors?.["required"]) {
-                <div>La contraseña es requerida</div>
-              }
-              @if (passwordInput.errors?.["minlength"]) {
-                <div>Mínimo 8 caracteres</div>
-              }
-              @if (passwordInput.errors?.["pattern"]) {
-                <div>
-                  La contraseña debe tener al menos una mayúscula, un número y
-                  un carácter especial
-                </div>
-              }
+      @if (!registroGoogle) {
+        <div class="form-section">
+          <h3>Seguridad</h3>
+          <div class="form-group">
+            <label for="password">Contraseña</label>
+            <div class="password-field">
+              <input
+                [type]="mostrarPassword ? 'text' : 'password'"
+                name="password"
+                [(ngModel)]="password"
+                required
+                minlength="8"
+                pattern="^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}$"
+                placeholder="••••••••"
+                class="form-input password-field__input"
+                #passwordInput="ngModel"
+              />
+              <button
+                type="button"
+                class="password-field__toggle"
+                [attr.aria-label]="
+                  mostrarPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'
+                "
+                (click)="alternarVisibilidadPassword()"
+              >
+                <i
+                  class="fas"
+                  [class.fa-eye]="!mostrarPassword"
+                  [class.fa-eye-slash]="mostrarPassword"
+                ></i>
+              </button>
             </div>
-          }
-        </div>
-        <div class="form-group">
-          <label for="confirmPassword">Confirmar contraseña </label>
-          <div class="password-field">
-            <input
-              [type]="mostrarConfirmPassword ? 'text' : 'password'"
-              name="confirmPassword"
-              [(ngModel)]="confirmPassword"
-              required
-              placeholder="••••••••"
-              class="form-input password-field__input"
-              #confirmPasswordInput="ngModel"
-            />
-            <button
-              type="button"
-              class="password-field__toggle"
-              [attr.aria-label]="
-                mostrarConfirmPassword
-                  ? 'Ocultar contraseña'
-                  : 'Mostrar contraseña'
-              "
-              (click)="alternarVisibilidadConfirmPassword()"
-            >
-              <i
-                class="fas"
-                [class.fa-eye]="!mostrarConfirmPassword"
-                [class.fa-eye-slash]="mostrarConfirmPassword"
-              ></i>
-            </button>
+            @if (
+              passwordInput.invalid &&
+              (passwordInput.dirty || passwordInput.touched || submitted)
+            ) {
+              <div class="error-message">
+                @if (passwordInput.errors?.["required"]) {
+                  <div>La contraseña es requerida</div>
+                }
+                @if (passwordInput.errors?.["minlength"]) {
+                  <div>Mínimo 8 caracteres</div>
+                }
+                @if (passwordInput.errors?.["pattern"]) {
+                  <div>
+                    La contraseña debe tener al menos una mayúscula, un número y
+                    un carácter especial
+                  </div>
+                }
+              </div>
+            }
           </div>
-          @if (
-            (confirmPasswordInput.invalid &&
-              (confirmPasswordInput.dirty ||
-                confirmPasswordInput.touched ||
-                submitted)) ||
-            (password &&
-              confirmPassword &&
-              password !== confirmPassword &&
-              (confirmPasswordInput.dirty ||
-                confirmPasswordInput.touched ||
-                submitted))
-          ) {
-            @if (confirmPasswordInput.errors?.["required"]) {
-              <div class="error-message">Confirma tu contraseña</div>
+          <div class="form-group">
+            <label for="confirmPassword">Confirmar contraseña </label>
+            <div class="password-field">
+              <input
+                [type]="mostrarConfirmPassword ? 'text' : 'password'"
+                name="confirmPassword"
+                [(ngModel)]="confirmPassword"
+                required
+                placeholder="••••••••"
+                class="form-input password-field__input"
+                #confirmPasswordInput="ngModel"
+              />
+              <button
+                type="button"
+                class="password-field__toggle"
+                [attr.aria-label]="
+                  mostrarConfirmPassword
+                    ? 'Ocultar contraseña'
+                    : 'Mostrar contraseña'
+                "
+                (click)="alternarVisibilidadConfirmPassword()"
+              >
+                <i
+                  class="fas"
+                  [class.fa-eye]="!mostrarConfirmPassword"
+                  [class.fa-eye-slash]="mostrarConfirmPassword"
+                ></i>
+              </button>
+            </div>
+            @if (
+              (confirmPasswordInput.invalid &&
+                (confirmPasswordInput.dirty ||
+                  confirmPasswordInput.touched ||
+                  submitted)) ||
+              (password &&
+                confirmPassword &&
+                password !== confirmPassword &&
+                (confirmPasswordInput.dirty ||
+                  confirmPasswordInput.touched ||
+                  submitted))
+            ) {
+              @if (confirmPasswordInput.errors?.["required"]) {
+                <div class="error-message">Confirma tu contraseña</div>
+              }
+              @if (
+                password && confirmPassword && password !== confirmPassword
+              ) {
+                <div class="error-message">Las contraseñas no coinciden</div>
+              }
             }
-            @if (password && confirmPassword && password !== confirmPassword) {
-              <div class="error-message">Las contraseñas no coinciden</div>
-            }
-          }
+          </div>
         </div>
-      </div>
+      }
       @if (error()) {
         <app-mostrarerror
           [inline]="true"
@@ -345,6 +350,6 @@
   <app-aviso-exito
     [mensaje]="mensajeaviso"
     [exito]="aviso"
-    (accion)="irAHome()"
+    (accion)="irALogin()"
   ></app-aviso-exito>
 }

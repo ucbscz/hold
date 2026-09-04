@@ -18,6 +18,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Configuration;
 using Moq;
 using CarreraEntity = IMT_Reservas.Server.Core.Entities.Carrera;
 namespace IMT_Reservas.Tests.Integration;
@@ -60,6 +61,16 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
 
         var audit = new AuditLogService(new AuditLogRepository(db), new HttpContextAccessor());
         var notifications = new NotificacionService(new NotificacionRepository(db));
+        var emailDelivery = new EmailDeliveryService(
+            Options.Create(new EmailSettings()),
+            NullLogger<EmailDeliveryService>.Instance
+        );
+        var verification = new VerificacionCorreoService(
+            authRepository,
+            emailDelivery,
+            new ConfigurationBuilder().AddInMemoryCollection().Build()
+        );
+        var googleCodes = new CodigoGoogleService(new CodigoAutenticacionRepository(db));
 
         return new UsuarioService(
             repo,
@@ -75,7 +86,9 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
             new SensitiveDataProtector(
                 new EphemeralDataProtectionProvider(),
                 NullLogger<SensitiveDataProtector>.Instance
-            )
+            ),
+            verification,
+            googleCodes
         );
     }
 
@@ -256,6 +269,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     public async Task Login_ValidCredentials_ReturnsSuccess()
     {
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
+        await VerifyEmail("U001");
 
         var result = await Sut.Login("u001@ucb.edu.bo", "Test@1234");
 
@@ -274,6 +288,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     public async Task Refresh_ValidToken_ReturnsNewTokenPair()
     {
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
+        await VerifyEmail("U001");
         var loginResult = await Sut.Login("u001@ucb.edu.bo", "Test@1234");
 
         var result = await Sut.Refresh(loginResult.Value.RefreshToken);
@@ -285,6 +300,64 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
 
         var replayResult = await Sut.Refresh(loginResult.Value.RefreshToken);
         replayResult.Status.Should().Be(Ardalis.Result.ResultStatus.Unauthorized);
+    }
+
+    [Test]
+    public async Task Login_UnverifiedAccount_ReturnsUnauthorized()
+    {
+        await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
+
+        var result = await Sut.Login("u001@ucb.edu.bo", "Test@1234");
+
+        result.Status.Should().Be(Ardalis.Result.ResultStatus.Unauthorized);
+        result.Errors.Should().Contain("Debes verificar tu correo antes de iniciar sesión");
+    }
+
+    [Test]
+    public async Task EmailVerificationToken_CanOnlyBeUsedOnce()
+    {
+        await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
+        var user = Db.Usuarios.Single(item => item.Carnet == "U001");
+        user.TokenVerificacionHash = AuthTokenGenerator.Hash("valid-token");
+        user.TokenVerificacionExpira = DateTime.UtcNow.AddHours(1);
+        await Db.SaveChangesAsync();
+        var authRepository = new UsuarioAuthRepository(Db);
+        var verification = new VerificacionCorreoService(
+            authRepository,
+            new EmailDeliveryService(
+                Options.Create(new EmailSettings()),
+                NullLogger<EmailDeliveryService>.Instance
+            ),
+            new ConfigurationBuilder().AddInMemoryCollection().Build()
+        );
+
+        var first = await verification.Confirm("valid-token", CancellationToken.None);
+        var replay = await verification.Confirm("valid-token", CancellationToken.None);
+
+        first.IsSuccess.Should().BeTrue();
+        replay.IsSuccess.Should().BeFalse();
+        Db.Usuarios.Single(item => item.Carnet == "U001").EmailVerificado.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task GoogleExchangeCode_CanOnlyBeConsumedOnce()
+    {
+        var codes = new CodigoGoogleService(new CodigoAutenticacionRepository(Db));
+        var token = await codes.Create(
+            "login",
+            "u001@ucb.edu.bo",
+            "google-id",
+            "Nombre",
+            "Paterno",
+            "Materno",
+            CancellationToken.None
+        );
+
+        var first = await codes.Consume(token, CancellationToken.None);
+        var replay = await codes.Consume(token, CancellationToken.None);
+
+        first.Should().BeTrue();
+        replay.Should().BeFalse();
     }
 
     [Test]
@@ -591,6 +664,14 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         var result = await Sut.SetBlocked("ROOT", true, "motivo", isAdmin: true, isLabAdmin: true);
         result.Status.Should().Be(Ardalis.Result.ResultStatus.Forbidden);
         Db.Usuarios.Single(u => u.Carnet == "ROOT").Bloqueado.Should().BeFalse();
+    }
+
+    private async Task VerifyEmail(string carnet)
+    {
+        var user = Db.Usuarios.Single(item => item.Carnet == carnet);
+        user.EmailVerificado = true;
+        await Db.SaveChangesAsync();
+        Db.ChangeTracker.Clear();
     }
 
     private static UsuarioDto BuildValidUsuario(

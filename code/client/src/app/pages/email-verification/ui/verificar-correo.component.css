@@ -1,0 +1,60 @@
+.verification-page {
+  min-height: 100dvh;
+  display: grid;
+  place-items: start center;
+  padding: 5rem 1rem 2rem;
+  background: var(--bg);
+}
+.verification-panel {
+  width: min(100%, 440px);
+  display: grid;
+  justify-items: center;
+  gap: 1rem;
+  padding: 2.5rem;
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--brand);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+}
+.verification-panel h1,
+.verification-panel p {
+  margin: 0;
+}
+.verification-panel h1 {
+  color: var(--ink);
+  font-size: 1.5rem;
+}
+.verification-panel p {
+  color: var(--ink-secondary);
+}
+.verification-icon {
+  color: var(--success);
+  font-size: 2rem;
+}
+.verification-icon--error {
+  color: var(--error);
+}
+.verification-action {
+  margin-top: 0.5rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-full);
+  background: var(--brand);
+  color: var(--brand-text);
+  font-weight: 700;
+  text-decoration: none;
+}
+.verification-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--border);
+  border-top-color: var(--interactive-text);
+  border-radius: 50%;
+  animation: verification-spin 0.8s linear infinite;
+}
+@keyframes verification-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

@@ -1,0 +1,24 @@
+<main class="verification-page">
+  <section class="verification-panel" aria-live="polite">
+    @if (estado === "cargando") {
+      <span class="verification-spinner" aria-hidden="true"></span>
+      <h1>Verificando tu correo</h1>
+      <p>Esto tomará solo un momento.</p>
+    } @else if (estado === "verificado") {
+      <i class="fas fa-circle-check verification-icon" aria-hidden="true"></i>
+      <h1>Correo verificado</h1>
+      <p>Tu cuenta ya está lista para iniciar sesión.</p>
+      <a routerLink="/login" class="verification-action">Iniciar sesión</a>
+    } @else {
+      <i
+        class="fas fa-circle-exclamation verification-icon verification-icon--error"
+        aria-hidden="true"
+      ></i>
+      <h1>No pudimos verificar el enlace</h1>
+      <p>Puede haber expirado o haber sido utilizado anteriormente.</p>
+      <a routerLink="/login" class="verification-action"
+        >Volver al inicio de sesión</a
+      >
+    }
+  </section>
+</main>

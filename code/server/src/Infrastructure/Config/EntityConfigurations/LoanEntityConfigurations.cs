@@ -31,11 +31,36 @@ internal sealed class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         entity.Property(e => e.ImagenFirma).HasColumnName("imagen_firma");
         entity.Property(e => e.RefreshToken).HasColumnName("refresh_token");
         entity.Property(e => e.RefreshTokenExpiry).HasColumnName("refresh_token_expiry");
+        entity.Property(e => e.EmailVerificado).HasColumnName("email_verificado").HasDefaultValue(true);
+        entity.Property(e => e.GoogleId).HasMaxLength(255).HasColumnName("google_id");
+        entity.Property(e => e.TokenVerificacionHash).HasMaxLength(64).HasColumnName("token_verificacion_hash");
+        entity.Property(e => e.TokenVerificacionExpira).HasColumnName("token_verificacion_expira");
         entity.HasOne<Carrera>().WithMany().HasForeignKey(e => e.IdCarrera).IsRequired();
         entity.HasIndex(e => new { e.Nombre, e.EstadoEliminado });
         entity.HasIndex(e => e.Email).IsUnique();
         entity.HasIndex(e => e.RefreshToken);
+        entity.HasIndex(e => e.GoogleId).IsUnique();
+        entity.HasIndex(e => e.TokenVerificacionHash).IsUnique();
         entity.HasQueryFilter(e => !e.EstadoEliminado);
+    }
+}
+
+internal sealed class CodigoAutenticacionConfiguration : IEntityTypeConfiguration<CodigoAutenticacion>
+{
+    public void Configure(EntityTypeBuilder<CodigoAutenticacion> entity)
+    {
+        entity.ToTable("codigos_autenticacion");
+        entity.HasKey(e => e.Hash);
+        entity.Property(e => e.Hash).HasMaxLength(64).HasColumnName("hash");
+        entity.Property(e => e.Tipo).HasMaxLength(20).HasColumnName("tipo");
+        entity.Property(e => e.Email).HasMaxLength(255).HasColumnName("email");
+        entity.Property(e => e.GoogleId).HasMaxLength(255).HasColumnName("google_id");
+        entity.Property(e => e.Nombre).HasMaxLength(64).HasColumnName("nombre");
+        entity.Property(e => e.ApellidoPaterno).HasMaxLength(64).HasColumnName("apellido_paterno");
+        entity.Property(e => e.ApellidoMaterno).HasMaxLength(64).HasColumnName("apellido_materno");
+        entity.Property(e => e.Expira).HasColumnName("expira");
+        entity.Property(e => e.Usado).HasColumnName("usado");
+        entity.HasIndex(e => new { e.Expira, e.Usado });
     }
 }
 

@@ -23,4 +23,8 @@ public class Usuario : Entity
     public byte[]? ImagenFirma { get; set; }
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiry { get; set; }
+    public bool EmailVerificado { get; set; } = true;
+    public string? GoogleId { get; set; }
+    public string? TokenVerificacionHash { get; set; }
+    public DateTime? TokenVerificacionExpira { get; set; }
 }

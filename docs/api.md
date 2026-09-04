@@ -27,6 +27,8 @@ The Angular application uses lowercase Spanish paths with one-word segments and 
 | `/perfil`         | View and edit the user profile. |
 | `/historial`      | Review the user's loans.        |
 | `/administracion` | Open the administration panel.  |
+| `/terminos`       | Read the terms and conditions.  |
+| `/verificar`      | Confirm a local account email.  |
 
 ## Response Contract
 
@@ -70,11 +72,19 @@ Validation and domain failures preserve the same structure:
 Authorization: Bearer <token>
 ```
 
-| Method | Route               | Purpose                                    |
-| ------ | ------------------- | ------------------------------------------ |
-| `POST` | `/api/usuarios`     | Register a user. Public.                   |
-| `POST` | `/api/auth/login`   | Authenticate and create a session. Public. |
-| `POST` | `/api/auth/refresh` | Rotate the access and refresh tokens.      |
+| Method | Route                          | Purpose                                                        |
+| ------ | ------------------------------ | -------------------------------------------------------------- |
+| `POST` | `/api/usuarios`                | Register a local user or complete a Google registration.       |
+| `POST` | `/api/auth/login`              | Authenticate a verified local account and create a session.    |
+| `POST` | `/api/auth/refresh`            | Rotate the access and refresh tokens.                           |
+| `POST` | `/api/auth/verificar`          | Consume a single-use local email-verification token.           |
+| `POST` | `/api/auth/reenviar`           | Issue a replacement token without disclosing account presence. |
+| `GET`  | `/api/auth/google`             | Start Google OAuth 2.0 authentication.                          |
+| `GET`  | `/api/auth/google/callback`    | OAuth middleware callback registered with Google.              |
+| `GET`  | `/api/auth/google/resultado`   | Complete the server-side provider result.                       |
+| `POST` | `/api/auth/google/intercambiar` | Exchange the short-lived code for a session or registration.  |
+
+Local accounts are created with `EmailVerificado = false`. Verification links expire after 24 hours, store only a SHA-256 token hash and become unusable after confirmation. Resend responses are intentionally identical for existing and unknown accounts. Google OAuth accepts only `@ucb.edu.bo` identities, uses middleware correlation/state protection and returns a ten-minute, single-use exchange code instead of placing JWT credentials in a URL. Existing local accounts are linked by their verified institutional email; new identities must complete carnet, career and contact information before the user record is created.
 
 ## Users and Notifications
 

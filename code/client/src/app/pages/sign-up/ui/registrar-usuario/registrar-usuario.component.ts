@@ -1,18 +1,16 @@
 import { CommonModule } from '@angular/common';
 import { Component, signal, WritableSignal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Carrera } from '@entities/admin';
 import { CarreraService } from '@entities/career';
-import { Usuario, UsuarioService, UsuarioServiceAPI } from '@entities/user';
-import { AuthService } from '@features/auth-session';
+import { Usuario, UsuarioServiceAPI } from '@entities/user';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   AvisoExitoComponent,
   CustomSelectComponent,
   MostrarerrorComponent,
 } from '@shared/ui';
-import { switchMap } from 'rxjs';
 @Component({
   selector: 'app-registrar-usuario',
   imports: [
@@ -36,17 +34,18 @@ export class RegistrarUsuarioComponent {
   submitted: boolean = false;
   registrando: boolean = false;
   aceptaTerminos = false;
+  registroGoogle = false;
+  codigoGoogle: string | null = null;
   error: WritableSignal<boolean> = signal(false);
   mensajeerror: string = '';
   aviso: WritableSignal<boolean> = signal(false);
   mensajeaviso: string =
     'Aviso desconocido , si ve esto es un error , avise al soporte si puede o intente mas tarde';
   constructor(
-    private readonly usuarioS: UsuarioService,
     private router: Router,
     private registrarcuenta: UsuarioServiceAPI,
     private carrerasS: CarreraService,
-    private readonly authService: AuthService,
+    private readonly route: ActivatedRoute,
   ) {}
   ngOnInit() {
     this.carrerasS.obtenerCarreras().subscribe({
@@ -62,22 +61,21 @@ export class RegistrarUsuarioComponent {
         this.error.set(true);
       },
     });
+    const googleCode = this.route.snapshot.queryParamMap.get('google');
+    if (googleCode) this.cargarDatosGoogle(googleCode);
   }
   registrar(form: NgForm) {
     this.submitted = true;
     if (this.registrando) return;
     if (
       form.invalid ||
-      this.password !== this.confirmPassword ||
+      (!this.registroGoogle && this.password !== this.confirmPassword) ||
       this.validartelefono(this.nuevoUsuario.telefono) ||
       !this.nuevoUsuario.carrera ||
       !this.aceptaTerminos
     ) {
       return;
     }
-    const correo = this.nuevoUsuario.correo ?? '';
-    let registroCompletado = false;
-
     this.registrando = true;
     this.error.set(false);
     this.aviso.set(false);
@@ -88,44 +86,56 @@ export class RegistrarUsuarioComponent {
         this.password,
         'estudiante',
         this.aceptaTerminos,
-      )
-      .pipe(
-        switchMap(() => {
-          registroCompletado = true;
-
-          return this.registrarcuenta.iniciarSesion(correo, this.password);
-        }),
+        this.codigoGoogle,
       )
       .subscribe({
-        next: (data) => {
-          this.authService.setSession(
-            data.accessToken,
-            data.refreshToken,
-            data.usuario,
-          );
-          this.usuarioS.guardarSesion(data.usuario);
-          this.mensajeaviso = 'Usuario registrado exitosamente';
+        next: (verificationSent) => {
+          this.mensajeaviso = this.registroGoogle
+            ? 'Cuenta completada. Ya puedes iniciar sesión con Google.'
+            : verificationSent
+              ? 'Cuenta creada. Revisa tu correo para verificarla antes de iniciar sesión.'
+              : 'Cuenta creada, pero no se pudo enviar el correo. Intenta reenviarlo desde el inicio de sesión.';
           this.aviso.set(true);
           this.registrando = false;
-          this.router.navigate(['/inicio']);
         },
         error: (err) => {
-          const mensajePorDefecto = registroCompletado
-            ? 'Tu cuenta fue creada, pero no se pudo iniciar sesión automáticamente. Intenta iniciar sesión manualmente.'
-            : 'Error al registrar el usuario intente mas tarde';
-          const errorMsg = extractErrorMessage(err, mensajePorDefecto);
+          const errorMsg = extractErrorMessage(
+            err,
+            'Error al registrar el usuario. Intenta más tarde.',
+          );
           this.mensajeerror = errorMsg;
           this.error.set(true);
           this.registrando = false;
         },
       });
   }
+
+  private cargarDatosGoogle(codigo: string): void {
+    this.registrando = true;
+    this.registrarcuenta.intercambiarCodigoGoogle(codigo).subscribe({
+      next: (result) => {
+        if (!result.RequiereRegistro || !result.CodigoRegistro) {
+          void this.router.navigate(['/login']);
+          return;
+        }
+        this.registroGoogle = true;
+        this.codigoGoogle = result.CodigoRegistro;
+        this.nuevoUsuario.correo = result.Email;
+        this.nuevoUsuario.nombre = result.Nombre;
+        this.nuevoUsuario.apellido_paterno = result.ApellidoPaterno;
+        this.nuevoUsuario.apellido_materno = result.ApellidoMaterno;
+        this.registrando = false;
+      },
+      error: () => {
+        this.mensajeerror =
+          'El registro con Google expiró. Vuelve a iniciar sesión con Google.';
+        this.error.set(true);
+        this.registrando = false;
+      },
+    });
+  }
   irALogin() {
     this.router.navigate(['/login']);
-  }
-
-  irAHome() {
-    this.router.navigate(['/inicio']);
   }
 
   alternarVisibilidadPassword(): void {

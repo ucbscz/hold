@@ -19,6 +19,7 @@ export class UsuarioServiceAPI {
     contrasena: string,
     rol: string | null,
     aceptaTerminos = false,
+    codigoGoogle: string | null = null,
   ) {
     if (!rol) {
       rol = 'Estudiante';
@@ -38,8 +39,20 @@ export class UsuarioServiceAPI {
       NombreReferencia: usuario.nombre_referencia,
       EmailReferencia: usuario.email_referencia,
       AceptaTerminos: aceptaTerminos,
+      CodigoGoogle: codigoGoogle,
     };
-    return this.http.post(this.apiUrl, envio);
+    return this.http
+      .post<ApiResponse<{ EmailVerificacionEnviada?: boolean }>>(
+        this.apiUrl,
+        envio,
+      )
+      .pipe(
+        map(
+          (response) =>
+            extractApiValue(response, { EmailVerificacionEnviada: false })
+              .EmailVerificacionEnviada ?? false,
+        ),
+      );
   }
 
   iniciarSesion(correo: string, contrasena: string) {
@@ -52,6 +65,60 @@ export class UsuarioServiceAPI {
         usuario: this.mapearUsuario(response.Value.Usuario),
       })),
     );
+  }
+
+  iniciarSesionGoogle(): void {
+    window.location.assign(`${environment.apiUrl}/api/auth/google`);
+  }
+
+  intercambiarCodigoGoogle(codigo: string) {
+    return this.http
+      .post<
+        ApiResponse<{
+          RequiereRegistro: boolean;
+          CodigoRegistro: string | null;
+          Email: string | null;
+          Nombre: string | null;
+          ApellidoPaterno: string | null;
+          ApellidoMaterno: string | null;
+          Sesion: UsuarioLoginApiResponse['Value'] | null;
+        }>
+      >(`${environment.apiUrl}/api/auth/google/intercambiar`, {
+        Token: codigo,
+      })
+      .pipe(
+        map((response) =>
+          extractApiValue(response, {
+            RequiereRegistro: false,
+            CodigoRegistro: null,
+            Email: null,
+            Nombre: null,
+            ApellidoPaterno: null,
+            ApellidoMaterno: null,
+            Sesion: null,
+          }),
+        ),
+      );
+  }
+
+  verificarCorreo(token: string) {
+    return this.http.post(`${environment.apiUrl}/api/auth/verificar`, {
+      Token: token,
+    });
+  }
+
+  reenviarVerificacion(email: string) {
+    return this.http.post(`${environment.apiUrl}/api/auth/reenviar`, {
+      Email: email,
+    });
+  }
+
+  mapearSesionGoogle(session: UsuarioLoginApiResponse['Value']) {
+    return {
+      accessToken: session.AccessToken,
+      refreshToken: session.RefreshToken,
+      usuario: this.mapearUsuario(session.Usuario),
+    };
   }
 
   actualizarUsuario(usuario: Usuario) {

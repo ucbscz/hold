@@ -49,7 +49,19 @@
         </div>
       </div>
       @if (incorrecto) {
-        <p class="field-error" role="alert">Correo o contraseña incorrectos</p>
+        <div class="login-error" role="alert">
+          <p>{{ mensajeError }}</p>
+          @if (requiereVerificacion) {
+            <button
+              type="button"
+              class="resend-button"
+              [disabled]="reenviando"
+              (click)="reenviarVerificacion()"
+            >
+              {{ reenviando ? "Enviando..." : "Reenviar verificación" }}
+            </button>
+          }
+        </div>
       }
       @if (errorraro()) {
         <app-mostrarerror
@@ -68,6 +80,16 @@
         } @else {
           <div class="spinner"></div>
         }
+      </button>
+      <div class="auth-separator"><span>o</span></div>
+      <button
+        type="button"
+        class="google-button"
+        [disabled]="loading"
+        (click)="iniciarGoogle()"
+      >
+        <span class="google-mark" aria-hidden="true">G</span>
+        Iniciar sesión con Google
       </button>
       <div class="additional-options">
         <p class="register-link">

@@ -139,6 +139,25 @@ npm run test:coverage
 npm run build
 ```
 
+### Google and email authentication
+
+Set these values in `code/server.env` for deployment:
+
+```dotenv
+Authentication__FrontendUrl=https://your-frontend.example
+Authentication__Google__ClientId=your-google-client-id
+Authentication__Google__ClientSecret=your-google-client-secret
+Email__Enabled=true
+Email__Host=smtp.example
+Email__Port=587
+Email__Username=your-smtp-user
+Email__Password=your-smtp-password
+Email__From=no-reply@example
+Email__EnableSsl=true
+```
+
+Register `https://your-frontend.example/api/auth/google/callback` as an authorized redirect URI in Google Cloud because the frontend reverse proxy publishes the API. Local development uses `http://localhost:4200/api/auth/google/callback`. The proxy preserves the original host and protocol so the callback remains correct behind TLS termination. Keep the client secret and SMTP password outside source control. When email delivery is disabled, accounts can be created but local verification messages are not sent.
+
 The frontend runtime image contains only the compiled Angular output served by unprivileged Nginx. Development-only build dependencies are not copied into the production image. Run `npm audit --omit=dev` as the release security gate; also review the full `npm audit` report when updating Angular tooling.
 
 ## Database Restore
