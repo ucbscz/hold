@@ -304,12 +304,6 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
 
         loan.Guardado = saved;
         await Repository.UpdateTracked(loan, cancellationToken);
-        await Audit!.Log(
-            AuditAccion.Editar,
-            typeof(PrestamoEntity).Name,
-            id.ToString(CultureInfo.InvariantCulture),
-            saved ? "Préstamo guardado para volver a solicitar" : "Préstamo quitado de guardados"
-        );
 
         return await _queries.Get(id, cancellationToken);
     }

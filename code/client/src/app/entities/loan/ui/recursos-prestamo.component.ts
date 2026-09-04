@@ -217,7 +217,7 @@ export class RecursosPrestamoComponent {
         for (const prestamo of this.prestamos) prestamo.Guardado = nuevoEstado;
         this.toast.success(
           nuevoEstado
-            ? 'Préstamo guardado. Podrás prepararlo de nuevo desde tu historial.'
+            ? 'Préstamo guardado. Podrás solicitarlo de nuevo desde tu historial.'
             : 'Préstamo quitado de guardados.',
         );
         this.actualizandoGuardado.set(false);
