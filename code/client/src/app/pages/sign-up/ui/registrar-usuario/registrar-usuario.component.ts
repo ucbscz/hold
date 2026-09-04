@@ -63,6 +63,13 @@ export class RegistrarUsuarioComponent {
     });
     const googleCode = this.route.snapshot.queryParamMap.get('google');
     if (googleCode) this.cargarDatosGoogle(googleCode);
+    if (
+      this.route.snapshot.queryParamMap.get('googleError') === 'configuracion'
+    ) {
+      this.mensajeerror =
+        'El acceso con Google aún no está configurado. Usa el registro institucional por ahora.';
+      this.error.set(true);
+    }
   }
   registrar(form: NgForm) {
     this.submitted = true;
@@ -136,6 +143,10 @@ export class RegistrarUsuarioComponent {
   }
   irALogin() {
     this.router.navigate(['/login']);
+  }
+
+  iniciarRegistroGoogle(): void {
+    if (!this.registrando) this.registrarcuenta.iniciarSesionGoogle(true);
   }
 
   alternarVisibilidadPassword(): void {

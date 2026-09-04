@@ -215,9 +215,10 @@ label {
   background: var(--surface-muted);
 }
 .google-mark {
-  color: #174ea6;
-  font-size: 1.1rem;
-  font-weight: 800;
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: 0 0 20px;
 }
 .forgot-password,
 .forgot-password-link a {

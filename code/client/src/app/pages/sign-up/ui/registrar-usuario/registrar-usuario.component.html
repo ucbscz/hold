@@ -1,6 +1,28 @@
 <div class="register-container">
   <div class="register-card">
     <h1 class="title">Crear cuenta</h1>
+    @if (!registroGoogle) {
+      <div class="google-registration">
+        <p>
+          Verifica primero tu correo institucional para completar el registro.
+        </p>
+        <button
+          type="button"
+          class="google-button"
+          [disabled]="registrando"
+          (click)="iniciarRegistroGoogle()"
+        >
+          <img
+            src="assets/identity/google-g.svg"
+            width="20"
+            height="20"
+            alt=""
+          />
+          Registrarse con Google
+        </button>
+      </div>
+      <div class="auth-separator"><span>o completa tus datos</span></div>
+    }
     <form
       (ngSubmit)="registrar(registerForm)"
       class="register-form"

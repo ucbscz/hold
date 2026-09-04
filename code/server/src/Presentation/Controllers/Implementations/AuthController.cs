@@ -63,30 +63,37 @@ public class AuthController : Controller
     ) => ToResponse(await _verification.Resend(request.Email, cancellationToken));
 
     [HttpGet("google")]
-    public IActionResult Google()
+    public IActionResult Google([FromQuery] string? origen)
     {
+        var frontend = _configuration["Authentication:FrontendUrl"]?.TrimEnd('/')
+            ?? "http://localhost:4200";
+        var ruta = origen == "registro" ? "registro" : "login";
         if (string.IsNullOrWhiteSpace(_configuration["Authentication:Google:ClientId"]))
-            return StatusCode(StatusCodes.Status503ServiceUnavailable);
+            return Redirect($"{frontend}/{ruta}?googleError=configuracion");
 
         return Challenge(
-            new AuthenticationProperties { RedirectUri = "/api/auth/google/resultado" },
+            new AuthenticationProperties { RedirectUri = $"/api/auth/google/resultado?origen={ruta}" },
             "Google"
         );
     }
 
     [HttpGet("google/resultado")]
-    public async Task<IActionResult> GoogleResult(CancellationToken cancellationToken)
+    public async Task<IActionResult> GoogleResult(
+        [FromQuery] string? origen,
+        CancellationToken cancellationToken
+    )
     {
         var authentication = await HttpContext.AuthenticateAsync("GoogleExternal");
         var frontend = _configuration["Authentication:FrontendUrl"]?.TrimEnd('/')
             ?? "http://localhost:4200";
+        var ruta = origen == "registro" ? "registro" : "login";
         if (!authentication.Succeeded || authentication.Principal == null)
-            return Redirect($"{frontend}/login?googleError=cancelado");
+            return Redirect($"{frontend}/{ruta}?googleError=cancelado");
 
         var result = await _google.Begin(authentication.Principal, cancellationToken);
         await HttpContext.SignOutAsync("GoogleExternal");
         if (!result.IsSuccess)
-            return Redirect($"{frontend}/login?googleError=cuenta");
+            return Redirect($"{frontend}/{ruta}?googleError=cuenta");
 
         return Redirect($"{frontend}/login?codigo={Uri.EscapeDataString(result.Value)}");
     }

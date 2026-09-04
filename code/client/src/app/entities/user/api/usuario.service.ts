@@ -67,8 +67,11 @@ export class UsuarioServiceAPI {
     );
   }
 
-  iniciarSesionGoogle(): void {
-    window.location.assign(`${environment.apiUrl}/api/auth/google`);
+  iniciarSesionGoogle(registro = false): void {
+    const origen = registro ? 'registro' : 'login';
+    window.location.assign(
+      `${environment.apiUrl}/api/auth/google?origen=${origen}`,
+    );
   }
 
   intercambiarCodigoGoogle(codigo: string) {

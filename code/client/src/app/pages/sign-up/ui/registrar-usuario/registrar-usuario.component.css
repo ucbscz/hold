@@ -37,6 +37,71 @@
   gap: 1.5rem;
 }
 
+.google-registration {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.google-registration p {
+  margin: 0;
+  color: var(--ink-secondary);
+  font-size: 0.875rem;
+  line-height: 1.45;
+  text-align: center;
+}
+
+.google-button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+  border: 1px solid #747775;
+  border-radius: var(--radius-full);
+  background: #fff;
+  color: #1f1f1f;
+  font: 700 0.875rem var(--font);
+  cursor: pointer;
+}
+
+.google-button img {
+  display: block;
+  width: 20px;
+  height: 20px;
+}
+
+.google-button:hover:not(:disabled),
+.google-button:focus-visible:not(:disabled) {
+  background: #f8f9fa;
+  outline: 2px solid var(--interactive-text);
+  outline-offset: 2px;
+}
+
+.google-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-separator {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1.5rem;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.auth-separator::before,
+.auth-separator::after {
+  height: 1px;
+  flex: 1;
+  background: var(--border);
+  content: "";
+}
+
 .form-section {
   border: none;
   border-radius: 0;

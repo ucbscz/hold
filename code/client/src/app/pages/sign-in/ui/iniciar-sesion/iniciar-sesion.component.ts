@@ -39,9 +39,12 @@ export class IniciarSesionComponent implements OnInit {
   ngOnInit(): void {
     const codigo = this.route.snapshot.queryParamMap.get('codigo');
     if (codigo) this.procesarCodigoGoogle(codigo);
-    if (this.route.snapshot.queryParamMap.has('googleError')) {
+    const googleError = this.route.snapshot.queryParamMap.get('googleError');
+    if (googleError) {
       this.mensajeError =
-        'No se pudo iniciar sesión con Google. Usa una cuenta institucional e inténtalo nuevamente.';
+        googleError === 'configuracion'
+          ? 'El acceso con Google aún no está configurado. Usa tu correo y contraseña institucional.'
+          : 'No se pudo iniciar sesión con Google. Usa una cuenta institucional e inténtalo nuevamente.';
       this.incorrecto = true;
     }
   }
