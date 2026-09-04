@@ -96,6 +96,7 @@ public sealed class AutenticacionGoogleService
 
         var dto = _mapper.ToDto(user);
         dto.CarreraNombre = careerName;
+        dto.ImagenPerfil = null;
         dto.ImagenFrenteCarnet = null;
         dto.ImagenAtrasCarnet = null;
         dto.ImagenFirma = null;

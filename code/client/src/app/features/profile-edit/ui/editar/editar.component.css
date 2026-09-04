@@ -88,6 +88,45 @@
   font-size: 0.82rem;
   line-height: 1.5;
 }
+.profile-photo-fieldset {
+  margin: 0.25rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+.profile-photo-fieldset legend {
+  padding: 0 0.35rem;
+  color: var(--ink);
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+.profile-photo-fieldset__content {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+.profile-photo-fieldset__content p {
+  margin: 0 0 0.55rem;
+  color: var(--ink-muted);
+  font-size: 0.78rem;
+}
+.profile-photo-preview {
+  display: grid;
+  width: 4.5rem;
+  height: 4.5rem;
+  flex: 0 0 4.5rem;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--ink-muted);
+  background: var(--sidebar);
+}
+.profile-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
 .signature-fieldset {
   display: grid;
   gap: 0.75rem;
@@ -397,6 +436,9 @@ textarea.form-input {
   }
   .identity-grid {
     grid-template-columns: 1fr;
+  }
+  .profile-photo-fieldset__content {
+    align-items: flex-start;
   }
 }
 

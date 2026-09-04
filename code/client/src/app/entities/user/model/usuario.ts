@@ -14,6 +14,7 @@ export class Usuario {
   email_referencia?: string | null;
   bloqueado?: boolean;
   motivo_bloqueo?: string | null;
+  imagen_perfil?: string | null;
   imagen_frente_carnet?: string | null;
   imagen_atras_carnet?: string | null;
   imagen_firma?: string | null;
@@ -31,6 +32,7 @@ export class Usuario {
     this.nombre_referencia = null;
     this.telefono_referencia = null;
     this.email_referencia = null;
+    this.imagen_perfil = null;
     this.imagen_frente_carnet = null;
     this.imagen_atras_carnet = null;
     this.imagen_firma = null;

@@ -67,6 +67,9 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
         RuleFor(usuario => usuario.MotivoBloqueo)
             .MaximumLength(1024)
             .WithMessage("Motivo de bloqueo no puede superar 1024 caracteres");
+        RuleFor(usuario => usuario.ImagenPerfil)
+            .Must(image => image == null || image.Length <= 1024 * 1024)
+            .WithMessage("La foto de perfil no puede superar 1 MB");
         RuleFor(usuario => usuario.ImagenFrenteCarnet)
             .Must(image => image == null || image.Length <= 5 * 1024 * 1024)
             .WithMessage("La imagen frontal del carnet no puede superar 5 MB");

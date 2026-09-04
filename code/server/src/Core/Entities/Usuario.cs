@@ -18,6 +18,7 @@ public class Usuario : Entity
     public int IdCarrera { get; set; }
     public bool Bloqueado { get; set; }
     public string? MotivoBloqueo { get; set; }
+    public byte[]? ImagenPerfil { get; set; }
     public byte[]? ImagenFrenteCarnet { get; set; }
     public byte[]? ImagenAtrasCarnet { get; set; }
     public byte[]? ImagenFirma { get; set; }

@@ -15,6 +15,36 @@
       de querer editarlos, contacta con un administrador
     </p>
     <form #form="ngForm" (ngSubmit)="confirmar()">
+      <fieldset class="profile-photo-fieldset">
+        <legend>Foto de perfil</legend>
+        <div class="profile-photo-fieldset__content">
+          <div class="profile-photo-preview">
+            @if (fotoPerfilPreview) {
+              <img [src]="fotoPerfilPreview" alt="Vista previa de tu foto" />
+            } @else {
+              <i class="fas fa-user" aria-hidden="true"></i>
+            }
+          </div>
+          <div>
+            <p>Se muestra únicamente en tu perfil.</p>
+            <input
+              #fotoPerfilInput
+              type="file"
+              hidden
+              accept="image/jpeg,image/png,image/webp"
+              (change)="cargarFotoPerfil($event)"
+            />
+            <button
+              type="button"
+              class="identity-button"
+              [disabled]="procesandoFoto"
+              (click)="fotoPerfilInput.click()"
+            >
+              {{ fotoPerfilPreview ? "Cambiar foto" : "Agregar foto" }}
+            </button>
+          </div>
+        </div>
+      </fieldset>
       <div class="form-group">
         <label for="contrasena">Nueva contraseña</label>
         <div class="password-field">
@@ -188,7 +218,9 @@
         <button
           type="submit"
           class="register-button"
-          [disabled]="!form.valid || cargando || procesandoCarnet"
+          [disabled]="
+            !form.valid || cargando || procesandoCarnet || procesandoFoto
+          "
         >
           @if (cargando) {
             <i class="fas fa-spinner fa-spin" aria-hidden="true"></i>

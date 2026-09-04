@@ -13,6 +13,7 @@ export interface UsuarioApiItem {
   IdCarrera?: number | null;
   Bloqueado?: boolean;
   MotivoBloqueo?: string | null;
+  ImagenPerfil?: string | null;
   ImagenFrenteCarnet?: string | null;
   ImagenAtrasCarnet?: string | null;
   ImagenFirma?: string | null;

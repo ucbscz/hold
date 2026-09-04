@@ -17,6 +17,7 @@ public class UsuarioDto
     public string? NombreReferencia { get; set; }
     public string? TelefonoReferencia { get; set; }
     public string? EmailReferencia { get; set; }
+    public byte[]? ImagenPerfil { get; set; }
     public byte[]? ImagenFrenteCarnet { get; set; }
     public byte[]? ImagenAtrasCarnet { get; set; }
     public byte[]? ImagenFirma { get; set; }

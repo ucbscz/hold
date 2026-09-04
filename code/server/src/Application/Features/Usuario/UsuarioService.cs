@@ -207,6 +207,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         )
             return Result<UsuarioDto>.Error("Teléfono ya registrado");
 
+        dto.ImagenPerfil = _sensitiveData.Protect(dto.ImagenPerfil);
         dto.ImagenFrenteCarnet = _sensitiveData.Protect(dto.ImagenFrenteCarnet);
         dto.ImagenAtrasCarnet = _sensitiveData.Protect(dto.ImagenAtrasCarnet);
         dto.ImagenFirma = _sensitiveData.Protect(dto.ImagenFirma);
@@ -220,6 +221,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             entity.MotivoBloqueo = null;
             entity.RefreshToken = null;
             entity.RefreshTokenExpiry = null;
+            entity.ImagenPerfil = dto.ImagenPerfil;
             entity.ImagenFrenteCarnet = dto.ImagenFrenteCarnet;
             entity.ImagenAtrasCarnet = dto.ImagenAtrasCarnet;
             entity.ImagenFirma = dto.ImagenFirma;
@@ -299,6 +301,9 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             PreserveTraceableFields(dto, existing);
 
         dto.Rol = dto.Rol?.Trim().ToLowerInvariant();
+        dto.ImagenPerfil = dto.ImagenPerfil == null
+            ? existing.ImagenPerfil
+            : _sensitiveData.Protect(dto.ImagenPerfil);
         dto.ImagenFrenteCarnet = dto.ImagenFrenteCarnet == null
             ? existing.ImagenFrenteCarnet
             : _sensitiveData.Protect(dto.ImagenFrenteCarnet);
@@ -556,6 +561,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
     private void UnprotectProfileDocuments(UsuarioDto dto)
     {
+        dto.ImagenPerfil = _sensitiveData.Unprotect(dto.ImagenPerfil);
         dto.ImagenFrenteCarnet = _sensitiveData.Unprotect(dto.ImagenFrenteCarnet);
         dto.ImagenAtrasCarnet = _sensitiveData.Unprotect(dto.ImagenAtrasCarnet);
         dto.ImagenFirma = _sensitiveData.Unprotect(dto.ImagenFirma);
@@ -563,6 +569,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
     private static void ClearProfileDocuments(UsuarioDto dto)
     {
+        dto.ImagenPerfil = null;
         dto.ImagenFrenteCarnet = null;
         dto.ImagenAtrasCarnet = null;
         dto.ImagenFirma = null;

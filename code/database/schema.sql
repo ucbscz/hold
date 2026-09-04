@@ -423,6 +423,7 @@ create table usuarios
     id_carrera           integer                                         not null
         constraint fk_usuarios_carrera
             references carreras,
+    imagen_perfil        bytea,
     imagen_frente_carnet bytea,
     imagen_atras_carnet  bytea,
     imagen_firma         bytea,

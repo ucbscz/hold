@@ -26,6 +26,7 @@ internal sealed class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         entity.Property(e => e.Bloqueado).HasColumnName("bloqueado");
         entity.Property(e => e.MotivoBloqueo).HasColumnName("motivo_bloqueo");
         entity.Property(e => e.EstadoEliminado).HasColumnName(DatabaseColumns.EstadoEliminado);
+        entity.Property(e => e.ImagenPerfil).HasColumnName("imagen_perfil");
         entity.Property(e => e.ImagenFrenteCarnet).HasColumnName("imagen_frente_carnet");
         entity.Property(e => e.ImagenAtrasCarnet).HasColumnName("imagen_atras_carnet");
         entity.Property(e => e.ImagenFirma).HasColumnName("imagen_firma");

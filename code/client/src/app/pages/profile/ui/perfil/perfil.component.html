@@ -3,7 +3,11 @@
     <div class="profile-header">
       <div class="avatar-wrapper">
         <div class="avatar-icon">
-          <i class="fas fa-user"></i>
+          @if (imagenSrc(usuario.imagen_perfil); as fotoPerfil) {
+            <img [src]="fotoPerfil" alt="Foto de perfil" />
+          } @else {
+            <i class="fas fa-user" aria-hidden="true"></i>
+          }
         </div>
       </div>
       <div class="profile-title-group">

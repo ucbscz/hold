@@ -40,6 +40,8 @@ export class EditarComponent {
   contrasena: string = '';
   cargando: boolean = false;
   procesandoCarnet = false;
+  procesandoFoto = false;
+  fotoPerfilPreview = '';
   carnetFrentePreview = '';
   carnetAtrasPreview = '';
   firmaPreview = '';
@@ -53,6 +55,9 @@ export class EditarComponent {
   ) {}
   ngOnInit() {
     this.localUsuario = { ...this.usuario };
+    this.fotoPerfilPreview = identityBase64ToDataUrl(
+      this.localUsuario.imagen_perfil,
+    );
     this.carnetFrentePreview = identityBase64ToDataUrl(
       this.localUsuario.imagen_frente_carnet,
     );
@@ -69,7 +74,7 @@ export class EditarComponent {
     this.localUsuario.imagen_firma = identityDataUrlToBase64(signatureData);
   }
   confirmar() {
-    if (this.cargando || this.procesandoCarnet) return;
+    if (this.cargando || this.procesandoCarnet || this.procesandoFoto) return;
     this.cargando = true;
     this.usuarioApi
       .actualizarPerfil(this.localUsuario, this.contrasena)
@@ -114,6 +119,25 @@ export class EditarComponent {
       input.value = '';
     } finally {
       this.procesandoCarnet = false;
+    }
+  }
+
+  async cargarFotoPerfil(event: Event): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    this.procesandoFoto = true;
+    try {
+      const dataUrl = await processIdentityImage(file);
+      this.fotoPerfilPreview = dataUrl;
+      this.localUsuario.imagen_perfil = identityDataUrlToBase64(dataUrl);
+    } catch (error) {
+      this.mensajeerror =
+        error instanceof Error ? error.message : 'No se pudo leer la imagen.';
+      this.error.set(true);
+      input.value = '';
+    } finally {
+      this.procesandoFoto = false;
     }
   }
   cerrar() {
