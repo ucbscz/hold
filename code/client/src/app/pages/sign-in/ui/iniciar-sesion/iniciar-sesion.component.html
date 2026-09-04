@@ -1,6 +1,9 @@
 <div class="login-container">
   <div class="login-card">
-    <h1 class="title">Iniciar sesión</h1>
+    <header class="auth-header">
+      <h1 class="title">Iniciar sesión</h1>
+      <p>Accede con tu cuenta institucional.</p>
+    </header>
     <form #form="ngForm" (ngSubmit)="form.valid && login()" class="login-form">
       <div class="form-group">
         <label for="email">Correo electrónico</label>
@@ -84,7 +87,7 @@
       <div class="auth-separator"><span>o</span></div>
       <button
         type="button"
-        class="google-button"
+        class="google-button google-button--sign-in"
         [disabled]="loading"
         (click)="iniciarGoogle()"
       >

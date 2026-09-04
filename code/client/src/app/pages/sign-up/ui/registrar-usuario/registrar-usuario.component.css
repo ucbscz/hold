@@ -5,30 +5,39 @@
 .register-container {
   min-height: 100dvh;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   background: var(--bg);
-  padding: 4rem 2rem 2rem;
+  padding: 2rem;
 }
 
 .register-card {
   background: var(--surface);
-  padding: 2.5rem;
+  padding: 2rem;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
-  border-top: 3px solid var(--brand);
-  box-shadow: var(--shadow-lg);
   width: 100%;
-  max-width: 600px;
+  max-width: 38rem;
 }
 
 .title {
   text-align: center;
   color: var(--ink);
-  margin-bottom: 2rem;
+  margin: 0;
   font-size: 1.75rem;
   font-weight: 800;
   letter-spacing: -0.02em;
+}
+
+.auth-header {
+  margin-bottom: var(--sp-8);
+  text-align: center;
+}
+
+.auth-header p {
+  margin: var(--sp-2) 0 0;
+  color: var(--ink-secondary);
+  font-size: 0.875rem;
 }
 
 .register-form {
@@ -48,7 +57,7 @@
   color: var(--ink-secondary);
   font-size: 0.875rem;
   line-height: 1.45;
-  text-align: center;
+  text-align: left;
 }
 
 .google-button {
@@ -58,8 +67,8 @@
   justify-content: center;
   gap: 0.75rem;
   width: 100%;
-  border: 1px solid #747775;
-  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   background: #fff;
   color: #1f1f1f;
   font: 700 0.875rem var(--font);
@@ -94,6 +103,13 @@
   font-weight: 600;
 }
 
+.verification-note {
+  margin: calc(var(--sp-3) * -1) 0 var(--sp-6);
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
 .auth-separator::before,
 .auth-separator::after {
   height: 1px;
@@ -114,8 +130,8 @@
   color: var(--ink-secondary);
   font-size: 0.875rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
+  text-transform: none;
+  letter-spacing: 0;
   border-bottom: 1px solid var(--border);
   padding-bottom: 0.6rem;
 }
@@ -135,15 +151,15 @@
 .form-group label {
   font-weight: 700;
   color: var(--ink-secondary);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0;
   display: block;
   font-size: 1rem;
 }
 
 .form-input {
-  padding: 0.85rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
+  padding: 0.7rem 0.875rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   font-size: 1rem;
   transition:
     border-color 0.2s,
@@ -223,7 +239,8 @@
   font-weight: var(--btn-font-weight);
   font-family: var(--font);
 
-  margin: 1rem auto 0;
+  min-height: 2.75rem;
+  margin: 0.5rem 0 0;
   cursor: pointer;
   transition:
     background-color var(--t-fast),
@@ -233,6 +250,7 @@
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  width: 100%;
 }
 
 @media (hover: hover) and (pointer: fine) {
@@ -401,7 +419,8 @@
 
 @media (max-width: 768px) {
   .register-container {
-    padding: 1.5rem 1rem 5rem;
+    align-items: flex-start;
+    padding: 5rem 1rem 2rem;
   }
 
   .register-card {
@@ -428,7 +447,7 @@
 
   .register-button {
     width: 100%;
-    max-width: 200px;
+    max-width: none;
   }
 }
 

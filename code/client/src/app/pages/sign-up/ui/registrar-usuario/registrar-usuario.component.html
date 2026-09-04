@@ -1,6 +1,9 @@
 <div class="register-container">
   <div class="register-card">
-    <h1 class="title">Crear cuenta</h1>
+    <header class="auth-header">
+      <h1 class="title">Crear cuenta</h1>
+      <p>Usa tu correo institucional para solicitar equipos.</p>
+    </header>
     @if (!registroGoogle) {
       <div class="google-registration">
         <p>
@@ -22,6 +25,10 @@
         </button>
       </div>
       <div class="auth-separator"><span>o completa tus datos</span></div>
+      <p class="verification-note">
+        Después de crear tu cuenta, te enviaremos un enlace para verificar tu
+        correo antes de iniciar sesión.
+      </p>
     }
     <form
       (ngSubmit)="registrar(registerForm)"

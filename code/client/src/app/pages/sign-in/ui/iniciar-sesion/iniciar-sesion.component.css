@@ -1,10 +1,10 @@
 .login-container {
   min-height: 100dvh;
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   background: var(--bg);
-  padding: 3.5rem 2rem 2rem;
+  padding: 2rem;
 }
 @media (max-width: 768px) {
   .login-container {
@@ -13,13 +13,11 @@
 }
 .login-card {
   background: var(--surface);
-  padding: 2.5rem;
+  padding: 2rem;
   border-radius: var(--radius-lg);
   border: 1px solid var(--border);
-  border-top: 3px solid var(--brand);
-  box-shadow: var(--shadow-lg);
   width: 100%;
-  max-width: 400px;
+  max-width: 26rem;
   animation: cardIn 220ms ease-out both;
 }
 .logo-container {
@@ -33,11 +31,20 @@
 .title {
   text-align: center;
   color: var(--ink);
-  margin: 0 0 2rem;
+  margin: 0;
   font-size: 1.75rem;
   font-weight: 800;
   font-family: var(--font);
   letter-spacing: -0.02em;
+}
+.auth-header {
+  margin-bottom: var(--sp-8);
+  text-align: center;
+}
+.auth-header p {
+  margin: var(--sp-2) 0 0;
+  color: var(--ink-secondary);
+  font-size: 0.875rem;
 }
 .login-form {
   display: flex;
@@ -130,13 +137,15 @@ label {
   font-weight: var(--btn-font-weight);
   font-family: var(--font);
 
-  margin: 0.5rem auto 0;
+  min-height: 2.75rem;
+  margin: 0.25rem 0 0;
   cursor: pointer;
   transition:
     background-color var(--t-fast),
     box-shadow var(--t-fast),
     transform var(--t-fast);
   display: block;
+  width: 100%;
 }
 @media (hover: hover) and (pointer: fine) {
   .login-button:hover {
@@ -201,18 +210,24 @@ label {
   align-items: center;
   justify-content: center;
   gap: 0.75rem;
-  border: 1px solid var(--border-strong);
-  border-radius: var(--radius-full);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
   background: var(--surface);
   color: var(--ink);
   font: inherit;
   font-weight: 700;
+  font-size: 0.875rem;
   cursor: pointer;
 }
 .google-button:hover,
 .google-button:focus-visible {
-  border-color: var(--interactive-text);
-  background: var(--surface-muted);
+  border-color: var(--ink-secondary);
+  background: var(--sidebar);
+  outline: 2px solid transparent;
+}
+.google-button:focus-visible {
+  outline-color: var(--interactive-text);
+  outline-offset: 2px;
 }
 .google-mark {
   display: block;
@@ -277,7 +292,8 @@ label {
 
 @media (max-width: 768px) {
   .login-container {
-    padding: 6rem 1rem 1rem;
+    align-items: flex-start;
+    padding: 5rem 1rem 1rem;
   }
   .login-card {
     padding: 1.75rem;
@@ -291,7 +307,7 @@ label {
   }
   .login-button {
     width: 100%;
-    max-width: 220px;
+    max-width: none;
   }
 }
 
