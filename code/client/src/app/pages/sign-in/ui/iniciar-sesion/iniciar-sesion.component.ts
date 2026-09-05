@@ -149,6 +149,10 @@ export class IniciarSesionComponent implements OnInit {
     this.router.navigate(['/registro']);
   }
 
+  recuperarContrasena(): void {
+    void this.router.navigate(['/recuperar-contrasena']);
+  }
+
   alternarVisibilidadContrasena(): void {
     this.mostrarContrasena = !this.mostrarContrasena;
   }

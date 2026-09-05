@@ -15,6 +15,7 @@ describe('application routes', () => {
     'registro',
     'terminos',
     'verificar',
+    'recuperar',
   ];
 
   it('uses the documented lowercase route contract', () => {

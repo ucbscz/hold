@@ -73,6 +73,15 @@ public sealed class UsuarioAuthRepository
         await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
+    public async Task UpdateCredentials(
+        UsuarioEntity user,
+        CancellationToken cancellationToken = default
+    )
+    {
+        _dbContext.Usuarios.Update(user);
+        await _dbContext.SaveChangesAsync(cancellationToken);
+    }
+
     public async Task<bool> ConfirmEmail(
         string tokenHash,
         CancellationToken cancellationToken = default

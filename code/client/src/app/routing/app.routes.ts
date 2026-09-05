@@ -78,4 +78,11 @@ export const routes: Routes = [
         (page) => page.VerificarCorreoComponent,
       ),
   },
+  {
+    path: 'recuperar',
+    loadComponent: () =>
+      import('@pages/password-recovery').then(
+        (page) => page.RecuperarContrasenaComponent,
+      ),
+  },
 ];

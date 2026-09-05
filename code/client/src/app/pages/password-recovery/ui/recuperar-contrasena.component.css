@@ -1,0 +1,159 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  font-family: var(--font);
+}
+
+.recovery-page {
+  display: grid;
+  min-height: 100dvh;
+  padding: 2rem 1rem;
+  place-items: center;
+  background: var(--bg);
+}
+
+.recovery-card {
+  display: grid;
+  width: min(100%, 27rem);
+  gap: 1.5rem;
+  padding: 2rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+}
+
+header h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.625rem;
+  line-height: 1.2;
+}
+
+header p {
+  margin: 0.65rem 0 0;
+  color: var(--ink-secondary);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+form {
+  display: grid;
+  gap: 0.5rem;
+}
+
+label {
+  margin-top: 0.5rem;
+  color: var(--ink-secondary);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+input {
+  width: 100%;
+  min-height: 46px;
+  box-sizing: border-box;
+  padding: 0.7rem 3rem 0.7rem 0.875rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--field-radius);
+  color: var(--ink);
+  font: inherit;
+  background: var(--surface);
+}
+
+input:focus-visible {
+  outline: 2px solid var(--interactive-text);
+  outline-offset: 2px;
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-field button {
+  position: absolute;
+  top: 50%;
+  right: 0.25rem;
+  display: grid;
+  width: 2.5rem;
+  height: 2.5rem;
+  min-width: 2.5rem;
+  min-height: 2.5rem;
+  padding: 0;
+  place-items: center;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: var(--radius-full);
+  color: var(--ink-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.hint {
+  margin: 0.25rem 0 0;
+  color: var(--ink-muted);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.primary-action {
+  min-height: 46px;
+  margin-top: 1rem;
+  border: 0;
+  border-radius: var(--radius-full);
+  color: var(--brand-text);
+  background: var(--brand);
+  font: 700 0.9375rem var(--font);
+  cursor: pointer;
+}
+
+.primary-action:hover:not(:disabled) {
+  background: var(--brand-hover);
+}
+
+.primary-action:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.feedback {
+  margin: 0.75rem 0 0;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.feedback--error {
+  color: var(--error);
+}
+
+.feedback--success {
+  padding: 0.875rem;
+  border: 1px solid #86efac;
+  border-radius: var(--radius-sm);
+  color: #166534;
+  background: #f0fdf4;
+}
+
+.back-link {
+  justify-self: center;
+  color: var(--interactive-text);
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .recovery-page {
+    padding: 1rem 0.75rem;
+    place-items: start center;
+  }
+
+  .recovery-card {
+    padding: 1.5rem;
+    border-radius: var(--radius-md);
+  }
+}

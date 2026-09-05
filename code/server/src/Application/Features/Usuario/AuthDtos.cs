@@ -10,6 +10,12 @@ public sealed class EmailDto
     public string Email { get; set; } = string.Empty;
 }
 
+public sealed class ResetPasswordDto
+{
+    public string Token { get; set; } = string.Empty;
+    public string Contrasena { get; set; } = string.Empty;
+}
+
 public sealed class GoogleAuthDto
 {
     public bool RequiereRegistro { get; set; }

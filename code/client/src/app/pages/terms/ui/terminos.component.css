@@ -51,13 +51,3 @@
   font-size: 0.9rem;
   line-height: 1.65;
 }
-.terms-page aside {
-  margin-top: 1.5rem;
-  padding: 1rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--surface);
-  color: var(--ink-secondary);
-  font-size: 0.82rem;
-  line-height: 1.5;
-}

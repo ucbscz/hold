@@ -15,18 +15,21 @@ public class AuthController : Controller
 {
     private readonly UsuarioService _service;
     private readonly VerificacionCorreoService _verification;
+    private readonly RecuperacionContrasenaService _passwordRecovery;
     private readonly AutenticacionGoogleService _google;
     private readonly IConfiguration _configuration;
 
     public AuthController(
         UsuarioService service,
         VerificacionCorreoService verification,
+        RecuperacionContrasenaService passwordRecovery,
         AutenticacionGoogleService google,
         IConfiguration configuration
     )
     {
         _service = service;
         _verification = verification;
+        _passwordRecovery = passwordRecovery;
         _google = google;
         _configuration = configuration;
     }
@@ -61,6 +64,18 @@ public class AuthController : Controller
         [FromBody] EmailDto request,
         CancellationToken cancellationToken
     ) => ToResponse(await _verification.Resend(request.Email, cancellationToken));
+
+    [HttpPost("recuperar-contrasena")]
+    public async Task<IActionResult> RequestPasswordReset(
+        [FromBody] EmailDto request,
+        CancellationToken cancellationToken
+    ) => ToResponse(await _passwordRecovery.Request(request.Email, cancellationToken));
+
+    [HttpPost("restablecer-contrasena")]
+    public async Task<IActionResult> ResetPassword(
+        [FromBody] ResetPasswordDto request,
+        CancellationToken cancellationToken
+    ) => ToResponse(await _passwordRecovery.Reset(request.Token, request.Contrasena, cancellationToken));
 
     [HttpGet("google")]
     public IActionResult Google([FromQuery] string? origen)

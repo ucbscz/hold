@@ -195,6 +195,7 @@ builder.Services.AddScoped<UsuarioService>();
 builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
 builder.Services.AddScoped<EmailDeliveryService>();
 builder.Services.AddScoped<VerificacionCorreoService>();
+builder.Services.AddScoped<RecuperacionContrasenaService>();
 builder.Services.AddScoped<CodigoGoogleService>();
 builder.Services.AddScoped<AutenticacionGoogleService>();
 builder.Services.AddSingleton<SensitiveDataProtector>();

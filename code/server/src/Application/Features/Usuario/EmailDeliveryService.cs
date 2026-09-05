@@ -22,6 +22,29 @@ public sealed class EmailDeliveryService
         string recipient,
         string verificationUrl,
         CancellationToken cancellationToken
+    ) => await Send(
+        recipient,
+        "Verifica tu cuenta de UCB Hold",
+        $"Confirma tu correo institucional desde este enlace, válido durante 24 horas:\n\n{verificationUrl}",
+        cancellationToken
+    );
+
+    public async Task<bool> SendPasswordReset(
+        string recipient,
+        string resetUrl,
+        CancellationToken cancellationToken
+    ) => await Send(
+        recipient,
+        "Restablece tu contraseña de UCB Hold",
+        $"Solicitaste restablecer tu contraseña. Usa este enlace una sola vez, válido durante 30 minutos:\n\n{resetUrl}\n\nSi no realizaste esta solicitud, puedes ignorar este correo.",
+        cancellationToken
+    );
+
+    private async Task<bool> Send(
+        string recipient,
+        string subject,
+        string body,
+        CancellationToken cancellationToken
     )
     {
         if (!_settings.Enabled)
@@ -31,8 +54,8 @@ public sealed class EmailDeliveryService
         {
             using var message = new MailMessage(_settings.From, recipient)
             {
-                Subject = "Verifica tu cuenta de UCB Hold",
-                Body = $"Confirma tu correo institucional desde este enlace, válido durante 24 horas:\n\n{verificationUrl}",
+                Subject = subject,
+                Body = body,
                 IsBodyHtml = false,
             };
             using var client = new SmtpClient(_settings.Host, _settings.Port)
@@ -46,7 +69,7 @@ public sealed class EmailDeliveryService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "No se pudo enviar el correo de verificación");
+            _logger.LogError(exception, "No se pudo enviar el correo");
             return false;
         }
     }
