@@ -105,7 +105,7 @@ Notification details show `Emisor`: the full name of the administrator who perfo
 
 Both management roles can list, create, update and block borrowers. Laboratory administrators cannot create, promote, edit or block either administrator role. Anonymous registration never grants privileged roles. `administrativo` is a borrower, not an administrator. Only root can delete users.
 
-`GET /api/usuarios/perfil` and `PUT /api/usuarios/perfil` are the only user endpoints that expose or accept `ImagenFrenteCarnet`, `ImagenAtrasCarnet`, and `ImagenFirma`. These byte arrays are encrypted at rest and returned only to their owner. Generic user lists, login responses, refresh responses, and administrative user responses omit them. A saved signature is inserted automatically into future contract drafts; finalized contracts retain their own immutable encrypted copy.
+`POST /api/usuarios` may accept optional identity-card images and a signature during registration. After registration, only `GET /api/usuarios/perfil` and `PUT /api/usuarios/perfil` expose or accept those documents. The byte arrays are encrypted at rest and returned only to their owner. Generic user lists, login responses, refresh responses, and administrative user responses omit them. A saved signature is inserted automatically into future contract drafts; finalized contracts retain their own immutable encrypted copy.
 
 ## Equipment Catalog
 
@@ -168,7 +168,6 @@ Room and origin payloads are `{ "Id": 1, "Nombre": "Sala principal" }`. Equipmen
 | `GET`    | `/api/prestamos?carnet=&estado=&guardado=` | Filter loans; non-admin users are restricted to their own carnet.           |
 | `POST`   | `/api/contratos`                           | Upload or create a contract for a loan. Multipart form data.                |
 | `GET`    | `/api/contratos/{prestamoId}`              | Get a contract by loan id.                                                  |
-| `GET`    | `/api/contratos/firmante`                  | Get the authenticated contract signer name, id and signature.               |
 | `DELETE` | `/api/contratos/{prestamoId}`              | Delete a contract.                                                          |
 | `POST`   | `/api/carrito/disponibilidad`              | Calculate availability after validating each group's maximum duration.      |
 | `POST`   | `/api/avisos`                              | Create an availability watch for the authenticated user.                    |
@@ -177,7 +176,7 @@ Rejection requires a nonempty `Observacion` (max 1024), stored as `MotivoRechazo
 
 Visible uses are internal (`Universidad`, or `Clase` for class details) and external (`Casa`). Internal start/end must fall on the same date in Bolivia and within the configured opening hours. External use respects the equipment group's maximum duration.
 
-Contract retrieval uses the **loan ID**, not the contract ID, and is restricted to its owner or either management role. New contract HTML includes `img[data-carnet="frente"]`, `img[data-carnet="atras"]` and the signature; only sanitized inline raster images are retained. The client offers HTML download and isolated contract/identity-card printing, also usable as browser PDF export. These documents contain personal data and are not public assets.
+Contract retrieval uses the **loan ID**, not the contract ID, and is restricted to its owner or either management role. New contract HTML includes `img[data-carnet="frente"]`, `img[data-carnet="atras"]` and the user signature; only sanitized inline raster images are retained. The institutional signature is never sent to the browser while drafting: the server replaces institutional identity fields and inserts its protected signature before persisting the final contract. The client offers HTML download and isolated contract/identity-card printing, also usable as browser PDF export. These documents contain personal data and are not public assets.
 
 ## Pickup Location and Inventory Catalogs
 
@@ -191,7 +190,13 @@ The root role is displayed as **Administrador general**; its API/authorization v
 
 `GET /api/configuracion` remains public; `PUT /api/configuracion` remains root-only. The existing payload adds `Horarios`, an array of `{ DiaSemana, Fecha, Abierto, InicioMinutos, FinMinutos }`. `Fecha` is nullable ISO `YYYY-MM-DD`; `DiaSemana` is 0 (Sunday) through 6. A date exception takes precedence over a weekday rule. Without either, the global hours apply Monday through Saturday. Minimum duration is at least 30 minutes. All reservation enforcement uses Bolivia time.
 
-The contract responsible is linked to an active user through `CarnetJefeCarrera`. When not assigned, the first available general administrator ordered by carnet is proposed. `NombreJefeCarrera` is derived from that user's full name, never trusted from the client. Changing the responsible requires their signature. Public configuration responses omit the identifier (null); only root can read/write it. Configuration responses use `Cache-Control: no-store`.
+The contract responsible is linked to an active user through `CarnetJefeCarrera`. When not assigned, the first available general administrator ordered by carnet is proposed. `NombreJefeCarrera` is derived from that user's full name, never trusted from the client. Changing the responsible requires their signature. Public configuration uses a dedicated response DTO without the responsible's name, identifier, or signature; only root can read or change them. The signature is protected at rest with the persistent Data Protection key ring. Configuration responses use `Cache-Control: no-store`.
+
+## Security Boundaries
+
+Presentation accepts purpose-specific request DTOs and returns DTOs rather than persistence entities. Authentication requests contain only email and password. The default user mapper omits password hashes, profile images, identity-card images, and signatures; only the authenticated profile flow explicitly decrypts and returns that user's documents. Login, refresh, administrative lists, cache entries, and generic user reads do not contain those documents.
+
+Application services enforce ownership and role rules before calling persistence. Core owns domain entities; Infrastructure owns EF Core persistence, cache, protected storage, and external integrations. Core has no dependency on Application, Infrastructure, or Presentation. CI verifies these dependency and DTO boundaries and rejects a database schema containing dumped table data.
 
 `GET /api/configuracion/responsables?buscar=nombre` is root-only. It returns up to 30 active, non-blocked users as `{ Carnet, Nombre }`, ordered by name. Search accepts up to 100 characters and matches name parts case-insensitively. Refine the query for additional results. The schema stores `configuraciones_sistema.carnet_jefe_carrera` as a nullable foreign key to `usuarios.carnet`.
 

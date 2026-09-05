@@ -1,6 +1,6 @@
 # Database Guide
 
-UCB Hold uses PostgreSQL 14+ with Entity Framework Core 8. The database name used by the project is `IMT_Reservas`. Repository source keeps a schema reference in [`code/database/schema.sql`](../code/database/schema.sql); full database snapshots are distributed as release assets.
+UCB Hold uses PostgreSQL 14+ with Entity Framework Core 8. The database name used by the project is `IMT_Reservas`. Repository source and releases contain only the data-free schema reference in [`code/database/schema.sql`](../code/database/schema.sql). Production backups remain in private infrastructure.
 
 ## Entity Relationship Diagram
 
@@ -41,9 +41,9 @@ UCB Hold uses PostgreSQL 14+ with Entity Framework Core 8. The database name use
 
 The backend maps PostgreSQL enums with `PgName` and `NpgsqlDataSourceBuilder.MapEnum<T>()`.
 
-`schema.sql` is the reference for fresh databases, not an upgrade script. Existing databases must match that schema before deploying this source. No EF migrations or `update.sql` are used. Restart application processes after enum changes.
+`schema.sql` is the reference for fresh databases, not an upgrade script. Existing databases must match that schema before deploying this source. No EF migrations or `update.sql` are used. Schema changes for populated databases require explicit, reviewed SQL. Restart application processes after enum changes.
 
-`codigo_ucb` is nullable and unique when present. `prestamos.autorizado_por`, `entregado_por` and `motivo_rechazo` retain actor names and rejection context. Legacy location/provenance text is preserved for historical SQL routines but is not updated by the application; new reads/writes use catalog foreign keys. Contracts store sanitized HTML that can contain identity photos and signatures. Restrict backups to private storage or anonymize them before release distribution.
+`codigo_ucb` is nullable and unique when present. `prestamos.autorizado_por`, `entregado_por` and `motivo_rechazo` retain actor names and rejection context. Legacy location/provenance text is preserved for historical SQL routines but is not updated by the application; new reads/writes use catalog foreign keys. Contracts store sanitized HTML that can contain identity photos and signatures. Backups must remain in restricted private storage and must never be attached to a release.
 
 ## Derived Data
 
@@ -57,7 +57,7 @@ The backend maps PostgreSQL enums with `PgName` and `NpgsqlDataSourceBuilder.Map
 
 Derived values exist to speed up administrative screens. Business logic should still validate critical decisions, especially availability, at the service layer.
 
-`usuarios.imagen_frente_carnet`, `usuarios.imagen_atras_carnet`, and `usuarios.imagen_firma` store ASP.NET Core Data Protection payloads rather than raw image bytes. The key ring must persist across deployments; losing it makes existing protected documents unreadable. Final contract HTML remains separately protected so later profile-signature changes do not alter historical contracts.
+`usuarios.imagen_perfil`, `usuarios.imagen_frente_carnet`, `usuarios.imagen_atras_carnet`, `usuarios.imagen_firma`, `configuraciones_sistema.firma_jefe_carrera_base64`, and final contract HTML use ASP.NET Core Data Protection payloads rather than raw sensitive content. Existing plain institutional signatures remain readable and are protected the next time configuration is saved. The key ring must persist across deployments; losing it makes protected documents unreadable. Final contracts retain their own immutable protected copy so later profile or institutional-signature changes do not alter historical records.
 
 `usuarios.email_verificado` blocks local authentication until ownership is confirmed. `token_verificacion_hash` stores SHA-256 output rather than the emailed token and is cleared atomically after confirmation. `google_id` uniquely links an institutional Google identity. `codigos_autenticacion` stores only hashes of ten-minute OAuth exchange codes and removes consumed or expired rows as new codes are issued.
 
@@ -98,35 +98,38 @@ With Docker:
 
 ```bash
 cd code
-docker compose up -d ucb_db
+docker compose --env-file server.env up -d ucb_db
 ```
 
-Docker starts PostgreSQL with an empty persistent volume. Restore a release backup when you need a populated local database.
+Docker starts PostgreSQL with an empty persistent volume. Apply `schema.sql` to initialize structure without copying user data.
 
-## Backup and Restore
+## Generate and Publish the Empty Schema
 
-Create a custom-format backup:
+Generate the schema from Git Bash on Windows:
 
 ```bash
-pg_dump -U postgres -d IMT_Reservas -F c -f artifacts/releases/database/backup.backup
+export PATH="/c/Program Files/PostgreSQL/17/bin:$PATH"
+pg_dump -h localhost -U postgres -d IMT_Reservas --schema-only --no-owner --no-privileges --file code/database/schema.sql.tmp
+mv code/database/schema.sql.tmp code/database/schema.sql
 ```
 
-Create a plain SQL backup:
+Verify that it has structure and no table data:
 
 ```bash
-pg_dump -U postgres -d IMT_Reservas -f artifacts/releases/database/backup.sql
+test -s code/database/schema.sql
+! grep -Eq '^-- Data for Name:|^COPY public\.|^SELECT pg_catalog\.setval' code/database/schema.sql
 ```
 
-Restore a custom-format backup:
+Upload it to the existing release:
 
 ```bash
-pg_restore -U postgres -d IMT_Reservas --clean --if-exists artifacts/releases/database/backup.backup
+gh release upload v1.1.0 code/database/schema.sql --repo ucbscz/hold --clobber
 ```
 
-Restore a plain SQL backup:
+Initialize an empty database:
 
 ```bash
-psql -U postgres -d IMT_Reservas -f artifacts/releases/database/backup.sql
+psql -U postgres -d IMT_Reservas -f code/database/schema.sql
 ```
 
-Backups are release artifacts. They must not be committed to the repository.
+Do not upload `.backup`, full SQL dumps, Data Protection keys, environment files, or user documents to GitHub releases. Store encrypted operational backups in private Oracle storage with access logging and a tested restore procedure.

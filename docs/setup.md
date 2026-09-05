@@ -32,8 +32,10 @@ Generated files, local reports, IDE metadata and database backups should not be 
 Create `code/server.env`:
 
 ```ini
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=<database-password>
+POSTGRES_DB=IMT_Reservas
 ASPNETCORE_ENVIRONMENT=Production
-ASPNETCORE_URLS=http://+:80
 ConnectionStrings__PostgreSQL=Host=ucb_db;Port=5432;Database=IMT_Reservas;Username=postgres;Password=<database-password>;Pooling=true;MinPoolSize=2;MaxPoolSize=20
 Jwt__Key=<local-secret-with-at-least-32-characters>
 Redis__ConnectionString=ucb_redis:6379
@@ -78,7 +80,7 @@ npm install
 
 ```bash
 cd code
-docker compose up --build
+docker compose --env-file server.env up --build
 ```
 
 Docker Compose mounts `ucb_dataprotection_keys` at `/app/data-protection-keys`. Back up this volume with the database and do not replace it during routine deployments; it is required to decrypt saved carnet images, profile signatures, and contracts.
@@ -87,17 +89,8 @@ Docker Compose mounts `ucb_dataprotection_keys` at `/app/data-protection-keys`. 
 | ----------- | --------------------- |
 | Frontend    | http://localhost:4200 |
 | Backend API | http://localhost:5000 |
-| PostgreSQL  | localhost:5432        |
-| Redis       | localhost:6379        |
 
 ### Hybrid Local Development
-
-Start infrastructure:
-
-```bash
-cd code
-docker compose up -d ucb_db ucb_redis
-```
 
 Run backend:
 
@@ -199,7 +192,7 @@ When email delivery is disabled, accounts can be created but local verification 
 
 The frontend runtime image contains only the compiled Angular output served by unprivileged Nginx. Development-only build dependencies are not copied into the production image. Run `npm audit --omit=dev` as the release security gate; also review the full `npm audit` report when updating Angular tooling.
 
-## Database Restore
+## Empty Database Setup
 
 Create the database:
 
@@ -207,26 +200,22 @@ Create the database:
 psql -U postgres -c "CREATE DATABASE IMT_Reservas;"
 ```
 
-Restore from the SQL backup attached to a release:
+Apply the data-free schema attached to the release:
 
 ```bash
-psql -U postgres -d IMT_Reservas -f artifacts/releases/database/backup.sql
+psql -U postgres -d IMT_Reservas -f code/database/schema.sql
 ```
 
-Restore from a custom-format backup:
-
-```bash
-pg_restore -U postgres -d IMT_Reservas --clean --if-exists artifacts/releases/database/backup.backup
-```
+The release never contains production data or full backups. Keep operational backups in private Oracle storage with restricted access. `schema.sql` initializes an empty database; it is not an upgrade script for a database that already contains data.
 
 ## Troubleshooting
 
 | Issue                                  | Resolution                                                                                         |
 | -------------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `.NET SDK not found`                   | Install .NET 8 SDK and restart the terminal.                                                       |
-| PostgreSQL or Redis refuses connection | Run `cd code && docker compose up -d ucb_db ucb_redis`.                                            |
+| PostgreSQL or Redis refuses connection | Run `cd code && docker compose --env-file server.env up -d ucb_db ucb_redis`.                          |
 | Backend cannot read secrets            | Run the `dotnet user-secrets` commands from `code/server`.                                         |
-| Database schema is outdated            | Restore the current release backup, or recreate an empty database with `code/database/schema.sql`. |
+| Database schema is outdated            | Review and apply the required `ALTER` statements, or recreate an empty database from `schema.sql`.   |
 | Port `4200` is already in use          | Run Angular with another port, for example `ng serve --port 4300`.                                 |
 | Frontend dependencies are missing      | Run `npm install` from `code/client`.                                                              |
 | Docker backend restarts                | Inspect logs with `docker logs -f ucb_server`.                                                     |

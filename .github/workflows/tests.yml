@@ -52,6 +52,15 @@ jobs:
       - name: Audit backend dependencies
         run: dotnet list code/IMT_Reservas.sln package --vulnerable --include-transitive --no-restore
 
+      - name: Validate data-free database schema
+        shell: bash
+        run: |
+          test -s code/database/schema.sql
+          if grep -Eq '^-- Data for Name:|^COPY public\.|^SELECT pg_catalog\.setval' code/database/schema.sql; then
+            echo "code/database/schema.sql contains database data"
+            exit 1
+          fi
+
       - name: Install coverage report tool
         run: dotnet tool install dotnet-reportgenerator-globaltool --tool-path .tools
 

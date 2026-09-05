@@ -87,7 +87,7 @@ Frontend modules follow Feature-Sliced Design:
 | `entities` | Domain models, API services and entity-specific UI. |
 | `shared` | Cross-cutting utilities, directives, primitives and reusable UI. |
 
-Backend code separates presentation, application rules, core entities and infrastructure. Controllers expose HTTP contracts; services own business decisions; repositories encapsulate persistence.
+Backend code separates presentation, application rules, core entities and infrastructure. Controllers expose HTTP contracts; services own business decisions; repositories encapsulate persistence. API DTOs do not expose domain entities, credentials, protected identity documents, or stored signatures. Automated boundary tests keep `Core` independent from outer layers and keep sensitive mapper defaults closed.
 
 ---
 
@@ -98,8 +98,10 @@ Backend code separates presentation, application rules, core entities and infras
 Create `code/server.env`:
 
 ```ini
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=<database-password>
+POSTGRES_DB=IMT_Reservas
 ASPNETCORE_ENVIRONMENT=Production
-ASPNETCORE_URLS=http://+:80
 ConnectionStrings__PostgreSQL=Host=ucb_db;Port=5432;Database=IMT_Reservas;Username=postgres;Password=<database-password>;Pooling=true;MinPoolSize=2;MaxPoolSize=20
 Jwt__Key=<local-secret-with-at-least-32-characters>
 Redis__ConnectionString=ucb_redis:6379
@@ -111,22 +113,15 @@ Start the stack:
 
 ```bash
 cd code
-docker compose up --build
+docker compose --env-file server.env up --build
 ```
 
 | Service | URL |
 | --- | --- |
 | Frontend | http://localhost:4200 |
 | Backend API | http://localhost:5000 |
-| PostgreSQL | localhost:5432 |
-| Redis | localhost:6379 |
 
 ### Local Development
-
-```bash
-cd code
-docker compose up -d ucb_db ucb_redis
-```
 
 ```bash
 psql -U postgres -d IMT_Reservas -f code/database/schema.sql
@@ -171,7 +166,7 @@ Generated coverage and quality outputs must stay out of source control. CI publi
 | --- | --- |
 | Configuration | Local secrets belong in `code/server.env`, environment variables or `dotnet user-secrets`. |
 | Database schema | `code/database/schema.sql` documents the database structure maintained by the application. |
-| Backups | Database backups are release artifacts, not repository files. Use release assets for `.backup` and `.sql` snapshots. |
+| Database releases | Releases contain only the data-free `schema.sql`; production backups stay in private infrastructure. |
 | Generated reports | Coverage, SonarQube exports and HTML reports are ignored and uploaded by CI when needed. |
 | Releases | Each release should include source changes, migration notes and operational artifacts only when required. |
 

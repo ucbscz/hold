@@ -49,3 +49,7 @@ Include:
 ## Secret Management
 
 Never commit credentials, production connection strings, JWT secrets, private keys, database dumps or backups. Use environment variables, `code/server.env` for local Docker execution, or `dotnet user-secrets` for local backend development.
+
+GitHub releases contain only `code/database/schema.sql`, generated with `pg_dump --schema-only` and validated to contain no table data. Operational backups, Data Protection keys, user documents and exported contracts remain in restricted private storage.
+
+If sensitive material reaches Git history, removing it in a later commit is insufficient. Revoke or rotate affected credentials, remove the data from every ref with a reviewed history rewrite, invalidate old release assets and require every collaborator to clone the sanitized repository again.
