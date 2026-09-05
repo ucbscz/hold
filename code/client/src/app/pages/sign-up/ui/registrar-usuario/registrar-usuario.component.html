@@ -2,14 +2,10 @@
   <div class="register-card">
     <header class="auth-header">
       <h1 class="title">Crear cuenta</h1>
-      <p>Registra tus datos para solicitar equipos institucionales.</p>
+      <p>Usa tu correo institucional para solicitar equipos.</p>
     </header>
     @if (!registroGoogle) {
       <div class="google-registration">
-        <p>
-          Verifica tu correo institucional con Google y completaremos los datos
-          disponibles.
-        </p>
         <button
           type="button"
           class="google-button"
@@ -25,11 +21,7 @@
           Continuar con Google
         </button>
       </div>
-      <div class="auth-separator"><span>o regístrate con correo</span></div>
-      <p class="verification-note">
-        Te enviaremos un enlace de verificación antes de que puedas iniciar
-        sesión.
-      </p>
+      <div class="auth-separator"><span>o</span></div>
     }
     <form
       (ngSubmit)="registrar(registerForm)"
