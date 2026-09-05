@@ -1,1190 +1,125 @@
-create sequence "Accesorio_Id_Accesorio_seq";
+--
+-- PostgreSQL database dump
+--
 
-alter sequence "Accesorio_Id_Accesorio_seq" owner to postgres;
+-- Dumped from database version 17.4
+-- Dumped by pg_dump version 17.4
 
-create sequence "Categoria_ID_Categoria_seq";
+SET statement_timeout = 0;
+SET lock_timeout = 0;
+SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
+SET client_encoding = 'UTF8';
+SET standard_conforming_strings = on;
+SELECT pg_catalog.set_config('search_path', '', false);
+SET check_function_bodies = false;
+SET xmloption = content;
+SET client_min_messages = warning;
+SET row_security = off;
 
-alter sequence "Categoria_ID_Categoria_seq" owner to postgres;
+--
+-- Name: hangfire; Type: SCHEMA; Schema: -; Owner: -
+--
 
-create sequence "Componente_Id_Componente_seq";
+CREATE SCHEMA hangfire;
 
-alter sequence "Componente_Id_Componente_seq" owner to postgres;
 
-create sequence "Empresa_Mantenimiento_Id_Empresa_seq";
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: -
+--
 
-alter sequence "Empresa_Mantenimiento_Id_Empresa_seq" owner to postgres;
+-- *not* creating schema, since initdb creates it
 
-create sequence "Equipo_Id_equipo_seq";
 
-alter sequence "Equipo_Id_equipo_seq" owner to postgres;
+--
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: -
+--
 
-create sequence "Gavetero_Id_Gavetero_seq";
+COMMENT ON SCHEMA public IS '';
 
-alter sequence "Gavetero_Id_Gavetero_seq" owner to postgres;
 
-create sequence "Grupo_Equipo_Id_Grupo_equipo_seq";
+--
+-- Name: pgcrypto; Type: EXTENSION; Schema: -; Owner: -
+--
 
-alter sequence "Grupo_Equipo_Id_Grupo_equipo_seq" owner to postgres;
+CREATE EXTENSION IF NOT EXISTS pgcrypto WITH SCHEMA public;
 
-create sequence "Mantenimiento_Id_Mantenimiento_seq";
 
-alter sequence "Mantenimiento_Id_Mantenimiento_seq" owner to postgres;
+--
+-- Name: EXTENSION pgcrypto; Type: COMMENT; Schema: -; Owner: -
+--
 
-create sequence "Mueble_Id_Mueble_seq";
+COMMENT ON EXTENSION pgcrypto IS 'cryptographic functions';
 
-alter sequence "Mueble_Id_Mueble_seq" owner to postgres;
 
-create sequence "Prestamo_Id_Prestamo_seq";
+--
+-- Name: estado_disponibilidad; Type: TYPE; Schema: public; Owner: -
+--
 
-alter sequence "Prestamo_Id_Prestamo_seq" owner to postgres;
-
-create sequence carrera_id_carrera_seq
-    as integer;
-
-alter sequence carrera_id_carrera_seq owner to postgres;
-
-create sequence detalles_mantenimientos_id_detalle_mantenimiento_seq
-    as integer;
-
-alter sequence detalles_mantenimientos_id_detalle_mantenimiento_seq owner to postgres;
-
-create sequence detalles_mantenimientos_id_detalle_mantenimiento_seq1;
-
-alter sequence detalles_mantenimientos_id_detalle_mantenimiento_seq1 owner to postgres;
-
-create sequence nombre_de_tu_tabla_id_seq;
-
-alter sequence nombre_de_tu_tabla_id_seq owner to postgres;
-
-create type estado_disponibilidad as enum ('disponible', 'mantenimiento', 'ocupado');
-
-alter type estado_disponibilidad owner to postgres;
-
-create type estado_equipo as enum ('operativo', 'parcialmente_operativo', 'inoperativo', 'en_mantenimiento');
-
-alter type estado_equipo owner to postgres;
-
-create type estado_prestamo as enum ('pendiente', 'rechazado', 'aprobado', 'activo', 'finalizado', 'cancelado', 'atrasado');
-
-alter type estado_prestamo owner to postgres;
-
-create type tipo_mantenimiento as enum ('correctivo', 'preventivo');
-
-alter type tipo_mantenimiento owner to postgres;
-
-create type tipo_usuario as enum ('docente', 'administrador', 'estudiante', 'administrativo', 'administrador_laboratorio');
-
-alter type tipo_usuario owner to postgres;
-
-create table categorias
-(
-    id_categoria     integer generated always as identity
-        constraint "Categoria_pk"
-            primary key,
-    nombre           varchar(255)          not null
-        constraint unique_categorias
-            unique,
-    estado_eliminado boolean default false not null
+CREATE TYPE public.estado_disponibilidad AS ENUM (
+    'disponible',
+    'mantenimiento',
+    'ocupado'
 );
 
-alter table categorias
-    owner to postgres;
 
-alter sequence "Categoria_ID_Categoria_seq" owned by categorias.id_categoria;
+--
+-- Name: estado_equipo; Type: TYPE; Schema: public; Owner: -
+--
 
-create index idx_categorias_nombre
-    on categorias (nombre, estado_eliminado);
-
-create table empresas_mantenimiento
-(
-    id_empresa_mantenimiento integer generated always as identity
-        constraint "Empresa_Mantenimiento_pk"
-            primary key,
-    nombre                   varchar(255)          not null
-        constraint unique_nombre_empresas_mantenimiento
-            unique,
-    direccion                varchar(512),
-    telefono                 varchar(64),
-    nit                      varchar(255),
-    estado_eliminado         boolean default false not null,
-    nombre_responsable       varchar(64),
-    apellido_responsable     varchar(64)
+CREATE TYPE public.estado_equipo AS ENUM (
+    'operativo',
+    'parcialmente_operativo',
+    'inoperativo',
+    'en_mantenimiento'
 );
 
-comment on column empresas_mantenimiento.id_empresa_mantenimiento is 'Código empresa';
 
-alter table empresas_mantenimiento
-    owner to postgres;
+--
+-- Name: estado_prestamo; Type: TYPE; Schema: public; Owner: -
+--
 
-alter sequence "Empresa_Mantenimiento_Id_Empresa_seq" owned by empresas_mantenimiento.id_empresa_mantenimiento;
-
-create index idx_empresas_mantenimiento
-    on empresas_mantenimiento (nombre, estado_eliminado);
-
-create table grupos_equipos
-(
-    id_grupo_equipo          integer generated always as identity
-        constraint "Grupo_Equipo_pk"
-            primary key,
-    nombre                   varchar(256)                 not null,
-    modelo                   varchar(512)                 not null,
-    url_data_sheet           text,
-    cantidad                 integer        default 0     not null,
-    marca                    varchar(256)                 not null,
-    id_categoria             integer                      not null
-        constraint "Grupo_Categoria_fk"
-            references categorias,
-    estado_eliminado         boolean        default false not null,
-    url_imagen               text                         not null,
-    descripcion              text                         not null,
-    costo_promedio           numeric(10, 2) default 0,
-    tiempo_max_prestamo_dias integer        default 7     not null
-        constraint ck_grupos_equipos_tiempo_max_prestamo
-            check ((tiempo_max_prestamo_dias >= 1) AND (tiempo_max_prestamo_dias <= 365)),
-    constraint unique_grupos_equipos_nombre_modelo_marca
-        unique (nombre, modelo, marca)
+CREATE TYPE public.estado_prestamo AS ENUM (
+    'pendiente',
+    'rechazado',
+    'aprobado',
+    'activo',
+    'finalizado',
+    'cancelado',
+    'atrasado'
 );
 
-comment on column grupos_equipos.descripcion is 'Esto se mostrar en la pagina web';
 
-alter table grupos_equipos
-    owner to postgres;
+--
+-- Name: tipo_mantenimiento; Type: TYPE; Schema: public; Owner: -
+--
 
-alter sequence "Grupo_Equipo_Id_Grupo_equipo_seq" owned by grupos_equipos.id_grupo_equipo;
-
-create index idx_grupos_equipos_identificadores
-    on grupos_equipos (id_categoria, nombre, modelo, marca, estado_eliminado);
-
-create table mantenimientos
-(
-    id_mantenimiento          integer generated always as identity
-        constraint "Mantenimiento_pk"
-            primary key,
-    descripcion               text,
-    costo                     double precision,
-    fecha_mantenimiento       date                  not null,
-    id_empresa                integer               not null
-        constraint "Mantenimiento_Empresa_fk"
-            references empresas_mantenimiento,
-    estado_eliminado          boolean default false not null,
-    fecha_final_mantenimiento date                  not null
+CREATE TYPE public.tipo_mantenimiento AS ENUM (
+    'correctivo',
+    'preventivo'
 );
 
-alter table mantenimientos
-    owner to postgres;
 
-alter sequence "Mantenimiento_Id_Mantenimiento_seq" owned by mantenimientos.id_mantenimiento;
+--
+-- Name: tipo_usuario; Type: TYPE; Schema: public; Owner: -
+--
 
-create index idx_mantenimientos_fecha_empresa
-    on mantenimientos (fecha_mantenimiento, fecha_final_mantenimiento, id_empresa, estado_eliminado);
-
-create table muebles
-(
-    id_mueble        integer generated always as identity
-        constraint "Mueble_pk"
-            primary key,
-    nombre           varchar(255)          not null
-        constraint unique_nombre
-            unique,
-    tipo             varchar(255),
-    ubicacion        varchar(255),
-    id_ambiente      integer,
-    numero_gaveteros integer default 0     not null,
-    estado_eliminado boolean default false not null,
-    longitud         double precision,
-    profundidad      double precision,
-    altura           double precision,
-    costo            double precision
+CREATE TYPE public.tipo_usuario AS ENUM (
+    'docente',
+    'administrador',
+    'estudiante',
+    'administrativo',
+    'administrador_laboratorio'
 );
 
-comment on column muebles.id_mueble is 'Código del mueble';
 
-alter table muebles
-    owner to postgres;
+--
+-- Name: actualizar_accesorio(integer, character varying, character varying, character varying, integer, text, double precision, text); Type: PROCEDURE; Schema: public; Owner: -
+--
 
-alter sequence "Mueble_Id_Mueble_seq" owned by muebles.id_mueble;
-
-create table gaveteros
-(
-    id_gavetero      integer generated always as identity
-        constraint "Gavetero_pk"
-            primary key,
-    nombre           varchar(255)          not null
-        constraint unique_nombre_gaveteros
-            unique,
-    tipo             varchar(255),
-    estado_eliminado boolean default false not null,
-    id_mueble        integer               not null
-        constraint fk_gaveteros_muebles
-            references muebles,
-    longitud         double precision,
-    profundidad      double precision,
-    altura           double precision
-);
-
-alter table gaveteros
-    owner to postgres;
-
-alter sequence "Gavetero_Id_Gavetero_seq" owned by gaveteros.id_gavetero;
-
-create table ambientes
-(
-    id_ambiente integer generated by default as identity primary key,
-    nombre varchar(255) not null unique,
-    carnet_administrador varchar(64),
-    estado_eliminado boolean not null default false
-);
-
-alter table muebles add constraint fk_muebles_ambientes
-    foreign key (id_ambiente) references ambientes(id_ambiente) on delete restrict;
-create index ix_muebles_id_ambiente on muebles(id_ambiente);
-
-create table procedencias
-(
-    id_procedencia integer generated by default as identity primary key,
-    nombre varchar(255) not null unique,
-    estado_eliminado boolean not null default false
-);
-
-insert into procedencias(nombre) values ('Compra'), ('Donación'), ('Préstamo');
-
-create table equipos
-(
-    id_equipo            integer generated always as identity
-        constraint "Equipo_pk"
-            primary key,
-    id_grupo_equipo      integer                                             not null
-        constraint "Equipo_Grupo_fk"
-            references grupos_equipos,
-    codigo_imt           integer                                             not null
-        constraint unique_codigo_imt
-            unique,
-    descripcion          text,
-    estado_equipo        estado_equipo    default 'operativo'::estado_equipo not null,
-    numero_serial        varchar(255),
-    ubicacion            varchar(255),
-    id_ambiente          integer references ambientes(id_ambiente) on delete restrict,
-    id_procedencia       integer references procedencias(id_procedencia) on delete restrict,
-    costo_referencia     double precision default 0,
-    tiempo_max_prestamo  integer          default 9999,
-    procedencia          varchar(255),
-    id_gavetero          integer
-        constraint "Equipo_Gavetero_fk"
-            references gaveteros,
-    estado_eliminado     boolean          default false                      not null,
-    fecha_ingreso_equipo date             default CURRENT_DATE               not null,
-    codigo_ucb           varchar
-);
-
-alter table equipos
-    owner to postgres;
-
-create index ix_equipos_id_ambiente on equipos(id_ambiente);
-create index ix_equipos_id_procedencia on equipos(id_procedencia);
-
-alter sequence "Equipo_Id_equipo_seq" owned by equipos.id_equipo;
-
-create table accesorios
-(
-    id_accesorio     integer generated always as identity
-        constraint "Accesorio_pk"
-            primary key,
-    nombre           varchar(255)          not null,
-    descripcion      text,
-    modelo           varchar(255)          not null,
-    url_data_sheet   text,
-    precio           double precision,
-    id_equipo        integer               not null
-        constraint "Accesorio_Equipo_fk"
-            references equipos,
-    tipo             varchar(255),
-    estado_eliminado boolean default false not null
-);
-
-comment on column accesorios.id_accesorio is 'Código del accesorio';
-
-alter table accesorios
-    owner to postgres;
-
-alter sequence "Accesorio_Id_Accesorio_seq" owned by accesorios.id_accesorio;
-
-create index idx_accesorios_identificadores
-    on accesorios (nombre, id_equipo, estado_eliminado);
-
-create table componentes
-(
-    id_componente     integer generated always as identity
-        constraint "Componente_pk"
-            primary key,
-    descripcion       text,
-    modelo            varchar(255)          not null,
-    url_data_sheet    text,
-    tipo              varchar(255),
-    precio_referencia double precision,
-    nombre            varchar(255)          not null,
-    id_equipo         integer               not null
-        constraint "Componente_Equipo_fk"
-            references equipos,
-    estado_eliminado  boolean default false not null
-);
-
-comment on column componentes.id_componente is 'Código del componente';
-
-alter table componentes
-    owner to postgres;
-
-alter sequence "Componente_Id_Componente_seq" owned by componentes.id_componente;
-
-create index idx_componentes
-    on componentes (nombre, id_equipo, estado_eliminado);
-
-create index idx_equipos_identificadores
-    on equipos (id_grupo_equipo, codigo_imt, estado_eliminado);
-
-create unique index unique_codigo_ucb
-    on equipos (codigo_ucb);
-
-create index idx_gaveteros_identificadores
-    on gaveteros (nombre, id_mueble, estado_eliminado);
-
-create table carreras
-(
-    id_carrera       integer generated always as identity
-        constraint carrera_pkey
-            primary key,
-    nombre           varchar(255)          not null
-        constraint unique_carreras
-            unique,
-    estado_eliminado boolean default false not null
-);
-
-alter table carreras
-    owner to postgres;
-
-create index idx_carreras_nombre
-    on carreras (nombre, estado_eliminado);
-
-create table contratos
-(
-    id       integer generated always as identity
-        constraint contrato_id
-            primary key,
-    contrato text
-);
-
-alter table contratos
-    owner to postgres;
-
-alter sequence nombre_de_tu_tabla_id_seq owned by contratos.id;
-
-create table detalles_mantenimientos
-(
-    id_detalle_mantenimiento integer generated always as identity
-        primary key,
-    id_mantenimiento         integer               not null
-        constraint fk_detalles_mantenimiento
-            references mantenimientos,
-    descripcion              text,
-    id_equipo                integer               not null
-        constraint fk_detalle_mantenimiento_equipo
-            references equipos,
-    estado_eliminado         boolean default false not null,
-    tipo_mantenimiento       varchar
-);
-
-alter table detalles_mantenimientos
-    owner to postgres;
-
-alter sequence detalles_mantenimientos_id_detalle_mantenimiento_seq1 owned by detalles_mantenimientos.id_detalle_mantenimiento;
-
-create index idx_detalles_mantenimientos
-    on detalles_mantenimientos (id_mantenimiento, estado_eliminado);
-
-create table usuarios
-(
-    carnet               varchar(64)                                     not null
-        constraint "Usuario_pk"
-            primary key
-        constraint unique_carnet
-            unique,
-    nombre               varchar(64)                                     not null,
-    apellido_paterno     varchar(64)                                     not null,
-    apellido_materno     varchar(64)                                     not null,
-    rol                  tipo_usuario default 'estudiante'::tipo_usuario not null,
-    contrasena           text                                            not null,
-    email                varchar(255)                                    not null
-        constraint unique_email
-            unique,
-    telefono             varchar(32)                                     not null,
-    telefono_referencia  varchar(32),
-    nombre_referencia    varchar(32),
-    email_referencia     varchar(255),
-    estado_eliminado     boolean      default false                      not null,
-    id_carrera           integer                                         not null
-        constraint fk_usuarios_carrera
-            references carreras,
-    imagen_perfil        bytea,
-    imagen_frente_carnet bytea,
-    imagen_atras_carnet  bytea,
-    imagen_firma         bytea,
-    refresh_token        text,
-    refresh_token_expiry timestamp with time zone,
-    bloqueado            boolean      default false                      not null,
-    motivo_bloqueo       text,
-    email_verificado     boolean default true not null,
-    google_id            varchar(255),
-    token_verificacion_hash varchar(64),
-    token_verificacion_expira timestamp with time zone
-);
-
-alter table usuarios
-    owner to postgres;
-
-alter table ambientes add constraint fk_ambientes_administrador
-    foreign key (carnet_administrador) references usuarios(carnet) on delete restrict;
-create index ix_ambientes_carnet_administrador on ambientes(carnet_administrador);
-
-create table prestamos
-(
-    autorizado_por           varchar(255),
-    entregado_por            varchar(255),
-    motivo_rechazo           varchar(1024),
-    id_prestamo               integer generated always as identity
-        constraint "Prestamo_pk"
-            primary key,
-    fecha_solicitud           timestamp       default (now() AT TIME ZONE 'America/La_Paz'::text) not null,
-    fecha_prestamo            timestamp,
-    fecha_devolucion_esperada timestamp                                                           not null,
-    observacion               text,
-    estado_prestamo           estado_prestamo default 'pendiente'::estado_prestamo                not null,
-    carnet                    varchar(64)                                                         not null
-        constraint "Prestamo_Usuario_fk"
-            references usuarios,
-    estado_eliminado          boolean         default false                                       not null,
-    fecha_devolucion          timestamp,
-    fecha_prestamo_esperada   timestamp                                                           not null,
-    id_contrato               integer
-        constraint "Prestamo_contrato_fk"
-            references contratos,
-    recordatorio_enviado      boolean         default false                                       not null,
-    destino_prestamo          varchar(50)     default 'Universidad'::character varying            not null,
-    id_carrera                integer
-        constraint "Prestamo_Carrera_fk"
-            references carreras,
-    nombre_materia            varchar(255),
-    guardado                  boolean default false not null
-);
-
-comment on column prestamos.id_prestamo is 'Código del préstamo';
-
-alter table prestamos
-    owner to postgres;
-
-alter sequence "Prestamo_Id_Prestamo_seq" owned by prestamos.id_prestamo;
-
-create index idx_prestamos_fechas
-    on prestamos (fecha_prestamo_esperada, fecha_devolucion_esperada, carnet, estado_eliminado);
-
-create index ix_prestamos_carnet_estado
-    on prestamos (carnet, estado_prestamo, estado_eliminado);
-
-create index ix_prestamos_guardados_usuario
-    on prestamos (carnet, fecha_solicitud desc)
-    where guardado = true and estado_eliminado = false;
-
-create table detalles_prestamos
-(
-    id_detalle_prestamo   integer generated always as identity
-        primary key,
-    id_equipo             integer
-        constraint fk_equipo
-            references equipos,
-    id_prestamo           integer               not null
-        constraint fk_prestamo
-            references prestamos,
-    estado_eliminado      boolean default false not null,
-    id_grupo_equipo       integer               not null
-        references grupos_equipos,
-    estado_equipo_retorno estado_equipo
-);
-
-alter table detalles_prestamos
-    owner to postgres;
-
-create index idx_detalles_prestamos
-    on detalles_prestamos (id_prestamo, estado_eliminado);
-
-create index ix_detalles_prestamos_id_equipo
-    on detalles_prestamos (id_equipo);
-
-create index idx_muebles_nombre
-    on usuarios (nombre, estado_eliminado);
-
-create index idx_usuarios_email
-    on usuarios (email, estado_eliminado);
-
-create index ix_usuarios_refresh_token
-    on usuarios (refresh_token);
-
-create unique index ix_usuarios_google_id
-    on usuarios (google_id)
-    where google_id is not null;
-
-create unique index ix_usuarios_token_verificacion
-    on usuarios (token_verificacion_hash)
-    where token_verificacion_hash is not null;
-
-create table codigos_autenticacion
-(
-    hash                varchar(64) primary key,
-    tipo                varchar(20) not null,
-    email               varchar(255) not null,
-    google_id           varchar(255) not null,
-    nombre              varchar(64) not null,
-    apellido_paterno    varchar(64) not null,
-    apellido_materno    varchar(64) not null,
-    expira              timestamp with time zone not null,
-    usado               boolean default false not null
-);
-
-create index ix_codigos_autenticacion_expira_usado
-    on codigos_autenticacion (expira, usado);
-
-create table audit_logs
-(
-    id               serial
-        primary key,
-    admin_carnet     varchar(20)                            not null,
-    admin_nombre     text                                   not null,
-    accion           varchar(50)                            not null,
-    entidad          varchar(100)                           not null,
-    entidad_id       text,
-    detalle          text,
-    timestamp        timestamp with time zone default now() not null,
-    estado_eliminado boolean                  default false not null
-);
-
-alter table audit_logs
-    owner to postgres;
-
-create index idx_audit_admin
-    on audit_logs (admin_carnet asc, timestamp desc, estado_eliminado asc);
-
-create index idx_audit_entidad
-    on audit_logs (entidad, entidad_id, estado_eliminado);
-
-create index idx_audit_entidad_accion_fecha
-    on audit_logs (entidad asc, accion asc, timestamp desc, estado_eliminado asc);
-
-create table notificaciones
-(
-    id_notificacion  integer generated always as identity
-        primary key,
-    carnet_usuario   varchar(20)                            not null
-        references usuarios,
-    tipo             varchar(50)                            not null,
-    titulo           text                                   not null,
-    contenido        text,
-    detalle          text,
-    leido            boolean                  default false not null,
-    fecha_envio      timestamp with time zone default now() not null,
-    estado_eliminado boolean                  default false not null
-);
-
-alter table notificaciones
-    owner to postgres;
-
-create index ix_notificaciones_carnet
-    on notificaciones (carnet_usuario, leido, estado_eliminado);
-
-create table avisos_disponibilidad
-(
-    id_aviso         integer generated always as identity
-        primary key,
-    carnet_usuario   varchar(20)                            not null
-        references usuarios,
-    id_grupo_equipo  integer                                not null
-        references grupos_equipos,
-    fecha            timestamp                              not null,
-    cantidad         integer                  default 1     not null,
-    notificado       boolean                  default false not null,
-    fecha_creacion   timestamp with time zone default now() not null,
-    estado_eliminado boolean                  default false not null
-);
-
-alter table avisos_disponibilidad
-    owner to postgres;
-
-create index ix_avisos_disponibilidad_pendiente
-    on avisos_disponibilidad (notificado, estado_eliminado);
-
-create table comentarios_equipos
-(
-    id_comentario_equipo integer generated always as identity
-        primary key,
-    id_grupo_equipo      integer                                   not null
-        references grupos_equipos,
-    carnet_usuario       varchar(20)                               not null
-        references usuarios,
-    contenido            varchar(1024)                             not null,
-    fecha_creacion       timestamp with time zone default now()    not null,
-    estado_eliminado     boolean                  default false    not null,
-    id_comentario_padre  integer
-        references comentarios_equipos
-            on delete restrict,
-    likes                integer                  default 0        not null,
-    liked_by             text                     default ''::text not null
-);
-
-alter table comentarios_equipos
-    owner to postgres;
-
-create index ix_comentarios_equipos_grupo_fecha
-    on comentarios_equipos (id_grupo_equipo, fecha_creacion, estado_eliminado);
-
-create index ix_comentarios_equipos_padre_estado
-    on comentarios_equipos (id_comentario_padre, estado_eliminado);
-
-create view vw_equipos_necesitan_mantenimiento
-            (codigo_imt, grupo_equipo, estado_equipo, ubicacion, ultima_fecha_mantenimiento) as
-SELECT e.codigo_imt,
-       ge.nombre                                                    AS grupo_equipo,
-       e.estado_equipo,
-       e.ubicacion,
-       COALESCE(max(m.fecha_mantenimiento), e.fecha_ingreso_equipo) AS ultima_fecha_mantenimiento
-FROM equipos e
-         LEFT JOIN detalles_mantenimientos dm ON dm.id_equipo = e.id_equipo AND dm.estado_eliminado = false
-         JOIN grupos_equipos ge ON ge.id_grupo_equipo = e.id_grupo_equipo
-         LEFT JOIN mantenimientos m ON m.id_mantenimiento = dm.id_mantenimiento AND m.estado_eliminado = false
-WHERE e.estado_eliminado = false
-GROUP BY e.codigo_imt, ge.nombre, e.estado_equipo, e.ubicacion, e.fecha_ingreso_equipo
-HAVING (e.estado_equipo = ANY (ARRAY ['parcialmente_operativo'::estado_equipo, 'inoperativo'::estado_equipo]))
-    OR max(m.fecha_mantenimiento) IS NOT NULL AND EXTRACT(month FROM age(CURRENT_DATE::timestamp with time zone,
-                                                                         max(m.fecha_mantenimiento)::timestamp with time zone)) >
-                                                  4::numeric
-    OR max(m.fecha_mantenimiento) IS NULL AND EXTRACT(month FROM age(CURRENT_DATE::timestamp with time zone,
-                                                                     e.fecha_ingreso_equipo::timestamp with time zone)) >
-                                              4::numeric;
-
-alter table vw_equipos_necesitan_mantenimiento
-    owner to postgres;
-
-create view vw_ubicaciones_grupos_equipos
-            (id_grupo_equipo, codigo_imt, nombre, modelo, marca, ubicacion, categoria, url_imagen) as
-SELECT ge.id_grupo_equipo,
-       e.codigo_imt,
-       ge.nombre,
-       ge.modelo,
-       ge.marca,
-       e.ubicacion,
-       c.nombre AS categoria,
-       ge.url_imagen
-FROM grupos_equipos ge
-         JOIN equipos e ON e.id_grupo_equipo = ge.id_grupo_equipo
-         JOIN categorias c ON c.id_categoria = ge.id_categoria
-         LEFT JOIN gaveteros ga ON e.id_gavetero = ga.id_gavetero
-         JOIN muebles mu ON mu.id_mueble = ga.id_mueble
-WHERE ge.estado_eliminado = false
-  AND e.estado_eliminado = false;
-
-alter table vw_ubicaciones_grupos_equipos
-    owner to postgres;
-
-create function digest(text, text) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function digest(text, text) owner to postgres;
-
-create function digest(bytea, text) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function digest(bytea, text) owner to postgres;
-
-create function hmac(text, text, text) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function hmac(text, text, text) owner to postgres;
-
-create function hmac(bytea, bytea, text) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function hmac(bytea, bytea, text) owner to postgres;
-
-create function crypt(text, text) returns text
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function crypt(text, text) owner to postgres;
-
-create function gen_salt(text) returns text
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function gen_salt(text) owner to postgres;
-
-create function gen_salt(text, integer) returns text
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function gen_salt(text, integer) owner to postgres;
-
-create function encrypt(bytea, bytea, text) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function encrypt(bytea, bytea, text) owner to postgres;
-
-create function decrypt(bytea, bytea, text) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function decrypt(bytea, bytea, text) owner to postgres;
-
-create function encrypt_iv(bytea, bytea, bytea, text) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function encrypt_iv(bytea, bytea, bytea, text) owner to postgres;
-
-create function decrypt_iv(bytea, bytea, bytea, text) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function decrypt_iv(bytea, bytea, bytea, text) owner to postgres;
-
-create function gen_random_bytes(integer) returns bytea
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function gen_random_bytes(integer) owner to postgres;
-
-create function gen_random_uuid() returns uuid
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function gen_random_uuid() owner to postgres;
-
-create function pgp_sym_encrypt(text, text) returns bytea
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_sym_encrypt(text, text) owner to postgres;
-
-create function pgp_sym_encrypt_bytea(bytea, text) returns bytea
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_sym_encrypt_bytea(bytea, text) owner to postgres;
-
-create function pgp_sym_encrypt(text, text, text) returns bytea
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_sym_encrypt(text, text, text) owner to postgres;
-
-create function pgp_sym_encrypt_bytea(bytea, text, text) returns bytea
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_sym_encrypt_bytea(bytea, text, text) owner to postgres;
-
-create function pgp_sym_decrypt(bytea, text) returns text
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_sym_decrypt(bytea, text) owner to postgres;
-
-create function pgp_sym_decrypt_bytea(bytea, text) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_sym_decrypt_bytea(bytea, text) owner to postgres;
-
-create function pgp_sym_decrypt(bytea, text, text) returns text
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_sym_decrypt(bytea, text, text) owner to postgres;
-
-create function pgp_sym_decrypt_bytea(bytea, text, text) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_sym_decrypt_bytea(bytea, text, text) owner to postgres;
-
-create function pgp_pub_encrypt(text, bytea) returns bytea
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_pub_encrypt(text, bytea) owner to postgres;
-
-create function pgp_pub_encrypt_bytea(bytea, bytea) returns bytea
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_pub_encrypt_bytea(bytea, bytea) owner to postgres;
-
-create function pgp_pub_encrypt(text, bytea, text) returns bytea
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_pub_encrypt(text, bytea, text) owner to postgres;
-
-create function pgp_pub_encrypt_bytea(bytea, bytea, text) returns bytea
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_pub_encrypt_bytea(bytea, bytea, text) owner to postgres;
-
-create function pgp_pub_decrypt(bytea, bytea) returns text
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_pub_decrypt(bytea, bytea) owner to postgres;
-
-create function pgp_pub_decrypt_bytea(bytea, bytea) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_pub_decrypt_bytea(bytea, bytea) owner to postgres;
-
-create function pgp_pub_decrypt(bytea, bytea, text) returns text
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_pub_decrypt(bytea, bytea, text) owner to postgres;
-
-create function pgp_pub_decrypt_bytea(bytea, bytea, text) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_pub_decrypt_bytea(bytea, bytea, text) owner to postgres;
-
-create function pgp_pub_decrypt(bytea, bytea, text, text) returns text
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_pub_decrypt(bytea, bytea, text, text) owner to postgres;
-
-create function pgp_pub_decrypt_bytea(bytea, bytea, text, text) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_pub_decrypt_bytea(bytea, bytea, text, text) owner to postgres;
-
-create function pgp_key_id(bytea) returns text
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_key_id(bytea) owner to postgres;
-
-create function armor(bytea) returns text
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function armor(bytea) owner to postgres;
-
-create function armor(bytea, text[], text[]) returns text
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function armor(bytea, text[], text[]) owner to postgres;
-
-create function dearmor(text) returns bytea
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function dearmor(text) owner to postgres;
-
-create function pgp_armor_headers(text, out key text, out value text) returns setof record
-    immutable
-    strict
-    parallel safe
-    language c
-as
-$$
-begin
--- missing source code
-end;
-$$;
-
-alter function pgp_armor_headers(text, out text, out text) owner to postgres;
-
-create procedure actualizar_accesorio(IN p_id_accesorio_actualizar integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_modelo_nuevo character varying DEFAULT NULL::character varying, IN p_tipo_nuevo character varying DEFAULT NULL::character varying, IN p_codigo_imt_nuevo integer DEFAULT NULL::integer, IN p_descripcion_nueva text DEFAULT NULL::text, IN p_precio_nuevo double precision DEFAULT NULL::double precision, IN p_url_data_sheet_nueva text DEFAULT NULL::text)
-    language plpgsql
-as
-$$
+CREATE PROCEDURE public.actualizar_accesorio(IN p_id_accesorio_actualizar integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_modelo_nuevo character varying DEFAULT NULL::character varying, IN p_tipo_nuevo character varying DEFAULT NULL::character varying, IN p_codigo_imt_nuevo integer DEFAULT NULL::integer, IN p_descripcion_nueva text DEFAULT NULL::text, IN p_precio_nuevo double precision DEFAULT NULL::double precision, IN p_url_data_sheet_nueva text DEFAULT NULL::text)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_id_equipo_para_actualizar INTEGER;
     v_accesorio_existe BOOLEAN;
@@ -1230,12 +165,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure actualizar_accesorio(integer, varchar, varchar, varchar, integer, text, double precision, text) owner to postgres;
 
-create procedure actualizar_cantidad_grupos_equipos()
-    language plpgsql
-as
-$$
+--
+-- Name: actualizar_cantidad_grupos_equipos(); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.actualizar_cantidad_grupos_equipos()
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_grupo_id integer;
     v_cantidad_actual integer;
@@ -1275,12 +212,14 @@ BEGIN
 END;
 $$;
 
-alter procedure actualizar_cantidad_grupos_equipos() owner to postgres;
 
-create procedure actualizar_carrera(IN p_id_carrera_actualizar integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: actualizar_carrera(integer, character varying); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.actualizar_carrera(IN p_id_carrera_actualizar integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_carrera_existe BOOLEAN;
     v_nombre_actual character varying;
@@ -1348,12 +287,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure actualizar_carrera(integer, varchar) owner to postgres;
 
-create procedure actualizar_categoria(IN p_id_categoria_actualizar integer, IN p_nombre_nuevo_raw character varying DEFAULT NULL::character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: actualizar_categoria(integer, character varying); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.actualizar_categoria(IN p_id_categoria_actualizar integer, IN p_nombre_nuevo_raw character varying DEFAULT NULL::character varying)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_categoria_existe   BOOLEAN;
     v_nombre_nuevo_procesado TEXT;
@@ -1433,12 +374,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure actualizar_categoria(integer, varchar) owner to postgres;
 
-create procedure actualizar_componente(IN p_id_componente_actualizar integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_modelo_nuevo character varying DEFAULT NULL::character varying, IN p_tipo_nuevo character varying DEFAULT NULL::character varying, IN p_codigo_imt_nuevo integer DEFAULT NULL::integer, IN p_descripcion_nueva text DEFAULT NULL::text, IN p_precio_referencia_nuevo double precision DEFAULT NULL::double precision, IN p_url_data_sheet_nueva text DEFAULT NULL::text)
-    language plpgsql
-as
-$$
+--
+-- Name: actualizar_componente(integer, character varying, character varying, character varying, integer, text, double precision, text); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.actualizar_componente(IN p_id_componente_actualizar integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_modelo_nuevo character varying DEFAULT NULL::character varying, IN p_tipo_nuevo character varying DEFAULT NULL::character varying, IN p_codigo_imt_nuevo integer DEFAULT NULL::integer, IN p_descripcion_nueva text DEFAULT NULL::text, IN p_precio_referencia_nuevo double precision DEFAULT NULL::double precision, IN p_url_data_sheet_nueva text DEFAULT NULL::text)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_id_equipo_para_actualizar INTEGER; 
     v_componente_existe BOOLEAN;
@@ -1484,12 +427,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure actualizar_componente(integer, varchar, varchar, varchar, integer, text, double precision, text) owner to postgres;
 
-create procedure actualizar_empresa_mantenimiento(IN p_id_empresa_actualizar integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_nombre_responsable_nuevo character varying DEFAULT NULL::character varying, IN p_apellido_responsable_nuevo character varying DEFAULT NULL::character varying, IN p_telefono_nuevo character varying DEFAULT NULL::character varying, IN p_direccion_nueva text DEFAULT NULL::text, IN p_nit_nuevo character varying DEFAULT NULL::character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: actualizar_empresa_mantenimiento(integer, character varying, character varying, character varying, character varying, text, character varying); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.actualizar_empresa_mantenimiento(IN p_id_empresa_actualizar integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_nombre_responsable_nuevo character varying DEFAULT NULL::character varying, IN p_apellido_responsable_nuevo character varying DEFAULT NULL::character varying, IN p_telefono_nuevo character varying DEFAULT NULL::character varying, IN p_direccion_nueva text DEFAULT NULL::text, IN p_nit_nuevo character varying DEFAULT NULL::character varying)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_empresa_existe   BOOLEAN;
     v_nombre_trimmed   TEXT;
@@ -1555,12 +500,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure actualizar_empresa_mantenimiento(integer, varchar, varchar, varchar, varchar, text, varchar) owner to postgres;
 
-create procedure actualizar_equipo(IN p_id_equipo_actualizar integer, IN p_nombre_grupo_equipo_nuevo character varying DEFAULT NULL::character varying, IN p_modelo_grupo_equipo_nuevo character varying DEFAULT NULL::character varying, IN p_marca_grupo_equipo_nuevo character varying DEFAULT NULL::character varying, IN p_codigo_ucb_nuevo character varying DEFAULT NULL::character varying, IN p_descripcion_nueva text DEFAULT NULL::text, IN p_numero_serial_nuevo character varying DEFAULT NULL::character varying, IN p_ubicacion_nueva character varying DEFAULT NULL::character varying, IN p_procedencia_nueva character varying DEFAULT NULL::character varying, IN p_costo_referencia_nuevo double precision DEFAULT NULL::double precision, IN p_tiempo_maximo_prestamo_nuevo integer DEFAULT NULL::integer, IN p_nombre_gavetero_nuevo character varying DEFAULT NULL::character varying, IN p_estado_equipo_nuevo character varying DEFAULT NULL::character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: actualizar_equipo(integer, character varying, character varying, character varying, character varying, text, character varying, character varying, character varying, double precision, integer, character varying, character varying); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.actualizar_equipo(IN p_id_equipo_actualizar integer, IN p_nombre_grupo_equipo_nuevo character varying DEFAULT NULL::character varying, IN p_modelo_grupo_equipo_nuevo character varying DEFAULT NULL::character varying, IN p_marca_grupo_equipo_nuevo character varying DEFAULT NULL::character varying, IN p_codigo_ucb_nuevo character varying DEFAULT NULL::character varying, IN p_descripcion_nueva text DEFAULT NULL::text, IN p_numero_serial_nuevo character varying DEFAULT NULL::character varying, IN p_ubicacion_nueva character varying DEFAULT NULL::character varying, IN p_procedencia_nueva character varying DEFAULT NULL::character varying, IN p_costo_referencia_nuevo double precision DEFAULT NULL::double precision, IN p_tiempo_maximo_prestamo_nuevo integer DEFAULT NULL::integer, IN p_nombre_gavetero_nuevo character varying DEFAULT NULL::character varying, IN p_estado_equipo_nuevo character varying DEFAULT NULL::character varying)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_id_grupo_equipo_actual        INTEGER;
     v_id_categoria_actual           INTEGER;
@@ -1611,8 +558,8 @@ BEGIN
     END IF;
 
     IF p_estado_equipo_nuevo IS NOT NULL THEN
-        IF lower(p_estado_equipo_nuevo) NOT IN ('operativo', 'inoperativo', 'parcialmente_operativo', 'en_mantenimiento') THEN
-            RAISE EXCEPTION 'Valor inválido para estado_equipo: "%".', p_estado_equipo_nuevo;
+        IF lower(p_estado_equipo_nuevo) NOT IN ('operativo', 'inoperativo', 'parcialmente_operativo') THEN
+            RAISE EXCEPTION 'Valor inválido para estado_equipo: "%". Debe ser ''operativo'', ''inoperativo'', o ''parcialmente_operativo''.', p_estado_equipo_nuevo;
         END IF;
     END IF;
 
@@ -1646,12 +593,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure actualizar_equipo(integer, varchar, varchar, varchar, varchar, text, varchar, varchar, varchar, double precision, integer, varchar, varchar) owner to postgres;
 
-create procedure actualizar_estado_prestamo(IN p_id_prestamo integer, IN p_estado_prestamo_input estado_prestamo)
-    language plpgsql
-as
-$$
+--
+-- Name: actualizar_estado_prestamo(integer, public.estado_prestamo); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.actualizar_estado_prestamo(IN p_id_prestamo integer, IN p_estado_prestamo_input public.estado_prestamo)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     -- 1. Validar que el nuevo estado esté dentro de los permitidos
     IF p_estado_prestamo_input NOT IN (
@@ -1691,12 +640,14 @@ BEGIN
 END;
 $$;
 
-alter procedure actualizar_estado_prestamo(integer, estado_prestamo) owner to postgres;
 
-create procedure actualizar_gavetero(IN p_id_gavetero_actualizar integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_tipo_nuevo character varying DEFAULT NULL::character varying, IN p_nombre_mueble_nuevo character varying DEFAULT NULL::character varying, IN p_longitud_nueva double precision DEFAULT NULL::double precision, IN p_profundidad_nueva double precision DEFAULT NULL::double precision, IN p_altura_nueva double precision DEFAULT NULL::double precision)
-    language plpgsql
-as
-$$
+--
+-- Name: actualizar_gavetero(integer, character varying, character varying, character varying, double precision, double precision, double precision); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.actualizar_gavetero(IN p_id_gavetero_actualizar integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_tipo_nuevo character varying DEFAULT NULL::character varying, IN p_nombre_mueble_nuevo character varying DEFAULT NULL::character varying, IN p_longitud_nueva double precision DEFAULT NULL::double precision, IN p_profundidad_nueva double precision DEFAULT NULL::double precision, IN p_altura_nueva double precision DEFAULT NULL::double precision)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_id_mueble_para_actualizar INTEGER;
     v_gavetero_existe BOOLEAN;
@@ -1756,12 +707,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure actualizar_gavetero(integer, varchar, varchar, varchar, double precision, double precision, double precision) owner to postgres;
 
-create procedure actualizar_grupo_equipo(IN p_id_grupo_equipo_actualizar integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_modelo_nuevo character varying DEFAULT NULL::character varying, IN p_marca_nueva character varying DEFAULT NULL::character varying, IN p_descripcion_nueva text DEFAULT NULL::text, IN p_nombre_categoria_nuevo character varying DEFAULT NULL::character varying, IN p_url_data_sheet_nuevo text DEFAULT NULL::text, IN p_url_imagen_nuevo text DEFAULT NULL::text)
-    language plpgsql
-as
-$$
+--
+-- Name: actualizar_grupo_equipo(integer, character varying, character varying, character varying, text, character varying, text, text); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.actualizar_grupo_equipo(IN p_id_grupo_equipo_actualizar integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_modelo_nuevo character varying DEFAULT NULL::character varying, IN p_marca_nueva character varying DEFAULT NULL::character varying, IN p_descripcion_nueva text DEFAULT NULL::text, IN p_nombre_categoria_nuevo character varying DEFAULT NULL::character varying, IN p_url_data_sheet_nuevo text DEFAULT NULL::text, IN p_url_imagen_nuevo text DEFAULT NULL::text)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_id_categoria_actual            INTEGER; 
     v_id_categoria_para_actualizar   INTEGER;
@@ -1847,12 +800,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure actualizar_grupo_equipo(integer, varchar, varchar, varchar, text, varchar, text, text) owner to postgres;
 
-create procedure actualizar_mueble(IN p_id_mueble_actual integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_tipo_nuevo character varying DEFAULT NULL::character varying, IN p_costo_nuevo double precision DEFAULT NULL::double precision, IN p_ubicacion_nueva character varying DEFAULT NULL::character varying, IN p_longitud_nueva double precision DEFAULT NULL::double precision, IN p_profundidad_nueva double precision DEFAULT NULL::double precision, IN p_altura_nueva double precision DEFAULT NULL::double precision)
-    language plpgsql
-as
-$$
+--
+-- Name: actualizar_mueble(integer, character varying, character varying, double precision, character varying, double precision, double precision, double precision); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.actualizar_mueble(IN p_id_mueble_actual integer, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_tipo_nuevo character varying DEFAULT NULL::character varying, IN p_costo_nuevo double precision DEFAULT NULL::double precision, IN p_ubicacion_nueva character varying DEFAULT NULL::character varying, IN p_longitud_nueva double precision DEFAULT NULL::double precision, IN p_profundidad_nueva double precision DEFAULT NULL::double precision, IN p_altura_nueva double precision DEFAULT NULL::double precision)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     PERFORM 1
       FROM public.muebles
@@ -1884,12 +839,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure actualizar_mueble(integer, varchar, varchar, double precision, varchar, double precision, double precision, double precision) owner to postgres;
 
-create procedure actualizar_usuario(IN p_carnet_actual character varying, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_apellido_paterno_nuevo character varying DEFAULT NULL::character varying, IN p_apellido_materno_nuevo character varying DEFAULT NULL::character varying, IN p_email_nuevo character varying DEFAULT NULL::character varying, IN p_contrasena_nueva text DEFAULT NULL::text, IN p_rol_nuevo tipo_usuario DEFAULT NULL::tipo_usuario, IN p_carrera_nueva character varying DEFAULT NULL::character varying, IN p_telefono_nuevo character varying DEFAULT NULL::character varying, IN p_telefono_ref_nuevo character varying DEFAULT NULL::character varying, IN p_nombre_ref_nuevo character varying DEFAULT NULL::character varying, IN p_email_ref_nuevo character varying DEFAULT NULL::character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: actualizar_usuario(character varying, character varying, character varying, character varying, character varying, text, public.tipo_usuario, character varying, character varying, character varying, character varying, character varying); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.actualizar_usuario(IN p_carnet_actual character varying, IN p_nombre_nuevo character varying DEFAULT NULL::character varying, IN p_apellido_paterno_nuevo character varying DEFAULT NULL::character varying, IN p_apellido_materno_nuevo character varying DEFAULT NULL::character varying, IN p_email_nuevo character varying DEFAULT NULL::character varying, IN p_contrasena_nueva text DEFAULT NULL::text, IN p_rol_nuevo public.tipo_usuario DEFAULT NULL::public.tipo_usuario, IN p_carrera_nueva character varying DEFAULT NULL::character varying, IN p_telefono_nuevo character varying DEFAULT NULL::character varying, IN p_telefono_ref_nuevo character varying DEFAULT NULL::character varying, IN p_nombre_ref_nuevo character varying DEFAULT NULL::character varying, IN p_email_ref_nuevo character varying DEFAULT NULL::character varying)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_id_carrera_actual integer;
     v_id_carrera_para_actualizar integer;
@@ -1954,12 +911,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure actualizar_usuario(varchar, varchar, varchar, varchar, varchar, text, tipo_usuario, varchar, varchar, varchar, varchar, varchar) owner to postgres;
 
-create procedure eliminar_accesorio(IN p_id_accesorio integer)
-    language plpgsql
-as
-$$
+--
+-- Name: eliminar_accesorio(integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.eliminar_accesorio(IN p_id_accesorio integer)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
 
     -- 2) Bloquear la fila y verificar existencia de accesorio activo
@@ -1986,12 +945,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure eliminar_accesorio(integer) owner to postgres;
 
-create procedure eliminar_carrera(IN p_id_carrera integer)
-    language plpgsql
-as
-$$
+--
+-- Name: eliminar_carrera(integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.eliminar_carrera(IN p_id_carrera integer)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
 
     PERFORM 1
@@ -2015,12 +976,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure eliminar_carrera(integer) owner to postgres;
 
-create procedure eliminar_categoria(IN p_id_categoria integer)
-    language plpgsql
-as
-$$
+--
+-- Name: eliminar_categoria(integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.eliminar_categoria(IN p_id_categoria integer)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     PERFORM 1
       FROM public.categorias
@@ -2043,12 +1006,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure eliminar_categoria(integer) owner to postgres;
 
-create procedure eliminar_componente(IN p_id_componente integer)
-    language plpgsql
-as
-$$
+--
+-- Name: eliminar_componente(integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.eliminar_componente(IN p_id_componente integer)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     PERFORM 1
       FROM public.componentes
@@ -2071,12 +1036,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure eliminar_componente(integer) owner to postgres;
 
-create procedure eliminar_empresas_mantenimiento(IN p_id_empresa_mantenimiento integer)
-    language plpgsql
-as
-$$
+--
+-- Name: eliminar_empresas_mantenimiento(integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.eliminar_empresas_mantenimiento(IN p_id_empresa_mantenimiento integer)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
 
     PERFORM 1
@@ -2101,12 +1068,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure eliminar_empresas_mantenimiento(integer) owner to postgres;
 
-create procedure eliminar_equipo(IN p_id_equipo integer)
-    language plpgsql
-as
-$$
+--
+-- Name: eliminar_equipo(integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.eliminar_equipo(IN p_id_equipo integer)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     PERFORM 1
       FROM public.equipos
@@ -2129,12 +1098,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure eliminar_equipo(integer) owner to postgres;
 
-create procedure eliminar_gavetero(IN p_id_gavetero integer)
-    language plpgsql
-as
-$$
+--
+-- Name: eliminar_gavetero(integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.eliminar_gavetero(IN p_id_gavetero integer)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     PERFORM 1
       FROM public.gaveteros
@@ -2157,12 +1128,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure eliminar_gavetero(integer) owner to postgres;
 
-create procedure eliminar_grupo_equipo(IN p_id_grupo_equipo integer)
-    language plpgsql
-as
-$$
+--
+-- Name: eliminar_grupo_equipo(integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.eliminar_grupo_equipo(IN p_id_grupo_equipo integer)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     PERFORM 1
       FROM public.grupos_equipos
@@ -2185,12 +1158,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure eliminar_grupo_equipo(integer) owner to postgres;
 
-create procedure eliminar_mantenimiento(IN p_id_mantenimiento integer)
-    language plpgsql
-as
-$$
+--
+-- Name: eliminar_mantenimiento(integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.eliminar_mantenimiento(IN p_id_mantenimiento integer)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     PERFORM 1
       FROM public.mantenimientos
@@ -2213,12 +1188,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure eliminar_mantenimiento(integer) owner to postgres;
 
-create procedure eliminar_mueble(IN p_id_mueble integer)
-    language plpgsql
-as
-$$
+--
+-- Name: eliminar_mueble(integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.eliminar_mueble(IN p_id_mueble integer)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     PERFORM 1
       FROM public.muebles
@@ -2241,12 +1218,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure eliminar_mueble(integer) owner to postgres;
 
-create procedure eliminar_prestamo(IN p_id_prestamo integer)
-    language plpgsql
-as
-$$
+--
+-- Name: eliminar_prestamo(integer); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.eliminar_prestamo(IN p_id_prestamo integer)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     PERFORM 1
       FROM public.prestamos
@@ -2269,12 +1248,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure eliminar_prestamo(integer) owner to postgres;
 
-create procedure eliminar_usuario(IN p_carnet character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: eliminar_usuario(character varying); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.eliminar_usuario(IN p_carnet character varying)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     PERFORM 1
       FROM public.usuarios
@@ -2297,12 +1278,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure eliminar_usuario(varchar) owner to postgres;
 
-create function fn_actualizar_cantidad_equipo_por_estado() returns trigger
-    language plpgsql
-as
-$$
+--
+-- Name: fn_actualizar_cantidad_equipo_por_estado(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.fn_actualizar_cantidad_equipo_por_estado() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
   IF OLD.estado_eliminado = FALSE AND NEW.estado_eliminado = TRUE THEN
     UPDATE public.grupos_equipos
@@ -2319,12 +1302,14 @@ BEGIN
 END;
 $$;
 
-alter function fn_actualizar_cantidad_equipo_por_estado() owner to postgres;
 
-create function fn_actualizar_cantidad_tras_update_equipos() returns trigger
-    language plpgsql
-as
-$$
+--
+-- Name: fn_actualizar_cantidad_tras_update_equipos(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.fn_actualizar_cantidad_tras_update_equipos() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     -- Este trigger se activa cuando OLD.id_grupo_equipo es diferente de NEW.id_grupo_equipo.
     -- Solo se realizarán ajustes si el estado_eliminado del equipo no cambia en la misma transacción,
@@ -2358,12 +1343,14 @@ BEGIN
 END;
 $$;
 
-alter function fn_actualizar_cantidad_tras_update_equipos() owner to postgres;
 
-create function fn_actualizar_conteo_gaveteros_por_estado() returns trigger
-    language plpgsql
-as
-$$
+--
+-- Name: fn_actualizar_conteo_gaveteros_por_estado(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.fn_actualizar_conteo_gaveteros_por_estado() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     IF OLD.estado_eliminado IS DISTINCT FROM NEW.estado_eliminado THEN
 
@@ -2383,12 +1370,14 @@ BEGIN
 END;
 $$;
 
-alter function fn_actualizar_conteo_gaveteros_por_estado() owner to postgres;
 
-create function fn_actualizar_costo_promedio_grupo() returns trigger
-    language plpgsql
-as
-$$
+--
+-- Name: fn_actualizar_costo_promedio_grupo(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.fn_actualizar_costo_promedio_grupo() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     -- Cuando se inserta, actualiza o elimina un equipo, recalcula el promedio del grupo
     UPDATE public.grupos_equipos
@@ -2405,12 +1394,14 @@ BEGIN
 END;
 $$;
 
-alter function fn_actualizar_costo_promedio_grupo() owner to postgres;
 
-create function fn_actualizar_gavetero_tras_update_mueble() returns trigger
-    language plpgsql
-as
-$$
+--
+-- Name: fn_actualizar_gavetero_tras_update_mueble(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.fn_actualizar_gavetero_tras_update_mueble() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     IF OLD.estado_eliminado = NEW.estado_eliminado THEN
         IF OLD.estado_eliminado = FALSE THEN
@@ -2433,12 +1424,14 @@ BEGIN
 END;
 $$;
 
-alter function fn_actualizar_gavetero_tras_update_mueble() owner to postgres;
 
-create function fn_estado_eliminado_mantenimiento_a_detalle() returns trigger
-    language plpgsql
-as
-$$
+--
+-- Name: fn_estado_eliminado_mantenimiento_a_detalle(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.fn_estado_eliminado_mantenimiento_a_detalle() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
 
     IF OLD.estado_eliminado IS DISTINCT FROM NEW.estado_eliminado THEN
@@ -2451,12 +1444,14 @@ BEGIN
 END;
 $$;
 
-alter function fn_estado_eliminado_mantenimiento_a_detalle() owner to postgres;
 
-create function fn_estado_eliminado_prestamo_a_detalle() returns trigger
-    language plpgsql
-as
-$$
+--
+-- Name: fn_estado_eliminado_prestamo_a_detalle(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.fn_estado_eliminado_prestamo_a_detalle() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
 
     IF OLD.estado_eliminado IS DISTINCT FROM NEW.estado_eliminado THEN
@@ -2470,12 +1465,14 @@ BEGIN
 END;
 $$;
 
-alter function fn_estado_eliminado_prestamo_a_detalle() owner to postgres;
 
-create function fn_incrementar_cantidad_equipos() returns trigger
-    language plpgsql
-as
-$$
+--
+-- Name: fn_incrementar_cantidad_equipos(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.fn_incrementar_cantidad_equipos() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
   -- Aumenta en 1 la cantidad en grupos_equipos
   UPDATE grupos_equipos
@@ -2485,12 +1482,14 @@ BEGIN
 END;
 $$;
 
-alter function fn_incrementar_cantidad_equipos() owner to postgres;
 
-create function fn_incrementar_numero_gaveteros() returns trigger
-    language plpgsql
-as
-$$
+--
+-- Name: fn_incrementar_numero_gaveteros(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.fn_incrementar_numero_gaveteros() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
   UPDATE public.muebles
      SET numero_gaveteros = COALESCE(numero_gaveteros, 0) + 1
@@ -2504,12 +1503,14 @@ EXCEPTION
 END;
 $$;
 
-alter function fn_incrementar_numero_gaveteros() owner to postgres;
 
-create procedure insertar_accesorios(IN p_nombre character varying, IN p_modelo character varying, IN p_tipo character varying, IN p_codigo_imt integer, IN p_descripcion text DEFAULT NULL::text, IN p_precio double precision DEFAULT NULL::double precision, IN p_url_data_sheet text DEFAULT NULL::text)
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_accesorios(character varying, character varying, character varying, integer, text, double precision, text); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.insertar_accesorios(IN p_nombre character varying, IN p_modelo character varying, IN p_tipo character varying, IN p_codigo_imt integer, IN p_descripcion text DEFAULT NULL::text, IN p_precio double precision DEFAULT NULL::double precision, IN p_url_data_sheet text DEFAULT NULL::text)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_id_equipo INTEGER;
 BEGIN
@@ -2551,12 +1552,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure insertar_accesorios(varchar, varchar, varchar, integer, text, double precision, text) owner to postgres;
 
-create procedure insertar_carrera(IN p_nombre character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_carrera(character varying); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.insertar_carrera(IN p_nombre character varying)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     IF trim(p_nombre) = '' THEN
         RAISE EXCEPTION 'El nombre de la carrera no puede estar vacío';
@@ -2596,12 +1599,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure insertar_carrera(varchar) owner to postgres;
 
-create procedure insertar_categoria(IN p_nombre_raw character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_categoria(character varying); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.insertar_categoria(IN p_nombre_raw character varying)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_nombre TEXT := TRIM(both ' ' FROM p_nombre_raw);
 BEGIN
@@ -2645,12 +1650,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure insertar_categoria(varchar) owner to postgres;
 
-create procedure insertar_componente(IN p_nombre character varying, IN p_modelo character varying, IN p_tipo character varying, IN p_codigo_imt integer, IN p_descripcion text DEFAULT NULL::text, IN p_precio_referencia double precision DEFAULT NULL::double precision, IN p_url_data_sheet text DEFAULT NULL::text)
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_componente(character varying, character varying, character varying, integer, text, double precision, text); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.insertar_componente(IN p_nombre character varying, IN p_modelo character varying, IN p_tipo character varying, IN p_codigo_imt integer, IN p_descripcion text DEFAULT NULL::text, IN p_precio_referencia double precision DEFAULT NULL::double precision, IN p_url_data_sheet text DEFAULT NULL::text)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_id_equipo INTEGER;
 BEGIN
@@ -2693,12 +1700,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure insertar_componente(varchar, varchar, varchar, integer, text, double precision, text) owner to postgres;
 
-create procedure insertar_empresa_mantenimiento(IN p_nombre character varying, IN p_nombre_responsable character varying, IN p_apellido_responsable character varying, IN p_telefono character varying, IN p_direccion text, IN p_nit character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_empresa_mantenimiento(character varying, character varying, character varying, character varying, text, character varying); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.insertar_empresa_mantenimiento(IN p_nombre character varying, IN p_nombre_responsable character varying, IN p_apellido_responsable character varying, IN p_telefono character varying, IN p_direccion text, IN p_nit character varying)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_nombre_trimmed TEXT := TRIM(both ' ' FROM p_nombre);
 BEGIN
@@ -2749,12 +1758,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure insertar_empresa_mantenimiento(varchar, varchar, varchar, varchar, text, varchar) owner to postgres;
 
-create procedure insertar_equipo(IN p_nombre_grupo_equipo character varying, IN p_modelo character varying, IN p_marca character varying, IN p_codigo_ucb character varying, IN p_descripcion text, IN p_numero_serial character varying, IN p_ubicacion character varying, IN p_procedencia character varying, IN p_costo_referencia double precision, IN p_tiempo_maximo_prestamo integer, IN p_nombre_gavetero character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_equipo(character varying, character varying, character varying, character varying, text, character varying, character varying, character varying, double precision, integer, character varying); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.insertar_equipo(IN p_nombre_grupo_equipo character varying, IN p_modelo character varying, IN p_marca character varying, IN p_codigo_ucb character varying, IN p_descripcion text, IN p_numero_serial character varying, IN p_ubicacion character varying, IN p_procedencia character varying, IN p_costo_referencia double precision, IN p_tiempo_maximo_prestamo integer, IN p_nombre_gavetero character varying)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_id_grupo_equipo INTEGER;
     v_id_gavetero     INTEGER;
@@ -2821,12 +1832,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure insertar_equipo(varchar, varchar, varchar, varchar, text, varchar, varchar, varchar, double precision, integer, varchar) owner to postgres;
 
-create procedure insertar_gavetero(IN p_nombre character varying, IN p_tipo character varying, IN p_nombre_mueble character varying, IN p_longitud double precision, IN p_profundidad double precision, IN p_altura double precision)
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_gavetero(character varying, character varying, character varying, double precision, double precision, double precision); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.insertar_gavetero(IN p_nombre character varying, IN p_tipo character varying, IN p_nombre_mueble character varying, IN p_longitud double precision, IN p_profundidad double precision, IN p_altura double precision)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_id_mueble INTEGER;
 BEGIN
@@ -2875,12 +1888,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure insertar_gavetero(varchar, varchar, varchar, double precision, double precision, double precision) owner to postgres;
 
-create procedure insertar_grupo_equipo(IN p_nombre character varying, IN p_modelo character varying, IN p_marca character varying, IN p_descripcion text, IN p_nombre_categoria character varying, IN p_url_data_sheet text, IN p_url_imagen text)
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_grupo_equipo(character varying, character varying, character varying, text, character varying, text, text); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.insertar_grupo_equipo(IN p_nombre character varying, IN p_modelo character varying, IN p_marca character varying, IN p_descripcion text, IN p_nombre_categoria character varying, IN p_url_data_sheet text, IN p_url_imagen text)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_id_categoria INTEGER;
 BEGIN
@@ -2935,12 +1950,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure insertar_grupo_equipo(varchar, varchar, varchar, text, varchar, text, text) owner to postgres;
 
-create procedure insertar_mantenimiento(IN p_fecha_mantenimiento date, IN p_fecha_final_mantenimiento date, IN p_nombre_empresa character varying, IN p_costo double precision, IN p_descripcion text, IN p_codigos_imt integer[], IN p_tipos_mantenimiento character varying[], IN p_descripciones_equipo text[])
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_mantenimiento(date, date, character varying, double precision, text, integer[], character varying[], text[]); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.insertar_mantenimiento(IN p_fecha_mantenimiento date, IN p_fecha_final_mantenimiento date, IN p_nombre_empresa character varying, IN p_costo double precision, IN p_descripcion text, IN p_codigos_imt integer[], IN p_tipos_mantenimiento character varying[], IN p_descripciones_equipo text[])
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_id_mantenimiento         INTEGER;
     v_id_empresa_mantenimiento INTEGER;
@@ -3016,12 +2033,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure insertar_mantenimiento(date, date, varchar, double precision, text, integer[], character varying[], text[]) owner to postgres;
 
-create procedure insertar_mueble(IN p_nombre character varying, IN p_tipo character varying, IN p_costo double precision, IN p_ubicacion character varying, IN p_longitud double precision, IN p_profundidad double precision, IN p_altura double precision)
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_mueble(character varying, character varying, double precision, character varying, double precision, double precision, double precision); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.insertar_mueble(IN p_nombre character varying, IN p_tipo character varying, IN p_costo double precision, IN p_ubicacion character varying, IN p_longitud double precision, IN p_profundidad double precision, IN p_altura double precision)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     INSERT INTO muebles (
         nombre,
@@ -3051,12 +2070,14 @@ EXCEPTION
 END;
 $$;
 
-alter procedure insertar_mueble(varchar, varchar, double precision, varchar, double precision, double precision, double precision) owner to postgres;
 
-create procedure insertar_prestamo(IN id_grupos_equipo_input integer[], IN fecha_prestamo_esperada_input timestamp without time zone, IN fecha_devolucion_esperada_input timestamp without time zone, IN observacion_input text, IN carnet_input character varying, IN id_contrato_input text)
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_prestamo(integer[], timestamp without time zone, timestamp without time zone, text, character varying, text); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.insertar_prestamo(IN id_grupos_equipo_input integer[], IN fecha_prestamo_esperada_input timestamp without time zone, IN fecha_devolucion_esperada_input timestamp without time zone, IN observacion_input text, IN carnet_input character varying, IN id_contrato_input text)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     id_prestamo_nuevo integer;
     id_grupo integer;
@@ -3150,12 +2171,14 @@ BEGIN
 END;
 $$;
 
-alter procedure insertar_prestamo(integer[], timestamp, timestamp, text, varchar, text) owner to postgres;
 
-create procedure insertar_prestamo(IN id_grupos_equipo_input integer[], IN fecha_prestamo_esperada_input timestamp with time zone, IN fecha_devolucion_esperada_input timestamp with time zone, IN observacion_input text, IN carnet_input character varying, IN id_contrato_input text)
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_prestamo(integer[], timestamp with time zone, timestamp with time zone, text, character varying, text); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.insertar_prestamo(IN id_grupos_equipo_input integer[], IN fecha_prestamo_esperada_input timestamp with time zone, IN fecha_devolucion_esperada_input timestamp with time zone, IN observacion_input text, IN carnet_input character varying, IN id_contrato_input text)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     id_grupo integer;
     id_equipo_disponible integer;
@@ -3312,12 +2335,14 @@ BEGIN
 END;
 $$;
 
-alter procedure insertar_prestamo(integer[], timestamp with time zone, timestamp with time zone, text, varchar, text) owner to postgres;
 
-create procedure insertar_usuario(IN carnet_input character varying, IN nombre_input character varying, IN apellido_paterno_input character varying, IN apellido_materno_input character varying, IN rol_input tipo_usuario, IN email_input character varying, IN contrasena_input text, IN carrera_input character varying, IN telefono_input character varying, IN telefono_referencia_input character varying, IN nombre_referencia_input character varying, IN email_referencia_input character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_usuario(character varying, character varying, character varying, character varying, public.tipo_usuario, character varying, text, character varying, character varying, character varying, character varying, character varying); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.insertar_usuario(IN carnet_input character varying, IN nombre_input character varying, IN apellido_paterno_input character varying, IN apellido_materno_input character varying, IN rol_input public.tipo_usuario, IN email_input character varying, IN contrasena_input text, IN carrera_input character varying, IN telefono_input character varying, IN telefono_referencia_input character varying, IN nombre_referencia_input character varying, IN email_referencia_input character varying)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     DECLARE
         id_carrera_input INTEGER;
@@ -3374,13 +2399,14 @@ BEGIN
 END;
 $$;
 
-alter procedure insertar_usuario(varchar, varchar, varchar, varchar, tipo_usuario, varchar, text, varchar, varchar, varchar, varchar, varchar) owner to postgres;
 
-create function insertar_y_obtener_prestamo(id_grupos_equipo_input integer[], fecha_prestamo_esperada_input timestamp without time zone, fecha_devolucion_esperada_input timestamp without time zone, observacion_input text, carnet_input character varying, id_contrato_input text)
-    returns TABLE(id_prestamo integer, id_equipo integer, codigo_imt character varying, codigo_serial character varying, nombre character varying, modelo character varying, marca character varying, id_grupo_equipo integer)
-    language plpgsql
-as
-$$
+--
+-- Name: insertar_y_obtener_prestamo(integer[], timestamp without time zone, timestamp without time zone, text, character varying, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.insertar_y_obtener_prestamo(id_grupos_equipo_input integer[], fecha_prestamo_esperada_input timestamp without time zone, fecha_devolucion_esperada_input timestamp without time zone, observacion_input text, carnet_input character varying, id_contrato_input text) RETURNS TABLE(id_prestamo integer, id_equipo integer, codigo_imt character varying, codigo_serial character varying, nombre character varying, modelo character varying, marca character varying, id_grupo_equipo integer)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     id_grupo_actual integer;
     id_equipo_disponible integer;
@@ -3510,13 +2536,14 @@ BEGIN
 END;
 $$;
 
-alter function insertar_y_obtener_prestamo(integer[], timestamp, timestamp, text, varchar, text) owner to postgres;
 
-create function obtener_accesorios()
-    returns TABLE(id_accesorio integer, nombre_accesorio character varying, modelo_accesorio character varying, tipo_accesorio character varying, precio_accesorio double precision, nombre_equipo_asociado character varying, codigo_imt_equipo_asociado integer, descripcion_accesorio text, url_data_sheet_accesorio text)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_accesorios(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_accesorios() RETURNS TABLE(id_accesorio integer, nombre_accesorio character varying, modelo_accesorio character varying, tipo_accesorio character varying, precio_accesorio double precision, nombre_equipo_asociado character varying, codigo_imt_equipo_asociado integer, descripcion_accesorio text, url_data_sheet_accesorio text)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -3542,13 +2569,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_accesorios() owner to postgres;
 
-create function obtener_carreras()
-    returns TABLE(id_carrera integer, nombre_carrera character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_carreras(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_carreras() RETURNS TABLE(id_carrera integer, nombre_carrera character varying)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -3561,13 +2589,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_carreras() owner to postgres;
 
-create function obtener_categorias()
-    returns TABLE(id_categoria integer, categoria character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_categorias(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_categorias() RETURNS TABLE(id_categoria integer, categoria character varying)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     RETURN QUERY
 	SELECT 
@@ -3578,12 +2607,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_categorias() owner to postgres;
 
-create function obtener_codigo_imt(p_id_grupo_equipo integer) returns integer
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_codigo_imt(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_codigo_imt(p_id_grupo_equipo integer) RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_id_categoria  integer;
     v_max_sufijo    integer;
@@ -3614,13 +2645,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_codigo_imt(integer) owner to postgres;
 
-create function obtener_componentes()
-    returns TABLE(id_componente integer, nombre_componente character varying, modelo_componente character varying, tipo_componente character varying, descripcion_componente text, precio_referencia_componente double precision, nombre_equipo character varying, codigo_imt_equipo integer, url_data_sheet_equipo text)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_componentes(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_componentes() RETURNS TABLE(id_componente integer, nombre_componente character varying, modelo_componente character varying, tipo_componente character varying, descripcion_componente text, precio_referencia_componente double precision, nombre_equipo character varying, codigo_imt_equipo integer, url_data_sheet_equipo text)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -3649,13 +2681,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_componentes() owner to postgres;
 
-create function obtener_disponibilidad_equipos_por_fechas_y_id_grupos_equipos(fecha_inicio timestamp without time zone, fecha_fin timestamp without time zone, p_array_ids integer[])
-    returns TABLE(fecha timestamp without time zone, id_grupo_equipo integer, cantidad_disponible bigint)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_disponibilidad_equipos_por_fechas_y_id_grupos_equipos(timestamp without time zone, timestamp without time zone, integer[]); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_disponibilidad_equipos_por_fechas_y_id_grupos_equipos(fecha_inicio timestamp without time zone, fecha_fin timestamp without time zone, p_array_ids integer[]) RETURNS TABLE(fecha timestamp without time zone, id_grupo_equipo integer, cantidad_disponible bigint)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     fecha_actual date;
     grupo_id integer;
@@ -3705,14 +2738,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_disponibilidad_equipos_por_fechas_y_id_grupos_equipos(timestamp, timestamp, integer[]) owner to postgres;
 
-create function obtener_empresas_mantenimiento()
-    returns TABLE(id_empresa_mantenimiento integer, nombre_empresa character varying, nombre_responsable_empresa character varying, apellido_responsable_empresa character varying, telefono_empresa character varying, nit_empresa character varying, direccion_empresa character varying)
-    rows 100
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_empresas_mantenimiento(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_empresas_mantenimiento() RETURNS TABLE(id_empresa_mantenimiento integer, nombre_empresa character varying, nombre_responsable_empresa character varying, apellido_responsable_empresa character varying, telefono_empresa character varying, nit_empresa character varying, direccion_empresa character varying)
+    LANGUAGE plpgsql ROWS 100
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -3731,13 +2764,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_empresas_mantenimiento() owner to postgres;
 
-create function obtener_equipos()
-    returns TABLE(id_equipo integer, nombre_grupo_equipo character varying, modelo_equipo character varying, marca_equipo character varying, codigo_imt_equipo integer, codigo_ucb_equipo character varying, numero_serial_equipo character varying, estado_equipo_equipo estado_equipo, ubicacion_equipo character varying, nombre_gavetero_equipo character varying, costo_referencia_equipo double precision, descripcion_equipo text, tiempo_max_prestamo_equipo integer, procedencia_equipo character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_equipos(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_equipos() RETURNS TABLE(id_equipo integer, nombre_grupo_equipo character varying, modelo_equipo character varying, marca_equipo character varying, codigo_imt_equipo integer, codigo_ucb_equipo character varying, numero_serial_equipo character varying, estado_equipo_equipo public.estado_equipo, ubicacion_equipo character varying, nombre_gavetero_equipo character varying, costo_referencia_equipo double precision, descripcion_equipo text, tiempo_max_prestamo_equipo integer, procedencia_equipo character varying)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -3770,13 +2804,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_equipos() owner to postgres;
 
-create function obtener_equipos_necesitan_mantenimiento()
-    returns TABLE(id_equipo integer, codigo_imt integer, nombre character varying, estado_equipo estado_equipo, ubicacion character varying, ultima_fecha_mantenimiento date)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_equipos_necesitan_mantenimiento(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_equipos_necesitan_mantenimiento() RETURNS TABLE(id_equipo integer, codigo_imt integer, nombre character varying, estado_equipo public.estado_equipo, ubicacion character varying, ultima_fecha_mantenimiento date)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -3813,13 +2848,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_equipos_necesitan_mantenimiento() owner to postgres;
 
-create function obtener_fechas_no_disponibles_por_id_grupos_equipos(fecha_inicio timestamp without time zone, fecha_fin timestamp without time zone, json_input jsonb)
-    returns TABLE(id_grupo_equipo integer, fecha_no_disponible timestamp without time zone, cantidad_disponible bigint)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_fechas_no_disponibles_por_id_grupos_equipos(timestamp without time zone, timestamp without time zone, jsonb); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_fechas_no_disponibles_por_id_grupos_equipos(fecha_inicio timestamp without time zone, fecha_fin timestamp without time zone, json_input jsonb) RETURNS TABLE(id_grupo_equipo integer, fecha_no_disponible timestamp without time zone, cantidad_disponible bigint)
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     fecha_actual date;
     grupo_key text;
@@ -3882,14 +2918,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_fechas_no_disponibles_por_id_grupos_equipos(timestamp, timestamp, jsonb) owner to postgres;
 
-create function obtener_gaveteros()
-    returns TABLE(id_gavetero integer, nombre_gavetero character varying, tipo_gavetero character varying, nombre_mueble character varying, longitud_gavetero double precision, profundidad_gavetero double precision, altura_gavetero double precision)
-    rows 100
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_gaveteros(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_gaveteros() RETURNS TABLE(id_gavetero integer, nombre_gavetero character varying, tipo_gavetero character varying, nombre_mueble character varying, longitud_gavetero double precision, profundidad_gavetero double precision, altura_gavetero double precision)
+    LANGUAGE plpgsql ROWS 100
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -3911,13 +2947,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_gaveteros() owner to postgres;
 
-create function obtener_grupo_equipo_especifico_por_id(id_grupo_equipo_input integer)
-    returns TABLE(id_grupo_equipo integer, nombre_grupo_equipo character varying, modelo_grupo_equipo character varying, marca_grupo_equipo character varying, descripcion_grupo_equipo text, url_data_sheet_grupo_equipo text, nombre_categoria character varying, url_imagen_grupo_equipo text, cantidad_grupo_equipo integer, costo_promedio numeric)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_grupo_equipo_especifico_por_id(integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_grupo_equipo_especifico_por_id(id_grupo_equipo_input integer) RETURNS TABLE(id_grupo_equipo integer, nombre_grupo_equipo character varying, modelo_grupo_equipo character varying, marca_grupo_equipo character varying, descripcion_grupo_equipo text, url_data_sheet_grupo_equipo text, nombre_categoria character varying, url_imagen_grupo_equipo text, cantidad_grupo_equipo integer, costo_promedio numeric)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
 
     RETURN QUERY
@@ -3941,14 +2978,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_grupo_equipo_especifico_por_id(integer) owner to postgres;
 
-create function obtener_grupos_equipos()
-    returns TABLE(id_grupo_equipo integer, nombre_grupo_equipo character varying, modelo_grupo_equipo character varying, marca_grupo_equipo character varying, nombre_categoria character varying, cantidad_grupo_equipo integer, descripcion_grupo_equipo text, url_data_sheet_grupo_equipo text, url_imagen_grupo_equipo text, costo_promedio numeric)
-    rows 100
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_grupos_equipos(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_grupos_equipos() RETURNS TABLE(id_grupo_equipo integer, nombre_grupo_equipo character varying, modelo_grupo_equipo character varying, marca_grupo_equipo character varying, nombre_categoria character varying, cantidad_grupo_equipo integer, descripcion_grupo_equipo text, url_data_sheet_grupo_equipo text, url_imagen_grupo_equipo text, costo_promedio numeric)
+    LANGUAGE plpgsql ROWS 100
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -3973,13 +3010,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_grupos_equipos() owner to postgres;
 
-create function obtener_grupos_equipos_por_nombre_y_categoria(nombre_grupo_equipo_input text, categoria_input text)
-    returns TABLE(id_grupo_equipo integer, nombre_grupo_equipo character varying, modelo_grupo_equipo character varying, marca_grupo_equipo character varying, nombre_categoria character varying, url_imagen_grupo_equipo text, url_data_sheet_grupo_equipo text, descripcion_grupo_equipo text, cantidad_grupo_equipo integer, costo_promedio numeric)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_grupos_equipos_por_nombre_y_categoria(text, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_grupos_equipos_por_nombre_y_categoria(nombre_grupo_equipo_input text, categoria_input text) RETURNS TABLE(id_grupo_equipo integer, nombre_grupo_equipo character varying, modelo_grupo_equipo character varying, marca_grupo_equipo character varying, nombre_categoria character varying, url_imagen_grupo_equipo text, url_data_sheet_grupo_equipo text, descripcion_grupo_equipo text, cantidad_grupo_equipo integer, costo_promedio numeric)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
 
     RETURN QUERY
@@ -4004,13 +3042,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_grupos_equipos_por_nombre_y_categoria(text, text) owner to postgres;
 
-create function obtener_mantenimientos()
-    returns TABLE(id_mantenimiento integer, nombre_empresa_mantenimiento character varying, fecha_mantenimiento date, fecha_final_mantenimiento date, costo_mantenimiento double precision, descripcion_mantenimiento text, tipo_detalle_mantenimiento character varying, nombre_grupo_equipo character varying, codigo_imt_equipo integer, descripcion_equipo text)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_mantenimientos(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_mantenimientos() RETURNS TABLE(id_mantenimiento integer, nombre_empresa_mantenimiento character varying, fecha_mantenimiento date, fecha_final_mantenimiento date, costo_mantenimiento double precision, descripcion_mantenimiento text, tipo_detalle_mantenimiento character varying, nombre_grupo_equipo character varying, codigo_imt_equipo integer, descripcion_equipo text)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -4044,14 +3083,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_mantenimientos() owner to postgres;
 
-create function obtener_muebles()
-    returns TABLE(id_mueble integer, nombre_mueble character varying, numero_gaveteros_mueble integer, ubicacion_mueble character varying, tipo_mueble character varying, costo_mueble double precision, longitud_mueble double precision, profundidad_mueble double precision, altura_mueble double precision)
-    rows 100
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_muebles(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_muebles() RETURNS TABLE(id_mueble integer, nombre_mueble character varying, numero_gaveteros_mueble integer, ubicacion_mueble character varying, tipo_mueble character varying, costo_mueble double precision, longitud_mueble double precision, profundidad_mueble double precision, altura_mueble double precision)
+    LANGUAGE plpgsql ROWS 100
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -4071,13 +3110,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_muebles() owner to postgres;
 
-create function obtener_numero_equipos_disponibles_por_id_y_fechas(id_grupo_equipo_input integer, fecha_prestamo_esperada_input timestamp without time zone, fecha_devolucion_esperada_input timestamp without time zone)
-    returns TABLE(cantidad_disponible bigint)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_numero_equipos_disponibles_por_id_y_fechas(integer, timestamp without time zone, timestamp without time zone); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_numero_equipos_disponibles_por_id_y_fechas(id_grupo_equipo_input integer, fecha_prestamo_esperada_input timestamp without time zone, fecha_devolucion_esperada_input timestamp without time zone) RETURNS TABLE(cantidad_disponible bigint)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT COUNT(e.id_equipo) AS cantidad_equipos_disponibles
@@ -4117,13 +3157,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_numero_equipos_disponibles_por_id_y_fechas(integer, timestamp, timestamp) owner to postgres;
 
-create function obtener_prestamos()
-    returns TABLE(id_prestamo integer, carnet character varying, nombre character varying, apellido_paterno character varying, telefono character varying, nombre_grupo_equipo character varying, codigo_imt integer, fecha_solicitud timestamp without time zone, fecha_prestamo_esperada timestamp without time zone, fecha_prestamo timestamp without time zone, fecha_devolucion_esperada timestamp without time zone, fecha_devolucion timestamp without time zone, observacion text, estado_prestamo estado_prestamo, ubicacion_equipo character varying, nombre_gavetero character varying, nombre_mueble character varying, ubicacion_mueble character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_prestamos(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_prestamos() RETURNS TABLE(id_prestamo integer, carnet character varying, nombre character varying, apellido_paterno character varying, telefono character varying, nombre_grupo_equipo character varying, codigo_imt integer, fecha_solicitud timestamp without time zone, fecha_prestamo_esperada timestamp without time zone, fecha_prestamo timestamp without time zone, fecha_devolucion_esperada timestamp without time zone, fecha_devolucion timestamp without time zone, observacion text, estado_prestamo public.estado_prestamo, ubicacion_equipo character varying, nombre_gavetero character varying, nombre_mueble character varying, ubicacion_mueble character varying)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     RETURN QUERY
 	SELECT
@@ -4170,13 +3211,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_prestamos() owner to postgres;
 
-create function obtener_prestamos_por_carnet_y_estado_prestamo(p_carnet_input character varying, p_estado_input estado_prestamo)
-    returns TABLE(id_prestamo integer, carnet character varying, nombre character varying, apellido_paterno character varying, telefono character varying, nombre_grupo_equipo character varying, codigo_imt integer, fecha_solicitud timestamp without time zone, fecha_prestamo_esperada timestamp without time zone, fecha_prestamo timestamp without time zone, fecha_devolucion_esperada timestamp without time zone, fecha_devolucion timestamp without time zone, observacion text, estado_prestamo estado_prestamo, ubicacion_equipo character varying, nombre_gavetero character varying, nombre_mueble character varying, ubicacion_mueble character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_prestamos_por_carnet_y_estado_prestamo(character varying, public.estado_prestamo); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_prestamos_por_carnet_y_estado_prestamo(p_carnet_input character varying, p_estado_input public.estado_prestamo) RETURNS TABLE(id_prestamo integer, carnet character varying, nombre character varying, apellido_paterno character varying, telefono character varying, nombre_grupo_equipo character varying, codigo_imt integer, fecha_solicitud timestamp without time zone, fecha_prestamo_esperada timestamp without time zone, fecha_prestamo timestamp without time zone, fecha_devolucion_esperada timestamp without time zone, fecha_devolucion timestamp without time zone, observacion text, estado_prestamo public.estado_prestamo, ubicacion_equipo character varying, nombre_gavetero character varying, nombre_mueble character varying, ubicacion_mueble character varying)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT
@@ -4218,13 +3260,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_prestamos_por_carnet_y_estado_prestamo(varchar, estado_prestamo) owner to postgres;
 
-create function obtener_ubicaciones_grupos_equipos_por_nombre(nombre_grupo_equipo_input text)
-    returns TABLE(id_grupo_equipo integer, codigo_imt integer, nombre character varying, modelo character varying, marca character varying, ubicacion character varying, categoria character varying, url_imagen text)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_ubicaciones_grupos_equipos_por_nombre(text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_ubicaciones_grupos_equipos_por_nombre(nombre_grupo_equipo_input text) RETURNS TABLE(id_grupo_equipo integer, codigo_imt integer, nombre character varying, modelo character varying, marca character varying, ubicacion character varying, categoria character varying, url_imagen text)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
 
     RETURN QUERY
@@ -4251,13 +3294,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_ubicaciones_grupos_equipos_por_nombre(text) owner to postgres;
 
-create function obtener_usuario_iniciar_sesion(email_input character varying, contrasena_input text)
-    returns TABLE(carnet character varying, nombre character varying, apellido_paterno character varying, apellido_materno character varying, rol tipo_usuario, carrera character varying, email character varying, telefono character varying, telefono_referencia character varying, nombre_referencia character varying, email_referencia character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_usuario_iniciar_sesion(character varying, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_usuario_iniciar_sesion(email_input character varying, contrasena_input text) RETURNS TABLE(carnet character varying, nombre character varying, apellido_paterno character varying, apellido_materno character varying, rol public.tipo_usuario, carrera character varying, email character varying, telefono character varying, telefono_referencia character varying, nombre_referencia character varying, email_referencia character varying)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT 
@@ -4282,13 +3326,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_usuario_iniciar_sesion(varchar, text) owner to postgres;
 
-create function obtener_usuario_por_carnet(carnet_input text)
-    returns TABLE(carnet character varying, nombre character varying, apellido_paterno character varying, apellido_materno character varying, rol tipo_usuario, carrera character varying, email character varying, contrasena text, telefono character varying, telefono_referencia character varying, nombre_referencia character varying, email_referencia character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_usuario_por_carnet(text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_usuario_por_carnet(carnet_input text) RETURNS TABLE(carnet character varying, nombre character varying, apellido_paterno character varying, apellido_materno character varying, rol public.tipo_usuario, carrera character varying, email character varying, contrasena text, telefono character varying, telefono_referencia character varying, nombre_referencia character varying, email_referencia character varying)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     RETURN QUERY
     SELECT 
@@ -4312,13 +3357,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_usuario_por_carnet(text) owner to postgres;
 
-create function obtener_usuarios()
-    returns TABLE(carnet character varying, nombre character varying, apellido_paterno character varying, apellido_materno character varying, carrera character varying, rol tipo_usuario, email character varying, telefono character varying, telefono_referencia character varying, nombre_referencia character varying, email_referencia character varying)
-    language plpgsql
-as
-$$
+--
+-- Name: obtener_usuarios(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.obtener_usuarios() RETURNS TABLE(carnet character varying, nombre character varying, apellido_paterno character varying, apellido_materno character varying, carrera character varying, rol public.tipo_usuario, email character varying, telefono character varying, telefono_referencia character varying, nombre_referencia character varying, email_referencia character varying)
+    LANGUAGE plpgsql
+    AS $$
 BEGIN
     RETURN QUERY
 	SELECT u.carnet, u.nombre, u.apellido_paterno, u.apellido_materno, c.nombre, u.rol, u.email, u.telefono, u.telefono_referencia, u.nombre_referencia, u.email_referencia
@@ -4330,12 +3376,14 @@ BEGIN
 END;
 $$;
 
-alter function obtener_usuarios() owner to postgres;
 
-create procedure recalcular_costo_promedio_todos_grupos()
-    language plpgsql
-as
-$$
+--
+-- Name: recalcular_costo_promedio_todos_grupos(); Type: PROCEDURE; Schema: public; Owner: -
+--
+
+CREATE PROCEDURE public.recalcular_costo_promedio_todos_grupos()
+    LANGUAGE plpgsql
+    AS $$
 DECLARE
     v_grupo_id integer;
     v_costo_promedio numeric(10,2);
@@ -4363,21 +3411,2271 @@ BEGIN
 END;
 $$;
 
-alter procedure recalcular_costo_promedio_todos_grupos() owner to postgres;
+
+SET default_tablespace = '';
+
+SET default_table_access_method = heap;
+
+--
+-- Name: aggregatedcounter; Type: TABLE; Schema: hangfire; Owner: -
+--
+
+CREATE TABLE hangfire.aggregatedcounter (
+    id bigint NOT NULL,
+    key text NOT NULL,
+    value bigint NOT NULL,
+    expireat timestamp with time zone
+);
 
 
-CREATE TABLE IF NOT EXISTS configuraciones_sistema (
-    horarios jsonb NOT NULL DEFAULT '[]'::jsonb,
-    id_configuracion integer GENERATED BY DEFAULT AS IDENTITY,
+--
+-- Name: aggregatedcounter_id_seq; Type: SEQUENCE; Schema: hangfire; Owner: -
+--
+
+CREATE SEQUENCE hangfire.aggregatedcounter_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: aggregatedcounter_id_seq; Type: SEQUENCE OWNED BY; Schema: hangfire; Owner: -
+--
+
+ALTER SEQUENCE hangfire.aggregatedcounter_id_seq OWNED BY hangfire.aggregatedcounter.id;
+
+
+--
+-- Name: counter; Type: TABLE; Schema: hangfire; Owner: -
+--
+
+CREATE TABLE hangfire.counter (
+    id bigint NOT NULL,
+    key text NOT NULL,
+    value bigint NOT NULL,
+    expireat timestamp with time zone
+);
+
+
+--
+-- Name: counter_id_seq; Type: SEQUENCE; Schema: hangfire; Owner: -
+--
+
+CREATE SEQUENCE hangfire.counter_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: counter_id_seq; Type: SEQUENCE OWNED BY; Schema: hangfire; Owner: -
+--
+
+ALTER SEQUENCE hangfire.counter_id_seq OWNED BY hangfire.counter.id;
+
+
+--
+-- Name: hash; Type: TABLE; Schema: hangfire; Owner: -
+--
+
+CREATE TABLE hangfire.hash (
+    id bigint NOT NULL,
+    key text NOT NULL,
+    field text NOT NULL,
+    value text,
+    expireat timestamp with time zone,
+    updatecount integer DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: hash_id_seq; Type: SEQUENCE; Schema: hangfire; Owner: -
+--
+
+CREATE SEQUENCE hangfire.hash_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: hash_id_seq; Type: SEQUENCE OWNED BY; Schema: hangfire; Owner: -
+--
+
+ALTER SEQUENCE hangfire.hash_id_seq OWNED BY hangfire.hash.id;
+
+
+--
+-- Name: job; Type: TABLE; Schema: hangfire; Owner: -
+--
+
+CREATE TABLE hangfire.job (
+    id bigint NOT NULL,
+    stateid bigint,
+    statename text,
+    invocationdata jsonb NOT NULL,
+    arguments jsonb NOT NULL,
+    createdat timestamp with time zone NOT NULL,
+    expireat timestamp with time zone,
+    updatecount integer DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: job_id_seq; Type: SEQUENCE; Schema: hangfire; Owner: -
+--
+
+CREATE SEQUENCE hangfire.job_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: job_id_seq; Type: SEQUENCE OWNED BY; Schema: hangfire; Owner: -
+--
+
+ALTER SEQUENCE hangfire.job_id_seq OWNED BY hangfire.job.id;
+
+
+--
+-- Name: jobparameter; Type: TABLE; Schema: hangfire; Owner: -
+--
+
+CREATE TABLE hangfire.jobparameter (
+    id bigint NOT NULL,
+    jobid bigint NOT NULL,
+    name text NOT NULL,
+    value text,
+    updatecount integer DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: jobparameter_id_seq; Type: SEQUENCE; Schema: hangfire; Owner: -
+--
+
+CREATE SEQUENCE hangfire.jobparameter_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: jobparameter_id_seq; Type: SEQUENCE OWNED BY; Schema: hangfire; Owner: -
+--
+
+ALTER SEQUENCE hangfire.jobparameter_id_seq OWNED BY hangfire.jobparameter.id;
+
+
+--
+-- Name: jobqueue; Type: TABLE; Schema: hangfire; Owner: -
+--
+
+CREATE TABLE hangfire.jobqueue (
+    id bigint NOT NULL,
+    jobid bigint NOT NULL,
+    queue text NOT NULL,
+    fetchedat timestamp with time zone,
+    updatecount integer DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: jobqueue_id_seq; Type: SEQUENCE; Schema: hangfire; Owner: -
+--
+
+CREATE SEQUENCE hangfire.jobqueue_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: jobqueue_id_seq; Type: SEQUENCE OWNED BY; Schema: hangfire; Owner: -
+--
+
+ALTER SEQUENCE hangfire.jobqueue_id_seq OWNED BY hangfire.jobqueue.id;
+
+
+--
+-- Name: list; Type: TABLE; Schema: hangfire; Owner: -
+--
+
+CREATE TABLE hangfire.list (
+    id bigint NOT NULL,
+    key text NOT NULL,
+    value text,
+    expireat timestamp with time zone,
+    updatecount integer DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: list_id_seq; Type: SEQUENCE; Schema: hangfire; Owner: -
+--
+
+CREATE SEQUENCE hangfire.list_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: list_id_seq; Type: SEQUENCE OWNED BY; Schema: hangfire; Owner: -
+--
+
+ALTER SEQUENCE hangfire.list_id_seq OWNED BY hangfire.list.id;
+
+
+--
+-- Name: lock; Type: TABLE; Schema: hangfire; Owner: -
+--
+
+CREATE TABLE hangfire.lock (
+    resource text NOT NULL,
+    updatecount integer DEFAULT 0 NOT NULL,
+    acquired timestamp with time zone
+);
+
+
+--
+-- Name: schema; Type: TABLE; Schema: hangfire; Owner: -
+--
+
+CREATE TABLE hangfire.schema (
+    version integer NOT NULL
+);
+
+
+--
+-- Name: server; Type: TABLE; Schema: hangfire; Owner: -
+--
+
+CREATE TABLE hangfire.server (
+    id text NOT NULL,
+    data jsonb,
+    lastheartbeat timestamp with time zone NOT NULL,
+    updatecount integer DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: set; Type: TABLE; Schema: hangfire; Owner: -
+--
+
+CREATE TABLE hangfire.set (
+    id bigint NOT NULL,
+    key text NOT NULL,
+    score double precision NOT NULL,
+    value text NOT NULL,
+    expireat timestamp with time zone,
+    updatecount integer DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: set_id_seq; Type: SEQUENCE; Schema: hangfire; Owner: -
+--
+
+CREATE SEQUENCE hangfire.set_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: set_id_seq; Type: SEQUENCE OWNED BY; Schema: hangfire; Owner: -
+--
+
+ALTER SEQUENCE hangfire.set_id_seq OWNED BY hangfire.set.id;
+
+
+--
+-- Name: state; Type: TABLE; Schema: hangfire; Owner: -
+--
+
+CREATE TABLE hangfire.state (
+    id bigint NOT NULL,
+    jobid bigint NOT NULL,
+    name text NOT NULL,
+    reason text,
+    createdat timestamp with time zone NOT NULL,
+    data jsonb,
+    updatecount integer DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: state_id_seq; Type: SEQUENCE; Schema: hangfire; Owner: -
+--
+
+CREATE SEQUENCE hangfire.state_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: state_id_seq; Type: SEQUENCE OWNED BY; Schema: hangfire; Owner: -
+--
+
+ALTER SEQUENCE hangfire.state_id_seq OWNED BY hangfire.state.id;
+
+
+--
+-- Name: accesorios; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.accesorios (
+    id_accesorio integer NOT NULL,
+    nombre character varying(255) NOT NULL,
+    descripcion text,
+    modelo character varying(255) NOT NULL,
+    url_data_sheet text,
+    precio double precision,
+    id_equipo integer NOT NULL,
+    tipo character varying(255),
+    estado_eliminado boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: COLUMN accesorios.id_accesorio; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.accesorios.id_accesorio IS 'Código del accesorio';
+
+
+--
+-- Name: Accesorio_Id_Accesorio_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.accesorios ALTER COLUMN id_accesorio ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Accesorio_Id_Accesorio_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: categorias; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.categorias (
+    id_categoria integer NOT NULL,
+    nombre character varying(255) NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: Categoria_ID_Categoria_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.categorias ALTER COLUMN id_categoria ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Categoria_ID_Categoria_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: componentes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.componentes (
+    id_componente integer NOT NULL,
+    descripcion text,
+    modelo character varying(255) NOT NULL,
+    url_data_sheet text,
+    tipo character varying(255),
+    precio_referencia double precision,
+    nombre character varying(255) NOT NULL,
+    id_equipo integer NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: COLUMN componentes.id_componente; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.componentes.id_componente IS 'Código del componente';
+
+
+--
+-- Name: Componente_Id_Componente_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.componentes ALTER COLUMN id_componente ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Componente_Id_Componente_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: empresas_mantenimiento; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.empresas_mantenimiento (
+    id_empresa_mantenimiento integer NOT NULL,
+    nombre character varying(255) NOT NULL,
+    direccion character varying(512),
+    telefono character varying(64),
+    nit character varying(255),
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    nombre_responsable character varying(64),
+    apellido_responsable character varying(64)
+);
+
+
+--
+-- Name: COLUMN empresas_mantenimiento.id_empresa_mantenimiento; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.empresas_mantenimiento.id_empresa_mantenimiento IS 'Código empresa';
+
+
+--
+-- Name: Empresa_Mantenimiento_Id_Empresa_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.empresas_mantenimiento ALTER COLUMN id_empresa_mantenimiento ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Empresa_Mantenimiento_Id_Empresa_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: equipos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.equipos (
+    id_equipo integer NOT NULL,
+    id_grupo_equipo integer NOT NULL,
+    codigo_imt integer NOT NULL,
+    descripcion text,
+    estado_equipo public.estado_equipo DEFAULT 'operativo'::public.estado_equipo NOT NULL,
+    numero_serial character varying(255),
+    ubicacion character varying(255),
+    costo_referencia double precision DEFAULT 0,
+    tiempo_max_prestamo integer DEFAULT 9999,
+    procedencia character varying(255),
+    id_gavetero integer,
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    fecha_ingreso_equipo date DEFAULT CURRENT_DATE NOT NULL,
+    codigo_ucb character varying,
+    id_ambiente integer,
+    id_procedencia integer
+);
+
+
+--
+-- Name: Equipo_Id_equipo_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.equipos ALTER COLUMN id_equipo ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Equipo_Id_equipo_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: gaveteros; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.gaveteros (
+    id_gavetero integer NOT NULL,
+    nombre character varying(255) NOT NULL,
+    tipo character varying(255),
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    id_mueble integer NOT NULL,
+    longitud double precision,
+    profundidad double precision,
+    altura double precision
+);
+
+
+--
+-- Name: Gavetero_Id_Gavetero_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.gaveteros ALTER COLUMN id_gavetero ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Gavetero_Id_Gavetero_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: grupos_equipos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.grupos_equipos (
+    id_grupo_equipo integer NOT NULL,
+    nombre character varying(256) NOT NULL,
+    modelo character varying(512) NOT NULL,
+    url_data_sheet text,
+    cantidad integer DEFAULT 0 NOT NULL,
+    marca character varying(256) NOT NULL,
+    id_categoria integer NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    url_imagen text NOT NULL,
+    descripcion text NOT NULL,
+    costo_promedio numeric(10,2) DEFAULT 0,
+    tiempo_max_prestamo_dias integer DEFAULT 7 NOT NULL,
+    CONSTRAINT ck_grupos_equipos_tiempo_max_prestamo CHECK (((tiempo_max_prestamo_dias >= 1) AND (tiempo_max_prestamo_dias <= 365)))
+);
+
+
+--
+-- Name: COLUMN grupos_equipos.descripcion; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.grupos_equipos.descripcion IS 'Esto se mostrar en la pagina web';
+
+
+--
+-- Name: Grupo_Equipo_Id_Grupo_equipo_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.grupos_equipos ALTER COLUMN id_grupo_equipo ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Grupo_Equipo_Id_Grupo_equipo_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: mantenimientos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.mantenimientos (
+    id_mantenimiento integer NOT NULL,
+    descripcion text,
+    costo double precision,
+    fecha_mantenimiento date NOT NULL,
+    id_empresa integer NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    fecha_final_mantenimiento date NOT NULL
+);
+
+
+--
+-- Name: Mantenimiento_Id_Mantenimiento_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.mantenimientos ALTER COLUMN id_mantenimiento ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Mantenimiento_Id_Mantenimiento_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: muebles; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.muebles (
+    id_mueble integer NOT NULL,
+    nombre character varying(255) NOT NULL,
+    tipo character varying(255),
+    ubicacion character varying(255),
+    numero_gaveteros integer DEFAULT 0 NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    longitud double precision,
+    profundidad double precision,
+    altura double precision,
+    costo double precision,
+    id_ambiente integer
+);
+
+
+--
+-- Name: COLUMN muebles.id_mueble; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.muebles.id_mueble IS 'Código del mueble';
+
+
+--
+-- Name: Mueble_Id_Mueble_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.muebles ALTER COLUMN id_mueble ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Mueble_Id_Mueble_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: prestamos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.prestamos (
+    id_prestamo integer NOT NULL,
+    fecha_solicitud timestamp without time zone DEFAULT (now() AT TIME ZONE 'America/La_Paz'::text) NOT NULL,
+    fecha_prestamo timestamp without time zone,
+    fecha_devolucion_esperada timestamp without time zone NOT NULL,
+    observacion text,
+    estado_prestamo public.estado_prestamo DEFAULT 'pendiente'::public.estado_prestamo NOT NULL,
+    carnet character varying(64) NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    fecha_devolucion timestamp without time zone,
+    fecha_prestamo_esperada timestamp without time zone NOT NULL,
+    id_contrato integer,
+    recordatorio_enviado boolean DEFAULT false NOT NULL,
+    destino_prestamo character varying(50) DEFAULT 'Universidad'::character varying NOT NULL,
+    id_carrera integer,
+    nombre_materia character varying(255),
+    autorizado_por character varying(255),
+    entregado_por character varying(255),
+    motivo_rechazo character varying(1024),
+    guardado boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: COLUMN prestamos.id_prestamo; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.prestamos.id_prestamo IS 'Código del préstamo';
+
+
+--
+-- Name: Prestamo_Id_Prestamo_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.prestamos ALTER COLUMN id_prestamo ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public."Prestamo_Id_Prestamo_seq"
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: __EFMigrationsHistory; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public."__EFMigrationsHistory" (
+    "MigrationId" character varying(150) NOT NULL,
+    "ProductVersion" character varying(32) NOT NULL
+);
+
+
+--
+-- Name: ambientes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ambientes (
+    id_ambiente integer NOT NULL,
+    nombre character varying(255) NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    carnet_administrador character varying(64)
+);
+
+
+--
+-- Name: ambientes_id_ambiente_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.ambientes ALTER COLUMN id_ambiente ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.ambientes_id_ambiente_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: audit_logs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.audit_logs (
+    id integer NOT NULL,
+    admin_carnet character varying(20) NOT NULL,
+    admin_nombre text NOT NULL,
+    accion character varying(50) NOT NULL,
+    entidad character varying(100) NOT NULL,
+    entidad_id text,
+    detalle text,
+    "timestamp" timestamp with time zone DEFAULT now() NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: audit_logs_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.audit_logs_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: audit_logs_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.audit_logs_id_seq OWNED BY public.audit_logs.id;
+
+
+--
+-- Name: avisos_disponibilidad; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.avisos_disponibilidad (
+    id_aviso integer NOT NULL,
+    carnet_usuario character varying(20) NOT NULL,
+    id_grupo_equipo integer NOT NULL,
+    fecha timestamp without time zone NOT NULL,
+    cantidad integer DEFAULT 1 NOT NULL,
+    notificado boolean DEFAULT false NOT NULL,
+    fecha_creacion timestamp with time zone DEFAULT now() NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: avisos_disponibilidad_id_aviso_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.avisos_disponibilidad ALTER COLUMN id_aviso ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.avisos_disponibilidad_id_aviso_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: carreras; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.carreras (
+    id_carrera integer NOT NULL,
+    nombre character varying(255) NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: carrera_id_carrera_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.carrera_id_carrera_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: carrera_id_carrera_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.carrera_id_carrera_seq OWNED BY public.carreras.id_carrera;
+
+
+--
+-- Name: carreras_id_carrera_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.carreras ALTER COLUMN id_carrera ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.carreras_id_carrera_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: codigos_autenticacion; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.codigos_autenticacion (
+    hash character varying(64) NOT NULL,
+    tipo character varying(20) NOT NULL,
+    email character varying(255) NOT NULL,
+    google_id character varying(255) NOT NULL,
+    nombre character varying(64) NOT NULL,
+    apellido_paterno character varying(64) NOT NULL,
+    apellido_materno character varying(64) NOT NULL,
+    expira timestamp with time zone NOT NULL,
+    usado boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: comentarios_equipos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.comentarios_equipos (
+    id_comentario_equipo integer NOT NULL,
+    id_grupo_equipo integer NOT NULL,
+    carnet_usuario character varying(20) NOT NULL,
+    contenido character varying(1024) NOT NULL,
+    fecha_creacion timestamp with time zone DEFAULT now() NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    id_comentario_padre integer,
+    likes integer DEFAULT 0 NOT NULL,
+    liked_by text DEFAULT ''::text NOT NULL
+);
+
+
+--
+-- Name: comentarios_equipos_id_comentario_equipo_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.comentarios_equipos ALTER COLUMN id_comentario_equipo ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.comentarios_equipos_id_comentario_equipo_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: configuraciones_sistema; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.configuraciones_sistema (
+    id_configuracion integer NOT NULL,
     monto_minimo_contrato numeric NOT NULL,
     horario_inicio_minutos integer NOT NULL,
     horario_fin_minutos integer NOT NULL,
     nombre_jefe_carrera text NOT NULL,
-    carnet_jefe_carrera varchar(20) REFERENCES usuarios(carnet) ON DELETE SET NULL,
     firma_jefe_carrera_base64 text NOT NULL,
     tiempo_minimo_reserva_minutos integer NOT NULL,
     tiempo_recordatorio_previo_minutos integer NOT NULL,
     minutos_gracia_atraso integer NOT NULL,
-    estado_eliminado boolean NOT NULL DEFAULT FALSE,
-    CONSTRAINT pk_configuraciones_sistema PRIMARY KEY (id_configuracion)
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    horarios jsonb DEFAULT '[]'::jsonb NOT NULL,
+    carnet_jefe_carrera character varying(20)
 );
+
+
+--
+-- Name: configuraciones_sistema_id_configuracion_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.configuraciones_sistema ALTER COLUMN id_configuracion ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.configuraciones_sistema_id_configuracion_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: contratos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.contratos (
+    id integer NOT NULL,
+    contrato text
+);
+
+
+--
+-- Name: detalles_mantenimientos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.detalles_mantenimientos (
+    id_detalle_mantenimiento integer NOT NULL,
+    id_mantenimiento integer NOT NULL,
+    descripcion text,
+    id_equipo integer NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    tipo_mantenimiento character varying
+);
+
+
+--
+-- Name: detalles_mantenimientos_id_detalle_mantenimiento_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.detalles_mantenimientos_id_detalle_mantenimiento_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: detalles_mantenimientos_id_detalle_mantenimiento_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.detalles_mantenimientos_id_detalle_mantenimiento_seq OWNED BY public.detalles_mantenimientos.id_detalle_mantenimiento;
+
+
+--
+-- Name: detalles_mantenimientos_id_detalle_mantenimiento_seq1; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.detalles_mantenimientos ALTER COLUMN id_detalle_mantenimiento ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.detalles_mantenimientos_id_detalle_mantenimiento_seq1
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: detalles_prestamos; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.detalles_prestamos (
+    id_detalle_prestamo integer NOT NULL,
+    id_equipo integer,
+    id_prestamo integer NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    id_grupo_equipo integer NOT NULL,
+    estado_equipo_retorno public.estado_equipo
+);
+
+
+--
+-- Name: detalles_prestamos_id_detalle_prestamo_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.detalles_prestamos ALTER COLUMN id_detalle_prestamo ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.detalles_prestamos_id_detalle_prestamo_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: nombre_de_tu_tabla_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.contratos ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.nombre_de_tu_tabla_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: notificaciones; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.notificaciones (
+    id_notificacion integer NOT NULL,
+    carnet_usuario character varying(20) NOT NULL,
+    tipo character varying(50) NOT NULL,
+    titulo text NOT NULL,
+    contenido text,
+    detalle text,
+    leido boolean DEFAULT false NOT NULL,
+    fecha_envio timestamp with time zone DEFAULT now() NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: notificaciones_id_notificacion_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.notificaciones ALTER COLUMN id_notificacion ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME public.notificaciones_id_notificacion_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: procedencias; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.procedencias (
+    id_procedencia integer NOT NULL,
+    nombre character varying(255) NOT NULL,
+    estado_eliminado boolean DEFAULT false NOT NULL
+);
+
+
+--
+-- Name: procedencias_id_procedencia_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+ALTER TABLE public.procedencias ALTER COLUMN id_procedencia ADD GENERATED BY DEFAULT AS IDENTITY (
+    SEQUENCE NAME public.procedencias_id_procedencia_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
+
+--
+-- Name: usuarios; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.usuarios (
+    carnet character varying(64) NOT NULL,
+    nombre character varying(64) NOT NULL,
+    apellido_paterno character varying(64) NOT NULL,
+    apellido_materno character varying(64) NOT NULL,
+    rol public.tipo_usuario DEFAULT 'estudiante'::public.tipo_usuario NOT NULL,
+    contrasena text NOT NULL,
+    email character varying(255) NOT NULL,
+    telefono character varying(32) NOT NULL,
+    telefono_referencia character varying(32),
+    nombre_referencia character varying(32),
+    email_referencia character varying(255),
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    id_carrera integer NOT NULL,
+    imagen_frente_carnet bytea,
+    imagen_atras_carnet bytea,
+    refresh_token text,
+    refresh_token_expiry timestamp with time zone,
+    bloqueado boolean DEFAULT false NOT NULL,
+    motivo_bloqueo text,
+    imagen_firma bytea,
+    email_verificado boolean DEFAULT true NOT NULL,
+    google_id character varying(255),
+    token_verificacion_hash character varying(64),
+    token_verificacion_expira timestamp with time zone,
+    imagen_perfil bytea
+);
+
+
+--
+-- Name: vw_equipos_necesitan_mantenimiento; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.vw_equipos_necesitan_mantenimiento AS
+ SELECT e.codigo_imt,
+    ge.nombre AS grupo_equipo,
+    e.estado_equipo,
+    e.ubicacion,
+    COALESCE(max(m.fecha_mantenimiento), e.fecha_ingreso_equipo) AS ultima_fecha_mantenimiento
+   FROM (((public.equipos e
+     LEFT JOIN public.detalles_mantenimientos dm ON (((dm.id_equipo = e.id_equipo) AND (dm.estado_eliminado = false))))
+     JOIN public.grupos_equipos ge ON ((ge.id_grupo_equipo = e.id_grupo_equipo)))
+     LEFT JOIN public.mantenimientos m ON (((m.id_mantenimiento = dm.id_mantenimiento) AND (m.estado_eliminado = false))))
+  WHERE (e.estado_eliminado = false)
+  GROUP BY e.codigo_imt, ge.nombre, e.estado_equipo, e.ubicacion, e.fecha_ingreso_equipo
+ HAVING ((e.estado_equipo = ANY (ARRAY['parcialmente_operativo'::public.estado_equipo, 'inoperativo'::public.estado_equipo])) OR ((max(m.fecha_mantenimiento) IS NOT NULL) AND (EXTRACT(month FROM age((CURRENT_DATE)::timestamp with time zone, (max(m.fecha_mantenimiento))::timestamp with time zone)) > (4)::numeric)) OR ((max(m.fecha_mantenimiento) IS NULL) AND (EXTRACT(month FROM age((CURRENT_DATE)::timestamp with time zone, (e.fecha_ingreso_equipo)::timestamp with time zone)) > (4)::numeric)));
+
+
+--
+-- Name: vw_ubicaciones_grupos_equipos; Type: VIEW; Schema: public; Owner: -
+--
+
+CREATE VIEW public.vw_ubicaciones_grupos_equipos AS
+ SELECT ge.id_grupo_equipo,
+    e.codigo_imt,
+    ge.nombre,
+    ge.modelo,
+    ge.marca,
+    e.ubicacion,
+    c.nombre AS categoria,
+    ge.url_imagen
+   FROM ((((public.grupos_equipos ge
+     JOIN public.equipos e ON ((e.id_grupo_equipo = ge.id_grupo_equipo)))
+     JOIN public.categorias c ON ((c.id_categoria = ge.id_categoria)))
+     LEFT JOIN public.gaveteros ga ON ((e.id_gavetero = ga.id_gavetero)))
+     JOIN public.muebles mu ON ((mu.id_mueble = ga.id_mueble)))
+  WHERE ((ge.estado_eliminado = false) AND (e.estado_eliminado = false));
+
+
+--
+-- Name: aggregatedcounter id; Type: DEFAULT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.aggregatedcounter ALTER COLUMN id SET DEFAULT nextval('hangfire.aggregatedcounter_id_seq'::regclass);
+
+
+--
+-- Name: counter id; Type: DEFAULT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.counter ALTER COLUMN id SET DEFAULT nextval('hangfire.counter_id_seq'::regclass);
+
+
+--
+-- Name: hash id; Type: DEFAULT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.hash ALTER COLUMN id SET DEFAULT nextval('hangfire.hash_id_seq'::regclass);
+
+
+--
+-- Name: job id; Type: DEFAULT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.job ALTER COLUMN id SET DEFAULT nextval('hangfire.job_id_seq'::regclass);
+
+
+--
+-- Name: jobparameter id; Type: DEFAULT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.jobparameter ALTER COLUMN id SET DEFAULT nextval('hangfire.jobparameter_id_seq'::regclass);
+
+
+--
+-- Name: jobqueue id; Type: DEFAULT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.jobqueue ALTER COLUMN id SET DEFAULT nextval('hangfire.jobqueue_id_seq'::regclass);
+
+
+--
+-- Name: list id; Type: DEFAULT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.list ALTER COLUMN id SET DEFAULT nextval('hangfire.list_id_seq'::regclass);
+
+
+--
+-- Name: set id; Type: DEFAULT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.set ALTER COLUMN id SET DEFAULT nextval('hangfire.set_id_seq'::regclass);
+
+
+--
+-- Name: state id; Type: DEFAULT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.state ALTER COLUMN id SET DEFAULT nextval('hangfire.state_id_seq'::regclass);
+
+
+--
+-- Name: audit_logs id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.audit_logs ALTER COLUMN id SET DEFAULT nextval('public.audit_logs_id_seq'::regclass);
+
+
+--
+-- Name: aggregatedcounter aggregatedcounter_key_key; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.aggregatedcounter
+    ADD CONSTRAINT aggregatedcounter_key_key UNIQUE (key);
+
+
+--
+-- Name: aggregatedcounter aggregatedcounter_pkey; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.aggregatedcounter
+    ADD CONSTRAINT aggregatedcounter_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: counter counter_pkey; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.counter
+    ADD CONSTRAINT counter_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: hash hash_key_field_key; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.hash
+    ADD CONSTRAINT hash_key_field_key UNIQUE (key, field);
+
+
+--
+-- Name: hash hash_pkey; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.hash
+    ADD CONSTRAINT hash_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: job job_pkey; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.job
+    ADD CONSTRAINT job_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: jobparameter jobparameter_pkey; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.jobparameter
+    ADD CONSTRAINT jobparameter_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: jobqueue jobqueue_pkey; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.jobqueue
+    ADD CONSTRAINT jobqueue_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: list list_pkey; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.list
+    ADD CONSTRAINT list_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: lock lock_resource_key; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.lock
+    ADD CONSTRAINT lock_resource_key UNIQUE (resource);
+
+ALTER TABLE ONLY hangfire.lock REPLICA IDENTITY USING INDEX lock_resource_key;
+
+
+--
+-- Name: schema schema_pkey; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.schema
+    ADD CONSTRAINT schema_pkey PRIMARY KEY (version);
+
+
+--
+-- Name: server server_pkey; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.server
+    ADD CONSTRAINT server_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: set set_key_value_key; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.set
+    ADD CONSTRAINT set_key_value_key UNIQUE (key, value);
+
+
+--
+-- Name: set set_pkey; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.set
+    ADD CONSTRAINT set_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: state state_pkey; Type: CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.state
+    ADD CONSTRAINT state_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: accesorios Accesorio_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.accesorios
+    ADD CONSTRAINT "Accesorio_pk" PRIMARY KEY (id_accesorio);
+
+
+--
+-- Name: categorias Categoria_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.categorias
+    ADD CONSTRAINT "Categoria_pk" PRIMARY KEY (id_categoria);
+
+
+--
+-- Name: componentes Componente_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.componentes
+    ADD CONSTRAINT "Componente_pk" PRIMARY KEY (id_componente);
+
+
+--
+-- Name: empresas_mantenimiento Empresa_Mantenimiento_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.empresas_mantenimiento
+    ADD CONSTRAINT "Empresa_Mantenimiento_pk" PRIMARY KEY (id_empresa_mantenimiento);
+
+
+--
+-- Name: equipos Equipo_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.equipos
+    ADD CONSTRAINT "Equipo_pk" PRIMARY KEY (id_equipo);
+
+
+--
+-- Name: gaveteros Gavetero_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gaveteros
+    ADD CONSTRAINT "Gavetero_pk" PRIMARY KEY (id_gavetero);
+
+
+--
+-- Name: grupos_equipos Grupo_Equipo_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grupos_equipos
+    ADD CONSTRAINT "Grupo_Equipo_pk" PRIMARY KEY (id_grupo_equipo);
+
+
+--
+-- Name: mantenimientos Mantenimiento_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mantenimientos
+    ADD CONSTRAINT "Mantenimiento_pk" PRIMARY KEY (id_mantenimiento);
+
+
+--
+-- Name: muebles Mueble_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.muebles
+    ADD CONSTRAINT "Mueble_pk" PRIMARY KEY (id_mueble);
+
+
+--
+-- Name: __EFMigrationsHistory PK___EFMigrationsHistory; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public."__EFMigrationsHistory"
+    ADD CONSTRAINT "PK___EFMigrationsHistory" PRIMARY KEY ("MigrationId");
+
+
+--
+-- Name: prestamos Prestamo_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.prestamos
+    ADD CONSTRAINT "Prestamo_pk" PRIMARY KEY (id_prestamo);
+
+
+--
+-- Name: usuarios Usuario_pk; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.usuarios
+    ADD CONSTRAINT "Usuario_pk" PRIMARY KEY (carnet);
+
+
+--
+-- Name: ambientes ambientes_nombre_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ambientes
+    ADD CONSTRAINT ambientes_nombre_key UNIQUE (nombre);
+
+
+--
+-- Name: ambientes ambientes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ambientes
+    ADD CONSTRAINT ambientes_pkey PRIMARY KEY (id_ambiente);
+
+
+--
+-- Name: audit_logs audit_logs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.audit_logs
+    ADD CONSTRAINT audit_logs_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: avisos_disponibilidad avisos_disponibilidad_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.avisos_disponibilidad
+    ADD CONSTRAINT avisos_disponibilidad_pkey PRIMARY KEY (id_aviso);
+
+
+--
+-- Name: carreras carrera_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.carreras
+    ADD CONSTRAINT carrera_pkey PRIMARY KEY (id_carrera);
+
+
+--
+-- Name: codigos_autenticacion codigos_autenticacion_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.codigos_autenticacion
+    ADD CONSTRAINT codigos_autenticacion_pkey PRIMARY KEY (hash);
+
+
+--
+-- Name: comentarios_equipos comentarios_equipos_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.comentarios_equipos
+    ADD CONSTRAINT comentarios_equipos_pkey PRIMARY KEY (id_comentario_equipo);
+
+
+--
+-- Name: contratos contrato_id; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.contratos
+    ADD CONSTRAINT contrato_id PRIMARY KEY (id);
+
+
+--
+-- Name: detalles_mantenimientos detalles_mantenimientos_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.detalles_mantenimientos
+    ADD CONSTRAINT detalles_mantenimientos_pkey PRIMARY KEY (id_detalle_mantenimiento);
+
+
+--
+-- Name: detalles_prestamos detalles_prestamos_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.detalles_prestamos
+    ADD CONSTRAINT detalles_prestamos_pkey PRIMARY KEY (id_detalle_prestamo);
+
+
+--
+-- Name: notificaciones notificaciones_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.notificaciones
+    ADD CONSTRAINT notificaciones_pkey PRIMARY KEY (id_notificacion);
+
+
+--
+-- Name: configuraciones_sistema pk_configuraciones_sistema; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.configuraciones_sistema
+    ADD CONSTRAINT pk_configuraciones_sistema PRIMARY KEY (id_configuracion);
+
+
+--
+-- Name: procedencias procedencias_nombre_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.procedencias
+    ADD CONSTRAINT procedencias_nombre_key UNIQUE (nombre);
+
+
+--
+-- Name: procedencias procedencias_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.procedencias
+    ADD CONSTRAINT procedencias_pkey PRIMARY KEY (id_procedencia);
+
+
+--
+-- Name: usuarios unique_carnet; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.usuarios
+    ADD CONSTRAINT unique_carnet UNIQUE (carnet);
+
+
+--
+-- Name: carreras unique_carreras; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.carreras
+    ADD CONSTRAINT unique_carreras UNIQUE (nombre);
+
+
+--
+-- Name: categorias unique_categorias; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.categorias
+    ADD CONSTRAINT unique_categorias UNIQUE (nombre);
+
+
+--
+-- Name: equipos unique_codigo_imt; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.equipos
+    ADD CONSTRAINT unique_codigo_imt UNIQUE (codigo_imt);
+
+
+--
+-- Name: usuarios unique_email; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.usuarios
+    ADD CONSTRAINT unique_email UNIQUE (email);
+
+
+--
+-- Name: grupos_equipos unique_grupos_equipos_nombre_modelo_marca; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grupos_equipos
+    ADD CONSTRAINT unique_grupos_equipos_nombre_modelo_marca UNIQUE (nombre, modelo, marca);
+
+
+--
+-- Name: muebles unique_nombre; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.muebles
+    ADD CONSTRAINT unique_nombre UNIQUE (nombre);
+
+
+--
+-- Name: empresas_mantenimiento unique_nombre_empresas_mantenimiento; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.empresas_mantenimiento
+    ADD CONSTRAINT unique_nombre_empresas_mantenimiento UNIQUE (nombre);
+
+
+--
+-- Name: gaveteros unique_nombre_gaveteros; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gaveteros
+    ADD CONSTRAINT unique_nombre_gaveteros UNIQUE (nombre);
+
+
+--
+-- Name: ix_hangfire_counter_expireat; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_counter_expireat ON hangfire.counter USING btree (expireat);
+
+
+--
+-- Name: ix_hangfire_counter_key; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_counter_key ON hangfire.counter USING btree (key);
+
+
+--
+-- Name: ix_hangfire_hash_expireat; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_hash_expireat ON hangfire.hash USING btree (expireat);
+
+
+--
+-- Name: ix_hangfire_job_expireat; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_job_expireat ON hangfire.job USING btree (expireat);
+
+
+--
+-- Name: ix_hangfire_job_statename; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_job_statename ON hangfire.job USING btree (statename);
+
+
+--
+-- Name: ix_hangfire_job_statename_is_not_null; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_job_statename_is_not_null ON hangfire.job USING btree (statename) INCLUDE (id) WHERE (statename IS NOT NULL);
+
+
+--
+-- Name: ix_hangfire_jobparameter_jobidandname; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_jobparameter_jobidandname ON hangfire.jobparameter USING btree (jobid, name);
+
+
+--
+-- Name: ix_hangfire_jobqueue_fetchedat_queue_jobid; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_jobqueue_fetchedat_queue_jobid ON hangfire.jobqueue USING btree (fetchedat NULLS FIRST, queue, jobid);
+
+
+--
+-- Name: ix_hangfire_jobqueue_jobidandqueue; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_jobqueue_jobidandqueue ON hangfire.jobqueue USING btree (jobid, queue);
+
+
+--
+-- Name: ix_hangfire_jobqueue_queueandfetchedat; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_jobqueue_queueandfetchedat ON hangfire.jobqueue USING btree (queue, fetchedat);
+
+
+--
+-- Name: ix_hangfire_list_expireat; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_list_expireat ON hangfire.list USING btree (expireat);
+
+
+--
+-- Name: ix_hangfire_set_expireat; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_set_expireat ON hangfire.set USING btree (expireat);
+
+
+--
+-- Name: ix_hangfire_set_key_score; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_set_key_score ON hangfire.set USING btree (key, score);
+
+
+--
+-- Name: ix_hangfire_state_jobid; Type: INDEX; Schema: hangfire; Owner: -
+--
+
+CREATE INDEX ix_hangfire_state_jobid ON hangfire.state USING btree (jobid);
+
+
+--
+-- Name: idx_accesorios_identificadores; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_accesorios_identificadores ON public.accesorios USING btree (nombre, id_equipo, estado_eliminado);
+
+
+--
+-- Name: idx_audit_admin; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_audit_admin ON public.audit_logs USING btree (admin_carnet, "timestamp" DESC, estado_eliminado);
+
+
+--
+-- Name: idx_audit_entidad; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_audit_entidad ON public.audit_logs USING btree (entidad, entidad_id, estado_eliminado);
+
+
+--
+-- Name: idx_audit_entidad_accion_fecha; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_audit_entidad_accion_fecha ON public.audit_logs USING btree (entidad, accion, "timestamp" DESC, estado_eliminado);
+
+
+--
+-- Name: idx_carreras_nombre; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_carreras_nombre ON public.carreras USING btree (nombre, estado_eliminado);
+
+
+--
+-- Name: idx_categorias_nombre; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_categorias_nombre ON public.categorias USING btree (nombre, estado_eliminado);
+
+
+--
+-- Name: idx_componentes; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_componentes ON public.componentes USING btree (nombre, id_equipo, estado_eliminado);
+
+
+--
+-- Name: idx_detalles_mantenimientos; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_detalles_mantenimientos ON public.detalles_mantenimientos USING btree (id_mantenimiento, estado_eliminado);
+
+
+--
+-- Name: idx_detalles_prestamos; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_detalles_prestamos ON public.detalles_prestamos USING btree (id_prestamo, estado_eliminado);
+
+
+--
+-- Name: idx_empresas_mantenimiento; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_empresas_mantenimiento ON public.empresas_mantenimiento USING btree (nombre, estado_eliminado);
+
+
+--
+-- Name: idx_equipos_identificadores; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_equipos_identificadores ON public.equipos USING btree (id_grupo_equipo, codigo_imt, estado_eliminado);
+
+
+--
+-- Name: idx_gaveteros_identificadores; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_gaveteros_identificadores ON public.gaveteros USING btree (nombre, id_mueble, estado_eliminado);
+
+
+--
+-- Name: idx_grupos_equipos_identificadores; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_grupos_equipos_identificadores ON public.grupos_equipos USING btree (id_categoria, nombre, modelo, marca, estado_eliminado);
+
+
+--
+-- Name: idx_mantenimientos_fecha_empresa; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_mantenimientos_fecha_empresa ON public.mantenimientos USING btree (fecha_mantenimiento, fecha_final_mantenimiento, id_empresa, estado_eliminado);
+
+
+--
+-- Name: idx_muebles_nombre; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_muebles_nombre ON public.usuarios USING btree (nombre, estado_eliminado);
+
+
+--
+-- Name: idx_prestamos_fechas; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_prestamos_fechas ON public.prestamos USING btree (fecha_prestamo_esperada, fecha_devolucion_esperada, carnet, estado_eliminado);
+
+
+--
+-- Name: idx_usuarios_email; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_usuarios_email ON public.usuarios USING btree (email, estado_eliminado);
+
+
+--
+-- Name: ix_ambientes_carnet_administrador; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_ambientes_carnet_administrador ON public.ambientes USING btree (carnet_administrador);
+
+
+--
+-- Name: ix_avisos_disponibilidad_pendiente; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_avisos_disponibilidad_pendiente ON public.avisos_disponibilidad USING btree (notificado, estado_eliminado);
+
+
+--
+-- Name: ix_codigos_autenticacion_expira_usado; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_codigos_autenticacion_expira_usado ON public.codigos_autenticacion USING btree (expira, usado);
+
+
+--
+-- Name: ix_comentarios_equipos_grupo_fecha; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_comentarios_equipos_grupo_fecha ON public.comentarios_equipos USING btree (id_grupo_equipo, fecha_creacion, estado_eliminado);
+
+
+--
+-- Name: ix_comentarios_equipos_padre_estado; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_comentarios_equipos_padre_estado ON public.comentarios_equipos USING btree (id_comentario_padre, estado_eliminado);
+
+
+--
+-- Name: ix_detalles_prestamos_id_equipo; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_detalles_prestamos_id_equipo ON public.detalles_prestamos USING btree (id_equipo);
+
+
+--
+-- Name: ix_equipos_id_ambiente; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_equipos_id_ambiente ON public.equipos USING btree (id_ambiente);
+
+
+--
+-- Name: ix_equipos_id_procedencia; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_equipos_id_procedencia ON public.equipos USING btree (id_procedencia);
+
+
+--
+-- Name: ix_muebles_id_ambiente; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_muebles_id_ambiente ON public.muebles USING btree (id_ambiente);
+
+
+--
+-- Name: ix_notificaciones_carnet; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_notificaciones_carnet ON public.notificaciones USING btree (carnet_usuario, leido, estado_eliminado);
+
+
+--
+-- Name: ix_prestamos_carnet_estado; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_prestamos_carnet_estado ON public.prestamos USING btree (carnet, estado_prestamo, estado_eliminado);
+
+
+--
+-- Name: ix_prestamos_guardados_usuario; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_prestamos_guardados_usuario ON public.prestamos USING btree (carnet, fecha_solicitud DESC) WHERE ((guardado = true) AND (estado_eliminado = false));
+
+
+--
+-- Name: ix_usuarios_google_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX ix_usuarios_google_id ON public.usuarios USING btree (google_id) WHERE (google_id IS NOT NULL);
+
+
+--
+-- Name: ix_usuarios_refresh_token; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ix_usuarios_refresh_token ON public.usuarios USING btree (refresh_token);
+
+
+--
+-- Name: ix_usuarios_token_verificacion; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX ix_usuarios_token_verificacion ON public.usuarios USING btree (token_verificacion_hash) WHERE (token_verificacion_hash IS NOT NULL);
+
+
+--
+-- Name: unique_codigo_ucb; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX unique_codigo_ucb ON public.equipos USING btree (codigo_ucb);
+
+
+--
+-- Name: equipos trg_actualizar_costo_promedio_delete; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_actualizar_costo_promedio_delete AFTER DELETE ON public.equipos FOR EACH ROW EXECUTE FUNCTION public.fn_actualizar_costo_promedio_grupo();
+
+
+--
+-- Name: equipos trg_actualizar_costo_promedio_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_actualizar_costo_promedio_insert AFTER INSERT ON public.equipos FOR EACH ROW EXECUTE FUNCTION public.fn_actualizar_costo_promedio_grupo();
+
+
+--
+-- Name: equipos trg_actualizar_costo_promedio_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_actualizar_costo_promedio_update AFTER UPDATE OF costo_referencia, estado_eliminado, estado_equipo ON public.equipos FOR EACH ROW EXECUTE FUNCTION public.fn_actualizar_costo_promedio_grupo();
+
+
+--
+-- Name: equipos trg_equipo_estado_actualiza_grupo; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_equipo_estado_actualiza_grupo AFTER UPDATE OF estado_eliminado ON public.equipos FOR EACH ROW EXECUTE FUNCTION public.fn_actualizar_cantidad_equipo_por_estado();
+
+
+--
+-- Name: equipos trg_equipos_after_insert; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_equipos_after_insert AFTER INSERT ON public.equipos FOR EACH ROW EXECUTE FUNCTION public.fn_incrementar_cantidad_equipos();
+
+
+--
+-- Name: gaveteros trg_gavetero_movimiento_actualiza_numero_mueble; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_gavetero_movimiento_actualiza_numero_mueble AFTER UPDATE ON public.gaveteros FOR EACH ROW WHEN ((old.id_mueble IS DISTINCT FROM new.id_mueble)) EXECUTE FUNCTION public.fn_actualizar_gavetero_tras_update_mueble();
+
+
+--
+-- Name: gaveteros trg_gaveteros_estado_conteo_mueble; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_gaveteros_estado_conteo_mueble AFTER UPDATE OF estado_eliminado ON public.gaveteros FOR EACH ROW EXECUTE FUNCTION public.fn_actualizar_conteo_gaveteros_por_estado();
+
+
+--
+-- Name: gaveteros trg_incrementar_gaveteros; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_incrementar_gaveteros AFTER INSERT ON public.gaveteros FOR EACH ROW EXECUTE FUNCTION public.fn_incrementar_numero_gaveteros();
+
+
+--
+-- Name: mantenimientos trg_mantenimientos_cascade_estado_a_detalles; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_mantenimientos_cascade_estado_a_detalles AFTER UPDATE OF estado_eliminado ON public.mantenimientos FOR EACH ROW EXECUTE FUNCTION public.fn_estado_eliminado_mantenimiento_a_detalle();
+
+
+--
+-- Name: prestamos trg_prestamos_estado_a_detalles; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_prestamos_estado_a_detalles AFTER UPDATE OF estado_eliminado ON public.prestamos FOR EACH ROW EXECUTE FUNCTION public.fn_estado_eliminado_prestamo_a_detalle();
+
+
+--
+-- Name: equipos trg_update_cantidad_tras_update_equipos; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trg_update_cantidad_tras_update_equipos AFTER UPDATE ON public.equipos FOR EACH ROW WHEN ((old.id_grupo_equipo IS DISTINCT FROM new.id_grupo_equipo)) EXECUTE FUNCTION public.fn_actualizar_cantidad_tras_update_equipos();
+
+
+--
+-- Name: jobparameter jobparameter_jobid_fkey; Type: FK CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.jobparameter
+    ADD CONSTRAINT jobparameter_jobid_fkey FOREIGN KEY (jobid) REFERENCES hangfire.job(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: state state_jobid_fkey; Type: FK CONSTRAINT; Schema: hangfire; Owner: -
+--
+
+ALTER TABLE ONLY hangfire.state
+    ADD CONSTRAINT state_jobid_fkey FOREIGN KEY (jobid) REFERENCES hangfire.job(id) ON UPDATE CASCADE ON DELETE CASCADE;
+
+
+--
+-- Name: accesorios Accesorio_Equipo_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.accesorios
+    ADD CONSTRAINT "Accesorio_Equipo_fk" FOREIGN KEY (id_equipo) REFERENCES public.equipos(id_equipo);
+
+
+--
+-- Name: componentes Componente_Equipo_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.componentes
+    ADD CONSTRAINT "Componente_Equipo_fk" FOREIGN KEY (id_equipo) REFERENCES public.equipos(id_equipo);
+
+
+--
+-- Name: equipos Equipo_Gavetero_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.equipos
+    ADD CONSTRAINT "Equipo_Gavetero_fk" FOREIGN KEY (id_gavetero) REFERENCES public.gaveteros(id_gavetero);
+
+
+--
+-- Name: equipos Equipo_Grupo_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.equipos
+    ADD CONSTRAINT "Equipo_Grupo_fk" FOREIGN KEY (id_grupo_equipo) REFERENCES public.grupos_equipos(id_grupo_equipo);
+
+
+--
+-- Name: grupos_equipos Grupo_Categoria_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.grupos_equipos
+    ADD CONSTRAINT "Grupo_Categoria_fk" FOREIGN KEY (id_categoria) REFERENCES public.categorias(id_categoria);
+
+
+--
+-- Name: mantenimientos Mantenimiento_Empresa_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.mantenimientos
+    ADD CONSTRAINT "Mantenimiento_Empresa_fk" FOREIGN KEY (id_empresa) REFERENCES public.empresas_mantenimiento(id_empresa_mantenimiento);
+
+
+--
+-- Name: prestamos Prestamo_Carrera_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.prestamos
+    ADD CONSTRAINT "Prestamo_Carrera_fk" FOREIGN KEY (id_carrera) REFERENCES public.carreras(id_carrera);
+
+
+--
+-- Name: prestamos Prestamo_Usuario_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.prestamos
+    ADD CONSTRAINT "Prestamo_Usuario_fk" FOREIGN KEY (carnet) REFERENCES public.usuarios(carnet);
+
+
+--
+-- Name: prestamos Prestamo_contrato_fk; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.prestamos
+    ADD CONSTRAINT "Prestamo_contrato_fk" FOREIGN KEY (id_contrato) REFERENCES public.contratos(id) NOT VALID;
+
+
+--
+-- Name: avisos_disponibilidad avisos_disponibilidad_carnet_usuario_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.avisos_disponibilidad
+    ADD CONSTRAINT avisos_disponibilidad_carnet_usuario_fkey FOREIGN KEY (carnet_usuario) REFERENCES public.usuarios(carnet);
+
+
+--
+-- Name: avisos_disponibilidad avisos_disponibilidad_id_grupo_equipo_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.avisos_disponibilidad
+    ADD CONSTRAINT avisos_disponibilidad_id_grupo_equipo_fkey FOREIGN KEY (id_grupo_equipo) REFERENCES public.grupos_equipos(id_grupo_equipo);
+
+
+--
+-- Name: comentarios_equipos comentarios_equipos_carnet_usuario_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.comentarios_equipos
+    ADD CONSTRAINT comentarios_equipos_carnet_usuario_fkey FOREIGN KEY (carnet_usuario) REFERENCES public.usuarios(carnet);
+
+
+--
+-- Name: comentarios_equipos comentarios_equipos_id_comentario_padre_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.comentarios_equipos
+    ADD CONSTRAINT comentarios_equipos_id_comentario_padre_fkey FOREIGN KEY (id_comentario_padre) REFERENCES public.comentarios_equipos(id_comentario_equipo) ON DELETE RESTRICT;
+
+
+--
+-- Name: comentarios_equipos comentarios_equipos_id_grupo_equipo_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.comentarios_equipos
+    ADD CONSTRAINT comentarios_equipos_id_grupo_equipo_fkey FOREIGN KEY (id_grupo_equipo) REFERENCES public.grupos_equipos(id_grupo_equipo);
+
+
+--
+-- Name: configuraciones_sistema configuraciones_sistema_carnet_jefe_carrera_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.configuraciones_sistema
+    ADD CONSTRAINT configuraciones_sistema_carnet_jefe_carrera_fkey FOREIGN KEY (carnet_jefe_carrera) REFERENCES public.usuarios(carnet) ON DELETE SET NULL;
+
+
+--
+-- Name: detalles_prestamos detalles_prestamos_id_grupo_equipo_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.detalles_prestamos
+    ADD CONSTRAINT detalles_prestamos_id_grupo_equipo_fkey FOREIGN KEY (id_grupo_equipo) REFERENCES public.grupos_equipos(id_grupo_equipo);
+
+
+--
+-- Name: equipos equipos_id_ambiente_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.equipos
+    ADD CONSTRAINT equipos_id_ambiente_fkey FOREIGN KEY (id_ambiente) REFERENCES public.ambientes(id_ambiente) ON DELETE RESTRICT;
+
+
+--
+-- Name: equipos equipos_id_procedencia_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.equipos
+    ADD CONSTRAINT equipos_id_procedencia_fkey FOREIGN KEY (id_procedencia) REFERENCES public.procedencias(id_procedencia) ON DELETE RESTRICT;
+
+
+--
+-- Name: ambientes fk_ambientes_administrador; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ambientes
+    ADD CONSTRAINT fk_ambientes_administrador FOREIGN KEY (carnet_administrador) REFERENCES public.usuarios(carnet) ON DELETE RESTRICT;
+
+
+--
+-- Name: detalles_mantenimientos fk_detalle_mantenimiento_equipo; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.detalles_mantenimientos
+    ADD CONSTRAINT fk_detalle_mantenimiento_equipo FOREIGN KEY (id_equipo) REFERENCES public.equipos(id_equipo);
+
+
+--
+-- Name: detalles_mantenimientos fk_detalles_mantenimiento; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.detalles_mantenimientos
+    ADD CONSTRAINT fk_detalles_mantenimiento FOREIGN KEY (id_mantenimiento) REFERENCES public.mantenimientos(id_mantenimiento);
+
+
+--
+-- Name: detalles_prestamos fk_equipo; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.detalles_prestamos
+    ADD CONSTRAINT fk_equipo FOREIGN KEY (id_equipo) REFERENCES public.equipos(id_equipo);
+
+
+--
+-- Name: gaveteros fk_gaveteros_muebles; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.gaveteros
+    ADD CONSTRAINT fk_gaveteros_muebles FOREIGN KEY (id_mueble) REFERENCES public.muebles(id_mueble);
+
+
+--
+-- Name: muebles fk_muebles_ambientes; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.muebles
+    ADD CONSTRAINT fk_muebles_ambientes FOREIGN KEY (id_ambiente) REFERENCES public.ambientes(id_ambiente) ON DELETE RESTRICT;
+
+
+--
+-- Name: detalles_prestamos fk_prestamo; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.detalles_prestamos
+    ADD CONSTRAINT fk_prestamo FOREIGN KEY (id_prestamo) REFERENCES public.prestamos(id_prestamo);
+
+
+--
+-- Name: usuarios fk_usuarios_carrera; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.usuarios
+    ADD CONSTRAINT fk_usuarios_carrera FOREIGN KEY (id_carrera) REFERENCES public.carreras(id_carrera);
+
+
+--
+-- Name: notificaciones notificaciones_carnet_usuario_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.notificaciones
+    ADD CONSTRAINT notificaciones_carnet_usuario_fkey FOREIGN KEY (carnet_usuario) REFERENCES public.usuarios(carnet);
+
+
+--
+-- PostgreSQL database dump complete
+--
+
