@@ -121,22 +121,16 @@ export class UsuarioServiceAPI {
   }
 
   solicitarRecuperacionContrasena(email: string) {
-    return this.http.post(
-      `${environment.apiUrl}/api/auth/recuperar-contrasena`,
-      {
-        Email: email,
-      },
-    );
+    return this.http.post(`${environment.apiUrl}/api/auth/recuperar`, {
+      Email: email,
+    });
   }
 
   restablecerContrasena(token: string, contrasena: string) {
-    return this.http.post(
-      `${environment.apiUrl}/api/auth/restablecer-contrasena`,
-      {
-        Token: token,
-        Contrasena: contrasena,
-      },
-    );
+    return this.http.post(`${environment.apiUrl}/api/auth/restablecer`, {
+      Token: token,
+      Contrasena: contrasena,
+    });
   }
 
   mapearSesionGoogle(session: UsuarioLoginApiResponse['Value']) {

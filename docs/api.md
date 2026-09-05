@@ -79,6 +79,8 @@ Authorization: Bearer <token>
 | `POST` | `/api/auth/refresh`            | Rotate the access and refresh tokens.                           |
 | `POST` | `/api/auth/verificar`          | Consume a single-use local email-verification token.           |
 | `POST` | `/api/auth/reenviar`           | Issue a replacement token without disclosing account presence. |
+| `POST` | `/api/auth/recuperar`           | Send a password reset link without disclosing account presence. |
+| `POST` | `/api/auth/restablecer`         | Consume a single-use password reset token.                      |
 | `GET`  | `/api/auth/google`             | Start Google OAuth 2.0 authentication.                          |
 | `GET`  | `/api/auth/google/callback`    | OAuth middleware callback registered with Google.              |
 | `GET`  | `/api/auth/google/resultado`   | Complete the server-side provider result.                       |

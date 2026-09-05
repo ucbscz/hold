@@ -65,13 +65,13 @@ public class AuthController : Controller
         CancellationToken cancellationToken
     ) => ToResponse(await _verification.Resend(request.Email, cancellationToken));
 
-    [HttpPost("recuperar-contrasena")]
+    [HttpPost("recuperar")]
     public async Task<IActionResult> RequestPasswordReset(
         [FromBody] EmailDto request,
         CancellationToken cancellationToken
     ) => ToResponse(await _passwordRecovery.Request(request.Email, cancellationToken));
 
-    [HttpPost("restablecer-contrasena")]
+    [HttpPost("restablecer")]
     public async Task<IActionResult> ResetPassword(
         [FromBody] ResetPasswordDto request,
         CancellationToken cancellationToken
