@@ -19,11 +19,25 @@
               autocomplete="new-password"
               placeholder="••••••••"
             />
-            <button type="button" [attr.aria-label]="mostrarContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'" (click)="mostrarContrasena = !mostrarContrasena">
-              <i class="fas" [class.fa-eye]="!mostrarContrasena" [class.fa-eye-slash]="mostrarContrasena" aria-hidden="true"></i>
+            <button
+              type="button"
+              [attr.aria-label]="
+                mostrarContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'
+              "
+              (click)="mostrarContrasena = !mostrarContrasena"
+            >
+              <i
+                class="fas"
+                [class.fa-eye]="!mostrarContrasena"
+                [class.fa-eye-slash]="mostrarContrasena"
+                aria-hidden="true"
+              ></i>
             </button>
           </div>
-          <p class="hint">Mínimo 8 caracteres, una mayúscula, un número y un carácter especial.</p>
+          <p class="hint">
+            Mínimo 8 caracteres, una mayúscula, un número y un carácter
+            especial.
+          </p>
           <label for="repetir-contrasena">Repite la contraseña</label>
           <div class="password-field">
             <input
@@ -36,14 +50,31 @@
               autocomplete="new-password"
               placeholder="••••••••"
             />
-            <button type="button" [attr.aria-label]="mostrarRepetirContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'" (click)="mostrarRepetirContrasena = !mostrarRepetirContrasena">
-              <i class="fas" [class.fa-eye]="!mostrarRepetirContrasena" [class.fa-eye-slash]="mostrarRepetirContrasena" aria-hidden="true"></i>
+            <button
+              type="button"
+              [attr.aria-label]="
+                mostrarRepetirContrasena
+                  ? 'Ocultar contraseña'
+                  : 'Mostrar contraseña'
+              "
+              (click)="mostrarRepetirContrasena = !mostrarRepetirContrasena"
+            >
+              <i
+                class="fas"
+                [class.fa-eye]="!mostrarRepetirContrasena"
+                [class.fa-eye-slash]="mostrarRepetirContrasena"
+                aria-hidden="true"
+              ></i>
             </button>
           </div>
           @if (error) {
             <p class="feedback feedback--error" role="alert">{{ error }}</p>
           }
-          <button type="submit" class="primary-action" [disabled]="enviando || resetForm.invalid">
+          <button
+            type="submit"
+            class="primary-action"
+            [disabled]="enviando || resetForm.invalid"
+          >
             {{ enviando ? "Actualizando..." : "Actualizar contraseña" }}
           </button>
         </form>
@@ -70,7 +101,11 @@
           @if (error) {
             <p class="feedback feedback--error" role="alert">{{ error }}</p>
           }
-          <button type="submit" class="primary-action" [disabled]="enviando || requestForm.invalid">
+          <button
+            type="submit"
+            class="primary-action"
+            [disabled]="enviando || requestForm.invalid"
+          >
             {{ enviando ? "Enviando..." : "Enviar enlace" }}
           </button>
         </form>
