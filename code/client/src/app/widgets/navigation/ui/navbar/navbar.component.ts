@@ -28,10 +28,10 @@ export class NavbarComponent {
     signal('usuario');
   expandedNotificationId: WritableSignal<number | null> = signal(null);
   showAdminSidebarToggle: WritableSignal<boolean> = signal(false);
-  showHome: WritableSignal<boolean> = signal(true);
-  showBack: WritableSignal<boolean> = signal(true);
-  showCart: WritableSignal<boolean> = signal(true);
-  showProfile: WritableSignal<boolean> = signal(true);
+  showHome: WritableSignal<boolean> = signal(false);
+  showBack: WritableSignal<boolean> = signal(false);
+  showCart: WritableSignal<boolean> = signal(false);
+  showProfile: WritableSignal<boolean> = signal(false);
   readonly totalProductos$: Observable<number>;
 
   constructor(
