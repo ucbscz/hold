@@ -679,7 +679,7 @@
 }
 
 .register-card .form-input:not(textarea) {
-  border-radius: var(--radius-sm) !important;
+  border-radius: var(--field-radius) !important;
 }
 
 .form-input:focus,

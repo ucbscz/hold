@@ -306,7 +306,7 @@ select {
   cursor: pointer !important;
   font-family: var(--font) !important;
   border: 1px solid var(--border) !important;
-  border-radius: var(--radius-sm) !important;
+  border-radius: var(--field-radius) !important;
 }
 select.form-input:focus,
 select:focus {
