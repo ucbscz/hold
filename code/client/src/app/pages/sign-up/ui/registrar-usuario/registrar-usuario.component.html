@@ -1,13 +1,14 @@
 <div class="register-container">
   <div class="register-card">
     <header class="auth-header">
+      <span class="auth-header__eyebrow">UCB Hold</span>
       <h1 class="title">Crear cuenta</h1>
-      <p>Usa tu correo institucional para solicitar equipos.</p>
+      <p>Registra tus datos para solicitar equipos institucionales.</p>
     </header>
     @if (!registroGoogle) {
       <div class="google-registration">
         <p>
-          Verifica primero tu correo institucional para completar el registro.
+          Verifica tu correo institucional con Google y completaremos los datos disponibles.
         </p>
         <button
           type="button"
@@ -16,18 +17,17 @@
           (click)="iniciarRegistroGoogle()"
         >
           <img
-            src="assets/identity/google-g.svg"
+            src="assets/identity/google-logo.svg"
             width="20"
             height="20"
             alt=""
           />
-          Registrarse con Google
+          Continuar con Google
         </button>
       </div>
-      <div class="auth-separator"><span>o completa tus datos</span></div>
+      <div class="auth-separator"><span>o regístrate con correo</span></div>
       <p class="verification-note">
-        Después de crear tu cuenta, te enviaremos un enlace para verificar tu
-        correo antes de iniciar sesión.
+        Te enviaremos un enlace de verificación antes de que puedas iniciar sesión.
       </p>
     }
     <form
@@ -36,7 +36,7 @@
       #registerForm="ngForm"
     >
       <div class="form-section">
-        <h3>Información Personal</h3>
+        <h3>Datos personales</h3>
         <div class="form-group">
           <label for="nombre">Nombre</label>
           <input
@@ -101,7 +101,7 @@
           </div>
         </div>
         <div class="form-group">
-          <label for="carnet">Carnet de identidad </label>
+          <label for="carnet">Carnet de identidad</label>
           <input
             type="text"
             name="carnet"
@@ -196,7 +196,7 @@
         </div>
       </div>
       <div class="form-section">
-        <h3>Contacto de Emergencia</h3>
+        <h3>Contacto de referencia</h3>
         <div class="form-group">
           <label for="nombreReferencia">Nombre de referencia</label>
           <input
@@ -232,7 +232,7 @@
       </div>
       @if (!registroGoogle) {
         <div class="form-section">
-          <h3>Seguridad</h3>
+          <h3>Contraseña</h3>
           <div class="form-group">
             <label for="password">Contraseña</label>
             <div class="password-field">
@@ -365,7 +365,7 @@
         @if (registrando) {
           <span class="spinner" aria-hidden="true"></span>
         }
-        <span>{{ registrando ? "Creando cuenta..." : "Crear Cuenta" }}</span>
+        <span>{{ registrando ? "Creando cuenta..." : "Crear cuenta" }}</span>
       </button>
       <div class="additional-options">
         <p class="login-link">
