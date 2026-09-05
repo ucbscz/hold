@@ -37,7 +37,7 @@ public class CacheRepository
         }
         catch (Exception exception)
         {
-            _logger.LogWarning(exception, "No se pudo leer la clave de caché {CacheKey}", cacheKey);
+            _logger.LogWarning(exception, "No se pudo leer un valor de la caché");
             return Result<T>.NotFound();
         }
     }
@@ -70,7 +70,7 @@ public class CacheRepository
         }
         catch (Exception exception)
         {
-            _logger.LogWarning(exception, "No se pudo escribir la clave de caché {CacheKey}", cacheKey);
+            _logger.LogWarning(exception, "No se pudo escribir un valor en la caché");
             return Result.Error("Caché no disponible");
         }
     }
@@ -92,7 +92,7 @@ public class CacheRepository
         }
         catch (Exception exception)
         {
-            _logger.LogWarning(exception, "No se pudo invalidar la clave de caché {CacheKey}", cacheKey);
+            _logger.LogWarning(exception, "No se pudo invalidar un valor de la caché");
             return Result.Error("Caché no disponible");
         }
     }
