@@ -555,49 +555,39 @@
 
 .register-container {
   align-items: flex-start;
-  padding: clamp(2rem, 6vh, 4.5rem) 1.25rem;
+  padding: clamp(2rem, 5vh, 3.5rem) 1.25rem;
   background: var(--bg);
 }
 
 .register-card {
-  max-width: 44rem;
+  max-width: 40rem;
   padding: 0;
   overflow: hidden;
-  border: 0;
+  border: 1px solid var(--border);
   border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .auth-header {
   margin: 0;
-  padding: 2.25rem 2.5rem 2rem;
-  text-align: left;
-  color: var(--ink-inverse);
-  background: #0f172a;
-}
-
-.auth-header__eyebrow {
-  display: block;
-  margin-bottom: 0.65rem;
-  color: var(--brand);
-  font-size: 0.75rem;
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+  padding: 2.25rem 2.5rem 1.25rem;
+  text-align: center;
+  background: var(--surface);
 }
 
 .auth-header .title {
-  color: var(--ink-inverse);
-  text-align: left;
-  font-size: clamp(1.75rem, 4vw, 2.25rem);
-  line-height: 1.15;
+  color: var(--ink);
+  text-align: center;
+  font-size: 1.875rem;
+  line-height: 1.2;
   letter-spacing: 0;
 }
 
 .auth-header p {
-  max-width: 40rem;
+  max-width: 31rem;
+  margin-inline: auto;
   margin-top: 0.7rem;
-  color: #dbe5f1;
+  color: var(--ink-secondary);
   font-size: 0.9375rem;
 }
 
@@ -610,8 +600,9 @@
 
 .google-registration {
   gap: 0.75rem;
-  margin-top: 2rem;
+  margin-top: 0.5rem;
   margin-bottom: 1.25rem;
+  text-align: center;
 }
 
 .google-registration p,
@@ -622,10 +613,11 @@
 }
 
 .google-button {
+  width: 100%;
   min-height: 44px;
   padding: 0 0.75rem;
   border: 1px solid #747775;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-full);
   background: #fff;
   color: #1f1f1f;
   font-family: Roboto, var(--font), sans-serif;
@@ -633,7 +625,9 @@
   font-weight: 600;
   line-height: 1.25rem;
   box-shadow: none;
-  transition: background-color var(--t-fast), box-shadow var(--t-fast);
+  transition:
+    background-color var(--t-fast),
+    box-shadow var(--t-fast);
 }
 
 .google-button img {
@@ -653,7 +647,7 @@
 }
 
 .auth-separator {
-  margin-top: 1.5rem;
+  margin-top: 1.25rem;
   margin-bottom: 0.75rem;
   color: var(--ink-muted);
 }
@@ -664,7 +658,7 @@
 }
 
 .register-form {
-  gap: 1.75rem;
+  gap: 1.5rem;
   padding-bottom: 2.5rem;
 }
 
@@ -677,7 +671,7 @@
   margin: 0 0 0.25rem;
   padding: 0 0 0.75rem;
   color: var(--ink);
-  font-size: 1rem;
+  font-size: 1.0625rem;
   line-height: 1.35;
 }
 
@@ -737,7 +731,7 @@
   }
 
   .auth-header {
-    padding: 1.75rem 1.25rem 1.5rem;
+    padding: 1.75rem 1.25rem 1rem;
   }
 
   .google-registration,
