@@ -36,13 +36,13 @@ public class AuthController : Controller
 
     [HttpPost("login")]
     public async Task<IActionResult> Login(
-        [FromBody] UsuarioDto request,
+        [FromBody] LoginRequestDto request,
         CancellationToken cancellationToken
     ) =>
         ToResponse(
             await _service.Login(
-                request.Email ?? string.Empty,
-                request.Contrasena ?? string.Empty,
+                request.Email,
+                request.Contrasena,
                 cancellationToken
             )
         );

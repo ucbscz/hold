@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace IMT_Reservas.Server.Application.Features.Usuario;
 
 public class UsuarioDto
@@ -8,6 +10,7 @@ public class UsuarioDto
     public string? ApellidoMaterno { get; set; }
     public string? Rol { get; set; }
     public string? Email { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? Contrasena { get; set; }
     public string? CarreraNombre { get; set; }
     public int? IdCarrera { get; set; }
@@ -23,6 +26,7 @@ public class UsuarioDto
     public byte[]? ImagenFirma { get; set; }
     public bool? AceptaTerminos { get; set; }
     public bool? EmailVerificado { get; set; }
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public string? CodigoGoogle { get; set; }
     public bool? EmailVerificacionEnviada { get; set; }
 }

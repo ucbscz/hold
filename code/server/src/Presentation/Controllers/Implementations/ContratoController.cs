@@ -16,10 +16,6 @@ public class ContratoController : Controller
     public ContratoController(ContratoService contratoService) =>
         _contratoService = contratoService;
 
-    [HttpGet("firmante")]
-    public async Task<IActionResult> GetInstitutionalSigner(CancellationToken cancellationToken) =>
-        Ok(await _contratoService.GetInstitutionalSigner(cancellationToken));
-
     [HttpPost]
     [Authorize(Roles = Permisos.Gestion)]
     [Consumes("multipart/form-data")]

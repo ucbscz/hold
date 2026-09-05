@@ -3,6 +3,7 @@ using ValidationError = Ardalis.Result.ValidationError;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Core.Entities;
+using IMT_Reservas.Server.Application.Security;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
 namespace IMT_Reservas.Server.Application.Features.Configuracion;
@@ -12,15 +13,18 @@ public class ConfiguracionService
     private readonly ConfiguracionRepository _repository;
     private readonly IValidator<ConfiguracionDto> _validator;
     private readonly ConfiguracionMapper _mapper;
+    private readonly SensitiveDataProtector _sensitiveData;
 
     public ConfiguracionService(
         ConfiguracionRepository repository,
         IValidator<ConfiguracionDto> validator,
-        ConfiguracionMapper mapper)
+        ConfiguracionMapper mapper,
+        SensitiveDataProtector sensitiveData)
     {
         _repository = repository;
         _validator = validator;
         _mapper = mapper;
+        _sensitiveData = sensitiveData;
     }
 
     public async Task<ConfiguracionDto> GetConfiguracion(
@@ -29,6 +33,7 @@ public class ConfiguracionService
     {
         var config = await _repository.GetConfiguracion(cancellationToken);
         var dto = _mapper.ToDto(config);
+        dto.FirmaJefeCarreraBase64 = _sensitiveData.Unprotect(dto.FirmaJefeCarreraBase64);
         var responsable = await _repository.GetResponsable(config.CarnetJefeCarrera, cancellationToken);
         dto.CarnetJefeCarrera = responsable?.Carnet;
         dto.NombreJefeCarrera = responsable == null ? string.Empty : NombreCompleto(responsable);
@@ -56,19 +61,23 @@ public class ConfiguracionService
             return validationResult.ToResult<ConfiguracionDto>();
 
         var config = await _repository.GetConfiguracion(cancellationToken);
+        var currentSignature = _sensitiveData.Unprotect(config.FirmaJefeCarreraBase64);
         if (config.CarnetJefeCarrera != dto.CarnetJefeCarrera
             && (config.CarnetJefeCarrera != null || config.NombreJefeCarrera != dto.NombreJefeCarrera)
-            && config.FirmaJefeCarreraBase64 == dto.FirmaJefeCarreraBase64)
+            && currentSignature == dto.FirmaJefeCarreraBase64)
             return Result<ConfiguracionDto>.Invalid(new ValidationError
             {
                 Identifier = nameof(dto.FirmaJefeCarreraBase64),
                 ErrorMessage = "Registra la firma del nuevo jefe de carrera."
             });
         _mapper.UpdateEntity(dto, config);
+        config.FirmaJefeCarreraBase64 = _sensitiveData.Protect(dto.FirmaJefeCarreraBase64);
 
         await _repository.Update(config, cancellationToken);
 
-        return Result<ConfiguracionDto>.Success(_mapper.ToDto(config));
+        var result = _mapper.ToDto(config);
+        result.FirmaJefeCarreraBase64 = dto.FirmaJefeCarreraBase64;
+        return Result<ConfiguracionDto>.Success(result);
     }
 
     public async Task<IReadOnlyList<ResponsableConfiguracionDto>> BuscarResponsables(

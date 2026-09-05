@@ -125,14 +125,6 @@ public sealed partial class ContractHtmlProcessor
         SetText(document, "institutional-name", name);
         SetText(document, "institutional-carnet", carnet);
 
-        foreach (var element in document.QuerySelectorAll("strong"))
-        {
-            if (element.TextContent.Trim() == "Job Angel Ledezma Pérez")
-                element.TextContent = name;
-            else if (element.TextContent.Trim() == "5268336 CB")
-                element.TextContent = carnet;
-        }
-
         var legacyName = document.QuerySelector(".signature > div:first-child > p");
         if (legacyName != null)
             legacyName.TextContent = name;

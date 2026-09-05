@@ -5,6 +5,7 @@ using IMT_Reservas.Server.Application.Features.Usuario;
 using Microsoft.AspNetCore.Http;
 using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Application.Features.Contrato;
+using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Application.Security;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
@@ -49,6 +50,13 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var userQueries = new UsuarioReadRepository(db);
         var userRepository = new UsuarioRepository(db, new UsuarioMapper(), userQueries);
         var availabilityRepository = new AvisoDisponibilidadRepository(db);
+        var contractHtml = new ContractHtmlProcessor();
+        var configuration = new ConfiguracionService(
+            configRepo,
+            new ConfiguracionValidator(),
+            new ConfiguracionMapper(),
+            _sensitiveData
+        );
 
         return new PrestamoService(
             repo,
@@ -61,7 +69,9 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
             configRepo,
             queries,
             states,
-            availability
+            availability,
+            configuration,
+            contractHtml
         );
     }
 
@@ -308,6 +318,49 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         auditDetail.RootElement.GetProperty("usuarioCarnet").GetString().Should().Be(Carnet);
         auditDetail.RootElement.GetProperty("equiposPrestamo").GetString().Should().Be("Grupo Test");
         auditDetail.RootElement.TryGetProperty("texto", out _).Should().BeFalse();
+    }
+
+    [Test]
+    public async Task Create_ContractUsesProtectedInstitutionalSignatureFromServer()
+    {
+        const string adminCarnet = "ADMIN";
+        Db.Usuarios.Add(new Usuario
+        {
+            Carnet = adminCarnet,
+            Nombre = "Ana",
+            ApellidoPaterno = "Perez",
+            Email = "ana@ucb.edu.bo",
+            Contrasena = "hashed",
+            Rol = TipoUsuario.Administrador,
+        });
+        await Db.SaveChangesAsync();
+
+        var configRepository = new ConfiguracionRepository(Db, Cache);
+        var config = await configRepository.GetConfiguracion();
+        config.CarnetJefeCarrera = adminCarnet;
+        config.NombreJefeCarrera = "Ana Perez";
+        config.FirmaJefeCarreraBase64 = "data:image/png;base64,c2VydmVy";
+        await configRepository.Update(config);
+
+        var start = DateTime.UtcNow.AddDays(1);
+        var dto = BuildValidPrestamo(Carnet, GrupoId, start, start.AddHours(1));
+        dto.Contrato = """
+            <strong data-contract-field="institutional-name">Manipulado</strong>
+            <strong data-contract-field="institutional-carnet">000</strong>
+            <img data-contract-image="institutional-signature" src="data:image/png;base64,YXR0YWNrZXI=" />
+            """;
+
+        var result = await Sut.Create(dto);
+
+        result.IsSuccess.Should().BeTrue();
+        var stored = _sensitiveData.Unprotect(
+            Db.Contratos.Single().ContratoHtml ?? string.Empty
+        );
+        stored.Should().Contain("Ana Perez");
+        stored.Should().Contain(adminCarnet);
+        stored.Should().Contain("data:image/png;base64,c2VydmVy");
+        stored.Should().NotContain("Manipulado");
+        stored.Should().NotContain("data:image/png;base64,YXR0YWNrZXI=");
     }
 
     [Test]

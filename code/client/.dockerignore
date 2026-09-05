@@ -7,5 +7,15 @@ npm-debug.log*
 *.log
 *.tmp
 *.temp
+*.env
+.env*
+secrets*
+*.pem
+*.key
+*.pfx
+*.p12
+*.backup
+*.dump
+*.sql
 Dockerfile
 .dockerignore

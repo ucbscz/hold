@@ -130,6 +130,15 @@ server.env
 secrets/
 **/https/*.pem
 **/https/*.key
+**/data-protection-keys/
+client_secret*.json
+credentials*.json
+service-account*.json
+*.jks
+*.keystore
+*.kdbx
+*.sql
+!code/database/schema.sql
 
 code/server/publish/
 

@@ -4,6 +4,8 @@ using Ardalis.Result;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Application.Features.AuditLog;
+using IMT_Reservas.Server.Application.Features.Configuracion;
+using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Application.Features.Notificacion;
 using IMT_Reservas.Server.Application.Features.Prestamo.State;
 using IMT_Reservas.Server.Application.Features.Usuario;
@@ -22,6 +24,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
     private readonly PrestamoReadRepository _queries;
     private readonly PrestamoEstadoRepository _states;
     private readonly PrestamoDisponibilidadRepository _availability;
+    private readonly ConfiguracionService _configuracion;
+    private readonly ContractHtmlProcessor _contractHtml;
 
     public PrestamoService(
         PrestamoRepository repository,
@@ -34,7 +38,9 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         ConfiguracionRepository configuracionRepository,
         PrestamoReadRepository queries,
         PrestamoEstadoRepository states,
-        PrestamoDisponibilidadRepository availability
+        PrestamoDisponibilidadRepository availability,
+        ConfiguracionService configuracion,
+        ContractHtmlProcessor contractHtml
     )
         : base(repository, validator, mapper, audit)
     {
@@ -45,6 +51,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         _queries = queries;
         _states = states;
         _availability = availability;
+        _configuracion = configuracion;
+        _contractHtml = contractHtml;
     }
 
     public override Task<Result<PrestamoDto>> Create(PrestamoDto dto) =>
@@ -73,10 +81,35 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         entity.FechaDevolucionEsperada = dto.FechaDevolucionEsperada ?? DateTime.UtcNow.AddMinutes(30);
         entity.EstadoPrestamo = EstadoPrestamo.Pendiente;
 
+        var contract = dto.Contrato;
+        if (!string.IsNullOrWhiteSpace(contract))
+        {
+            try
+            {
+                var config = await _configuracion.GetConfiguracion(cancellationToken);
+                contract = _contractHtml.RenderInstitutionalSigner(
+                    contract,
+                    config.NombreJefeCarrera,
+                    config.CarnetJefeCarrera ?? "No registrado",
+                    config.FirmaJefeCarreraBase64
+                );
+            }
+            catch (ArgumentException exception)
+            {
+                return Result<PrestamoDto>.Invalid(
+                    new Ardalis.Result.ValidationError
+                    {
+                        Identifier = nameof(dto.Contrato),
+                        ErrorMessage = exception.Message,
+                    }
+                );
+            }
+        }
+
         var createResult = await Repository.CreateReservation(
             entity,
             dto.GrupoEquipoId ?? [],
-            dto.Contrato,
+            contract,
             cancellationToken
         );
 

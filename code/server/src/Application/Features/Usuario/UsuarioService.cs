@@ -412,7 +412,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             user.IdCarrera,
             cancellationToken
         );
-        UnprotectProfileDocuments(dto);
+        SetProfileDocuments(dto, user);
         return Result<UsuarioDto>.Success(dto);
     }
 
@@ -560,12 +560,12 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         dto.Rol = existing.Rol.ToString().ToLowerInvariant();
     }
 
-    private void UnprotectProfileDocuments(UsuarioDto dto)
+    private void SetProfileDocuments(UsuarioDto dto, UsuarioEntity user)
     {
-        dto.ImagenPerfil = _sensitiveData.Unprotect(dto.ImagenPerfil);
-        dto.ImagenFrenteCarnet = _sensitiveData.Unprotect(dto.ImagenFrenteCarnet);
-        dto.ImagenAtrasCarnet = _sensitiveData.Unprotect(dto.ImagenAtrasCarnet);
-        dto.ImagenFirma = _sensitiveData.Unprotect(dto.ImagenFirma);
+        dto.ImagenPerfil = _sensitiveData.Unprotect(user.ImagenPerfil);
+        dto.ImagenFrenteCarnet = _sensitiveData.Unprotect(user.ImagenFrenteCarnet);
+        dto.ImagenAtrasCarnet = _sensitiveData.Unprotect(user.ImagenAtrasCarnet);
+        dto.ImagenFirma = _sensitiveData.Unprotect(user.ImagenFirma);
     }
 
     private static void ClearProfileDocuments(UsuarioDto dto)

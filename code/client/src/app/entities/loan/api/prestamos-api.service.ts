@@ -186,12 +186,4 @@ export class PrestamosAPIService {
         map((response) => extractApiValue(response, {}).ContratoHtml ?? ''),
       );
   }
-
-  obtenerFirmanteContrato() {
-    return this.http.get<{
-      Nombre: string;
-      Carnet: string;
-      FirmaBase64: string;
-    }>(`${environment.apiUrl}/api/contratos/firmante`);
-  }
 }

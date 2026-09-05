@@ -3,10 +3,11 @@ services:
     container_name: ucb_db
     image: postgres:16-alpine
     restart: on-failure
-    env_file:
-      - server.env
     environment:
-      - PGDATA=/var/lib/postgresql/data/pgdata
+      POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: ${POSTGRES_DB:?POSTGRES_DB is required}
+      PGDATA: /var/lib/postgresql/data/pgdata
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
@@ -14,6 +15,8 @@ services:
       retries: 5
     volumes:
       - ucb_db_data:/var/lib/postgresql/data
+    networks:
+      - data
 
   ucb_redis:
     container_name: ucb_redis
@@ -27,6 +30,8 @@ services:
       retries: 5
     volumes:
       - ucb_redis_data:/data
+    networks:
+      - data
 
   ucb_elastic:
     container_name: ucb_elastic
@@ -43,6 +48,8 @@ services:
       retries: 10
     volumes:
       - ucb_elastic_data:/usr/share/elasticsearch/data
+    networks:
+      - data
 
   ucb_server:
     container_name: ucb_server
@@ -71,6 +78,9 @@ services:
         condition: service_healthy
       ucb_elastic:
         condition: service_healthy
+    networks:
+      - web
+      - data
 
   ucb_client:
     container_name: ucb_client
@@ -89,9 +99,16 @@ services:
       interval: 10s
       timeout: 3s
       retries: 5
+    networks:
+      - web
 
 volumes:
   ucb_db_data:
   ucb_redis_data:
   ucb_elastic_data:
   ucb_dataprotection_keys:
+
+networks:
+  web:
+  data:
+    internal: true

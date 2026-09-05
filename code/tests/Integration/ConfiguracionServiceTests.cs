@@ -12,6 +12,9 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.DataProtection;
+using IMT_Reservas.Server.Application.Security;
+using System.Text.Json;
 
 namespace IMT_Reservas.Tests.Integration;
 
@@ -45,7 +48,16 @@ internal class ConfiguracionServiceTests
         );
         var repository = new ConfiguracionRepository(_db, cache);
         var mapper = new ConfiguracionMapper();
-        _service = new ConfiguracionService(repository, new ConfiguracionValidator(), mapper);
+        var sensitiveData = new SensitiveDataProtector(
+            new EphemeralDataProtectionProvider(),
+            NullLogger<SensitiveDataProtector>.Instance
+        );
+        _service = new ConfiguracionService(
+            repository,
+            new ConfiguracionValidator(),
+            mapper,
+            sensitiveData
+        );
     }
 
     [TearDown]
@@ -70,6 +82,8 @@ internal class ConfiguracionServiceTests
         reloaded.NombreJefeCarrera.Should().Be("Luis Lopez");
         reloaded.CarnetJefeCarrera.Should().Be("2222222");
         reloaded.FirmaJefeCarreraBase64.Should().Be("nueva-firma");
+        _db.ConfiguracionesSistema.Single().FirmaJefeCarreraBase64
+            .Should().StartWith("ucbhold:v1:");
     }
 
     [Test]
@@ -122,23 +136,52 @@ internal class ConfiguracionServiceTests
         var dto = await _service.GetConfiguracion();
         dto.FirmaJefeCarreraBase64 = "firma";
         dto.TiempoMinimoReservaMinutos = 60;
-        dto.Horarios = new List<HorarioAtencion> { new() { DiaSemana = 1, Abierto = true, InicioMinutos = 480, FinMinutos = 510 } };
+        dto.Horarios = new List<HorarioAtencionDto> { new() { DiaSemana = 1, Abierto = true, InicioMinutos = 480, FinMinutos = 510 } };
         (await _service.UpdateConfiguracion(dto)).Status.Should().Be(Ardalis.Result.ResultStatus.Invalid);
     }
 
-    [TestCase(false)]
-    [TestCase(true)]
-    public async Task Get_OnlyExposesResponsibleIdentifierToRoot(bool root)
+    [Test]
+    public async Task Get_ExposesResponsibleIdentityToRoot()
     {
-        var controller = new ConfiguracionController(_service) { ControllerContext = new ControllerContext
+        var stored = await _service.GetConfiguracion();
+        stored.FirmaJefeCarreraBase64 = "firma-institucional";
+        (await _service.UpdateConfiguracion(stored)).IsSuccess.Should().BeTrue();
+        var controller = new ConfiguracionController(_service)
         {
-            HttpContext = new DefaultHttpContext { User = new ClaimsPrincipal(new ClaimsIdentity(
-                root ? new[] { new Claim(ClaimTypes.Role, "administrador") } : Array.Empty<Claim>())) }
-        } };
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext
+                {
+                    User = new ClaimsPrincipal(new ClaimsIdentity(
+                        new[] { new Claim(ClaimTypes.Role, "administrador") }))
+                }
+            }
+        };
         var result = (OkObjectResult)await controller.Get(CancellationToken.None);
         var config = (ConfiguracionDto)result.Value!;
-        config.CarnetJefeCarrera.Should().Be(root ? "1111111" : null);
+        config.CarnetJefeCarrera.Should().Be("1111111");
         config.NombreJefeCarrera.Should().Be("Ana Perez");
+        config.FirmaJefeCarreraBase64.Should().Be("firma-institucional");
+        controller.Response.Headers.CacheControl.ToString().Should().Be("no-store");
+    }
+
+    [Test]
+    public async Task Get_AnonymousResponseHasNoResponsibleIdentityFields()
+    {
+        var controller = new ConfiguracionController(_service)
+        {
+            ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext()
+            }
+        };
+
+        var result = (OkObjectResult)await controller.Get(CancellationToken.None);
+        result.Value.Should().BeOfType<ConfiguracionPublicaDto>();
+        var json = JsonSerializer.Serialize(result.Value);
+        json.Should().NotContain("CarnetJefeCarrera");
+        json.Should().NotContain("NombreJefeCarrera");
+        json.Should().NotContain("FirmaJefeCarreraBase64");
         controller.Response.Headers.CacheControl.ToString().Should().Be("no-store");
     }
 }

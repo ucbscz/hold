@@ -96,19 +96,6 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
         return result;
     }
 
-    public async Task<FirmanteContratoDto> GetInstitutionalSigner(
-        CancellationToken cancellationToken = default
-    )
-    {
-        var config = await _configuracion.GetConfiguracion(cancellationToken);
-        return new FirmanteContratoDto
-        {
-            Nombre = config.NombreJefeCarrera,
-            Carnet = config.CarnetJefeCarrera ?? string.Empty,
-            FirmaBase64 = config.FirmaJefeCarreraBase64,
-        };
-    }
-
     public override async Task<Result<object>> Delete(int prestamoId)
     {
         var result = await Repository.Delete(prestamoId);

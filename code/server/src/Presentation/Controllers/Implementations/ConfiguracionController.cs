@@ -20,9 +20,12 @@ public class ConfiguracionController : Controller
     public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
         var result = await _service.GetConfiguracion(cancellationToken);
-        if (!User.IsInRole("administrador")) result.CarnetJefeCarrera = null;
         Response.Headers.CacheControl = "no-store";
-        return Ok(result);
+        return Ok(
+            User.IsInRole("administrador")
+                ? result
+                : ConfiguracionPublicaDto.From(result)
+        );
     }
 
     [HttpGet("responsables")]

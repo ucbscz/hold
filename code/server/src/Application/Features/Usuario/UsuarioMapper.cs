@@ -13,6 +13,10 @@ public partial class UsuarioMapper : IMapper<UsuarioEntity, UsuarioDto>
     [MapperIgnoreTarget(nameof(UsuarioDto.AceptaTerminos))]
     [MapperIgnoreTarget(nameof(UsuarioDto.CodigoGoogle))]
     [MapperIgnoreTarget(nameof(UsuarioDto.EmailVerificacionEnviada))]
+    [MapperIgnoreTarget(nameof(UsuarioDto.ImagenPerfil))]
+    [MapperIgnoreTarget(nameof(UsuarioDto.ImagenFrenteCarnet))]
+    [MapperIgnoreTarget(nameof(UsuarioDto.ImagenAtrasCarnet))]
+    [MapperIgnoreTarget(nameof(UsuarioDto.ImagenFirma))]
     public partial UsuarioDto ToDto(UsuarioEntity entity);
 
     [MapperIgnoreSource(nameof(UsuarioDto.AceptaTerminos))]

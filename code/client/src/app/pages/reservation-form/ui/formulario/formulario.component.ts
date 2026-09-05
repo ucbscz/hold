@@ -9,7 +9,6 @@ import {
   signal,
 } from '@angular/core';
 import { Carrito } from '@entities/cart';
-import { ConfiguracionService } from '@entities/configuracion';
 import { PrestamosAPIService } from '@entities/loan';
 import { UsuarioService, UsuarioServiceAPI } from '@entities/user';
 import { CarritoService, LoanReturnNavigationService } from '@features/cart';
@@ -86,12 +85,6 @@ export class FormularioComponent implements OnInit {
   idCarrera: number | null = null;
   nombreCarrera: string = '';
   nombreMateria: string = '';
-  private firmanteContrato: {
-    Nombre: string;
-    Carnet: string;
-    FirmaBase64: string;
-  } | null = null;
-
   constructor(
     private readonly http: HttpClient,
     private readonly renderer: Renderer2,
@@ -102,7 +95,6 @@ export class FormularioComponent implements OnInit {
     private readonly loanReturnNavigation: LoanReturnNavigationService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly configuracionService: ConfiguracionService,
     private readonly toast: ToastService,
   ) {}
 
@@ -142,23 +134,10 @@ export class FormularioComponent implements OnInit {
       rolCarrera = `${rol} de ${u.carrera}`;
     }
 
-    const config = this.configuracionService.configuracionActual();
-    const nombreFirmante =
-      this.firmanteContrato?.Nombre ?? config?.NombreJefeCarrera ?? '';
-    const carnetFirmante = this.firmanteContrato?.Carnet ?? '';
-
-    const base64Firma =
-      this.firmanteContrato?.FirmaBase64 ??
-      config?.FirmaJefeCarreraBase64 ??
-      '';
-    const firmaSrc = base64Firma.startsWith('data:')
-      ? base64Firma
-      : `data:image/png;base64,${base64Firma}`;
-
     const processedTemplate = this.reemplazarMarcadores(this.templateCrudo, {
-      nombre_jefe_carrera: escapeHtmlValue(nombreFirmante),
-      carnet_jefe_carrera: escapeHtmlValue(carnetFirmante || 'No registrado'),
-      firma_jefe_carrera: firmaSrc,
+      nombre_jefe_carrera: '',
+      carnet_jefe_carrera: '',
+      firma_jefe_carrera: '',
       carnet_frente: this.carnetFrente,
       carnet_atras: this.carnetAtras,
 
@@ -197,18 +176,6 @@ export class FormularioComponent implements OnInit {
         this.carnetAtras = identityBase64ToDataUrl(profile.imagen_atras_carnet);
         this.firma = identityBase64ToDataUrl(profile.imagen_firma, 'image/png');
         this.actualizarContrato();
-      },
-    });
-
-    this.mandarprestamo.obtenerFirmanteContrato().subscribe({
-      next: (firmante) => {
-        this.firmanteContrato = firmante;
-        this.actualizarContrato();
-      },
-      error: () => {
-        this.mensajeerror =
-          'No se pudieron cargar los datos del responsable institucional.';
-        this.error.set(true);
       },
     });
 

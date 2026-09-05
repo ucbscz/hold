@@ -17,4 +17,22 @@ public partial class ConfiguracionMapper : IMapper<ConfiguracionSistema, Configu
     [MapperIgnoreTarget(nameof(ConfiguracionSistema.Id))]
     [MapperIgnoreTarget(nameof(ConfiguracionSistema.EstadoEliminado))]
     public partial void UpdateEntity(ConfiguracionDto dto, ConfiguracionSistema entity);
+
+    private static HorarioAtencionDto MapSchedule(HorarioAtencion source) => new()
+    {
+        DiaSemana = source.DiaSemana,
+        Fecha = source.Fecha,
+        Abierto = source.Abierto,
+        InicioMinutos = source.InicioMinutos,
+        FinMinutos = source.FinMinutos,
+    };
+
+    private static HorarioAtencion MapSchedule(HorarioAtencionDto source) => new()
+    {
+        DiaSemana = source.DiaSemana,
+        Fecha = source.Fecha,
+        Abierto = source.Abierto,
+        InicioMinutos = source.InicioMinutos,
+        FinMinutos = source.FinMinutos,
+    };
 }
