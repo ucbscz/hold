@@ -53,7 +53,7 @@ jobs:
         run: dotnet list code/IMT_Reservas.sln package --vulnerable --include-transitive --no-restore
 
       - name: Install coverage report tool
-        run: dotnet tool install --global dotnet-reportgenerator-globaltool
+        run: dotnet tool install dotnet-reportgenerator-globaltool --tool-path .tools
 
       - name: Install SonarQube scanner
         if: env.SONAR_TOKEN != '' && env.SONAR_PROJECT_KEY != ''
@@ -89,7 +89,7 @@ jobs:
       - name: Generate backend HTML coverage
         if: always()
         run: |
-          reportgenerator \
+          .tools/reportgenerator \
             -reports:"code/tests/TestResults/**/coverage.cobertura.xml" \
             -targetdir:"code/tests/coveragereport" \
             -reporttypes:"Html;TextSummary"
