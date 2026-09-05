@@ -14,7 +14,7 @@ UCB Hold handles user identity, administrative actions and equipment loan record
 
 Use GitHub Security Advisories when available:
 
-<https://github.com/alejandroramirezvallejos/UCB_Hold/security/advisories>
+<https://github.com/ucbscz/hold/security/advisories>
 
 If advisories are not available, contact a maintainer listed in the README through a private channel.
 

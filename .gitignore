@@ -95,6 +95,15 @@ code/database/*.backup
 code/database/*.dump
 code/database/backups/
 !code/database/schema.sql
+*.backup
+*.dump
+*.sql.gz
+*.sql.gpg
+*.sql.age
+*.backup.gpg
+*.backup.age
+*.tar.gz.gpg
+*.tar.gz.age
 
 *.log
 *.tlog
