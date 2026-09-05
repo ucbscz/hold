@@ -61,6 +61,18 @@ internal class JwtServiceTests
     }
 
     [Test]
+    public void GenerateAccessToken_DoesNotContainPersonalProfileData()
+    {
+        var token = _jwtService.GenerateAccessToken(BuildUsuarioDto());
+
+        var parsedToken = new JwtSecurityTokenHandler().ReadJwtToken(token);
+        parsedToken.Claims.Should().NotContain(c => c.Type == JwtRegisteredClaimNames.Email);
+        parsedToken.Claims.Should().NotContain(c => c.Type == "nombre");
+        token.Should().NotContain("u001@ucb.edu.bo");
+        token.Should().NotContain("Test");
+    }
+
+    [Test]
     public void GenerateAccessToken_HasFutureExpiry()
     {
         var beforeGeneration = DateTime.UtcNow;

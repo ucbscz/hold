@@ -24,7 +24,7 @@ public sealed class ExceptionHandler : IExceptionHandler
     )
     {
         var (statusCode, errors) = MapException(exception);
-        LogException(exception, statusCode);
+        LogException(exception, statusCode, httpContext.TraceIdentifier);
 
         httpContext.Response.ContentType = "application/json";
         httpContext.Response.StatusCode = statusCode;
@@ -48,7 +48,7 @@ public sealed class ExceptionHandler : IExceptionHandler
     private static (int StatusCode, List<string> Errors) MapException(Exception exception) =>
         exception switch
         {
-            KeyNotFoundException => (StatusCodes.Status404NotFound, [exception.Message]),
+            KeyNotFoundException => (StatusCodes.Status404NotFound, ["Recurso no encontrado"]),
             DbUpdateException { InnerException: PostgresException postgresException }
                 when IsConstraintViolation(postgresException.SqlState) => (
                 StatusCodes.Status409Conflict,
@@ -66,7 +66,7 @@ public sealed class ExceptionHandler : IExceptionHandler
                 StatusCodes.Status500InternalServerError,
                 ["Error interno del servidor. Por favor intenta de nuevo más tarde."]
             ),
-            ArgumentException => (StatusCodes.Status400BadRequest, [exception.Message]),
+            ArgumentException => (StatusCodes.Status400BadRequest, ["Solicitud inválida"]),
             _ => (
                 StatusCodes.Status500InternalServerError,
                 ["Error interno del servidor. Por favor intenta de nuevo más tarde."]
@@ -80,11 +80,19 @@ public sealed class ExceptionHandler : IExceptionHandler
                 or PostgresErrorCodes.CheckViolation
                 or PostgresErrorCodes.NotNullViolation;
 
-    private void LogException(Exception exception, int statusCode)
+    private void LogException(Exception exception, int statusCode, string traceIdentifier)
     {
         if (statusCode >= StatusCodes.Status500InternalServerError)
-            _logger.LogError(exception, "Error no controlado: {Message}", exception.Message);
+            _logger.LogError(
+                "Error no controlado {ExceptionType}. TraceId: {TraceId}",
+                exception.GetType().Name,
+                traceIdentifier
+            );
         else
-            _logger.LogWarning(exception, "Error controlado: {Message}", exception.Message);
+            _logger.LogWarning(
+                "Error controlado {ExceptionType}. TraceId: {TraceId}",
+                exception.GetType().Name,
+                traceIdentifier
+            );
     }
 }

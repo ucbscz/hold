@@ -22,16 +22,9 @@ public class JwtService
         var issuedAt = DateTime.UtcNow;
         var expiresAt = issuedAt.AddMinutes(_settings.ExpiresInMinutes);
 
-        var displayName = string.Join(
-            " ",
-            new[] { usuario.Nombre, usuario.ApellidoPaterno, usuario.ApellidoMaterno }.Where(part =>
-                !string.IsNullOrWhiteSpace(part)
-            )
-        );
         var claims = new[]
         {
             new Claim(JwtRegisteredClaimNames.Sub, usuario.Carnet ?? string.Empty),
-            new Claim(JwtRegisteredClaimNames.Email, usuario.Email ?? string.Empty),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(
                 JwtRegisteredClaimNames.Iat,
@@ -41,7 +34,6 @@ public class JwtService
                 ClaimValueTypes.Integer64
             ),
             new Claim("role", usuario.Rol?.ToLowerInvariant() ?? "estudiante"),
-            new Claim("nombre", displayName),
         };
 
         var securityToken = new JwtSecurityToken(

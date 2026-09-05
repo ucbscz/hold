@@ -34,7 +34,8 @@ public class ExceptionHandlerTests
         var response = await GetResponse();
         response.Should().NotBeNull();
         response!.Status.Should().Be(404);
-        response.Errors.Should().Contain("Item not found");
+        response.Errors.Should().Contain("Recurso no encontrado");
+        response.Errors.Should().NotContain("Item not found");
     }
 
     [Test]
@@ -94,7 +95,8 @@ public class ExceptionHandlerTests
         var response = await GetResponse();
         response.Should().NotBeNull();
         response!.Status.Should().Be(400);
-        response.Errors.Should().Contain("Bad Arg");
+        response.Errors.Should().Contain("Solicitud inválida");
+        response.Errors.Should().NotContain("Bad Arg");
     }
 
     [Test]

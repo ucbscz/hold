@@ -10,7 +10,6 @@ import {
   ViewChild,
   WritableSignal,
 } from '@angular/core';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { PrestamosAPIService } from '../../api/prestamos-api.service';
 import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
@@ -35,15 +34,12 @@ export class VercontratoComponent
   @Input() idprestamo: number = 0;
   @ViewChild('contractContent') contractContentRef?: ElementRef<HTMLElement>;
   contratoContent: string = '';
-  contratoContentSeguro: SafeHtml | null = null;
+  contratoContentSeguro: string | null = null;
   tieneCarnet = false;
   imprimiendo = false;
   private cancelarImpresion?: () => void;
   private readonly descargas = new Map<string, number>();
-  constructor(
-    private readonly prestamo: PrestamosAPIService,
-    private readonly sanitizer: DomSanitizer,
-  ) {
+  constructor(private readonly prestamo: PrestamosAPIService) {
     super();
   }
   ngOnInit() {
@@ -62,9 +58,7 @@ export class VercontratoComponent
         }
         this.contratoContent = this.normalizarContratoHtml(data);
         this.tieneCarnet = this.obtenerImagenesCarnet().length === 2;
-        this.contratoContentSeguro = this.sanitizer.bypassSecurityTrustHtml(
-          this.contratoContent,
-        );
+        this.contratoContentSeguro = this.contratoContent;
       },
       error: (error) => {
         const errorMsg = extractErrorMessage(
