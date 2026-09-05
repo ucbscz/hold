@@ -7,10 +7,15 @@ import { CarreraService } from '@entities/career';
 import { Usuario, UsuarioServiceAPI } from '@entities/user';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
+  identityDataUrlToBase64,
+  processIdentityImage,
+} from '@shared/lib/image/identity-image';
+import {
   AvisoExitoComponent,
   CustomSelectComponent,
   MostrarerrorComponent,
 } from '@shared/ui';
+import { FirmaComponent } from '@features/signature';
 @Component({
   selector: 'app-registrar-usuario',
   imports: [
@@ -19,6 +24,7 @@ import {
     MostrarerrorComponent,
     AvisoExitoComponent,
     CustomSelectComponent,
+    FirmaComponent,
     RouterLink,
   ],
   templateUrl: './registrar-usuario.component.html',
@@ -36,6 +42,12 @@ export class RegistrarUsuarioComponent {
   aceptaTerminos = false;
   registroGoogle = false;
   codigoGoogle: string | null = null;
+  procesandoImagen = false;
+  fotoPerfilPreview = '';
+  carnetFrentePreview = '';
+  carnetAtrasPreview = '';
+  firmaPreview = '';
+  capturandoFirma = signal(false);
   error: WritableSignal<boolean> = signal(false);
   mensajeerror: string = '';
   aviso: WritableSignal<boolean> = signal(false);
@@ -79,7 +91,8 @@ export class RegistrarUsuarioComponent {
       (!this.registroGoogle && this.password !== this.confirmPassword) ||
       this.validartelefono(this.nuevoUsuario.telefono) ||
       !this.nuevoUsuario.carrera ||
-      !this.aceptaTerminos
+      !this.aceptaTerminos ||
+      this.procesandoImagen
     ) {
       return;
     }
@@ -155,6 +168,44 @@ export class RegistrarUsuarioComponent {
 
   alternarVisibilidadConfirmPassword(): void {
     this.mostrarConfirmPassword = !this.mostrarConfirmPassword;
+  }
+
+  async cargarImagen(
+    event: Event,
+    destino: 'perfil' | 'frente' | 'atras',
+  ): Promise<void> {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+
+    this.procesandoImagen = true;
+    this.error.set(false);
+    try {
+      const dataUrl = await processIdentityImage(file);
+      const base64 = identityDataUrlToBase64(dataUrl);
+      if (destino === 'perfil') {
+        this.fotoPerfilPreview = dataUrl;
+        this.nuevoUsuario.imagen_perfil = base64;
+      } else if (destino === 'frente') {
+        this.carnetFrentePreview = dataUrl;
+        this.nuevoUsuario.imagen_frente_carnet = base64;
+      } else {
+        this.carnetAtrasPreview = dataUrl;
+        this.nuevoUsuario.imagen_atras_carnet = base64;
+      }
+    } catch (error) {
+      this.mensajeerror =
+        error instanceof Error ? error.message : 'No se pudo leer la imagen.';
+      this.error.set(true);
+      input.value = '';
+    } finally {
+      this.procesandoImagen = false;
+    }
+  }
+
+  guardarFirma(firma: string): void {
+    this.firmaPreview = firma;
+    this.nuevoUsuario.imagen_firma = identityDataUrlToBase64(firma);
   }
 
   validartelefono(telefono: string | null | undefined): boolean {

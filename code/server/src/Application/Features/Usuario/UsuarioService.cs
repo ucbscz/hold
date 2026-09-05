@@ -144,6 +144,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
     public async Task<Result<UsuarioDto>> Create(UsuarioDto dto, bool isAdmin, bool isLabAdmin = false)
     {
+        dto.Carnet = dto.Carnet?.Trim().ToUpperInvariant();
         dto.Rol = dto.Rol?.Trim().ToLowerInvariant();
         dto.Email = dto.Email?.Trim().ToLowerInvariant();
         var googleRegistration = string.IsNullOrWhiteSpace(dto.CodigoGoogle)

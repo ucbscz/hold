@@ -229,6 +229,135 @@
   gap: 0.125rem;
 }
 
+.identity-fieldset {
+  display: grid;
+  gap: 1rem;
+  margin: 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+}
+
+.identity-fieldset legend {
+  padding: 0 0.35rem;
+  color: var(--ink);
+  font-size: 0.875rem;
+  font-weight: 700;
+}
+
+.identity-fieldset legend span {
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+
+.identity-fieldset > p,
+.signature-registration p {
+  margin: 0;
+  color: var(--ink-muted);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+.identity-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+
+.identity-grid section {
+  display: grid;
+  min-width: 0;
+  gap: 0.5rem;
+  justify-items: center;
+  text-align: center;
+}
+
+.identity-grid strong,
+.signature-registration strong {
+  color: var(--ink-secondary);
+  font-size: 0.8125rem;
+}
+
+.identity-preview,
+.profile-photo-preview {
+  display: grid;
+  width: 100%;
+  aspect-ratio: 1.55;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  background: var(--sidebar);
+}
+
+.profile-photo-preview {
+  width: min(100%, 5.25rem);
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.identity-preview img,
+.profile-photo-preview img,
+.signature-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.identity-button {
+  min-height: 2.25rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-full);
+  color: var(--interactive-text);
+  background: var(--surface);
+  font: 700 0.8125rem var(--font);
+  cursor: pointer;
+}
+
+.identity-button:hover:not(:disabled),
+.identity-button:focus-visible:not(:disabled) {
+  border-color: var(--interactive-text);
+  background: var(--interactive-subtle);
+  outline: none;
+}
+
+.identity-button:disabled {
+  cursor: wait;
+  opacity: 0.6;
+}
+
+.signature-registration {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1fr) minmax(0, 1.35fr);
+  align-items: center;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+}
+
+.signature-registration > div:last-child {
+  display: grid;
+  gap: 0.45rem;
+  justify-items: start;
+}
+
+.signature-preview {
+  display: grid;
+  min-height: 5.5rem;
+  overflow: hidden;
+  place-items: center;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--ink-muted);
+  background: var(--surface);
+}
+
+.signature-preview img {
+  object-fit: contain;
+}
+
 .register-button {
   background: var(--brand);
   color: var(--brand-text);
@@ -727,5 +856,24 @@
 
   .google-registration {
     margin-top: 1.5rem;
+  }
+
+  .identity-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .profile-document {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 460px) {
+  .identity-grid,
+  .signature-registration {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-document {
+    grid-column: auto;
   }
 }

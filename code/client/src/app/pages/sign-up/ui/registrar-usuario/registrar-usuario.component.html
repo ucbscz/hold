@@ -188,6 +188,113 @@
           }
         </div>
       </div>
+      <fieldset class="identity-fieldset">
+        <legend>Documentos para contratos <span>(opcional)</span></legend>
+        <p>
+          Guárdalos ahora para completar futuras solicitudes con menos pasos.
+        </p>
+        <div class="identity-grid">
+          <section class="profile-document">
+            <div class="profile-photo-preview">
+              @if (fotoPerfilPreview) {
+                <img
+                  [src]="fotoPerfilPreview"
+                  alt="Vista previa de la foto de perfil"
+                />
+              } @else {
+                <i class="fas fa-user" aria-hidden="true"></i>
+              }
+            </div>
+            <strong>Foto de perfil</strong>
+            <input
+              #fotoPerfilInput
+              type="file"
+              hidden
+              accept="image/jpeg,image/png,image/webp"
+              (change)="cargarImagen($event, 'perfil')"
+            />
+            <button
+              type="button"
+              class="identity-button"
+              [disabled]="procesandoImagen"
+              (click)="fotoPerfilInput.click()"
+            >
+              {{ fotoPerfilPreview ? "Cambiar" : "Agregar" }}
+            </button>
+          </section>
+          <section>
+            <div class="identity-preview">
+              @if (carnetFrentePreview) {
+                <img [src]="carnetFrentePreview" alt="Anverso del carnet" />
+              } @else {
+                <i class="fas fa-id-card" aria-hidden="true"></i>
+              }
+            </div>
+            <strong>Carnet: anverso</strong>
+            <input
+              #frenteInput
+              type="file"
+              hidden
+              accept="image/jpeg,image/png,image/webp"
+              (change)="cargarImagen($event, 'frente')"
+            />
+            <button
+              type="button"
+              class="identity-button"
+              [disabled]="procesandoImagen"
+              (click)="frenteInput.click()"
+            >
+              {{ carnetFrentePreview ? "Cambiar" : "Agregar" }}
+            </button>
+          </section>
+          <section>
+            <div class="identity-preview">
+              @if (carnetAtrasPreview) {
+                <img [src]="carnetAtrasPreview" alt="Reverso del carnet" />
+              } @else {
+                <i class="fas fa-id-card" aria-hidden="true"></i>
+              }
+            </div>
+            <strong>Carnet: reverso</strong>
+            <input
+              #atrasInput
+              type="file"
+              hidden
+              accept="image/jpeg,image/png,image/webp"
+              (change)="cargarImagen($event, 'atras')"
+            />
+            <button
+              type="button"
+              class="identity-button"
+              [disabled]="procesandoImagen"
+              (click)="atrasInput.click()"
+            >
+              {{ carnetAtrasPreview ? "Cambiar" : "Agregar" }}
+            </button>
+          </section>
+        </div>
+        <div class="signature-registration">
+          <div class="signature-preview">
+            @if (firmaPreview) {
+              <img [src]="firmaPreview" alt="Firma registrada" />
+            } @else {
+              <i class="fas fa-signature" aria-hidden="true"></i>
+              <span>Aún no registraste una firma</span>
+            }
+          </div>
+          <div>
+            <strong>Firma</strong>
+            <p>Se usará automáticamente en los contratos que aceptes.</p>
+            <button
+              type="button"
+              class="identity-button"
+              (click)="capturandoFirma.set(true)"
+            >
+              {{ firmaPreview ? "Cambiar firma" : "Agregar firma" }}
+            </button>
+          </div>
+        </div>
+      </fieldset>
       <div class="form-section">
         <h3>Contacto de referencia</h3>
         <div class="form-group">
@@ -372,4 +479,10 @@
     [exito]="aviso"
     (accion)="irALogin()"
   ></app-aviso-exito>
+}
+@if (capturandoFirma()) {
+  <app-firma
+    (firma)="guardarFirma($event)"
+    [clickfirma]="capturandoFirma"
+  ></app-firma>
 }

@@ -38,6 +38,10 @@ export class UsuarioServiceAPI {
       TelefonoReferencia: usuario.telefono_referencia,
       NombreReferencia: usuario.nombre_referencia,
       EmailReferencia: usuario.email_referencia,
+      ImagenPerfil: usuario.imagen_perfil,
+      ImagenFrenteCarnet: usuario.imagen_frente_carnet,
+      ImagenAtrasCarnet: usuario.imagen_atras_carnet,
+      ImagenFirma: usuario.imagen_firma,
       AceptaTerminos: aceptaTerminos,
       CodigoGoogle: codigoGoogle,
     };
