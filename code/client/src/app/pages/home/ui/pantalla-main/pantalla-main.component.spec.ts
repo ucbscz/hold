@@ -26,4 +26,24 @@ describe('PantallaMainComponent', () => {
 
     expect(component.categoriasArray).toBe(categories);
   });
+
+  it('closes category filters when clicking outside the search control', () => {
+    component.showCategories = true;
+    fixture.detectChanges();
+
+    document.body.dispatchEvent(new MouseEvent('click', { bubbles: true }));
+
+    expect(component.showCategories).toBeFalse();
+  });
+
+  it('summarizes active categories without filling the search field', () => {
+    component.seleccionarCategoria('Electrónica');
+    component.seleccionarCategoria('Control');
+    fixture.detectChanges();
+
+    const summary = fixture.nativeElement.querySelector('.category-summary');
+
+    expect(summary.textContent).toContain('2 categorías');
+    expect(component.solicitud).toBe('');
+  });
 });

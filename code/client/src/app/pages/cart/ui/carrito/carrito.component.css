@@ -181,14 +181,6 @@
 .cart__remove-button i {
   pointer-events: none;
 }
-.cart__error {
-  color: var(--error);
-  font-size: 0.8rem;
-  font-weight: 600;
-  font-family: var(--font);
-  text-align: center;
-  min-height: 1.1rem;
-}
 .cart__button {
   display: inline-flex;
   align-items: center;

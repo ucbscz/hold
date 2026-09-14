@@ -480,7 +480,7 @@
   width: 100%;
   resize: vertical;
   min-height: 7rem;
-  padding: 0.85rem 1rem;
+  padding: 1rem 1.25rem;
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
   background: var(--surface);

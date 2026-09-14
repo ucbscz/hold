@@ -333,13 +333,11 @@ export class CalendarioComponent {
   horaDeshabilitada(campo: CampoFecha, hora: string): boolean {
     const [horas, minutos] = hora.split(':').map(Number);
     const minutosDelDia = horas * 60 + minutos;
-    const horario = this.horario(this.obtenerFecha(campo) ?? this.minimoInicio);
+    const fecha = new Date(this.obtenerFecha(campo) ?? this.minimoInicio);
+    fecha.setHours(horas, minutos, 0, 0);
+    const horario = this.horario(fecha);
     const limite =
-      horario.FinMinutos -
-      (campo === 'inicio'
-        ? (this.configuracionService.configuracionActual()
-            ?.TiempoMinimoReservaMinutos ?? 30)
-        : 0);
+      campo === 'inicio' ? this.limiteHoraInicio(fecha) : horario.FinMinutos;
     if (
       !horario.Abierto ||
       minutosDelDia < horario.InicioMinutos ||
@@ -347,8 +345,6 @@ export class CalendarioComponent {
     )
       return true;
 
-    const fecha = new Date(this.obtenerFecha(campo) ?? this.minimoInicio);
-    fecha.setHours(horas, minutos, 0, 0);
     const minimo =
       campo === 'inicio'
         ? this.minimoInicio
@@ -500,9 +496,7 @@ export class CalendarioComponent {
     if (normalizada < apertura) normalizada = apertura;
     const limite = this.limiteDelDia(
       normalizada,
-      this.horario(normalizada).FinMinutos -
-        (this.configuracionService.configuracionActual()
-          ?.TiempoMinimoReservaMinutos ?? 30),
+      this.limiteHoraInicio(normalizada),
     );
 
     return normalizada.getTime() > limite.getTime()
@@ -564,12 +558,16 @@ export class CalendarioComponent {
     const minimo =
       this.configuracionService.configuracionActual()
         ?.TiempoMinimoReservaMinutos ?? 30;
+    const mismoDia = this.comparaSoloFecha(inicio, fin) === 0;
+    const limiteInicio = mismoDia
+      ? apertura.FinMinutos - minimo
+      : apertura.FinMinutos - 1;
     return (
       duration >= minimo * MILLISECONDS_PER_MINUTE &&
       apertura.Abierto &&
       cierre.Abierto &&
       minutosInicio >= apertura.InicioMinutos &&
-      minutosInicio <= apertura.FinMinutos - minimo &&
+      minutosInicio <= limiteInicio &&
       minutosFin >= cierre.InicioMinutos &&
       minutosFin <= cierre.FinMinutos &&
       (this.maximoDiasPrestamo == null ||
@@ -611,6 +609,17 @@ export class CalendarioComponent {
     const limite = new Date(fecha);
     limite.setHours(Math.floor(minutosDelDia / 60), minutosDelDia % 60, 0, 0);
     return limite;
+  }
+
+  private limiteHoraInicio(fecha: Date): number {
+    const horario = this.horario(fecha);
+    const fin = this.fechaFinSeleccionada();
+    const minimo =
+      this.configuracionService.configuracionActual()
+        ?.TiempoMinimoReservaMinutos ?? 30;
+    const mismoDia = !fin || this.comparaSoloFecha(fecha, fin) === 0;
+
+    return horario.FinMinutos - (mismoDia ? minimo : 1);
   }
 
   private inicioDelSiguienteDia(fecha: Date): Date {

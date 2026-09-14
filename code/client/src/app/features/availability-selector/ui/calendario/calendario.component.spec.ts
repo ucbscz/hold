@@ -57,6 +57,14 @@ describe('CalendarioComponent', () => {
     expect(component.horaDeshabilitada('fin', '18:00')).toBeFalse();
   });
 
+  it('allows a multi-day loan to start shortly before closing', () => {
+    component.fechaInicioSeleccionada.set(new Date(2030, 0, 10, 17, 30));
+    component.fechaFinSeleccionada.set(new Date(2030, 0, 11, 8, 30));
+
+    expect(component.horaDeshabilitada('inicio', '17:30')).toBeFalse();
+    expect(component.rangoValido).toBeTrue();
+  });
+
   it('defaults to the nearest valid minute after the current time', () => {
     jasmine.clock().install();
     try {

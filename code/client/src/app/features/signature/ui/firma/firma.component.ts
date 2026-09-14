@@ -33,7 +33,12 @@ export class FirmaComponent implements AfterViewInit, OnDestroy {
   }
   ngAfterViewInit(): void {
     const canvas = this.signatureCanvas.nativeElement;
-    this.signaturePad = new SignaturePad(canvas);
+    this.signaturePad = new SignaturePad(canvas, {
+      throttle: 0,
+      minDistance: 1,
+      minWidth: 0.75,
+      maxWidth: 2.5,
+    });
     this.resizeCanvas();
     window.addEventListener('resize', this.resizeListener);
   }
@@ -43,7 +48,7 @@ export class FirmaComponent implements AfterViewInit, OnDestroy {
   }
   private resizeCanvas(): void {
     const canvas = this.signatureCanvas.nativeElement;
-    const ratio = Math.max(window.devicePixelRatio || 1, 1);
+    const ratio = Math.min(Math.max(window.devicePixelRatio || 1, 1), 2);
     canvas.width = canvas.offsetWidth * ratio;
     canvas.height = canvas.offsetHeight * ratio;
     canvas.getContext('2d')?.scale(ratio, ratio);

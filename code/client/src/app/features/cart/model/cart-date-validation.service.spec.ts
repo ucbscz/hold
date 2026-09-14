@@ -58,6 +58,26 @@ describe('CartDateValidationService', () => {
     expect(result.isValid).toBeTrue();
   });
 
+  it('allows a multi-day loan to start shortly before closing', () => {
+    const result = service.validate(
+      new Date('2026-08-12T17:45:00'),
+      new Date('2026-08-13T08:30:00'),
+      currentDate,
+    );
+
+    expect(result.isValid).toBeTrue();
+  });
+
+  it('allows closed days between valid pickup and return times', () => {
+    const result = service.validate(
+      new Date('2026-09-05T17:45:00'),
+      new Date('2026-09-07T08:30:00'),
+      currentDate,
+    );
+
+    expect(result.isValid).toBeTrue();
+  });
+
   it('rejects reservations before opening or after closing', () => {
     const beforeOpening = service.validate(
       new Date('2026-08-13T07:30:00'),

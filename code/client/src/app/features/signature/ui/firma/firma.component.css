@@ -2,8 +2,6 @@
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-  -webkit-backdrop-filter: blur(4px);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -69,6 +67,7 @@
   border-radius: var(--radius-md);
   background-color: var(--sidebar);
   display: block;
+  contain: layout paint;
 }
 .signature-error {
   min-height: 1.25rem;

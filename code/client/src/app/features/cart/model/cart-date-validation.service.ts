@@ -62,11 +62,15 @@ export class CartDateValidationService {
     const fin = horarioParaFecha(config, endDate);
     const startMinutes = startDate.getHours() * 60 + startDate.getMinutes();
     const endMinutes = endDate.getHours() * 60 + endDate.getMinutes();
+    const sameDay = startDate.toDateString() === endDate.toDateString();
+    const latestStart = sameDay
+      ? inicio.FinMinutos - minimo
+      : inicio.FinMinutos - 1;
     if (
       !inicio.Abierto ||
       !fin.Abierto ||
       startMinutes < inicio.InicioMinutos ||
-      startMinutes > inicio.FinMinutos - minimo ||
+      startMinutes > latestStart ||
       endMinutes < fin.InicioMinutos ||
       endMinutes > fin.FinMinutos
     ) {

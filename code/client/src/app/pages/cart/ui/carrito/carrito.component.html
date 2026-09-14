@@ -89,7 +89,6 @@
           [mostrarEncabezado]="false"
         ></app-calendario>
       </section>
-      <div class="cart__error">{{ validacionFechas().message }}</div>
       @if (!puedeReservar()) {
         <div class="cart__bloqueo">
           <i class="fas fa-ban"></i> {{ motivoBloqueo() }}

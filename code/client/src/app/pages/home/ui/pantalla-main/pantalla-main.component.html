@@ -1,6 +1,6 @@
-<div class="container-search">
-  <div class="search-input" [class.open]="showCategories">
-    <img class="icon" src="assets/search_line.png" alt="Buscar" />
+<div #searchContainer class="container-search" [class.open]="showCategories">
+  <div class="search-input">
+    <img class="icon search-icon" src="assets/search_line.png" alt="" />
     <textarea
       [(ngModel)]="solicitud"
       placeholder="Buscar..."
@@ -19,12 +19,27 @@
         <i class="fas fa-times"></i>
       </button>
     }
-    <img
-      class="icon category-icon"
-      src="assets/categories_line.png"
-      alt="Categorías"
+    @if (resumenCategorias) {
+      <button
+        type="button"
+        class="category-summary"
+        [title]="resumenCategorias"
+        (click)="alternarCategorias()"
+      >
+        <span class="category-summary__dot" aria-hidden="true"></span>
+        <span>{{ resumenCategorias }}</span>
+      </button>
+    }
+    <button
+      type="button"
+      class="category-toggle"
+      [class.category-toggle--active]="categoriasSeleccionadas.size > 0"
+      [attr.aria-expanded]="showCategories"
+      aria-label="Filtrar por categorías"
       (click)="alternarCategorias()"
-    />
+    >
+      <img class="icon category-icon" src="assets/categories_line.png" alt="" />
+    </button>
   </div>
   @if (showCategories) {
     <div class="categories-panel">

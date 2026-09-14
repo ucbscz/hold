@@ -6,6 +6,7 @@ import {
   OnDestroy,
   OnInit,
   signal,
+  ViewChild,
   WritableSignal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -29,6 +30,9 @@ import { ListaObjetosComponent } from '@widgets/equipment-catalog';
   styleUrl: './pantalla-main.component.css',
 })
 export class PantallaMainComponent implements OnInit, OnDestroy {
+  @ViewChild('searchContainer')
+  private searchContainer?: ElementRef<HTMLElement>;
+
   showCategories = false;
   solicitud = '';
   categoriasSeleccionadas: Set<string> = new Set();
@@ -40,14 +44,13 @@ export class PantallaMainComponent implements OnInit, OnDestroy {
   constructor(
     private readonly categorias: CategoriaService,
     private readonly filtrosService: FiltrosService,
-    private readonly elementRef: ElementRef<HTMLElement>,
   ) {}
 
   @HostListener('document:click', ['$event'])
   onDocumentClick(event: MouseEvent): void {
     if (
       this.showCategories &&
-      !this.elementRef.nativeElement.contains(event.target as Node)
+      !this.searchContainer?.nativeElement.contains(event.target as Node)
     ) {
       this.showCategories = false;
     }
@@ -111,6 +114,15 @@ export class PantallaMainComponent implements OnInit, OnDestroy {
 
   estaCategoriaSeleccionada(categoria: string): boolean {
     return this.categoriasSeleccionadas.has(categoria);
+  }
+
+  get resumenCategorias(): string {
+    const categorias = [...this.categoriasSeleccionadas];
+
+    if (categorias.length === 0) return '';
+    if (categorias.length > 1) return `${categorias.length} categorías`;
+
+    return categorias[0] === 'sinCategoria' ? 'Sin categoría' : categorias[0];
   }
 
   private actualizarCategoriasArray(): void {
