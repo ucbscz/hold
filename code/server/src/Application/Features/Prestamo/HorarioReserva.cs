@@ -9,11 +9,23 @@ public static class HorarioReserva
 
     private static readonly TimeZoneInfo BoliviaTimeZone = ResolveBoliviaTimeZone();
 
-    public static bool EsValido(DateTime inicio, DateTime fin, Core.Entities.ConfiguracionSistema config) =>
-        fin > inicio && DentroHorario(EnBolivia(inicio), config, false)
-            && DentroHorario(EnBolivia(fin), config, true);
+    public static bool EsValido(DateTime inicio, DateTime fin, Core.Entities.ConfiguracionSistema config)
+    {
+        var inicioBolivia = EnBolivia(inicio);
+        var finBolivia = EnBolivia(fin);
+        var mismoDia = inicioBolivia.Date == finBolivia.Date;
 
-    private static bool DentroHorario(DateTime fecha, Core.Entities.ConfiguracionSistema config, bool devolucion)
+        return fin > inicio
+            && DentroHorario(inicioBolivia, config, false, mismoDia)
+            && DentroHorario(finBolivia, config, true, mismoDia);
+    }
+
+    private static bool DentroHorario(
+        DateTime fecha,
+        Core.Entities.ConfiguracionSistema config,
+        bool devolucion,
+        bool mismoDia
+    )
     {
         var horario = config.Horarios.FirstOrDefault(h => h.Fecha == DateOnly.FromDateTime(fecha))
             ?? config.Horarios.FirstOrDefault(h => h.Fecha == null && h.DiaSemana == (int)fecha.DayOfWeek);
@@ -21,7 +33,10 @@ public static class HorarioReserva
         var inicio = horario?.InicioMinutos ?? config.HorarioInicioMinutos;
         var fin = horario?.FinMinutos ?? config.HorarioFinMinutos;
         var minutos = fecha.TimeOfDay.TotalMinutes;
-        return abierto && minutos >= inicio && (devolucion ? minutos <= fin : minutos <= fin - config.TiempoMinimoReservaMinutos);
+        var limiteInicio = mismoDia ? fin - config.TiempoMinimoReservaMinutos : fin;
+        return abierto
+            && minutos >= inicio
+            && (devolucion ? minutos <= fin : mismoDia ? minutos <= limiteInicio : minutos < limiteInicio);
     }
 
     public static bool MismoDia(DateTime inicio, DateTime fin) => EnBolivia(inicio).Date == EnBolivia(fin).Date;

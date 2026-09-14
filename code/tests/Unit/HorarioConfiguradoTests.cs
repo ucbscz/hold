@@ -18,7 +18,8 @@ public class HorarioConfiguradoTests
         config.Horarios.Add(new() { DiaSemana = 1, InicioMinutos = 600, FinMinutos = 960 });
         HorarioReserva.EsValido(new(2026, 8, 31, 9, 0, 0), new(2026, 8, 31, 10, 0, 0), config).Should().BeFalse();
         HorarioReserva.EsValido(new(2026, 8, 31, 15, 30, 0), new(2026, 8, 31, 16, 0, 0), config).Should().BeTrue();
-        HorarioReserva.EsValido(new(2026, 8, 31, 15, 31, 0), new(2026, 9, 1, 8, 30, 0), config).Should().BeFalse();
+        HorarioReserva.EsValido(new(2026, 8, 31, 15, 59, 0), new(2026, 9, 1, 8, 30, 0), config).Should().BeTrue();
+        HorarioReserva.EsValido(new(2026, 8, 31, 16, 0, 0), new(2026, 9, 1, 8, 30, 0), config).Should().BeFalse();
     }
 
     [Test]
@@ -44,5 +45,17 @@ public class HorarioConfiguradoTests
     public void InternalDate_UsesBoliviaRatherThanUtcMidnight()
     {
         HorarioReserva.MismoDia(new(2026, 8, 31, 23, 0, 0, DateTimeKind.Utc), new(2026, 9, 1, 1, 0, 0, DateTimeKind.Utc)).Should().BeTrue();
+    }
+
+    [Test]
+    public void MultiDayLoan_AllowsClosedDaysBetweenValidEndpoints()
+    {
+        var config = Config();
+
+        HorarioReserva.EsValido(
+            new(2026, 9, 5, 17, 45, 0),
+            new(2026, 9, 7, 8, 30, 0),
+            config
+        ).Should().BeTrue();
     }
 }
