@@ -90,6 +90,11 @@ export class PantallaMainComponent implements OnInit, OnDestroy {
     this.filtrosService.solicitud = '';
   }
 
+  limpiarCategorias(): void {
+    this.categoriasSeleccionadas.clear();
+    this.actualizarCategoriasArray();
+  }
+
   alternarCategorias(): void {
     this.showCategories = !this.showCategories;
   }

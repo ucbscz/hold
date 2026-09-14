@@ -48,17 +48,19 @@ import { EquipmentImagePlaceholderComponent } from '@shared/ui';
           <p role="alert">{{ error }}</p>
         }
         @if (grupo) {
-          <div class="inspection-image">
-            @if (obtenerImagenGrupo(); as imageUrl) {
+          @if (obtenerImagenGrupo(); as imageUrl) {
+            <div class="inspection-image inspection-image--single">
               <img
                 [src]="imageUrl"
                 [alt]="grupo.nombre || 'Equipo'"
                 (error)="ocultarImagenGrupo()"
               />
-            } @else {
+            </div>
+          } @else {
+            <div class="inspection-image inspection-image--empty">
               <app-equipment-image-placeholder></app-equipment-image-placeholder>
-            }
-          </div>
+            </div>
+          }
           <dl>
             <div>
               <dt>Modelo</dt>
@@ -173,19 +175,30 @@ import { EquipmentImagePlaceholderComponent } from '@shared/ui';
         box-sizing: border-box;
       }
       .inspection-image {
+        margin: 0 auto 20px;
+      }
+      .inspection-image--single {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+      }
+      .inspection-image--empty {
         width: min(17rem, 100%);
         aspect-ratio: 4 / 3;
-        margin: 0 auto 20px;
         overflow: hidden;
         border-radius: var(--radius-md);
         background: var(--sidebar);
       }
-      .inspection-image img,
       .inspection-image app-equipment-image-placeholder {
         width: 100%;
         height: 100%;
       }
       .inspection-image img {
+        width: auto;
+        max-width: 100%;
+        height: auto;
+        max-height: 18rem;
         object-fit: contain;
         display: block;
       }

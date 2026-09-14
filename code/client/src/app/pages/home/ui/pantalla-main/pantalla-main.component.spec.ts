@@ -46,4 +46,15 @@ describe('PantallaMainComponent', () => {
     expect(summary.textContent).toContain('2 categorías');
     expect(component.solicitud).toBe('');
   });
+
+  it('clears every selected category at once', () => {
+    component.seleccionarCategoria('Mecánica');
+    component.seleccionarCategoria('Electrónica');
+
+    component.limpiarCategorias();
+
+    expect(component.categoriasSeleccionadas.size).toBe(0);
+    expect(component.categoriasArray).toEqual([]);
+    expect(component.resumenCategorias).toBe('');
+  });
 });

@@ -29,6 +29,15 @@
         <span class="category-summary__dot" aria-hidden="true"></span>
         <span>{{ resumenCategorias }}</span>
       </button>
+      <button
+        type="button"
+        class="clear-categories"
+        title="Quitar todas las categorías"
+        aria-label="Quitar todas las categorías"
+        (click)="limpiarCategorias(); $event.stopPropagation()"
+      >
+        <i class="fas fa-times" aria-hidden="true"></i>
+      </button>
     }
     <button
       type="button"
