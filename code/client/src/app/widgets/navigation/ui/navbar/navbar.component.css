@@ -307,26 +307,37 @@
 }
 .notif__button {
   position: relative;
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  min-height: 36px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
 }
 .notif__icon-stack {
   position: relative;
-  width: 1.15rem;
-  height: 1.15rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
 }
 .notif__icon {
   position: absolute;
   inset: 0;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.15rem;
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
   line-height: 1;
   transition:
     opacity var(--t-fast),
     transform var(--t-fast);
+}
+.notif__icon::before {
+  display: block;
+  line-height: 1;
 }
 .notif__icon--outline {
   color: #8f9195;
@@ -343,7 +354,7 @@
 .notif__button:hover .notif__icon--filled,
 .notif__button--active .notif__icon--filled {
   opacity: 1;
-  transform: translateY(-1px);
+  transform: none;
 }
 .notif__badge {
   position: absolute;
@@ -372,6 +383,14 @@
 .notif__button--active .notif__badge {
   background-color: #8f9195;
   color: var(--brand);
+}
+@media (max-width: 768px) {
+  .notif__button {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    min-height: 44px;
+  }
 }
 .notif__dropdown {
   position: absolute;

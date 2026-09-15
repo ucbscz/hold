@@ -351,10 +351,9 @@
 }
 
 .comentarios-equipo {
-  width: 100%;
-  max-width: 960px;
+  width: calc(100% - 4rem);
+  max-width: 896px;
   margin: 0 auto 2.5rem;
-  padding: 0 1.5rem;
   scroll-margin-top: 5.5rem;
 }
 .comentarios-subir {
@@ -744,8 +743,9 @@
   }
 }
 @media (max-width: 992px) {
+  .equipment-resources,
   .comentarios-equipo {
-    padding: 0 1.5rem;
+    width: calc(100% - 3rem);
   }
   .objeto-loading {
     grid-template-columns: 1fr;
@@ -754,8 +754,9 @@
   }
 }
 @media (max-width: 480px) {
+  .equipment-resources,
   .comentarios-equipo {
-    padding: 0 1rem;
+    width: calc(100% - 2rem);
   }
   .comentarios-subir {
     right: max(1rem, env(safe-area-inset-right));
