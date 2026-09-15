@@ -84,10 +84,10 @@
           <span class="notif__icon-stack" aria-hidden="true">
             <i class="fa-regular fa-bell notif__icon notif__icon--outline"></i>
             <i class="fa-solid fa-bell notif__icon notif__icon--filled"></i>
+            @if (notifStore.noLeidas() > 0) {
+              <span class="notif__badge">{{ notifStore.noLeidas() }}</span>
+            }
           </span>
-          @if (notifStore.noLeidas() > 0) {
-            <span class="notif__badge">{{ notifStore.noLeidas() }}</span>
-          }
         </button>
         @if (showNotifications()) {
           <div class="notif__dropdown" role="menu">

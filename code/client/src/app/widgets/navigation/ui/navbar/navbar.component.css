@@ -347,8 +347,8 @@
 }
 .notif__badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  top: -0.45rem;
+  right: -0.55rem;
   min-width: 14px;
   height: 14px;
   padding: 0 3px;
