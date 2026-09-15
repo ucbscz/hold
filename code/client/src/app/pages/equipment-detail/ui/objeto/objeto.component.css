@@ -128,13 +128,16 @@
   margin: 0;
 }
 .equipment-resources h2 {
-  font-size: 1rem;
+  font-family: var(--font);
+  font-size: 1.1rem;
   font-weight: 800;
+  line-height: 1.35;
 }
 .equipment-resources p {
   margin-top: 0.25rem;
   color: var(--ink-secondary);
   font-size: 0.82rem;
+  line-height: 1.45;
 }
 .equipment-resources__actions {
   display: flex;
@@ -469,7 +472,7 @@
   display: grid;
   width: min(100%, 640px);
   gap: 0.55rem;
-  margin: 1rem auto 0;
+  margin: 1rem 0 0;
 }
 .comentarios-equipo__label {
   color: var(--ink-secondary);

@@ -313,7 +313,7 @@
   min-height: 36px;
   display: grid;
   place-items: center;
-  border-radius: 50%;
+  border-radius: var(--radius-md);
 }
 .notif__icon-stack {
   position: relative;
