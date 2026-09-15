@@ -17,8 +17,11 @@
   background: var(--surface);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-sm);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-xl);
   overflow: visible;
+}
+.container-search.open {
+  box-shadow: none;
 }
 .categories-wrapper {
   position: relative;
@@ -47,15 +50,15 @@
 
 .categories-panel {
   position: absolute;
-  top: calc(100% - 1px);
+  top: calc(100% - var(--radius-xl));
   left: 0;
   right: 0;
   width: auto;
   background: var(--surface);
   border: 1px solid var(--border);
   border-top: 0;
-  box-shadow: 0 8px 12px rgba(15, 23, 42, 0.1);
-  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  box-shadow: var(--shadow-md);
+  border-radius: 0 0 var(--radius-xl) var(--radius-xl);
   z-index: 5;
   overflow: hidden;
 }
@@ -63,7 +66,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  padding: 0.8rem 1rem 1rem;
+  padding: calc(var(--radius-xl) + 0.65rem) 1rem 1rem;
   background: #fff;
 }
 .no-category-item,
@@ -122,7 +125,7 @@
   width: 100%;
   padding: 6px 16px;
   background: #fff;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-xl);
   z-index: 10;
 }
 .container-search:focus-within {
@@ -305,7 +308,7 @@
   }
   .categories-list {
     gap: 8px;
-    padding: 16px 12px 8px;
+    padding: calc(var(--radius-xl) + 0.5rem) 12px 12px;
   }
   .categories-list .no-category-item,
   .categories-list .category-item {
@@ -359,7 +362,7 @@
   }
   .categories-list {
     gap: 6px;
-    padding: 12px 10px 8px;
+    padding: calc(var(--radius-xl) + 0.4rem) 10px 10px;
   }
   .categories-list .no-category-item,
   .categories-list .category-item {

@@ -468,8 +468,9 @@
 }
 .comentarios-equipo__form {
   display: grid;
+  width: min(100%, 640px);
   gap: 0.55rem;
-  margin-top: 1rem;
+  margin: 1rem auto 0;
 }
 .comentarios-equipo__label {
   color: var(--ink-secondary);
@@ -477,17 +478,21 @@
   font-weight: 700;
 }
 .comentarios-equipo__textarea {
+  display: block;
   width: 100%;
   resize: vertical;
-  min-height: 5.25rem;
-  padding: 0.85rem 1.1rem;
+  min-height: 4.75rem;
+  padding: 0.85rem 1rem;
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg) !important;
   background: var(--surface);
   color: var(--ink);
   font-family: var(--font);
   font-size: 0.9rem;
-  line-height: 1.5;
+  line-height: 1.4;
+  text-align: left;
+  text-indent: 0;
+  vertical-align: top;
   box-sizing: border-box;
   transition:
     border-color var(--t-fast),
