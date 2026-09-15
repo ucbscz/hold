@@ -470,7 +470,7 @@
 }
 .comentarios-equipo__form {
   display: grid;
-  width: min(100%, 640px);
+  width: 100%;
   gap: 0.55rem;
   margin: 1rem 0 0;
 }
