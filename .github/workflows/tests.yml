@@ -62,7 +62,10 @@ jobs:
           fi
 
       - name: Install coverage report tool
-        run: dotnet tool install dotnet-reportgenerator-globaltool --version 5.5.11 --tool-path .tools
+        shell: bash
+        run: |
+          dotnet tool install dotnet-reportgenerator-globaltool --version 5.5.11 --tool-path "$GITHUB_WORKSPACE/.tools"
+          test -x "$GITHUB_WORKSPACE/.tools/reportgenerator"
 
       - name: Install SonarQube scanner
         if: env.SONAR_TOKEN != '' && env.SONAR_PROJECT_KEY != ''
@@ -97,8 +100,13 @@ jobs:
 
       - name: Generate backend HTML coverage
         if: always()
+        shell: bash
         run: |
-          .tools/reportgenerator \
+          if ! find code/tests/TestResults -name 'coverage.cobertura.xml' -print -quit | grep -q .; then
+            echo "No backend coverage report was produced."
+            exit 0
+          fi
+          "$GITHUB_WORKSPACE/.tools/reportgenerator" \
             -reports:"code/tests/TestResults/**/coverage.cobertura.xml" \
             -targetdir:"code/tests/coveragereport" \
             -reporttypes:"Html;TextSummary"
