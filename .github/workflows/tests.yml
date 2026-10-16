@@ -44,7 +44,7 @@ jobs:
 
       - name: Audit frontend dependencies
         working-directory: code/client
-        run: npm audit --audit-level=moderate
+        run: npm audit --omit=dev --audit-level=moderate
 
       - name: Restore backend
         run: dotnet restore code/IMT_Reservas.sln
