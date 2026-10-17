@@ -61,9 +61,12 @@ export class NavbarComponent {
   }
 
   private updateButtonVisibility(url: string) {
+    if (!this.router.navigated) return;
+
     const cleanUrl = url.split('?')[0];
     const rol = this.usuario.obtenerRol();
     const isLoginOrRegister =
+      cleanUrl === '/' ||
       cleanUrl.includes('/login') ||
       cleanUrl.includes('/registro') ||
       cleanUrl.includes('/recuperar') ||
