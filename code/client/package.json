@@ -38,7 +38,7 @@
     "@emnapi/core": "1.11.3",
     "@emnapi/runtime": "1.11.3",
     "@emnapi/wasi-threads": "1.2.3",
-    "@angular-devkit/build-angular": "21.2.27",
+    "@angular-devkit/build-angular": "21.2.29",
     "@angular/cli": "21.2.27",
     "@angular/compiler-cli": "21.2.25",
     "@types/jasmine": "~5.1.0",
