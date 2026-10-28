@@ -121,10 +121,6 @@
     background-color: #8f9195;
     color: var(--brand);
   }
-  .notification-button:hover .pendiente {
-    background-color: #8f9195;
-    color: var(--brand);
-  }
 }
 
 .icon-button:active {
@@ -165,27 +161,6 @@
   pointer-events: none;
 }
 .user-menu {
-  position: relative;
-}
-.pendiente {
-  position: absolute;
-  top: -2px;
-  right: -2px;
-  width: 12px;
-  height: 12px;
-  background: var(--brand);
-  color: #8f9195;
-  border-radius: 50%;
-  font-size: 0.55rem;
-  line-height: 12px;
-  padding: 0;
-  text-align: center;
-  pointer-events: none;
-  transition:
-    background-color 0.2s,
-    color 0.2s;
-}
-.notification-button {
   position: relative;
 }
 
@@ -597,30 +572,6 @@
   color: var(--ink-muted);
   line-height: 1.3;
 }
-.notif__details-toggle {
-  align-self: flex-start;
-  margin-top: 0.15rem;
-  min-width: unset !important;
-  min-height: 1.75rem !important;
-  padding: 0.25rem 0.55rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-full);
-  background: var(--surface);
-  color: var(--ink-secondary);
-  cursor: pointer;
-  font-family: var(--font);
-  font-size: 0.68rem;
-  font-weight: 700;
-  transition:
-    background-color var(--t-fast),
-    border-color var(--t-fast),
-    color var(--t-fast);
-}
-.notif__details-toggle:hover {
-  background: var(--dropdown-hover-bg);
-  border-color: rgba(255, 215, 0, 0.45);
-  color: var(--brand-text);
-}
 .notif__detail-panel {
   display: grid;
   gap: 0.25rem;
@@ -687,11 +638,6 @@
 
   .notif__list {
     max-height: calc(100dvh - 220px);
-  }
-
-  .notif__details-toggle {
-    min-height: 1.9rem !important;
-    min-width: unset !important;
   }
 
   .notif__item {

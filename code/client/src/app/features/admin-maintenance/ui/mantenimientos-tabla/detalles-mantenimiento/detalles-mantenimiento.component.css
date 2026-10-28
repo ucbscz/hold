@@ -135,13 +135,6 @@
 .data-table tbody tr:hover {
   background-color: rgba(255, 215, 0, 0.06);
 }
-.actions-column {
-  width: 70px;
-  text-align: center;
-}
-.precio-column {
-  text-align: right;
-}
 @media (max-width: 768px) {
   .mantenimientos-container {
     padding: 0.75rem;

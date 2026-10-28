@@ -125,36 +125,6 @@ export abstract class Tabla extends BaseTablaComponent {
     return this.sortDirection === 'asc' ? 'ascending' : 'descending';
   }
 
-  protected sortByText<T>(
-    items: readonly T[],
-    direction: AdminTableSort['dir'],
-    accessor: (item: T) => unknown,
-  ): T[] {
-    return this.sortByAccessor(items, direction, accessor, (first, second) =>
-      this.compareTextValues(first, second),
-    );
-  }
-
-  protected sortByNumber<T>(
-    items: readonly T[],
-    direction: AdminTableSort['dir'],
-    accessor: (item: T) => unknown,
-  ): T[] {
-    return this.sortByAccessor(items, direction, accessor, (first, second) =>
-      this.compareNumberValues(first, second),
-    );
-  }
-
-  protected sortByDate<T>(
-    items: readonly T[],
-    direction: AdminTableSort['dir'],
-    accessor: (item: T) => unknown,
-  ): T[] {
-    return this.sortByAccessor(items, direction, accessor, (first, second) =>
-      this.compareDateValues(first, second),
-    );
-  }
-
   protected sortByAuto<T>(
     items: readonly T[],
     direction: AdminTableSort['dir'],

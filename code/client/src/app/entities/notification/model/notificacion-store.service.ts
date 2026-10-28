@@ -42,13 +42,6 @@ export class NotificacionStoreService {
     this.intervalo = setInterval(() => this.refrescar(), INTERVALO_MS);
   }
 
-  detenerPolling(): void {
-    if (this.intervalo === null) return;
-
-    clearInterval(this.intervalo);
-    this.intervalo = null;
-  }
-
   refrescar(): void {
     if (
       this.actualizando ||

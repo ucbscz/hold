@@ -502,18 +502,6 @@
   color: var(--ink);
   vertical-align: middle;
 }
-.badge-estado-operativo {
-  background: var(--success-bg);
-  color: var(--success);
-}
-.badge-estado-parcialmente-operativo {
-  background: #fff7ed;
-  color: #b45309;
-}
-.badge-estado-inoperativo {
-  background: var(--error-bg);
-  color: var(--error);
-}
 @keyframes slideUp {
   from {
     opacity: 0;

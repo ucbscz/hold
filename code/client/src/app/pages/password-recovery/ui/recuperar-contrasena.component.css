@@ -89,13 +89,6 @@ input:focus-visible {
   cursor: pointer;
 }
 
-.hint {
-  margin: 0.25rem 0 0;
-  color: var(--ink-muted);
-  font-size: 0.75rem;
-  line-height: 1.4;
-}
-
 .field-error {
   margin: 0.125rem 0 0;
   color: var(--error);
@@ -135,24 +128,6 @@ input:focus-visible {
 
 .secondary-action:hover:not(:disabled) {
   background: var(--interactive-subtle);
-}
-
-.feedback {
-  margin: 0.75rem 0 0;
-  font-size: 0.875rem;
-  line-height: 1.5;
-}
-
-.feedback--error {
-  color: var(--error);
-}
-
-.feedback--success {
-  padding: 0.875rem;
-  border: 1px solid #86efac;
-  border-radius: var(--radius-sm);
-  color: #166534;
-  background: #f0fdf4;
 }
 
 .back-link {

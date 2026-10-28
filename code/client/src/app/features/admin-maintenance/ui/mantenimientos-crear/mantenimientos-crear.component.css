@@ -154,11 +154,6 @@ textarea.form-input {
   display: grid;
   gap: 0.5rem;
 }
-.equipos-seleccionados__title {
-  color: var(--ink-secondary);
-  font-size: 0.8125rem;
-  font-weight: 700;
-}
 .equipos-seleccionados__toggle {
   display: flex;
   align-items: center;

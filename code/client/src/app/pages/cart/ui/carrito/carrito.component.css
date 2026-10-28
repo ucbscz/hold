@@ -413,9 +413,6 @@
     max-width: 260px;
     font-size: 0.85rem;
   }
-  .cart__date-field label {
-    font-size: 0.8rem;
-  }
 }
 .cart__bloqueo {
   display: flex;

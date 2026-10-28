@@ -13,7 +13,6 @@ export class BuscadorComponent {
 
   terminoBusquedaLocal = '';
   columnaSeleccionada = '';
-  isHovered = false;
 
   buscar(): void {
     this.terminoBusqueda.emit([
@@ -30,13 +29,5 @@ export class BuscadorComponent {
     this.terminoBusquedaLocal = '';
     this.columnaSeleccionada = '';
     this.terminoBusqueda.emit(['', '']);
-  }
-
-  onMouseEnter(): void {
-    this.isHovered = true;
-  }
-
-  onMouseLeave(): void {
-    this.isHovered = false;
   }
 }

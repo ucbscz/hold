@@ -20,14 +20,6 @@
   max-width: 26rem;
   animation: cardIn 220ms ease-out both;
 }
-.logo-container {
-  text-align: center;
-  margin-bottom: 2rem;
-}
-.logo {
-  height: 60px;
-  width: auto;
-}
 .title {
   text-align: center;
   color: var(--ink);
@@ -119,13 +111,6 @@ label {
   background: var(--interactive-subtle);
   color: var(--ink);
   outline: none;
-}
-
-.error-message {
-  color: var(--error);
-  font-size: 0.8rem;
-  font-family: var(--font);
-  margin-top: 0.125rem;
 }
 .login-button {
   background: var(--brand);
@@ -236,8 +221,7 @@ label {
   height: 18px;
   flex: 0 0 18px;
 }
-.forgot-password,
-.forgot-password-link a {
+.forgot-password {
   color: var(--interactive-text);
   text-decoration: none;
   font-size: 0.875rem;
@@ -250,14 +234,8 @@ label {
   background: transparent;
   cursor: pointer;
 }
-.forgot-password:hover,
-.forgot-password-link a:hover {
+.forgot-password:hover {
   text-decoration: underline;
-}
-.forgot-password-link {
-  color: var(--ink-secondary);
-  font-size: 0.875rem;
-  margin: 0;
 }
 .register-link {
   color: var(--ink-secondary);
@@ -333,8 +311,5 @@ label {
   }
   label {
     font-size: 0.8rem;
-  }
-  .error-message {
-    font-size: 0.75rem;
   }
 }

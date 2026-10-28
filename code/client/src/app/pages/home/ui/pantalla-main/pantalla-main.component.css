@@ -23,30 +23,6 @@
 .container-search.open {
   box-shadow: none;
 }
-.categories-wrapper {
-  position: relative;
-  min-width: 170px;
-}
-.categories-btn {
-  background: #222;
-  color: white;
-  padding: 10px 18px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  font-size: 0.95rem;
-  transition: background 0.3s;
-}
-
-.categories-btn:active {
-  background: #000;
-}
-
-@media (hover: hover) and (pointer: fine) {
-  .categories-btn:hover {
-    background: #000;
-  }
-}
 
 .categories-panel {
   position: absolute;
@@ -69,14 +45,12 @@
   padding: calc(var(--radius-xl) + 0.65rem) 1rem 1rem;
   background: #fff;
 }
-.no-category-item,
 .category-item {
   padding: 12px;
   margin: 5px;
   border-radius: 5px;
   transition: background 0.2s;
 }
-.categories-list .no-category-item,
 .categories-list .category-item {
   font-family: var(--font);
   font-size: 0.875rem;
@@ -95,26 +69,17 @@
     box-shadow var(--t-fast);
   user-select: none;
 }
-.categories-list .no-category-item {
-  background: #f5f5f5;
-}
 
-.categories-list .no-category-item:active,
 .categories-list .category-item:active {
   background: rgba(143, 145, 149, 0.3);
 }
 
 @media (hover: hover) and (pointer: fine) {
-  .categories-list .no-category-item:hover,
   .categories-list .category-item:hover {
     background: var(--interactive-subtle);
     border-color: var(--brand);
     color: var(--brand-text);
   }
-}
-
-.no-category-item {
-  background: #f5f5f5;
 }
 .category-item {
   background: #f8f9fa;
@@ -281,15 +246,7 @@
 .clear-search:active {
   transform: scale(0.92);
 }
-.category-label {
-  margin-left: 0px;
-  color: #000000;
-  font-weight: 500;
-  cursor: pointer;
-  user-select: none;
-}
-.categories-list .category-item.selected,
-.categories-list .no-category-item.selected {
+.categories-list .category-item.selected {
   background: var(--brand);
   color: var(--brand-text);
   border-color: var(--brand);
@@ -310,7 +267,6 @@
     gap: 8px;
     padding: calc(var(--radius-xl) + 0.5rem) 12px 12px;
   }
-  .categories-list .no-category-item,
   .categories-list .category-item {
     font-size: 0.85rem;
     padding: 5px 12px;
@@ -336,7 +292,6 @@
   .category-summary {
     max-width: 6.75rem;
   }
-  .categories-list .no-category-item,
   .categories-list .category-item {
     font-size: 0.8rem;
     padding: 4px 10px;
@@ -364,7 +319,6 @@
     gap: 6px;
     padding: calc(var(--radius-xl) + 0.4rem) 10px 10px;
   }
-  .categories-list .no-category-item,
   .categories-list .category-item {
     font-size: 0.75rem;
     padding: 4px 8px;

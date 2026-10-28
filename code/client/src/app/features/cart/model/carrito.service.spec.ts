@@ -3,54 +3,45 @@ import { withDefaultTestingProviders } from '@shared/lib/testing';
 import { CarritoService } from './carrito.service';
 describe('CarritoService', () => {
   let service: CarritoService;
+  let totals: number[];
+
   beforeEach(() => {
     TestBed.configureTestingModule(withDefaultTestingProviders({}));
     service = TestBed.inject(CarritoService);
+    totals = [];
+    service.total$.subscribe((total) => totals.push(total));
   });
+
   it('should be created', () => {
     expect(service).toBeTruthy();
   });
 
   it('removes all units when the product is removed from its detail view', () => {
-    service.agregarProducto(10, 'Multímetro', '', '', '', 0, 3);
-    service.agregarProducto(10, 'Multímetro', '', '', '', 0, 3);
+    service.establecerCantidad(10, 'Multímetro', '', '', '', 0, 3, 2);
 
     service.eliminarProducto(10);
 
     expect(service.contieneProducto(10)).toBeFalse();
-    expect(service.obtenerTotal()).toBe(0);
+    expect(totals.at(-1)).toBe(0);
   });
 
   it('emits the total units whenever a cart quantity changes', () => {
-    const totals: number[] = [];
-    const subscription = service.total$.subscribe((total) =>
-      totals.push(total),
-    );
-
-    service.agregarProducto(10, 'Multímetro', '', '', '', 0, 3);
+    service.establecerCantidad(10, 'Multímetro', '', '', '', 0, 3, 1);
     service.editarCantidad(10, 3);
-    service.quitarProducto(10);
+    service.editarCantidad(10, 2);
 
     expect(totals).toEqual([0, 1, 3, 2]);
-    subscription.unsubscribe();
   });
 
   it('counts a newly established cart item from its first unit', () => {
-    const totals: number[] = [];
-    const subscription = service.total$.subscribe((total) =>
-      totals.push(total),
-    );
-
     service.establecerCantidad(10, 'Multimetro', '', '', '', 0, 3, 1);
 
-    expect(service.obtenerTotal()).toBe(1);
     expect(totals).toEqual([0, 1]);
-    subscription.unsubscribe();
   });
 
   it('emits the exact requested quantity for a newly established item', () => {
     service.establecerCantidad(10, 'Multimetro', '', '', '', 0, 4, 3);
 
-    expect(service.obtenerTotal()).toBe(3);
+    expect(totals.at(-1)).toBe(3);
   });
 });

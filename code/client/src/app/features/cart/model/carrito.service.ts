@@ -13,56 +13,6 @@ export class CarritoService {
   readonly carrito$ = this.carritoSubject.asObservable();
   readonly total$ = this.totalSubject.asObservable();
 
-  agregarProducto(
-    id: number,
-    nombre: string | null,
-    imagen: string,
-    marca: string,
-    modelo: string,
-    precio: number,
-    cantidadMaxima: number,
-    tiempoMaximoPrestamoDias = 7,
-  ): void {
-    if (!nombre) {
-      return;
-    }
-
-    if (!this.carrito[id]) {
-      this.carrito[id] = {
-        nombre,
-        modelo,
-        marca,
-        cantidad: 1,
-        fecha_inicio: null,
-        fecha_final: null,
-        imagen,
-        precio,
-        cantidadMax: cantidadMaxima,
-        tiempoMaximoPrestamoDias,
-      };
-      this.cantidadTotal++;
-    } else if (this.carrito[id].cantidad < this.carrito[id].cantidadMax) {
-      this.carrito[id].cantidad += 1;
-      this.cantidadTotal++;
-    }
-
-    this.emitirCambios();
-  }
-
-  quitarProducto(id: number): void {
-    if (id in this.carrito) {
-      if (this.carrito[id].cantidad > 1) {
-        this.carrito[id].cantidad -= 1;
-        this.cantidadTotal--;
-      } else {
-        delete this.carrito[id];
-        this.cantidadTotal--;
-      }
-    }
-
-    this.emitirCambios();
-  }
-
   eliminarProducto(id: number): void {
     const item = this.carrito[id];
 
@@ -79,10 +29,6 @@ export class CarritoService {
 
   obtenerCarrito(): Carrito {
     return this.carrito;
-  }
-
-  obtenerTotal(): number {
-    return this.cantidadTotal;
   }
 
   vaciarCarrito(): void {

@@ -263,39 +263,6 @@ input[type="checkbox"] {
   white-space: nowrap;
 }
 
-.btn-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  min-width: 2rem;
-  min-height: 2rem;
-  padding: 0;
-  border: none;
-  border-radius: var(--radius-full);
-  cursor: pointer;
-  transition:
-    background-color var(--t-fast),
-    color var(--t-fast),
-    transform var(--t-fast);
-}
-
-.btn-add {
-  background: var(--success-bg);
-  color: var(--success);
-  border: 1px solid var(--success-border);
-}
-
-.btn-add:hover {
-  background: var(--success);
-  color: var(--ink-inverse);
-}
-
-.btn-add:active {
-  transform: scale(0.94);
-}
-
 .empty-table {
   padding: 0 !important;
 }
