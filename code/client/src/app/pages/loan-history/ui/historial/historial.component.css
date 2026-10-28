@@ -39,11 +39,6 @@
   margin-bottom: 1.5rem;
 }
 
-.history-state-select {
-  width: 13rem;
-  min-width: 0;
-}
-
 .audit-search-wrap {
   position: relative;
   min-width: 0;
@@ -162,7 +157,6 @@
     grid-template-columns: 1fr 1fr;
   }
 
-  .history-state-select,
   .audit-search-wrap {
     grid-column: 1 / -1;
     width: 100%;
@@ -191,7 +185,6 @@
     grid-template-columns: 1fr;
   }
 
-  .history-state-select,
   .audit-search-wrap,
   .history-toolbar > .btn {
     grid-column: 1;

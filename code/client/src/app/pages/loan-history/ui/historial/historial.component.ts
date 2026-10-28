@@ -4,26 +4,14 @@ import { ActivatedRoute } from '@angular/router';
 import { FlatpickrDirective } from '@shared/lib/directives';
 import { OpcionSelect } from '@shared/ui';
 import flatpickr from 'flatpickr';
-import { ActivoComponent } from './activo/activo.component';
-import { AprobadoComponent } from './aprobado/aprobado.component';
-import { AtrasadoComponent } from './atrasado/atrasado.component';
-import { CanceladoComponent } from './cancelado/cancelado.component';
-import { FinalizadoComponent } from './finalizado/finalizado.component';
-import { PendienteComponent } from './pendiente/pendiente.component';
-import { RechazadoComponent } from './rechazado/rechazado.component';
+import { HistorialEstadoComponent } from './estado/historial-estado.component';
 import { GuardadosComponent } from './guardados/guardados.component';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-historial',
   imports: [
-    ActivoComponent,
-    AprobadoComponent,
-    AtrasadoComponent,
-    CanceladoComponent,
-    FinalizadoComponent,
-    PendienteComponent,
-    RechazadoComponent,
+    HistorialEstadoComponent,
     GuardadosComponent,
     FormsModule,
     FlatpickrDirective,
@@ -51,6 +39,10 @@ export class HistorialComponent implements OnInit, OnDestroy {
   fpHasta?: flatpickr.Instance;
   private pollInterval?: ReturnType<typeof setInterval>;
   private querySubscription?: Subscription;
+
+  get estadoActual(): string {
+    return this.item.toLowerCase();
+  }
 
   constructor(private readonly route: ActivatedRoute) {}
 

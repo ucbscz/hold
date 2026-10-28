@@ -19,7 +19,10 @@ describe('HistorialComponent', () => {
   });
   it('starts with pending loans and has no board tab', () => {
     expect(component.item).toBe('Pendiente');
-    expect(fixture.nativeElement.querySelector('app-pendiente')).not.toBeNull();
+    expect(component.estadoActual).toBe('pendiente');
+    expect(
+      fixture.nativeElement.querySelector('app-historial-estado'),
+    ).not.toBeNull();
     const tabs = fixture.nativeElement.querySelector('.history-tabs');
     expect(tabs.querySelector('button').textContent.trim()).toBe('Pendientes');
     expect(tabs.textContent).not.toContain('Tablero');
@@ -28,7 +31,10 @@ describe('HistorialComponent', () => {
     component.filtroTexto = 'Mini Dron';
     component.seleccionarEstado('Activo');
     fixture.detectChanges();
-    expect(fixture.nativeElement.querySelector('app-activo')).not.toBeNull();
+    expect(component.estadoActual).toBe('activo');
+    expect(
+      fixture.nativeElement.querySelector('app-historial-estado'),
+    ).not.toBeNull();
     expect(component.filtroTexto).toBe('Mini Dron');
   });
 });

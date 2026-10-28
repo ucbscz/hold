@@ -185,8 +185,7 @@
   font-size: 0.82rem;
 }
 
-.text-atrasado,
-.text-warning {
+.text-atrasado {
   color: var(--error);
 }
 
