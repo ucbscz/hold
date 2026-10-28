@@ -36,7 +36,7 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=<database-password>
 POSTGRES_DB=IMT_Reservas
 ASPNETCORE_ENVIRONMENT=Production
-ConnectionStrings__PostgreSQL=Host=ucb_db;Port=5432;Database=IMT_Reservas;Username=postgres;Password=<database-password>;Pooling=true;MinPoolSize=2;MaxPoolSize=20
+ConnectionStrings__PostgreSQL=Host=ucb_db;Port=5432;Database=IMT_Reservas;Username=ucbhold_app;Password=<app-role-password>;Pooling=true;MinPoolSize=2;MaxPoolSize=20
 Jwt__Key=<local-secret-with-at-least-32-characters>
 Redis__ConnectionString=ucb_redis:6379
 Redis__Enabled=true

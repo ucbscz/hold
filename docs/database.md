@@ -120,10 +120,10 @@ test -s code/database/schema.sql
 ! grep -Eq '^-- Data for Name:|^COPY public\.|^SELECT pg_catalog\.setval' code/database/schema.sql
 ```
 
-Upload it to the existing release:
+Upload it with the RLS policies to the release:
 
 ```bash
-gh release upload v1.1.0 code/database/schema.sql --repo ucbscz/hold --clobber
+gh release upload <tag> code/database/schema.sql code/database/rls.sql --repo ucbscz/hold --clobber
 ```
 
 Initialize an empty database:
