@@ -132,4 +132,29 @@ Initialize an empty database:
 psql -U postgres -d IMT_Reservas -f code/database/schema.sql
 ```
 
+
+## Row Level Security
+
+The API must connect with a dedicated role that is not a superuser, does not own the tables and has `NOBYPASSRLS`. Outside Development the server refuses to start if the connected role bypasses RLS or if `code/database/rls.sql` was not applied.
+
+```bash
+psql -U postgres -d IMT_Reservas -c "CREATE ROLE ucbhold_app LOGIN PASSWORD '<secret>' NOSUPERUSER NOBYPASSRLS;"
+psql -U postgres -d IMT_Reservas -v app_role=ucbhold_app -f code/database/rls.sql
+```
+
+`rls.sql` is idempotent: run it after `schema.sql` on new databases and after every schema change on existing ones. Then set `ConnectionStrings__PostgreSQL` to use `ucbhold_app`.
+
+Each EF Core connection publishes `app.carnet` and `app.rol`; policies use them:
+
+| Table | Regular user | Anonymous endpoints | Administrators and system |
+| --- | --- | --- | --- |
+| `usuarios` | Read; update own row | Read, register, update (login, verification, recovery) | Full access |
+| `prestamos` | Read; create and update own loans | Read | Full access |
+| `contratos` | Read contracts of own loans | None | Full access |
+| `notificaciones`, `avisos_disponibilidad` | Own rows | None | Full access |
+| `audit_logs` | None | None | Full access |
+| `codigos_autenticacion` | None | Full access | System only |
+
+Writes performed on behalf of the system (audit entries, notifications, contract rendering, availability watches) run inside `ApplicationDbContext.RunAsSystemAsync()`. Sessions without context (`app.rol` unset) see no rows.
+
 Do not upload `.backup`, full SQL dumps, Data Protection keys, environment files, or user documents to GitHub releases. Store encrypted operational backups in private Oracle storage with access logging and a tested restore procedure.

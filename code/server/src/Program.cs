@@ -27,6 +27,7 @@ using IMT_Reservas.Server.Application.Features.Inventario;
 using IMT_Reservas.Server.Application.Security;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
+using IMT_Reservas.Server.Infrastructure.Config.RowLevelSecurity;
 using IMT_Reservas.Server.Infrastructure.Jobs;
 using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
@@ -60,7 +61,14 @@ dataSourceBuilder.MapEnum<TipoUsuario>("tipo_usuario");
 dataSourceBuilder.MapEnum<EstadoEquipo>("estado_equipo");
 var dataSource = dataSourceBuilder.Build();
 
-builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseNpgsql(dataSource));
+builder.Services.AddDbContext<ApplicationDbContext>(
+    (services, options) =>
+        options
+            .UseNpgsql(dataSource)
+            .AddInterceptors(
+                new RowLevelSecurityInterceptor(services.GetRequiredService<IHttpContextAccessor>())
+            )
+);
 
 builder
     .Services.AddControllers()
@@ -382,6 +390,8 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 });
 
 var app = builder.Build();
+if (!app.Environment.IsDevelopment())
+    await RowLevelSecurityGuard.EnsureEnforcedAsync(dataSource);
 var useHttpsRedirection = builder.Configuration.GetValue("HttpsRedirection:Enabled", true);
 
 app.UseForwardedHeaders();

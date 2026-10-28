@@ -129,8 +129,7 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                     ),
                 };
 
-                DbContext.Contratos.Add(contract);
-                await DbContext.SaveChangesAsync(cancellationToken);
+                await SaveContractAsSystem(contract, cancellationToken);
                 entity.IdContrato = contract.Id;
                 await DbContext.SaveChangesAsync(cancellationToken);
             }
@@ -201,6 +200,16 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
         return exceeded == null
             ? null
             : $"El grupo '{exceeded.Nombre}' permite préstamos de hasta {exceeded.TiempoMaximoPrestamoDias} día(s)";
+    }
+
+    private async Task SaveContractAsSystem(
+        Contrato contract,
+        CancellationToken cancellationToken
+    )
+    {
+        await using var _ = await DbContext.RunAsSystemAsync(cancellationToken);
+        DbContext.Contratos.Add(contract);
+        await DbContext.SaveChangesAsync(cancellationToken);
     }
 
     private async Task RollbackCreate(

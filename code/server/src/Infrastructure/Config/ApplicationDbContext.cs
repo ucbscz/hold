@@ -1,4 +1,5 @@
 using IMT_Reservas.Server.Core.Entities;
+using IMT_Reservas.Server.Infrastructure.Config.RowLevelSecurity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
@@ -29,6 +30,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<AvisoDisponibilidad> AvisosDisponibilidad { get; set; }
     public DbSet<ComentarioEquipo> ComentariosEquipos { get; set; }
     public DbSet<CodigoAutenticacion> CodigosAutenticacion { get; set; }
+
+    public Task<IAsyncDisposable> RunAsSystemAsync(CancellationToken cancellationToken = default) =>
+        RowLevelSecurityInterceptor.RunAsSystemAsync(this, cancellationToken);
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

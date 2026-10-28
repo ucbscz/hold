@@ -27,7 +27,7 @@ public class AuditLogRepository
             BuildLog(accion, entidad, entidadId, detalle, adminCarnet, adminNombre, DateTime.UtcNow)
         );
         if (saveChanges)
-            await _db.SaveChangesAsync();
+            await SaveAsSystem();
     }
 
     public async Task WriteMany(
@@ -55,6 +55,12 @@ public class AuditLogRepository
             .ToList();
 
         _db.AuditLogs.AddRange(logs);
+        await SaveAsSystem();
+    }
+
+    private async Task SaveAsSystem()
+    {
+        await using var _ = await _db.RunAsSystemAsync();
         await _db.SaveChangesAsync();
     }
 

@@ -33,7 +33,7 @@ public class NotificacionRepository
             )
         );
         if (saveChanges)
-            await _db.SaveChangesAsync();
+            await SaveAsSystem();
     }
 
     public async Task AddRange(IReadOnlyCollection<NotificacionDto> notifications)
@@ -42,6 +42,12 @@ public class NotificacionRepository
             return;
 
         _db.Notificaciones.AddRange(notifications.Select(Build));
+        await SaveAsSystem();
+    }
+
+    private async Task SaveAsSystem()
+    {
+        await using var _ = await _db.RunAsSystemAsync();
         await _db.SaveChangesAsync();
     }
 
