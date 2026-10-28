@@ -15,6 +15,9 @@ import {
   UsuarioService,
   NombreRolPipe,
   nombreRol,
+  esRolGestion,
+  ROL_ADMINISTRADOR,
+  ROL_OPCIONES,
 } from '@entities/user';
 import { BuscadorComponent } from '@features/admin-search';
 import { Tabla, TablePaginationComponent } from '@shared/lib/admin-table';
@@ -56,14 +59,9 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
   private readonly toast = inject(ToastService);
   readonly esRoot =
     inject(UsuarioService).obtenerUsuario().rol?.toLowerCase() ===
-    'administrador';
+    ROL_ADMINISTRADOR;
   puedeGestionar(usuario: Usuario): boolean {
-    return (
-      this.esRoot ||
-      !['administrador', 'administrador_laboratorio'].includes(
-        usuario.rol?.toLowerCase() ?? '',
-      )
-    );
+    return this.esRoot || !esRolGestion(usuario.rol);
   }
   auditRefresh = 0;
   expandedCarnet: string | null = null;
@@ -89,14 +87,7 @@ export class UsuariosTablaComponent extends Tabla implements OnInit {
   filtroBusqueda: [string, string] = ['', ''];
   readonly rolesFiltroOpciones: OpcionSelect[] = [
     { value: '', label: 'Todos los roles' },
-    { value: 'administrador', label: 'Administrador general' },
-    {
-      value: 'administrador_laboratorio',
-      label: 'Administrador de laboratorio',
-    },
-    { value: 'administrativo', label: 'Administrativo' },
-    { value: 'docente', label: 'Docente' },
-    { value: 'estudiante', label: 'Estudiante' },
+    ...ROL_OPCIONES,
   ];
   carrerasFiltroOpciones: OpcionSelect[] = [
     { value: '', label: 'Todas las carreras' },

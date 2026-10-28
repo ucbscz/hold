@@ -8,7 +8,11 @@ import {
 } from '@angular/core';
 import { NavigationEnd, Router, RouterModule } from '@angular/router';
 import { Notificacion, NotificacionStoreService } from '@entities/notification';
-import { UsuarioService } from '@entities/user';
+import {
+  UsuarioService,
+  esRolGestion,
+  ROL_ADMINISTRADOR,
+} from '@entities/user';
 import { CarritoService } from '@features/cart';
 import { parseJsonResult } from '@shared/lib/result';
 import { SidebarService } from '@widgets/admin-sidebar';
@@ -82,9 +86,7 @@ export class NavbarComponent {
       return;
     }
 
-    const isAdmin = ['administrador', 'administrador_laboratorio'].includes(
-      rol,
-    );
+    const isAdmin = esRolGestion(rol);
     const isInAdminMode = isAdmin && cleanUrl.includes('/administracion');
 
     this.showProfile.set(true);
@@ -171,13 +173,6 @@ export class NavbarComponent {
     );
   }
 
-  alternarDetalleNotificacion(notificacion: Notificacion, event: MouseEvent) {
-    event.stopPropagation();
-    this.expandedNotificationId.update((id) =>
-      id === notificacion.Id ? null : notificacion.Id,
-    );
-  }
-
   tieneDetalleOrganizado(notificacion: Notificacion): boolean {
     return this.obtenerDetalleOrganizado(notificacion) !== null;
   }
@@ -249,9 +244,7 @@ export class NavbarComponent {
   }
 
   esAdministrador(): boolean {
-    return ['administrador', 'administrador_laboratorio'].includes(
-      this.usuario.obtenerRol(),
-    );
+    return this.usuario.obtenerRol() === ROL_ADMINISTRADOR;
   }
 
   seleccionarTabNotificaciones(tab: 'usuario' | 'admin'): void {

@@ -1,3 +1,4 @@
+import { esRolGestion } from '../rol';
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { parseJsonResult } from '@shared/lib/result';
 import {
@@ -57,10 +58,6 @@ export class UsuarioService {
 
   obtenerRol(): 'administrador' | 'usuario' {
     const usuario = this.usuarioSignal();
-    return ['administrador', 'administrador_laboratorio'].includes(
-      usuario.rol ?? '',
-    )
-      ? 'administrador'
-      : 'usuario';
+    return esRolGestion(usuario.rol) ? 'administrador' : 'usuario';
   }
 }

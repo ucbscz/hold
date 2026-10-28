@@ -1,6 +1,6 @@
 import { HttpBackend, HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Usuario } from '@entities/user';
+import { Usuario, esRolGestion } from '@entities/user';
 import { environment } from '@environments/environment';
 import { parseJsonResult } from '@shared/lib/result';
 import {
@@ -32,13 +32,6 @@ export class AuthService {
     this.clearLegacyTokens();
   }
 
-  setSession(usuario: Usuario): void {
-    this.sessionStorage.setItem(
-      SESSION_STORAGE_KEYS.user,
-      JSON.stringify(usuario),
-    );
-  }
-
   getStoredUser(): Usuario | null {
     const storedUser = this.sessionStorage.getItem(SESSION_STORAGE_KEYS.user);
 
@@ -56,9 +49,7 @@ export class AuthService {
   }
 
   isAdmin(): boolean {
-    return ['administrador', 'administrador_laboratorio'].includes(
-      this.getRole() ?? '',
-    );
+    return esRolGestion(this.getRole());
   }
 
   refreshSession(): Observable<void> {

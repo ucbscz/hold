@@ -13,7 +13,10 @@ import {
   CatalogoInventarioService,
   TipoCatalogo,
 } from '@entities/equipment';
-import { UsuarioServiceAPI } from '@entities/user';
+import {
+  UsuarioServiceAPI,
+  ROL_ADMINISTRADOR_LABORATORIO,
+} from '@entities/user';
 import { BuscadorComponent } from '@features/admin-search';
 import {
   Tabla,
@@ -456,7 +459,7 @@ export class CatalogosInventarioComponent
             ...users
               .filter(
                 (u) =>
-                  u.rol?.toLowerCase() === 'administrador_laboratorio' &&
+                  u.rol?.toLowerCase() === ROL_ADMINISTRADOR_LABORATORIO &&
                   !u.bloqueado,
               )
               .map((u) => ({

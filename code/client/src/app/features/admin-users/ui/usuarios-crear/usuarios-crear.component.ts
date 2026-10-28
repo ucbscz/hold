@@ -8,7 +8,12 @@ import {
   WritableSignal,
 } from '@angular/core';
 import { ValidatedFormsModule } from '@shared/lib/forms';
-import { Usuario, UsuarioServiceAPI, UsuarioService } from '@entities/user';
+import {
+  Usuario,
+  UsuarioServiceAPI,
+  UsuarioService,
+  opcionesRolAsignables,
+} from '@entities/user';
 import { BaseTablaComponent } from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -47,19 +52,8 @@ export class UsuariosCrearComponent extends BaseTablaComponent {
     );
   }
   private readonly sesion = inject(UsuarioService);
-  readonly rolesOpciones: OpcionSelect[] = [
-    { value: 'administrador', label: 'Administrador general' },
-    {
-      value: 'administrador_laboratorio',
-      label: 'Administrador de laboratorio',
-    },
-    { value: 'administrativo', label: 'Administrativo' },
-    { value: 'estudiante', label: 'Estudiante' },
-    { value: 'docente', label: 'Docente' },
-  ].filter(
-    (rol) =>
-      this.sesion.obtenerUsuario().rol?.toLowerCase() === 'administrador' ||
-      !rol.value.startsWith('administrador'),
+  readonly rolesOpciones = opcionesRolAsignables(
+    this.sesion.obtenerUsuario().rol,
   );
   constructor(private readonly usuarioApi: UsuarioServiceAPI) {
     super();

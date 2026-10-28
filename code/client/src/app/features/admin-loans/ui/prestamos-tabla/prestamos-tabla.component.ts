@@ -9,6 +9,7 @@ import {
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { PrestamoDto } from '@entities/admin';
 import {
+  ESTADO_PRESTAMO_FILTRO_OPCIONES,
   PrestamoAgrupados,
   compararPrestamos,
   PrestamosAPIService,
@@ -19,7 +20,10 @@ import {
   UsuarioService,
   NombreRolPipe,
   nombreRol,
+  ROL_OPCIONES,
+  ROL_ADMINISTRADOR,
 } from '@entities/user';
+import { ESTADO_EQUIPO_OPCIONES } from '@entities/equipment';
 import { BuscadorComponent } from '@features/admin-search';
 import {
   printTable,
@@ -72,14 +76,13 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   private readonly toast = inject(ToastService);
   readonly esRoot =
     inject(UsuarioService).obtenerUsuario().rol?.toLowerCase() ===
-    'administrador';
+    ROL_ADMINISTRADOR;
   expandedRowId: number | null = null;
   auditRefresh = 0;
 
   toggleExpand(id: number) {
     this.expandedRowId = this.expandedRowId === id ? null : id;
   }
-  botoncrear: WritableSignal<boolean> = signal(false);
   cargando: boolean = false;
   alertaeliminar: boolean = false;
   prestamos: Map<number, PrestamoAgrupados> = new Map<
@@ -187,33 +190,11 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     'Fecha Devolución Esperada',
   ];
   estadoSeleccionado: string = '';
-  estadosDisponibles: string[] = [
-    'atrasado',
-    'pendiente',
-    'rechazado',
-    'aprobado',
-    'activo',
-    'finalizado',
-    'cancelado',
-  ];
-  readonly estadoFiltroOpciones: OpcionSelect[] = [
-    { value: '', label: 'Todos los estados' },
-    ...this.estadosDisponibles.map((estado) => ({
-      value: estado,
-      label: estado.charAt(0).toUpperCase() + estado.slice(1),
-    })),
-  ];
+  readonly estadoFiltroOpciones = ESTADO_PRESTAMO_FILTRO_OPCIONES;
   rolSeleccionado: string = '';
   readonly rolesFiltroOpciones: OpcionSelect[] = [
     { value: '', label: 'Todos los roles' },
-    { value: 'administrador', label: 'Administrador general' },
-    {
-      value: 'administrador_laboratorio',
-      label: 'Administrador de laboratorio',
-    },
-    { value: 'administrativo', label: 'Administrativo' },
-    { value: 'docente', label: 'Docente' },
-    { value: 'estudiante', label: 'Estudiante' },
+    ...ROL_OPCIONES,
   ];
   fechaPrestamoDesde = '';
   fechaPrestamoHasta = '';
@@ -256,9 +237,6 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   }
   limpiarPrestamoSeleccionado() {
     this.prestamoSeleccionado = new PrestamoDto();
-  }
-  crearprestamo() {
-    this.botoncrear.set(true);
   }
   cargarPrestamos() {
     this.prestamosapi.obtenerPrestamos().subscribe({
@@ -605,11 +583,7 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   avisorecogido: WritableSignal<boolean> = signal(false);
   avisodevuelto: WritableSignal<boolean> = signal(false);
   observacionDevolucion: string = '';
-  estadoEquipoOpciones: OpcionSelect[] = [
-    { value: 'operativo', label: 'Operativo' },
-    { value: 'parcialmente_operativo', label: 'Parcialmente operativo' },
-    { value: 'inoperativo', label: 'Inoperativo' },
-  ];
+  readonly estadoEquipoOpciones = ESTADO_EQUIPO_OPCIONES;
 
   estadosRetorno: { [codigoImt: string]: string } = {};
   equiposDevolucion: PrestamoDto[] = [];

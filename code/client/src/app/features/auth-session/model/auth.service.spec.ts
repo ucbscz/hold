@@ -1,5 +1,6 @@
 import { HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { UsuarioService } from '@entities/user';
 import { environment } from '@environments/environment';
 import { withDefaultTestingProviders } from '@shared/lib/testing';
 import { AuthService } from './auth.service';
@@ -7,6 +8,7 @@ import { AuthService } from './auth.service';
 describe('AuthService', () => {
   let service: AuthService;
   let http: HttpTestingController;
+  let sesion: UsuarioService;
 
   beforeEach(() => {
     sessionStorage.clear();
@@ -15,6 +17,7 @@ describe('AuthService', () => {
     TestBed.configureTestingModule(withDefaultTestingProviders());
     service = TestBed.inject(AuthService);
     http = TestBed.inject(HttpTestingController);
+    sesion = TestBed.inject(UsuarioService);
   });
 
   afterEach(() => {
@@ -23,7 +26,7 @@ describe('AuthService', () => {
   });
 
   it('stores the user without browser-readable tokens', () => {
-    service.setSession({ nombre: 'Ana', rol: 'docente' });
+    sesion.guardarSesion({ nombre: 'Ana', rol: 'docente' });
 
     expect(service.isLoggedIn()).toBeTrue();
     expect(service.getRole()).toBe('docente');
@@ -41,7 +44,7 @@ describe('AuthService', () => {
   });
 
   it('clears local session data after logout', () => {
-    service.setSession({ nombre: 'Ana', rol: 'docente' });
+    sesion.guardarSesion({ nombre: 'Ana', rol: 'docente' });
     service.logout().subscribe();
 
     const request = http.expectOne(`${environment.apiUrl}/api/auth/logout`);

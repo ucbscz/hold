@@ -1,7 +1,11 @@
 import { Component } from '@angular/core';
 import { CatalogosInventarioComponent } from '../catalogos-inventario.component';
 import { Router } from '@angular/router';
-import { UsuarioService } from '@entities/user';
+import {
+  UsuarioService,
+  esRolGestion,
+  ROL_ADMINISTRADOR_LABORATORIO,
+} from '@entities/user';
 import { AccesoriosTablaComponent } from '@features/admin-accessories';
 import { CarrerasTablaComponent } from '@features/admin-careers';
 import { CategoriasTablaComponent } from '@features/admin-categories';
@@ -87,11 +91,11 @@ export class AdministradorComponent {
 
     if (this.usuario.estaVacio()) {
       this.router.navigate(['/login']);
-    } else if (!['administrador', 'administrador_laboratorio'].includes(rol)) {
+    } else if (!esRolGestion(rol)) {
       this.router.navigate(['/inicio']);
     } else {
       this.navigationGroups =
-        rol === 'administrador_laboratorio'
+        rol === ROL_ADMINISTRADOR_LABORATORIO
           ? LAB_ADMIN_NAVIGATION
           : GENERAL_ADMIN_NAVIGATION;
     }
