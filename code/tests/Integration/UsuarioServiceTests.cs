@@ -565,9 +565,9 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     public async Task Update_Profile_EncryptsIdentityImagesAtRestAndReturnsPlainBytes()
     {
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
-        var front = new byte[] { 1, 2, 3, 4, 5 };
-        var back = new byte[] { 6, 7, 8, 9, 10 };
-        var signature = new byte[] { 11, 12, 13, 14, 15 };
+        var front = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0, 1 };
+        var back = new byte[] { 0xFF, 0xD8, 0xFF, 0xE0, 2 };
+        var signature = new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 3 };
         var dto = BuildValidUsuario("U001", "u001@ucb.edu.bo", contrasena: null);
         dto.ImagenFrenteCarnet = front;
         dto.ImagenAtrasCarnet = back;
@@ -583,6 +583,19 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         stored.ImagenFrenteCarnet.Should().NotEqual(front);
         stored.ImagenAtrasCarnet.Should().NotEqual(back);
         stored.ImagenFirma.Should().NotEqual(signature);
+    }
+
+    [Test]
+    public async Task Update_Profile_RejectsFilesThatAreNotImages()
+    {
+        await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
+        var dto = BuildValidUsuario("U001", "u001@ucb.edu.bo", contrasena: null);
+        dto.ImagenFrenteCarnet = "<svg onload=alert(1)>"u8.ToArray();
+
+        var result = await Sut.UpdateProfile("U001", dto);
+
+        result.Status.Should().Be(Ardalis.Result.ResultStatus.Invalid);
+        Db.Usuarios.Single(user => user.Carnet == "U001").ImagenFrenteCarnet.Should().BeNull();
     }
 
     [Test]

@@ -1,4 +1,5 @@
 using FluentValidation;
+using IMT_Reservas.Server.Application.Security;
 
 namespace IMT_Reservas.Server.Application.Features.Configuracion;
 
@@ -31,7 +32,9 @@ public class ConfiguracionValidator : AbstractValidator<ConfiguracionDto>
             .MaximumLength(255).WithMessage("El nombre no puede exceder los 255 caracteres.");
 
         RuleFor(c => c.FirmaJefeCarreraBase64)
-            .NotEmpty().WithMessage("La firma es obligatoria.");
+            .NotEmpty().WithMessage("La firma es obligatoria.")
+            .Must(firma => AllowedImage.IsValidDataUri(firma, AllowedImage.MaxSignatureBytes))
+            .WithMessage("La firma debe ser una imagen PNG, JPG o WebP de hasta 1 MB.");
 
         RuleFor(c => c.CarnetJefeCarrera).MaximumLength(20);
 

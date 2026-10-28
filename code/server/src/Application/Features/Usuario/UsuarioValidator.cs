@@ -1,4 +1,6 @@
 using FluentValidation;
+using IMT_Reservas.Server.Application.Security;
+using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,11 +8,17 @@ namespace IMT_Reservas.Server.Application.Features.Usuario;
 
 public class UsuarioValidator : AbstractValidator<UsuarioDto>
 {
+    private const int MaxProfileImageBytes = 1024 * 1024;
+    private const int MaxCarnetImageBytes = 5 * 1024 * 1024;
+
+    private static readonly string[] Roles = Enum.GetNames<TipoUsuario>()
+        .Select(rol => rol.ToLowerInvariant())
+        .ToArray();
+
     public UsuarioValidator(ApplicationDbContext dbContext)
     {
         RuleFor(usuario => usuario.Rol)
-            .Must(rol => string.IsNullOrWhiteSpace(rol) || new[]
-            { "estudiante", "docente", "administrativo", "administrador", "administrador_laboratorio" }.Contains(rol))
+            .Must(rol => string.IsNullOrWhiteSpace(rol) || Roles.Contains(rol))
             .WithMessage("Rol de usuario no reconocido");
         RuleFor(usuario => usuario.Carnet)
             .NotEmpty()
@@ -68,17 +76,17 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
             .MaximumLength(1024)
             .WithMessage("Motivo de bloqueo no puede superar 1024 caracteres");
         RuleFor(usuario => usuario.ImagenPerfil)
-            .Must(image => image == null || image.Length <= 1024 * 1024)
-            .WithMessage("La foto de perfil no puede superar 1 MB");
+            .Must(image => AllowedImage.IsValid(image, MaxProfileImageBytes))
+            .WithMessage("La foto de perfil debe ser JPG, PNG o WebP de hasta 1 MB");
         RuleFor(usuario => usuario.ImagenFrenteCarnet)
-            .Must(image => image == null || image.Length <= 5 * 1024 * 1024)
-            .WithMessage("La imagen frontal del carnet no puede superar 5 MB");
+            .Must(image => AllowedImage.IsValid(image, MaxCarnetImageBytes))
+            .WithMessage("La imagen frontal del carnet debe ser JPG, PNG o WebP de hasta 5 MB");
         RuleFor(usuario => usuario.ImagenAtrasCarnet)
-            .Must(image => image == null || image.Length <= 5 * 1024 * 1024)
-            .WithMessage("La imagen posterior del carnet no puede superar 5 MB");
+            .Must(image => AllowedImage.IsValid(image, MaxCarnetImageBytes))
+            .WithMessage("La imagen posterior del carnet debe ser JPG, PNG o WebP de hasta 5 MB");
         RuleFor(usuario => usuario.ImagenFirma)
-            .Must(image => image == null || image.Length <= 1024 * 1024)
-            .WithMessage("La firma no puede superar 1 MB");
+            .Must(image => AllowedImage.IsValid(image, MaxProfileImageBytes))
+            .WithMessage("La firma debe ser JPG, PNG o WebP de hasta 1 MB");
 
         RuleFor(usuario => usuario.IdCarrera)
             .MustAsync(

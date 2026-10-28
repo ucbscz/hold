@@ -33,8 +33,7 @@ using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using IMT_Reservas.Server.Presentation.Errors;
 using IMT_Reservas.Server.Presentation.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -174,6 +173,8 @@ builder
         options.CallbackPath = "/api/auth/google/callback";
         options.SaveTokens = false;
     });
+builder.Services.AddAuthorizationBuilder()
+    .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
 
 builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<UsuarioAuthRepository>();
@@ -380,7 +381,6 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
     options.KnownProxies.Clear();
 });
 
-
 var app = builder.Build();
 var useHttpsRedirection = builder.Configuration.GetValue("HttpsRedirection:Enabled", true);
 
@@ -393,37 +393,7 @@ if (!app.Environment.IsDevelopment() && useHttpsRedirection)
     app.UseHttpsRedirection();
 }
 
-app.Use(
-    async (HttpContext ctx, Func<Task> next) =>
-    {
-        ctx.Response.Headers.Append("X-Content-Type-Options", "nosniff");
-        ctx.Response.Headers.Append("X-Frame-Options", "DENY");
-        ctx.Response.Headers.Append("Referrer-Policy", "strict-origin-when-cross-origin");
-        ctx.Response.Headers.Append(
-            "Permissions-Policy",
-            "camera=(), microphone=(), geolocation=()"
-        );
-        ctx.Response.Headers.Append("X-XSS-Protection", "0");
-
-        if (ctx.Request.Path.StartsWithSegments("/api"))
-        {
-            ctx.Response.Headers.Append(
-                "Content-Security-Policy",
-                "default-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self';"
-            );
-        }
-        else
-        {
-#pragma warning disable S7039
-            ctx.Response.Headers.Append(
-                "Content-Security-Policy",
-                "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self';"
-            );
-#pragma warning restore S7039
-        }
-        await next();
-    }
-);
+app.UseSecurityHeaders();
 
 app.UseCors("AllowFrontend");
 app.UseExceptionHandler(_ => { });
@@ -438,7 +408,7 @@ app.UseAuthentication();
 app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHealthChecks("/api/health");
+app.MapHealthChecks("/api/health").AllowAnonymous();
 if (hangfireEnabled)
 {
     app.UseHangfireDashboard(

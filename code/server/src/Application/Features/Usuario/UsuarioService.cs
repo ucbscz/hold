@@ -1,5 +1,4 @@
 using Ardalis.Result;
-using System.Text.Json;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Application.Features.AuditLog;
@@ -7,6 +6,7 @@ using IMT_Reservas.Server.Application.Features.Cache;
 using IMT_Reservas.Server.Application.Features.Jwt;
 using IMT_Reservas.Server.Application.Features.Notificacion;
 using IMT_Reservas.Server.Application.Security;
+using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.Extensions.Options;
 using BCryptLib = BCrypt.Net.BCrypt;
@@ -16,8 +16,11 @@ namespace IMT_Reservas.Server.Application.Features.Usuario;
 
 public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioDto>
 {
-    public const string TermsVersion = "2026-09-02";
     private static readonly TimeSpan UsuarioCacheTtl = TimeSpan.FromMinutes(30);
+    private static readonly string UnknownUserPasswordHash = BCryptLib.HashPassword(
+        AuthTokenGenerator.Create(),
+        workFactor: 12
+    );
     private readonly UsuarioMapper _mapper;
     private readonly JwtService _jwtService;
     private readonly JwtSettings _jwtSettings;
@@ -76,7 +79,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (user == null)
             return Result<object>.NotFound();
 
-        if (isLabAdmin && user.Rol is Core.Entities.TipoUsuario.Administrador or Core.Entities.TipoUsuario.Administrador_Laboratorio)
+        if (isLabAdmin && IsManagementRole(user.Rol))
             return Result<object>.Forbidden();
 
         var previousAuditState = new { user.Bloqueado, user.MotivoBloqueo };
@@ -122,12 +125,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             notificationType,
             notificationTitle,
             notificationContent,
-            JsonSerializer.Serialize(new
-            {
-                emisor = actorName ?? "Sistema",
-                motivo = notificationReason,
-                fecha = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
-            }),
+            NotificacionService.BuildEmitterDetail(actorName ?? "Sistema", notificationReason),
             saveChanges: false
         );
 
@@ -178,7 +176,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
                 "Debes aceptar los términos y condiciones para crear tu cuenta"
             );
 
-        if (isLabAdmin && dto.Rol is "administrador" or "administrador_laboratorio")
+        if (isLabAdmin && IsManagementRole(dto.Rol))
             return Result<UsuarioDto>.Forbidden();
         dto.Bloqueado = false;
         dto.MotivoBloqueo = null;
@@ -212,10 +210,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         )
             return Result<UsuarioDto>.Error("Teléfono ya registrado");
 
-        dto.ImagenPerfil = _sensitiveData.Protect(dto.ImagenPerfil);
-        dto.ImagenFrenteCarnet = _sensitiveData.Protect(dto.ImagenFrenteCarnet);
-        dto.ImagenAtrasCarnet = _sensitiveData.Protect(dto.ImagenAtrasCarnet);
-        dto.ImagenFirma = _sensitiveData.Protect(dto.ImagenFirma);
+        ProtectProfileDocuments(dto, null);
         var entity = deletedUser ?? MapToEntity(dto);
 
         if (deletedUser != null)
@@ -305,26 +300,13 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             PreserveTraceableFields(dto, existing);
 
         dto.Rol = dto.Rol?.Trim().ToLowerInvariant();
-        dto.ImagenPerfil = dto.ImagenPerfil == null
-            ? existing.ImagenPerfil
-            : _sensitiveData.Protect(dto.ImagenPerfil);
-        dto.ImagenFrenteCarnet = dto.ImagenFrenteCarnet == null
-            ? existing.ImagenFrenteCarnet
-            : _sensitiveData.Protect(dto.ImagenFrenteCarnet);
-        dto.ImagenAtrasCarnet = dto.ImagenAtrasCarnet == null
-            ? existing.ImagenAtrasCarnet
-            : _sensitiveData.Protect(dto.ImagenAtrasCarnet);
-        dto.ImagenFirma = dto.ImagenFirma == null
-            ? existing.ImagenFirma
-            : _sensitiveData.Protect(dto.ImagenFirma);
 
         var validation = await Validator.ValidateAsync(dto, cancellationToken);
 
         if (!validation.IsValid)
             return validation.ToResult<UsuarioDto>();
 
-        if (isLabAdmin && (existing.Rol is Core.Entities.TipoUsuario.Administrador or Core.Entities.TipoUsuario.Administrador_Laboratorio
-            || dto.Rol is "administrador" or "administrador_laboratorio"))
+        if (isLabAdmin && (IsManagementRole(existing.Rol) || IsManagementRole(dto.Rol)))
             return Result<UsuarioDto>.Forbidden();
         dto.Bloqueado = existing.Bloqueado;
         dto.MotivoBloqueo = existing.MotivoBloqueo;
@@ -337,6 +319,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         if (isAdmin)
             await ResolveCarrera(dto, cancellationToken);
+        ProtectProfileDocuments(dto, existing);
         _mapper.Update(dto, existing);
 
         if (isAdmin && (dto.IdCarrera ?? 0) > 0)
@@ -443,14 +426,12 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             cancellationToken
         );
 
-        if (user == null)
-            return Result<LoginDto>.Unauthorized("Credenciales inválidas");
+        var storedHash = string.IsNullOrWhiteSpace(user?.Contrasena)
+            ? UnknownUserPasswordHash
+            : user.Contrasena;
+        var passwordValid = BCryptLib.Verify(password, storedHash);
 
-        var passwordValid =
-            !string.IsNullOrWhiteSpace(user.Contrasena)
-            && BCryptLib.Verify(password, user.Contrasena);
-
-        if (!passwordValid)
+        if (user == null || !passwordValid)
             return Result<LoginDto>.Unauthorized("Credenciales inválidas");
 
         if (!user.EmailVerificado)
@@ -589,6 +570,23 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         dto.IdCarrera = existing.IdCarrera;
         dto.Rol = existing.Rol.ToString().ToLowerInvariant();
     }
+
+    private static bool IsManagementRole(TipoUsuario rol) =>
+        rol is TipoUsuario.Administrador or TipoUsuario.Administrador_Laboratorio;
+
+    private static bool IsManagementRole(string? rol) =>
+        rol is Permisos.Administrador or Permisos.AdministradorLaboratorio;
+
+    private void ProtectProfileDocuments(UsuarioDto dto, UsuarioEntity? existing)
+    {
+        dto.ImagenPerfil = ProtectOrKeep(dto.ImagenPerfil, existing?.ImagenPerfil);
+        dto.ImagenFrenteCarnet = ProtectOrKeep(dto.ImagenFrenteCarnet, existing?.ImagenFrenteCarnet);
+        dto.ImagenAtrasCarnet = ProtectOrKeep(dto.ImagenAtrasCarnet, existing?.ImagenAtrasCarnet);
+        dto.ImagenFirma = ProtectOrKeep(dto.ImagenFirma, existing?.ImagenFirma);
+    }
+
+    private byte[]? ProtectOrKeep(byte[]? value, byte[]? current) =>
+        value == null ? current : _sensitiveData.Protect(value);
 
     private void SetProfileDocuments(UsuarioDto dto, UsuarioEntity user)
     {

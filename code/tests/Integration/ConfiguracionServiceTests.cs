@@ -21,6 +21,9 @@ namespace IMT_Reservas.Tests.Integration;
 [TestFixture]
 internal class ConfiguracionServiceTests
 {
+    private const string Firma = "data:image/png;base64,iVBORw0KGgpwcmltZXJh";
+    private const string OtraFirma = "data:image/png;base64,iVBORw0KGgpzZWd1bmRh";
+
     private ApplicationDbContext _db = null!;
     private ConfiguracionService _service = null!;
 
@@ -71,7 +74,7 @@ internal class ConfiguracionServiceTests
         current.HorarioFinMinutos = 17 * 60;
         current.NombreJefeCarrera = "Jefe actualizado";
         current.CarnetJefeCarrera = "2222222";
-        current.FirmaJefeCarreraBase64 = "nueva-firma";
+        current.FirmaJefeCarreraBase64 = OtraFirma;
 
         var result = await _service.UpdateConfiguracion(current);
         var reloaded = await _service.GetConfiguracion();
@@ -81,7 +84,7 @@ internal class ConfiguracionServiceTests
         reloaded.HorarioFinMinutos.Should().Be(17 * 60);
         reloaded.NombreJefeCarrera.Should().Be("Luis Lopez");
         reloaded.CarnetJefeCarrera.Should().Be("2222222");
-        reloaded.FirmaJefeCarreraBase64.Should().Be("nueva-firma");
+        reloaded.FirmaJefeCarreraBase64.Should().Be(OtraFirma);
         _db.ConfiguracionesSistema.Single().FirmaJefeCarreraBase64
             .Should().StartWith("ucbhold:v1:");
     }
@@ -102,7 +105,17 @@ internal class ConfiguracionServiceTests
     {
         var dto = await _service.GetConfiguracion();
         dto.CarnetJefeCarrera = carnet;
-        dto.FirmaJefeCarreraBase64 = "firma";
+        dto.FirmaJefeCarreraBase64 = Firma;
+        (await _service.UpdateConfiguracion(dto)).Status.Should().Be(Ardalis.Result.ResultStatus.Invalid);
+    }
+
+    [TestCase("firma")]
+    [TestCase("data:text/html;base64,PHNjcmlwdD4=")]
+    [TestCase("data:image/png;base64,PHNjcmlwdD4=")]
+    public async Task Update_RejectsSignatureThatIsNotAnImage(string firma)
+    {
+        var dto = await _service.GetConfiguracion();
+        dto.FirmaJefeCarreraBase64 = firma;
         (await _service.UpdateConfiguracion(dto)).Status.Should().Be(Ardalis.Result.ResultStatus.Invalid);
     }
 
@@ -123,7 +136,7 @@ internal class ConfiguracionServiceTests
     public async Task Reassignment_RequiresNewSignature_AndNameComesFromUser()
     {
         var dto = await _service.GetConfiguracion();
-        dto.FirmaJefeCarreraBase64 = "primera-firma";
+        dto.FirmaJefeCarreraBase64 = Firma;
         (await _service.UpdateConfiguracion(dto)).IsSuccess.Should().BeTrue();
         dto.CarnetJefeCarrera = "2222222";
         (await _service.UpdateConfiguracion(dto)).Status.Should().Be(Ardalis.Result.ResultStatus.Invalid);
@@ -134,7 +147,7 @@ internal class ConfiguracionServiceTests
     public async Task Update_RejectsDailyHoursShorterThanMinimumReservation()
     {
         var dto = await _service.GetConfiguracion();
-        dto.FirmaJefeCarreraBase64 = "firma";
+        dto.FirmaJefeCarreraBase64 = Firma;
         dto.TiempoMinimoReservaMinutos = 60;
         dto.Horarios = new List<HorarioAtencionDto> { new() { DiaSemana = 1, Abierto = true, InicioMinutos = 480, FinMinutos = 510 } };
         (await _service.UpdateConfiguracion(dto)).Status.Should().Be(Ardalis.Result.ResultStatus.Invalid);
@@ -144,7 +157,7 @@ internal class ConfiguracionServiceTests
     public async Task Get_ExposesResponsibleIdentityToRoot()
     {
         var stored = await _service.GetConfiguracion();
-        stored.FirmaJefeCarreraBase64 = "firma-institucional";
+        stored.FirmaJefeCarreraBase64 = Firma;
         (await _service.UpdateConfiguracion(stored)).IsSuccess.Should().BeTrue();
         var controller = new ConfiguracionController(_service)
         {
@@ -161,7 +174,7 @@ internal class ConfiguracionServiceTests
         var config = (ConfiguracionDto)result.Value!;
         config.CarnetJefeCarrera.Should().Be("1111111");
         config.NombreJefeCarrera.Should().Be("Ana Perez");
-        config.FirmaJefeCarreraBase64.Should().Be("firma-institucional");
+        config.FirmaJefeCarreraBase64.Should().Be(Firma);
         controller.Response.Headers.CacheControl.ToString().Should().Be("no-store");
     }
 
