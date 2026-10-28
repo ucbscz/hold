@@ -1,4 +1,5 @@
 using Hangfire.Dashboard;
+using IMT_Reservas.Server.Core.Entities;
 
 namespace IMT_Reservas.Server.Infrastructure.Jobs;
 
@@ -9,6 +10,6 @@ public sealed class HangfireDashboardAccessPolicy : IDashboardAuthorizationFilte
         var httpContext = context.GetHttpContext();
 
         return httpContext.User.Identity?.IsAuthenticated == true
-            && httpContext.User.IsInRole("administrador");
+            && httpContext.User.IsInRole(Permisos.Administrador);
     }
 }

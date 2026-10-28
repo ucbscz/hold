@@ -111,9 +111,8 @@ public class AuthController : Controller
     [HttpGet("google")]
     public IActionResult Google([FromQuery] string? origen)
     {
-        var frontend = _configuration["Authentication:FrontendUrl"]?.TrimEnd('/')
-            ?? "http://localhost:4200";
-        var ruta = origen == "registro" ? "registro" : "login";
+        var frontend = FrontendUrl;
+        var ruta = GoogleRoute(origen);
         if (string.IsNullOrWhiteSpace(_configuration["Authentication:Google:ClientId"]))
             return Redirect($"{frontend}/{ruta}?googleError=configuracion");
 
@@ -130,9 +129,8 @@ public class AuthController : Controller
     )
     {
         var authentication = await HttpContext.AuthenticateAsync("GoogleExternal");
-        var frontend = _configuration["Authentication:FrontendUrl"]?.TrimEnd('/')
-            ?? "http://localhost:4200";
-        var ruta = origen == "registro" ? "registro" : "login";
+        var frontend = FrontendUrl;
+        var ruta = GoogleRoute(origen);
         if (!authentication.Succeeded || authentication.Principal == null)
             return Redirect($"{frontend}/{ruta}?googleError=cancelado");
 
@@ -178,6 +176,12 @@ public class AuthController : Controller
             )
         );
     }
+
+    private string FrontendUrl =>
+        _configuration["Authentication:FrontendUrl"]?.TrimEnd('/') ?? "http://localhost:4200";
+
+    private static string GoogleRoute(string? origen) =>
+        origen == "registro" ? "registro" : "login";
 
     private IActionResult SessionResponse(Result<LoginDto> result)
     {

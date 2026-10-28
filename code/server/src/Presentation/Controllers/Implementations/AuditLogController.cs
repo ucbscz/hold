@@ -25,7 +25,7 @@ public class AuditLogController : Controller
         [FromQuery] string? buscar
     )
     {
-        if (!User.IsInRole("administrador") && entidad is not ("Prestamo" or "Usuario"))
+        if (!User.IsInRole(Permisos.Administrador) && entidad is not ("Prestamo" or "Usuario"))
             return Forbid();
         return ToResponse(await _service.GetFiltered(entidad, actor, accion, desde, hasta, buscar));
     }

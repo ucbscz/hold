@@ -1,4 +1,5 @@
 using IMT_Reservas.Server.Application.Features.Configuracion;
+using IMT_Reservas.Server.Core.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
@@ -22,14 +23,14 @@ public class ConfiguracionController : Controller
         var result = await _service.GetConfiguracion(cancellationToken);
         Response.Headers.CacheControl = "no-store";
         return Ok(
-            User.IsInRole("administrador")
+            User.IsInRole(Permisos.Administrador)
                 ? result
                 : ConfiguracionPublicaDto.From(result)
         );
     }
 
     [HttpGet("responsables")]
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Administrador)]
     public async Task<IActionResult> Responsables([FromQuery] string? buscar, CancellationToken cancellationToken)
     {
         Response.Headers.CacheControl = "no-store";
@@ -38,7 +39,7 @@ public class ConfiguracionController : Controller
     }
 
     [HttpPut]
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Administrador)]
     public async Task<IActionResult> Update(
         [FromBody] ConfiguracionDto dto,
         CancellationToken cancellationToken

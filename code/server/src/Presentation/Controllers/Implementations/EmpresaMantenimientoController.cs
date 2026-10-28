@@ -1,5 +1,6 @@
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Application.Features.EmpresaMantenimiento;
+using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -8,7 +9,7 @@ using EmpresaMantenimientoEntity = IMT_Reservas.Server.Core.Entities.EmpresaMant
 
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
-[Authorize(Roles = "administrador")]
+[Authorize(Roles = Permisos.Administrador)]
 [Route("api/empresas")]
 public class EmpresaMantenimientoController : Controller
 {

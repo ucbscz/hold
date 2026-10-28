@@ -15,5 +15,5 @@ public class AvisoDisponibilidadController : Controller
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] AvisoDisponibilidadDto dto) =>
-        ToResponse(await _service.Create(User.Identity?.Name ?? string.Empty, dto));
+        ToResponse(await _service.Create(CurrentCarnet, dto));
 }

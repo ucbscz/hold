@@ -25,5 +25,4 @@ public class NotificacionController : Controller
     public async Task<IActionResult> MarkAllAsRead() =>
         ToResponse(await _service.MarkAllAsRead(CurrentCarnet));
 
-    private string CurrentCarnet => User.Identity?.Name ?? string.Empty;
 }

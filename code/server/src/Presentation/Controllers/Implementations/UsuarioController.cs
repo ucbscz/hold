@@ -21,7 +21,7 @@ public class UsuarioController : Controller
     public async Task<IActionResult> GetProfile(CancellationToken cancellationToken) =>
         ToResponse(
             await _service.GetProfile(
-                User.Identity?.Name ?? string.Empty,
+                CurrentCarnet,
                 cancellationToken
             )
         );
@@ -32,7 +32,7 @@ public class UsuarioController : Controller
         CancellationToken cancellationToken
     )
     {
-        var carnet = User.Identity?.Name ?? string.Empty;
+        var carnet = CurrentCarnet;
         return ToResponse(
             await _service.UpdateProfile(
                 carnet,
@@ -53,7 +53,7 @@ public class UsuarioController : Controller
     [HttpGet("{carnet}")]
     public async Task<IActionResult> Get(string carnet)
     {
-        if (!User.PuedeGestionar() && User.Identity?.Name != carnet)
+        if (!User.PuedeGestionar() && CurrentCarnet != carnet)
             return Forbid();
 
         return ToResponse(await _service.Get(carnet));
@@ -71,7 +71,7 @@ public class UsuarioController : Controller
                 )
             );
 
-        var result = await _service.Create(dto, User.PuedeGestionar(), User.IsInRole("administrador_laboratorio"));
+        var result = await _service.Create(dto, User.PuedeGestionar(), User.IsInRole(Permisos.AdministradorLaboratorio));
         return ToCreatedResponse(result, nameof(Get), new { carnet = result.Value?.Carnet });
     }
 
@@ -85,14 +85,14 @@ public class UsuarioController : Controller
             await _service.Update(
                 carnet,
                 dto,
-                User.Identity?.Name,
+                CurrentCarnet,
                 User.PuedeGestionar(),
-                User.IsInRole("administrador_laboratorio"),
+                User.IsInRole(Permisos.AdministradorLaboratorio),
                 cancellationToken
             )
         );
 
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Administrador)]
     [HttpDelete("{carnet}")]
     public async Task<IActionResult> Delete(string carnet) =>
         ToDeleteResponse(await _service.Delete(carnet));
@@ -110,9 +110,9 @@ public class UsuarioController : Controller
                 request.Bloqueado ?? false,
                 request.MotivoBloqueo,
                 User.PuedeGestionar(),
-                User.Identity?.Name,
+                CurrentCarnet,
                 cancellationToken,
-                User.IsInRole("administrador_laboratorio")
+                User.IsInRole(Permisos.AdministradorLaboratorio)
             )
         );
 

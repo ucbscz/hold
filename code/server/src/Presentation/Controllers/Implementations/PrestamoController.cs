@@ -26,34 +26,20 @@ public class PrestamoController : Controller
     )
     {
         if (User.PuedeGestionar())
-        {
-            if (string.IsNullOrWhiteSpace(carnet) && string.IsNullOrWhiteSpace(estado))
-                return ToResponse(
-                    await _service.GetFiltered(
-                        null,
-                        string.Empty,
-                        pagina,
-                        tamanoPagina,
-                        cancellationToken,
-                        guardado
-                    )
-                );
-
             return ToResponse(
                 await _service.GetFiltered(
-                    carnet,
-                    estado ?? string.Empty,
+                    string.IsNullOrWhiteSpace(carnet) ? null : carnet,
+                    string.IsNullOrWhiteSpace(estado) ? string.Empty : estado,
                     pagina,
                     tamanoPagina,
                     cancellationToken,
                     guardado
                 )
             );
-        }
 
         return ToResponse(
             await _service.GetHistory(
-                User.Identity?.Name ?? string.Empty,
+                CurrentCarnet,
                 estado ?? string.Empty,
                 pagina,
                 tamanoPagina,
@@ -68,7 +54,7 @@ public class PrestamoController : Controller
         ToResponse(
             await _service.GetAuthorized(
                 id,
-                User.Identity?.Name ?? string.Empty,
+                CurrentCarnet,
                 User.PuedeGestionar(),
                 cancellationToken
             )
@@ -78,7 +64,7 @@ public class PrestamoController : Controller
     public async Task<IActionResult> GetReservationStatus(CancellationToken cancellationToken) =>
         ToResponse(
             await _service.GetReservationStatus(
-                User.Identity?.Name ?? string.Empty,
+                CurrentCarnet,
                 cancellationToken
             )
         );
@@ -91,7 +77,7 @@ public class PrestamoController : Controller
     {
         var result = await _service.CreateForUser(
             request,
-            User.Identity?.Name ?? string.Empty,
+            CurrentCarnet,
             cancellationToken
         );
         return ToCreatedResponse(result, nameof(Get), new { id = result.Value?.Id });
@@ -108,7 +94,7 @@ public class PrestamoController : Controller
         {
             if (!string.Equals(request.EstadoPrestamo, "cancelado", StringComparison.OrdinalIgnoreCase))
                 return Forbid();
-            return ToResponse(await _service.CancelForUser(id, User.Identity?.Name ?? string.Empty, cancellationToken));
+            return ToResponse(await _service.CancelForUser(id, CurrentCarnet, cancellationToken));
         }
         return ToResponse(
             await _service.UpdateStatus(
@@ -116,13 +102,13 @@ public class PrestamoController : Controller
                 request.EstadoPrestamo ?? string.Empty,
                 request.Observacion,
                 request,
-                User.Identity?.Name,
+                CurrentCarnet,
                 cancellationToken
             )
         );
     }
 
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Administrador)]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id) => ToDeleteResponse(await _service.Delete(id));
 
@@ -139,7 +125,7 @@ public class PrestamoController : Controller
     ) => ToResponse(
         await _service.SetSaved(
             id,
-            User.Identity?.Name ?? string.Empty,
+            CurrentCarnet,
             dto.Guardado,
             cancellationToken
         )

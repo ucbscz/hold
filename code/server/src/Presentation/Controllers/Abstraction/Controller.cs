@@ -8,6 +8,8 @@ namespace IMT_Reservas.Server.Presentation.Controllers.Abstraction;
 [ApiController]
 public abstract class Controller : ControllerBase
 {
+    protected string CurrentCarnet => User.Identity?.Name ?? string.Empty;
+
     protected IActionResult ToResponse<T>(Result<T> result)
         where T : class =>
         result.Status switch

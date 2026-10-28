@@ -62,13 +62,13 @@ public class ContratoController : Controller
         ToResponse(
             await _contratoService.GetByPrestamoId(
                 prestamoId,
-                User.Identity?.Name ?? string.Empty,
+                CurrentCarnet,
                 User.PuedeGestionar(),
                 cancellationToken
             )
         );
 
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Administrador)]
     [HttpDelete("{prestamoId:int}")]
     public async Task<IActionResult> Delete(int prestamoId) =>
         ToDeleteResponse(await _contratoService.Delete(prestamoId));

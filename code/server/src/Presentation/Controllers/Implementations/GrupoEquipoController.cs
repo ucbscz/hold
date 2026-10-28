@@ -1,4 +1,5 @@
 using IMT_Reservas.Server.Application.Features.GrupoEquipo;
+using IMT_Reservas.Server.Core.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
@@ -64,14 +65,14 @@ public class GrupoEquipoController : Controller
         return result.IsSuccess ? NoContent() : ToResponse(result);
     }
 
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Administrador)]
     [HttpPost("importar")]
     public async Task<IActionResult> Importar(
         [FromBody] GrupoEquipoImportacionSolicitudDto dto,
         CancellationToken cancellationToken
     ) => ToResponse(await _importador.Preview(dto.Url, cancellationToken));
 
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Administrador)]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] GrupoEquipoDto dto)
     {
@@ -80,17 +81,16 @@ public class GrupoEquipoController : Controller
         return ToCreatedResponse(result, nameof(Get), new { id = result.Value?.Id });
     }
 
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Administrador)]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] GrupoEquipoDto dto) =>
         ToResponse(await _service.Update(id, dto));
 
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Administrador)]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id) => ToDeleteResponse(await _service.Delete(id));
 
-    private string CurrentCarnet => User.Identity?.Name ?? string.Empty;
-    private bool IsAdmin => User.IsInRole("administrador");
+    private bool IsAdmin => User.IsInRole(Permisos.Administrador);
 }
 
 public sealed class GrupoEquipoImportacionSolicitudDto

@@ -4,7 +4,10 @@ namespace IMT_Reservas.Server.Core.Entities;
 
 public static class Permisos
 {
-    public const string Gestion = "administrador,administrador_laboratorio";
+    public const string Administrador = "administrador";
+    public const string AdministradorLaboratorio = "administrador_laboratorio";
+    public const string Gestion = Administrador + "," + AdministradorLaboratorio;
+
     public static bool PuedeGestionar(this ClaimsPrincipal user) =>
-        user.IsInRole("administrador") || user.IsInRole("administrador_laboratorio");
+        user.IsInRole(Administrador) || user.IsInRole(AdministradorLaboratorio);
 }

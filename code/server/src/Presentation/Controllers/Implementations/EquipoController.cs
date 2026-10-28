@@ -1,4 +1,5 @@
 using IMT_Reservas.Server.Application.Features.Equipo;
+using IMT_Reservas.Server.Core.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
@@ -31,7 +32,7 @@ public class EquipoController : Controller
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id) => ToResponse(await _service.Get(id));
 
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Administrador)]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] EquipoDto dto)
     {
@@ -39,16 +40,16 @@ public class EquipoController : Controller
         return ToCreatedResponse(result, nameof(Get), new { id = result.Value?.Id });
     }
 
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Administrador)]
     [HttpPut("{id:int}")]
     public async Task<IActionResult> Update(int id, [FromBody] EquipoDto dto) =>
         ToResponse(await _service.Update(id, dto));
 
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Administrador)]
     [HttpDelete("{id:int}")]
     public async Task<IActionResult> Delete(int id) => ToDeleteResponse(await _service.Delete(id));
 
-    [Authorize(Roles = "administrador")]
+    [Authorize(Roles = Permisos.Administrador)]
     [HttpGet("{id:int}/prestamos")]
     public async Task<IActionResult> GetPrestamos(int id) =>
         ToResponse(await _service.GetHistorial(id));
