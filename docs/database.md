@@ -120,10 +120,10 @@ test -s code/database/schema.sql
 ! grep -Eq '^-- Data for Name:|^COPY public\.|^SELECT pg_catalog\.setval' code/database/schema.sql
 ```
 
-Upload it with the RLS policies to the release:
+Append the `Row Level Security` section of the previous `schema.sql` before the closing comment, then upload it to the release:
 
 ```bash
-gh release upload <tag> code/database/schema.sql code/database/rls.sql --repo ucbscz/hold --clobber
+gh release upload <tag> code/database/schema.sql --repo ucbscz/hold --clobber
 ```
 
 Initialize an empty database:
@@ -135,14 +135,19 @@ psql -U postgres -d IMT_Reservas -f code/database/schema.sql
 
 ## Row Level Security
 
-The API must connect with a dedicated role that is not a superuser, does not own the tables and has `NOBYPASSRLS`. Outside Development the server refuses to start if the connected role bypasses RLS or if `code/database/rls.sql` was not applied.
+The API must connect with a dedicated role that is not a superuser, does not own the tables and has `NOBYPASSRLS`. Outside Development the server refuses to start if the connected role bypasses RLS or if the Row Level Security section of `code/database/schema.sql` was not applied.
 
 ```bash
-psql -U postgres -d IMT_Reservas -c "CREATE ROLE ucbhold_app LOGIN PASSWORD '<secret>' NOSUPERUSER NOBYPASSRLS;"
-psql -U postgres -d IMT_Reservas -v app_role=ucbhold_app -f code/database/rls.sql
+psql -U postgres -d IMT_Reservas -c "ALTER ROLE ucbhold_app WITH LOGIN PASSWORD '<secret>';"
 ```
 
-`rls.sql` is idempotent: run it after `schema.sql` on new databases and after every schema change on existing ones. Then set `ConnectionStrings__PostgreSQL` to use `ucbhold_app`.
+`schema.sql` creates `ucbhold_app` without login and applies the policies. On a database that already has data, apply only its idempotent RLS section:
+
+```bash
+sed -n '/^-- Row Level Security/,$p' code/database/schema.sql | psql -U postgres -d IMT_Reservas -v ON_ERROR_STOP=1
+```
+
+Then set `ConnectionStrings__PostgreSQL` to use `ucbhold_app`.
 
 Each EF Core connection publishes `app.carnet` and `app.rol`; policies use them:
 

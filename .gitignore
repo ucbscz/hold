@@ -95,7 +95,6 @@ code/database/*.backup
 code/database/*.dump
 code/database/backups/
 !code/database/schema.sql
-!code/database/rls.sql
 *.backup
 *.dump
 *.sql.gz
@@ -141,7 +140,6 @@ service-account*.json
 *.kdbx
 *.sql
 !code/database/schema.sql
-!code/database/rls.sql
 
 code/server/publish/
 

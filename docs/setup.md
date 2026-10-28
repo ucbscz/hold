@@ -220,12 +220,11 @@ Create the database:
 psql -U postgres -c "CREATE DATABASE IMT_Reservas;"
 ```
 
-Apply the data-free schema attached to the release, then the Row Level Security policies with the application role (see [database.md](database.md#row-level-security)):
+Apply the data-free schema attached to the release, which includes the Row Level Security policies, and enable the application role (see [database.md](database.md#row-level-security)):
 
 ```bash
 psql -U postgres -d IMT_Reservas -f code/database/schema.sql
-psql -U postgres -d IMT_Reservas -c "CREATE ROLE ucbhold_app LOGIN PASSWORD '<secret>' NOSUPERUSER NOBYPASSRLS;"
-psql -U postgres -d IMT_Reservas -v app_role=ucbhold_app -f code/database/rls.sql
+psql -U postgres -d IMT_Reservas -c "ALTER ROLE ucbhold_app WITH LOGIN PASSWORD '<secret>';"
 ```
 
 The release never contains production data or full backups. Keep operational backups in private Oracle storage with restricted access. `schema.sql` initializes an empty database; it is not an upgrade script for a database that already contains data.

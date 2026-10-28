@@ -16,7 +16,7 @@ public static class RowLevelSecurityGuard
 
         if (await command.ExecuteScalarAsync() is not true)
             throw new InvalidOperationException(
-                "La base de datos no aplica Row Level Security: conecta con un rol NOSUPERUSER NOBYPASSRLS y ejecuta code/database/rls.sql."
+                "La base de datos no aplica Row Level Security: conecta con un rol NOSUPERUSER NOBYPASSRLS y aplica code/database/schema.sql."
             );
     }
 }
