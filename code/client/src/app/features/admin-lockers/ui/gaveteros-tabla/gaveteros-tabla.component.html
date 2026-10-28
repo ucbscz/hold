@@ -142,17 +142,17 @@
   }
 </div>
 @if (botoncrear()) {
-  <app-gaveteros-crear
-    [botoncrear]="botoncrear"
-    (Actualizar)="actualizarDatos()"
-  ></app-gaveteros-crear>
+  <app-gaveteros-formulario
+    [abierto]="botoncrear"
+    (guardado)="actualizarDatos()"
+  ></app-gaveteros-formulario>
 }
 @if (botoneditar()) {
-  <app-gaveteros-editar
-    [botoneditar]="botoneditar"
-    [gavetero]="gaveteroSeleccionado"
-    (actualizar)="actualizarDatos()"
-  ></app-gaveteros-editar>
+  <app-gaveteros-formulario
+    [abierto]="botoneditar"
+    [registro]="gaveteroSeleccionado"
+    (guardado)="actualizarDatos()"
+  ></app-gaveteros-formulario>
 }
 @if (error()) {
   <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>

@@ -1,0 +1,120 @@
+<div class="form-container">
+  <button class="btn-close" (click)="cerrar()">
+    <img src="assets/x.png" alt="Cerrar" />
+  </button>
+  <div class="form-content">
+    <h2>{{ textos.titulo }}</h2>
+    <form #form="ngForm" (ngSubmit)="validarEnvio()">
+      <div class="form-group">
+        <label for="nombre">Nombre</label>
+        <input
+          type="text"
+          id="nombre"
+          name="nombre"
+          [(ngModel)]="modelo.nombre"
+          required
+          maxlength="25"
+          placeholder="Ingresa el nombre del accesorio"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group">
+        <label for="modelo">Modelo</label>
+        <input
+          type="text"
+          id="modelo"
+          name="modelo"
+          [(ngModel)]="modelo.modelo"
+          required
+          maxlength="25"
+          placeholder="Modelo del accesorio"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group">
+        <label for="tipo">Tipo</label>
+        <input
+          type="text"
+          id="tipo"
+          name="tipo"
+          [(ngModel)]="modelo.tipo"
+          required
+          maxlength="25"
+          placeholder="Tipo de accesorio"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group">
+        <label for="descripcion">Descripción</label>
+        <textarea
+          id="descripcion"
+          name="descripcion"
+          [(ngModel)]="modelo.descripcion"
+          rows="3"
+          maxlength="100"
+          placeholder="Describe las características del accesorio"
+          class="form-input"
+        ></textarea>
+      </div>
+      <div class="form-group">
+        <label for="codigo_imt">Código IMT</label>
+        <app-custom-select
+          name="codigo_imt"
+          [(ngModel)]="modelo.id_equipo"
+          required
+          [opciones]="equiposOpciones"
+          placeholder="Selecciona un equipo"
+        ></app-custom-select>
+      </div>
+      <div class="form-group">
+        <label for="precio">Precio</label>
+        <input
+          type="number"
+          id="precio"
+          name="precio"
+          [(ngModel)]="modelo.precio"
+          step="0.01"
+          max="999999999"
+          placeholder="0.00"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group">
+        <label for="url_data_sheet">URL Data Sheet</label>
+        <input
+          type="url"
+          id="url_data_sheet"
+          name="url_data_sheet"
+          [(ngModel)]="modelo.url_data_sheet"
+          maxlength="255"
+          pattern="https?://.+"
+          placeholder="https://ejemplo.com/datasheet.pdf"
+          class="form-input"
+        />
+      </div>
+      @if (error()) {
+        <app-mostrarerror
+          [inline]="true"
+          [error]="error"
+          [mensaje]="mensajeerror"
+        ></app-mostrarerror>
+      }
+      <div class="form-submit">
+        <button
+          type="submit"
+          class="register-button"
+          [disabled]="!form.valid || procesando"
+        >
+          <span>{{ textos.boton }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+@if (aviso()) {
+  <app-aviso
+    [cerrar]="aviso"
+    [mensaje]="mensajeaviso"
+    (aceptar)="confirmar()"
+  ></app-aviso>
+}

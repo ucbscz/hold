@@ -112,17 +112,17 @@
   }
 </div>
 @if (botoncrear()) {
-  <app-carreras-crear
-    [botoncrear]="botoncrear"
-    (Actualizar)="actualizarDatos()"
-  ></app-carreras-crear>
+  <app-carreras-formulario
+    [abierto]="botoncrear"
+    (guardado)="actualizarDatos()"
+  ></app-carreras-formulario>
 }
 @if (botoneditar()) {
-  <app-carreras-editar
-    [botoneditar]="botoneditar"
-    [carrera]="carreraSeleccionada"
-    (actualizar)="actualizarDatos()"
-  ></app-carreras-editar>
+  <app-carreras-formulario
+    [abierto]="botoneditar"
+    [registro]="carreraSeleccionada"
+    (guardado)="actualizarDatos()"
+  ></app-carreras-formulario>
 }
 @if (error()) {
   <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>

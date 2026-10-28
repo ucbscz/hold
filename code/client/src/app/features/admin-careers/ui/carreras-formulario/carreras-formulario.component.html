@@ -1,0 +1,49 @@
+<div class="form-container">
+  <button class="btn-close" (click)="cerrar()">
+    <img src="assets/x.png" alt="Cerrar" />
+  </button>
+  <div class="form-content">
+    <h2>{{ textos.titulo }}</h2>
+    <form #form="ngForm" (ngSubmit)="validarEnvio()">
+      <div class="form-group">
+        <label for="nombre">Nombre</label>
+        <input
+          type="text"
+          id="nombre"
+          name="nombre"
+          [(ngModel)]="modelo.Nombre"
+          (ngModelChange)="error.set(false)"
+          required
+          maxlength="50"
+          minlength="3"
+          placeholder="Ingresa el nombre de la carrera"
+          class="form-input"
+        />
+      </div>
+      @if (error()) {
+        <app-mostrarerror
+          [inline]="true"
+          [dismissible]="false"
+          [error]="error"
+          [mensaje]="mensajeerror"
+        ></app-mostrarerror>
+      }
+      <div class="form-submit">
+        <button
+          type="submit"
+          class="register-button"
+          [disabled]="!form.valid || procesando"
+        >
+          <span>{{ textos.boton }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+@if (aviso()) {
+  <app-aviso
+    [cerrar]="aviso"
+    [mensaje]="mensajeaviso"
+    (aceptar)="confirmar()"
+  ></app-aviso>
+}

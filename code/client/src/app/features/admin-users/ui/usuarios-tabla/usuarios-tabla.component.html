@@ -256,19 +256,19 @@
   }
 </div>
 @if (botoncrear()) {
-  <app-usuarios-crear
-    [botoncrear]="botoncrear"
-    (Actualizar)="actualizarTabla()"
+  <app-usuarios-formulario
+    [abierto]="botoncrear"
+    (guardado)="actualizarTabla()"
     [carreras]="carreras"
-  ></app-usuarios-crear>
+  ></app-usuarios-formulario>
 }
 @if (botoneditar()) {
-  <app-usuarios-editar
-    [botoneditar]="botoneditar"
-    [usuario]="usuarioSeleccionado"
-    (actualizar)="actualizarTabla()"
+  <app-usuarios-formulario
+    [abierto]="botoneditar"
+    [registro]="usuarioSeleccionado"
+    (guardado)="actualizarTabla()"
     [carreras]="carreras"
-  ></app-usuarios-editar>
+  ></app-usuarios-formulario>
 }
 @if (error()) {
   <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>

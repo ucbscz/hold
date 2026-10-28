@@ -164,17 +164,17 @@
   }
 </div>
 @if (botoncrear()) {
-  <app-equipos-crear
-    [botoncrear]="botoncrear"
-    (Actualizar)="actualizarDatos()"
-  ></app-equipos-crear>
+  <app-equipos-formulario
+    [abierto]="botoncrear"
+    (guardado)="actualizarDatos()"
+  ></app-equipos-formulario>
 }
 @if (botoneditar()) {
-  <app-equipos-editar
-    [botoneditar]="botoneditar"
-    [equipo]="equipoSeleccionado"
-    (actualizar)="actualizarDatos()"
-  ></app-equipos-editar>
+  <app-equipos-formulario
+    [abierto]="botoneditar"
+    [registro]="equipoSeleccionado"
+    (guardado)="actualizarDatos()"
+  ></app-equipos-formulario>
 }
 @if (error()) {
   <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>

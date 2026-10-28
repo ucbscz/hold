@@ -32,8 +32,7 @@ import {
 } from '@shared/ui';
 import { PrestamosInlineComponent } from '@widgets/admin-inline';
 import { AuditPanelComponent } from '@widgets/audit-panel';
-import { UsuariosCrearComponent } from '../usuarios-crear/usuarios-crear.component';
-import { UsuariosEditarComponent } from '../usuarios-editar/usuarios-editar.component';
+import { UsuariosFormularioComponent } from '../usuarios-formulario/usuarios-formulario.component';
 @Component({
   selector: 'app-usuarios-tabla',
   standalone: true,
@@ -42,8 +41,7 @@ import { UsuariosEditarComponent } from '../usuarios-editar/usuarios-editar.comp
     CommonModule,
     NombreRolPipe,
     FormsModule,
-    UsuariosCrearComponent,
-    UsuariosEditarComponent,
+    UsuariosFormularioComponent,
     AvisoEliminarComponent,
     MostrarerrorComponent,
     BuscadorComponent,

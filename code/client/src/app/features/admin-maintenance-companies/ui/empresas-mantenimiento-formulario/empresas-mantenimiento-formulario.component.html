@@ -1,0 +1,109 @@
+<div class="form-container">
+  <button class="btn-close" (click)="cerrar()">
+    <img src="assets/x.png" alt="Cerrar" />
+  </button>
+  <div class="form-content">
+    <h2>{{ textos.titulo }}</h2>
+    <form #form="ngForm" (ngSubmit)="validarEnvio()">
+      <div class="form-group">
+        <label for="nombre">Nombre Empresa</label>
+        <input
+          type="text"
+          id="nombre"
+          name="nombre"
+          [(ngModel)]="modelo.NombreEmpresa"
+          required
+          maxlength="50"
+          placeholder="Ingresa el nombre de la empresa"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group">
+        <label for="nombreResponsable">Nombre Responsable</label>
+        <input
+          type="text"
+          id="nombreResponsable"
+          name="nombreResponsable"
+          [(ngModel)]="modelo.NombreResponsable"
+          required
+          maxlength="50"
+          placeholder="Nombre del responsable"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group">
+        <label for="apellidoResponsable">Apellido Responsable</label>
+        <input
+          type="text"
+          id="apellidoResponsable"
+          name="apellidoResponsable"
+          [(ngModel)]="modelo.ApellidoResponsable"
+          required
+          maxlength="50"
+          placeholder="Apellido del responsable"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group">
+        <label for="telefono">Teléfono</label>
+        <input
+          type="tel"
+          id="telefono"
+          name="telefono"
+          [(ngModel)]="modelo.Telefono"
+          required
+          maxlength="15"
+          placeholder="Teléfono de contacto"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group">
+        <label for="direccion">Dirección</label>
+        <input
+          type="text"
+          id="direccion"
+          name="direccion"
+          [(ngModel)]="modelo.Direccion"
+          maxlength="100"
+          placeholder="Dirección de la empresa"
+          class="form-input"
+        />
+      </div>
+      <div class="form-group">
+        <label for="nit">NIT</label>
+        <input
+          type="text"
+          id="nit"
+          name="nit"
+          [(ngModel)]="modelo.Nit"
+          maxlength="20"
+          placeholder="NIT de la empresa"
+          class="form-input"
+        />
+      </div>
+      @if (error()) {
+        <app-mostrarerror
+          [inline]="true"
+          [error]="error"
+          [mensaje]="mensajeerror"
+        ></app-mostrarerror>
+      }
+      <div class="form-submit">
+        <button
+          type="submit"
+          class="register-button"
+          [disabled]="!form.valid || procesando"
+        >
+          <span>{{ textos.boton }}</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+@if (aviso()) {
+  <app-aviso
+    [cerrar]="aviso"
+    [mensaje]="mensajeaviso"
+    (aceptar)="confirmar()"
+  ></app-aviso>
+}

@@ -143,19 +143,19 @@
   }
 </div>
 @if (botoncrear()) {
-  <app-grupos-equipos-crear
-    [botoncrear]="botoncrear"
+  <app-grupos-equipos-formulario
+    [abierto]="botoncrear"
     [categorias]="categorias"
-    (Actualizar)="actualizarDatos()"
-  ></app-grupos-equipos-crear>
+    (guardado)="actualizarDatos()"
+  ></app-grupos-equipos-formulario>
 }
 @if (botoneditar()) {
-  <app-grupos-equipos-editar
-    [botoneditar]="botoneditar"
-    [grupoequipo]="grupoEquipoSeleccionado"
+  <app-grupos-equipos-formulario
+    [abierto]="botoneditar"
+    [registro]="grupoEquipoSeleccionado"
     [categorias]="categorias"
-    (actualizar)="actualizarDatos()"
-  ></app-grupos-equipos-editar>
+    (guardado)="actualizarDatos()"
+  ></app-grupos-equipos-formulario>
 }
 @if (error()) {
   <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>

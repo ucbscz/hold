@@ -19,8 +19,7 @@ import {
   ToastService,
 } from '@shared/ui';
 import { AuditPanelComponent } from '@widgets/audit-panel';
-import { ComponentesCrearComponent } from '../componentes-crear/componentes-crear.component';
-import { ComponentesEditarComponent } from '../componentes-editar/componentes-editar.component';
+import { ComponentesFormularioComponent } from '../componentes-formulario/componentes-formulario.component';
 @Component({
   selector: 'app-componentes-tabla',
   standalone: true,
@@ -28,8 +27,7 @@ import { ComponentesEditarComponent } from '../componentes-editar/componentes-ed
     StickyScrollDirective,
     CommonModule,
     FormsModule,
-    ComponentesCrearComponent,
-    ComponentesEditarComponent,
+    ComponentesFormularioComponent,
     AvisoEliminarComponent,
     MostrarerrorComponent,
     BuscadorComponent,

@@ -128,17 +128,17 @@
   }
 </div>
 @if (botoncrear()) {
-  <app-empresas-mantenimiento-crear
-    [botoncrear]="botoncrear"
-    (Actualizar)="actualizarDatos()"
-  ></app-empresas-mantenimiento-crear>
+  <app-empresas-mantenimiento-formulario
+    [abierto]="botoncrear"
+    (guardado)="actualizarDatos()"
+  ></app-empresas-mantenimiento-formulario>
 }
 @if (botoneditar()) {
-  <app-empresas-mantenimiento-editar
-    [botoneditar]="botoneditar"
-    [empresaMantenimiento]="empresaSeleccionada"
-    (actualizar)="actualizarDatos()"
-  ></app-empresas-mantenimiento-editar>
+  <app-empresas-mantenimiento-formulario
+    [abierto]="botoneditar"
+    [registro]="empresaSeleccionada"
+    (guardado)="actualizarDatos()"
+  ></app-empresas-mantenimiento-formulario>
 }
 @if (error()) {
   <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>

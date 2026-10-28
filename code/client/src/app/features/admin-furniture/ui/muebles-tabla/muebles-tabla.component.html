@@ -146,17 +146,17 @@
   }
 </div>
 @if (botoncrear()) {
-  <app-muebles-crear
-    [botoncrear]="botoncrear"
-    (Actualizar)="actualizarDatos()"
-  ></app-muebles-crear>
+  <app-muebles-formulario
+    [abierto]="botoncrear"
+    (guardado)="actualizarDatos()"
+  ></app-muebles-formulario>
 }
 @if (botoneditar()) {
-  <app-muebles-editar
-    [botoneditar]="botoneditar"
-    [muebleOriginal]="muebleSeleccionado"
-    (actualizar)="actualizarDatos()"
-  ></app-muebles-editar>
+  <app-muebles-formulario
+    [abierto]="botoneditar"
+    [registro]="muebleSeleccionado"
+    (guardado)="actualizarDatos()"
+  ></app-muebles-formulario>
 }
 @if (error()) {
   <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>

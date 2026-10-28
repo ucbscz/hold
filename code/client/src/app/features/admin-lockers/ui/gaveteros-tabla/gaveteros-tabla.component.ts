@@ -14,8 +14,7 @@ import {
 } from '@shared/ui';
 import { EquiposInlineComponent } from '@widgets/admin-inline';
 import { AuditPanelComponent } from '@widgets/audit-panel';
-import { GaveterosCrearComponent } from '../gaveteros-crear/gaveteros-crear.component';
-import { GaveterosEditarComponent } from '../gaveteros-editar/gaveteros-editar.component';
+import { GaveterosFormularioComponent } from '../gaveteros-formulario/gaveteros-formulario.component';
 @Component({
   selector: 'app-gaveteros-tabla',
   standalone: true,
@@ -24,8 +23,7 @@ import { GaveterosEditarComponent } from '../gaveteros-editar/gaveteros-editar.c
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    GaveterosCrearComponent,
-    GaveterosEditarComponent,
+    GaveterosFormularioComponent,
     AvisoEliminarComponent,
     MostrarerrorComponent,
     BuscadorComponent,

@@ -14,8 +14,7 @@ import {
   ToastService,
 } from '@shared/ui';
 import { AuditPanelComponent } from '@widgets/audit-panel';
-import { AccesoriosCrearComponent } from '../accesorios-crear/accesorios-crear.component';
-import { AccesoriosEditarComponent } from '../accesorios-editar/accesorios-editar.component';
+import { AccesoriosFormularioComponent } from '../accesorios-formulario/accesorios-formulario.component';
 @Component({
   selector: 'app-accesorios-tabla',
   standalone: true,
@@ -24,8 +23,7 @@ import { AccesoriosEditarComponent } from '../accesorios-editar/accesorios-edita
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    AccesoriosCrearComponent,
-    AccesoriosEditarComponent,
+    AccesoriosFormularioComponent,
     AvisoEliminarComponent,
     MostrarerrorComponent,
     Aviso,

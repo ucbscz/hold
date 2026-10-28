@@ -16,8 +16,7 @@ import {
 } from '@shared/ui';
 import { HistorialEquipoInlineComponent } from '@widgets/admin-inline';
 import { AuditPanelComponent } from '@widgets/audit-panel';
-import { EquiposCrearComponent } from '../equipos-crear/equipos-crear.component';
-import { EquiposEditarComponent } from '../equipos-editar/equipos-editar.component';
+import { EquiposFormularioComponent } from '../equipos-formulario/equipos-formulario.component';
 
 @Component({
   selector: 'app-equipos-tabla',
@@ -27,8 +26,7 @@ import { EquiposEditarComponent } from '../equipos-editar/equipos-editar.compone
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    EquiposCrearComponent,
-    EquiposEditarComponent,
+    EquiposFormularioComponent,
     AvisoEliminarComponent,
     MostrarerrorComponent,
     BuscadorComponent,

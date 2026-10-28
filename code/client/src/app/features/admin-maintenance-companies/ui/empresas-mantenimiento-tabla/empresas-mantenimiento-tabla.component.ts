@@ -19,8 +19,7 @@ import {
   ToastService,
 } from '@shared/ui';
 import { AuditPanelComponent } from '@widgets/audit-panel';
-import { EmpresasMantenimientoCrearComponent } from '../empresas-mantenimiento-crear/empresas-mantenimiento-crear.component';
-import { EmpresasMantenimientoEditarComponent } from '../empresas-mantenimiento-editar/empresas-mantenimiento-editar.component';
+import { EmpresasMantenimientoFormularioComponent } from '../empresas-mantenimiento-formulario/empresas-mantenimiento-formulario.component';
 @Component({
   selector: 'app-empresas-mantenimiento-tabla',
   standalone: true,
@@ -28,8 +27,7 @@ import { EmpresasMantenimientoEditarComponent } from '../empresas-mantenimiento-
     StickyScrollDirective,
     CommonModule,
     FormsModule,
-    EmpresasMantenimientoCrearComponent,
-    EmpresasMantenimientoEditarComponent,
+    EmpresasMantenimientoFormularioComponent,
     AvisoEliminarComponent,
     MostrarerrorComponent,
     BuscadorComponent,

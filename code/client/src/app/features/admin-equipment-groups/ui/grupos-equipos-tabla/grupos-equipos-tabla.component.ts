@@ -21,8 +21,7 @@ import {
 } from '@shared/ui';
 import { EquiposInlineComponent } from '@widgets/admin-inline';
 import { AuditPanelComponent } from '@widgets/audit-panel';
-import { GruposEquiposCrearComponent } from '../grupos-equipos-crear/grupos-equipos-crear.component';
-import { GruposEquiposEditarComponent } from '../grupos-equipos-editar/grupos-equipos-editar.component';
+import { GruposEquiposFormularioComponent } from '../grupos-equipos-formulario/grupos-equipos-formulario.component';
 @Component({
   selector: 'app-grupos-equipos-tabla',
   standalone: true,
@@ -31,8 +30,7 @@ import { GruposEquiposEditarComponent } from '../grupos-equipos-editar/grupos-eq
     CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    GruposEquiposCrearComponent,
-    GruposEquiposEditarComponent,
+    GruposEquiposFormularioComponent,
     AvisoEliminarComponent,
     MostrarerrorComponent,
     BuscadorComponent,

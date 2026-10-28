@@ -13,8 +13,7 @@ import {
   ToastService,
 } from '@shared/ui';
 import { AuditPanelComponent } from '@widgets/audit-panel';
-import { CategoriasCrearComponent } from '../categorias-crear/categorias-crear.component';
-import { CategoriasEditarComponent } from '../categorias-editar/categorias-editar.component';
+import { CategoriasFormularioComponent } from '../categorias-formulario/categorias-formulario.component';
 @Component({
   selector: 'app-categorias-tabla',
   standalone: true,
@@ -22,8 +21,7 @@ import { CategoriasEditarComponent } from '../categorias-editar/categorias-edita
     StickyScrollDirective,
     CommonModule,
     FormsModule,
-    CategoriasCrearComponent,
-    CategoriasEditarComponent,
+    CategoriasFormularioComponent,
     AvisoEliminarComponent,
     MostrarerrorComponent,
     BuscadorComponent,

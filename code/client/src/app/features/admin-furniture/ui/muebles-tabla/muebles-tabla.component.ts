@@ -20,8 +20,7 @@ import {
 } from '@shared/ui';
 import { GaveterosInlineComponent } from '@widgets/admin-inline';
 import { AuditPanelComponent } from '@widgets/audit-panel';
-import { MueblesCrearComponent } from '../muebles-crear/muebles-crear.component';
-import { MueblesEditarComponent } from '../muebles-editar/muebles-editar.component';
+import { MueblesFormularioComponent } from '../muebles-formulario/muebles-formulario.component';
 @Component({
   selector: 'app-muebles-tabla',
   standalone: true,
@@ -31,8 +30,7 @@ import { MueblesEditarComponent } from '../muebles-editar/muebles-editar.compone
     TablePaginationComponent,
     FormsModule,
     ReactiveFormsModule,
-    MueblesCrearComponent,
-    MueblesEditarComponent,
+    MueblesFormularioComponent,
     AvisoEliminarComponent,
     MostrarerrorComponent,
     BuscadorComponent,

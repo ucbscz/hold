@@ -13,8 +13,7 @@ import {
   ToastService,
 } from '@shared/ui';
 import { AuditPanelComponent } from '@widgets/audit-panel';
-import { CarrerasCrearComponent } from '../carreras-crear/carreras-crear.component';
-import { CarrerasEditarComponent } from '../carreras-editar/carreras-editar.component';
+import { CarrerasFormularioComponent } from '../carreras-formulario/carreras-formulario.component';
 @Component({
   selector: 'app-carreras-tabla',
   standalone: true,
@@ -22,8 +21,7 @@ import { CarrerasEditarComponent } from '../carreras-editar/carreras-editar.comp
     StickyScrollDirective,
     CommonModule,
     FormsModule,
-    CarrerasCrearComponent,
-    CarrerasEditarComponent,
+    CarrerasFormularioComponent,
     AvisoEliminarComponent,
     MostrarerrorComponent,
     BuscadorComponent,
