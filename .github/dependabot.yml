@@ -1,0 +1,18 @@
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /code/server
+    schedule:
+      interval: weekly
+  - package-ecosystem: nuget
+    directory: /code/tests
+    schedule:
+      interval: weekly
+  - package-ecosystem: npm
+    directory: /code/client
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
