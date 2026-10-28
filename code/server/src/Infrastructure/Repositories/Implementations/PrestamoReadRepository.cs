@@ -183,15 +183,6 @@ public sealed class PrestamoReadRepository
         )
     ).ToListAsync(cancellationToken);
 
-    public async Task<string?> GetGrupoEquipoNombre(
-        int grupoEquipoId,
-        CancellationToken cancellationToken = default
-    ) => await _dbContext
-        .GruposEquipos.AsNoTracking()
-        .Where(group => group.Id == grupoEquipoId && !group.EstadoEliminado)
-        .Select(group => group.Nombre)
-        .FirstOrDefaultAsync(cancellationToken);
-
     public async Task<bool> HasAtrasadoPrestamo(
         string carnet,
         CancellationToken cancellationToken = default

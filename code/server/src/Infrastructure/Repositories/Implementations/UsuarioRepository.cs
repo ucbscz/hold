@@ -21,9 +21,6 @@ public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
 
     public override Task<Result<List<UsuarioDto>>> GetAll() => _queries.GetAll();
 
-    public Task<Result<List<UsuarioDto>>> GetAll(CancellationToken cancellationToken) =>
-        _queries.GetAll(cancellationToken);
-
     public Task<Result<List<UsuarioDto>>> GetPage(
         int page,
         int pageSize,

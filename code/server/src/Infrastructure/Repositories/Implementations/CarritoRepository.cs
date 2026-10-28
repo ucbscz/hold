@@ -72,14 +72,8 @@ public class CarritoRepository
                 )
                 && prestamo.FechaPrestamoEsperada < fechaFin
                 && prestamo.FechaDevolucionEsperada > fechaInicio
-            select new
-            {
-                equipo.IdGrupoEquipo,
-                equipo.Id,
-                prestamo.FechaPrestamoEsperada,
-                prestamo.FechaDevolucionEsperada,
-            }
-        ).ToListAsync();
+            select new { equipo.IdGrupoEquipo, equipo.Id }
+        ).ToListAsync(cancellationToken);
 
         return rows.ConvertAll(r =>
             (r.IdGrupoEquipo, r.Id)

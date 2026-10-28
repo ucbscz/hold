@@ -4,6 +4,7 @@ using Ardalis.Result;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Application.Features.AuditLog;
+using IMT_Reservas.Server.Application.Features.AvisoDisponibilidad;
 using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Application.Features.Notificacion;
@@ -19,7 +20,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
 {
     private readonly NotificacionService _notifications;
     private readonly UsuarioRepository _usuarioRepository;
-    private readonly AvisoDisponibilidadRepository _availabilityWatches;
+    private readonly AvisoDisponibilidadService _availabilityWatches;
     private readonly ConfiguracionRepository _configuracionRepository;
     private readonly PrestamoReadRepository _queries;
     private readonly PrestamoEstadoRepository _states;
@@ -34,7 +35,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         AuditLogService audit,
         NotificacionService notifications,
         UsuarioRepository usuarioRepository,
-        AvisoDisponibilidadRepository availabilityWatches,
+        AvisoDisponibilidadService availabilityWatches,
         ConfiguracionRepository configuracionRepository,
         PrestamoReadRepository queries,
         PrestamoEstadoRepository states,
@@ -160,7 +161,14 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         CancellationToken cancellationToken = default
     )
     {
+        dto.Id = null;
         dto.CarnetUsuario = carnet;
+        dto.FechaSolicitud = null;
+        dto.FechaPrestamo = null;
+        dto.FechaDevolucion = null;
+        dto.Observacion = null;
+        dto.IdContrato = null;
+        dto.Guardado = false;
         dto.AutorizadoPor = null;
         dto.EntregadoPor = null;
         dto.MotivoRechazo = null;
@@ -323,7 +331,10 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             await UnblockIfNoOverdueLoans(loan.Carnet!, cancellationToken);
 
         if (ReleasesAvailability(parsedState.Value))
-            await NotifyAvailabilityWatches();
+            await _availabilityWatches.NotifyAvailable(
+                await _configuracionRepository.GetConfiguracion(cancellationToken),
+                cancellationToken
+            );
 
         return await _queries.Get(id, cancellationToken);
     }
@@ -398,58 +409,11 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             TipoNotificacion.UsuarioDesbloqueado,
             "Cuenta desbloqueada para reservas",
             "Tu cuenta fue desbloqueada porque ya no tienes préstamos atrasados.",
-            JsonSerializer.Serialize(new
-            {
-                emisor = "Sistema",
-                motivo = "Todos los préstamos atrasados fueron regularizados.",
-                fecha = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
-            })
+            NotificacionService.BuildEmitterDetail(
+                NotificacionService.SystemEmitter,
+                "Todos los préstamos atrasados fueron regularizados."
+            )
         );
-    }
-
-    private async Task NotifyAvailabilityWatches()
-    {
-        var pending = await _availabilityWatches.GetPending();
-        var config = await _configuracionRepository.GetConfiguracion();
-
-        if (pending.Count == 0)
-            return;
-
-        var notified = new List<int>();
-        var notifications = new List<NotificacionDto>();
-
-        foreach (var watch in pending)
-        {
-            var date = watch.Fecha;
-
-            if (!HorarioReserva.EsValido(date, date.AddMinutes(config.TiempoMinimoReservaMinutos), config))
-                continue;
-
-            if (!await _availability.HasAvailableEquipo(
-                watch.IdGrupoEquipo,
-                date,
-                date.AddMinutes(config.TiempoMinimoReservaMinutos)
-            ))
-                continue;
-
-            notifications.Add(
-                new NotificacionDto
-                {
-                    CarnetUsuario = watch.CarnetUsuario,
-                    Tipo = nameof(TipoNotificacion.DisponibilidadLiberada),
-                    Titulo = "Disponibilidad liberada",
-                    Contenido =
-                        $"Un equipo que esperabas está disponible el {watch.Fecha:dd/MM/yyyy HH:mm}.",
-                }
-            );
-            notified.Add(watch.Id);
-        }
-
-        if (notified.Count == 0)
-            return;
-
-        await _notifications.CreateMany(notifications);
-        await _availabilityWatches.MarkAsNotified(notified);
     }
 
     private async Task NotifyStatusChange(

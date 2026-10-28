@@ -6,6 +6,9 @@ namespace IMT_Reservas.Server.Application.Features.Notificacion;
 
 public class NotificacionService
 {
+    public const string SystemEmitter = "Sistema";
+    public const string DateFormat = "dd/MM/yyyy HH:mm";
+
     private readonly NotificacionRepository _repository;
 
     public NotificacionService(NotificacionRepository repository) => _repository = repository;
@@ -23,7 +26,7 @@ public class NotificacionService
             type,
             title,
             content,
-            detail ?? BuildEmitterDetail("Sistema"),
+            detail ?? BuildEmitterDetail(SystemEmitter),
             saveChanges
         );
 
@@ -33,7 +36,7 @@ public class NotificacionService
             return;
 
         foreach (var notification in notifications)
-            notification.Detalle ??= BuildEmitterDetail("Sistema");
+            notification.Detalle ??= BuildEmitterDetail(SystemEmitter);
 
         await _repository.AddRange(notifications);
     }
@@ -42,7 +45,7 @@ public class NotificacionService
         TipoNotificacion type,
         string title,
         string? content = null,
-        string emitter = "Sistema"
+        string emitter = SystemEmitter
     )
     {
         var adminCarnets = await _repository.GetAdminCarnets();
@@ -85,10 +88,10 @@ public class NotificacionService
         JsonSerializer.Serialize(
             new
             {
-                emisor = string.IsNullOrWhiteSpace(emitter) ? "Sistema" : emitter,
+                emisor = string.IsNullOrWhiteSpace(emitter) ? SystemEmitter : emitter,
                 motivo = reason,
                 prestamoId,
-                fecha = DateTime.UtcNow.ToString("dd/MM/yyyy HH:mm"),
+                fecha = DateTime.UtcNow.ToString(DateFormat),
             }
         );
 }

@@ -2,8 +2,6 @@ namespace IMT_Reservas.Server.Application.Features.Prestamo;
 
 public static class HorarioReserva
 {
-    public const int HoraApertura = 8;
-    public const int HoraCierre = 18;
     public const string Mensaje =
         "Selecciona una fecha y hora dentro del horario de atención autorizado (hora de Bolivia)";
 
@@ -40,21 +38,6 @@ public static class HorarioReserva
     }
 
     public static bool MismoDia(DateTime inicio, DateTime fin) => EnBolivia(inicio).Date == EnBolivia(fin).Date;
-
-    public static bool EsValido(DateTime inicio, DateTime fin, int aperturaMinutos, int cierreMinutos)
-    {
-        var inicioLocal = EnBolivia(inicio);
-        var finLocal = EnBolivia(fin);
-        var apertura = TimeSpan.FromMinutes(aperturaMinutos);
-        var cierre = TimeSpan.FromMinutes(cierreMinutos);
-
-        return inicioLocal.DayOfWeek != DayOfWeek.Sunday
-            && finLocal.DayOfWeek != DayOfWeek.Sunday
-            && inicioLocal.TimeOfDay >= apertura
-            && inicioLocal.TimeOfDay < cierre
-            && finLocal.TimeOfDay >= apertura
-            && finLocal.TimeOfDay <= cierre;
-    }
 
     private static DateTime EnBolivia(DateTime value)
     {

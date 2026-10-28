@@ -1,5 +1,6 @@
 using FluentAssertions;
 using IMT_Reservas.Server.Application.Features.AuditLog;
+using IMT_Reservas.Server.Application.Features.AvisoDisponibilidad;
 using IMT_Reservas.Server.Application.Features.Notificacion;
 using IMT_Reservas.Server.Application.Features.Usuario;
 using Microsoft.AspNetCore.Http;
@@ -53,7 +54,12 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var notifications = new NotificacionService(new NotificacionRepository(db));
         var userQueries = new UsuarioReadRepository(db);
         var userRepository = new UsuarioRepository(db, new UsuarioMapper(), userQueries);
-        var availabilityRepository = new AvisoDisponibilidadRepository(db);
+        var availabilityRepository = new AvisoDisponibilidadService(
+            new AvisoDisponibilidadRepository(db),
+            configRepo,
+            availability,
+            notifications
+        );
         var contractHtml = new ContractHtmlProcessor();
         var configuration = new ConfiguracionService(
             configRepo,
@@ -812,6 +818,29 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
 
         result.IsSuccess.Should().BeTrue();
         Db.Prestamos.Single().Carnet.Should().Be(Carnet);
+    }
+
+    [Test]
+    public async Task CreateForUser_IgnoresServerControlledFields()
+    {
+        var start = DateTime.UtcNow.AddDays(1);
+        var dto = BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(2));
+        dto.Id = 999;
+        dto.FechaSolicitud = DateTime.UtcNow.AddYears(-1);
+        dto.FechaDevolucion = DateTime.UtcNow;
+        dto.Observacion = "aprobado por admin";
+        dto.Guardado = true;
+
+        var result = await Sut.CreateForUser(dto, Carnet);
+
+        result.IsSuccess.Should().BeTrue();
+        var loan = Db.Prestamos.Single();
+        loan.Id.Should().NotBe(999);
+        loan.FechaSolicitud.Should().BeCloseTo(DateTime.UtcNow, TimeSpan.FromMinutes(1));
+        loan.FechaDevolucion.Should().BeNull();
+        loan.Observacion.Should().BeNull();
+        loan.Guardado.Should().BeFalse();
+        loan.EstadoPrestamo.Should().Be(EstadoPrestamo.Pendiente);
     }
 
     [Test]
