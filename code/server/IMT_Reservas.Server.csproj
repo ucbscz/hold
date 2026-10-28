@@ -31,7 +31,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="System.Text.Json" Version="8.0.5" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.24" />
-    <PackageReference Include="Hangfire.PostgreSql" Version="1.20.13" />
+    <PackageReference Include="Hangfire.PostgreSql" Version="1.21.1" />
     <PackageReference Include="Elastic.Clients.Elasticsearch" Version="8.15.10" />
   </ItemGroup>
 
