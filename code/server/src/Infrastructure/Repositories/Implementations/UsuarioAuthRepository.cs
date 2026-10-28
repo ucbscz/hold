@@ -234,6 +234,8 @@ public sealed class UsuarioAuthRepository
                         user.RefreshTokenExpiry,
                         user.EmailVerificado,
                         user.GoogleId,
+                        user.Bloqueado,
+                        user.MotivoBloqueo,
                         career.Nombre
                     )
             )
@@ -263,6 +265,8 @@ public sealed class UsuarioAuthRepository
                 RefreshTokenExpiry = data.RefreshTokenExpiry,
                 EmailVerificado = data.EmailVerificado,
                 GoogleId = data.GoogleId,
+                Bloqueado = data.Bloqueado,
+                MotivoBloqueo = data.MotivoBloqueo,
             },
             data.CarreraNombre
         );
@@ -285,6 +289,8 @@ public sealed class UsuarioAuthRepository
         DateTime? RefreshTokenExpiry,
         bool EmailVerificado,
         string? GoogleId,
+        bool Bloqueado,
+        string? MotivoBloqueo,
         string CarreraNombre
     );
 }
