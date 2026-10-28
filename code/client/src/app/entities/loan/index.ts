@@ -5,3 +5,4 @@ export * from './ui/recursos-prestamo.component';
 export * from './ui/vista-prestamos/vista-prestamos.component';
 export * from './ui/contrato/vercontrato.component';
 export * from './model/prioridad-prestamo';
+export * from './model/estado-prestamo';

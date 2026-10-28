@@ -1,43 +1,34 @@
-import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { Component, Input, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { environment } from '@environments/environment';
-import { ApiResponse, extractApiValue } from '@shared/api';
+import { Component, Input } from '@angular/core';
+import { estadoEquipoCssClass, estadoEquipoLabel } from '@entities/equipment';
+import { Observable } from 'rxjs';
+import { AdminInlineApiService } from '../api/admin-inline-api.service';
 import { EquipoInlineItem } from '../model';
+import { InlineListComponent } from './inline-list';
+import { InlineSearchComponent } from './inline-search.component';
 import { INLINE_SEARCH_STYLES } from './inline-search.styles';
 
 @Component({
   selector: 'app-equipos-inline',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [InlineSearchComponent],
   template: `
     <div class="inline-panel">
       @if (cargando) {
         <p class="empty-inline">Cargando...</p>
       } @else if (items.length === 0) {
-        <p class="empty-inline">Sin equipos en este grupo</p>
+        <p class="empty-inline">
+          Sin equipos en este {{ porGavetero ? 'gavetero' : 'grupo' }}
+        </p>
       } @else {
         <div class="audit-filters">
-          <div class="audit-search-wrap">
-            <i class="fas fa-search search-icon"></i>
-            <input
-              type="text"
-              [(ngModel)]="filtroTexto"
-              placeholder="Buscar por código, serial o ubicación..."
-              class="admin-search"
-            />
-            @if (filtroTexto) {
-              <button
-                class="clear-search"
-                (click)="filtroTexto = ''"
-                title="Limpiar búsqueda"
-                type="button"
-              >
-                <i class="fas fa-times"></i>
-              </button>
-            }
-          </div>
+          <app-inline-search
+            [(texto)]="filtroTexto"
+            [placeholder]="
+              porGavetero
+                ? 'Buscar por código o serial...'
+                : 'Buscar por código, serial o ubicación...'
+            "
+          ></app-inline-search>
         </div>
         @if (itemsFiltrados.length === 0) {
           <p class="empty-inline">Ningún equipo coincide con la búsqueda</p>
@@ -48,7 +39,9 @@ import { INLINE_SEARCH_STYLES } from './inline-search.styles';
                 <th>Código IMT</th>
                 <th>Estado</th>
                 <th>Serial</th>
-                <th>Ubicación</th>
+                @if (!porGavetero) {
+                  <th>Ubicación</th>
+                }
               </tr>
             </thead>
             <tbody>
@@ -59,12 +52,17 @@ import { INLINE_SEARCH_STYLES } from './inline-search.styles';
                   </td>
                   <td>
                     <span
-                      [class]="'badge badge-' + estadoBadge(e.EstadoEquipo)"
-                      >{{ e.EstadoEquipo }}</span
+                      [class]="
+                        'badge badge-estado-' +
+                        estadoEquipoCssClass(e.EstadoEquipo)
+                      "
+                      >{{ estadoEquipoLabel(e.EstadoEquipo) }}</span
                     >
                   </td>
                   <td>{{ e.NumeroSerial || '—' }}</td>
-                  <td>{{ e.Ubicacion || '—' }}</td>
+                  @if (!porGavetero) {
+                    <td>{{ e.Ubicacion || '—' }}</td>
+                  }
                 </tr>
               }
             </tbody>
@@ -75,49 +73,27 @@ import { INLINE_SEARCH_STYLES } from './inline-search.styles';
   `,
   styles: [INLINE_SEARCH_STYLES],
 })
-export class EquiposInlineComponent implements OnInit {
-  @Input() grupoEquipoId!: number;
-  items: EquipoInlineItem[] = [];
-  cargando = true;
-  filtroTexto = '';
+export class EquiposInlineComponent extends InlineListComponent<EquipoInlineItem> {
+  @Input() grupoEquipoId?: number;
+  @Input() gaveteroId?: number;
+  protected readonly estadoEquipoLabel = estadoEquipoLabel;
+  protected readonly estadoEquipoCssClass = estadoEquipoCssClass;
 
-  constructor(private readonly http: HttpClient) {}
-
-  get itemsFiltrados(): EquipoInlineItem[] {
-    const texto = this.filtroTexto.trim().toLowerCase();
-    if (!texto) return this.items;
-    return this.items.filter(
-      (e) =>
-        e.CodigoImt?.toString().toLowerCase().includes(texto) ||
-        (e.NumeroSerial ?? '').toLowerCase().includes(texto) ||
-        (e.Ubicacion ?? '').toLowerCase().includes(texto),
-    );
+  constructor(private readonly api: AdminInlineApiService) {
+    super();
   }
 
-  ngOnInit() {
-    this.http
-      .get<ApiResponse<EquipoInlineItem[]>>(
-        `${environment.apiUrl}/api/equipos?grupoId=${this.grupoEquipoId}`,
-      )
-      .subscribe({
-        next: (res) => {
-          this.items = extractApiValue(res, []);
-          this.cargando = false;
-        },
-        error: () => {
-          this.cargando = false;
-        },
-      });
+  get porGavetero(): boolean {
+    return this.gaveteroId !== undefined;
   }
 
-  estadoBadge(estado: string | null): string {
-    if (!estado) return 'cancelado';
-    if (
-      estado.toLowerCase().includes('operativo') &&
-      !estado.toLowerCase().includes('parcial')
-    )
-      return 'activo';
-    if (estado.toLowerCase().includes('parcial')) return 'pendiente';
-    return 'rechazado';
+  protected cargar(): Observable<EquipoInlineItem[]> {
+    return this.porGavetero
+      ? this.api.obtenerEquiposPorGavetero(this.gaveteroId!)
+      : this.api.obtenerEquiposPorGrupo(this.grupoEquipoId!);
+  }
+
+  protected camposBusqueda(equipo: EquipoInlineItem): unknown[] {
+    return [equipo.CodigoImt, equipo.NumeroSerial, equipo.Ubicacion];
   }
 }

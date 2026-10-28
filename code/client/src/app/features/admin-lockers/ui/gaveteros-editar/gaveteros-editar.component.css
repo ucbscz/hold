@@ -182,7 +182,6 @@ textarea.form-input {
 }
 
 select.form-input,
-select.date-input,
 select {
   -webkit-appearance: none !important;
   appearance: none !important;

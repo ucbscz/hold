@@ -12,7 +12,7 @@ import {
   MostrarerrorComponent,
   ToastService,
 } from '@shared/ui';
-import { EquiposGaveteroInlineComponent } from '@widgets/admin-inline';
+import { EquiposInlineComponent } from '@widgets/admin-inline';
 import { AuditPanelComponent } from '@widgets/audit-panel';
 import { GaveterosCrearComponent } from '../gaveteros-crear/gaveteros-crear.component';
 import { GaveterosEditarComponent } from '../gaveteros-editar/gaveteros-editar.component';
@@ -29,7 +29,7 @@ import { GaveterosEditarComponent } from '../gaveteros-editar/gaveteros-editar.c
     AvisoEliminarComponent,
     MostrarerrorComponent,
     BuscadorComponent,
-    EquiposGaveteroInlineComponent,
+    EquiposInlineComponent,
     AuditPanelComponent,
   ],
   templateUrl: './gaveteros-tabla.component.html',

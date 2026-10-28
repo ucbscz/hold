@@ -1,16 +1,16 @@
-import { CommonModule, DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { Component, Input, OnInit } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { environment } from '@environments/environment';
-import { ApiResponse, extractApiValue } from '@shared/api';
+import { DatePipe } from '@angular/common';
+import { Component, Input } from '@angular/core';
+import { Observable } from 'rxjs';
+import { AdminInlineApiService } from '../api/admin-inline-api.service';
 import { PrestamoInlineItem } from '../model';
+import { InlineListComponent } from './inline-list';
+import { InlineSearchComponent } from './inline-search.component';
 import { INLINE_SEARCH_STYLES } from './inline-search.styles';
 
 @Component({
   selector: 'app-prestamos-inline',
   standalone: true,
-  imports: [CommonModule, DatePipe, FormsModule],
+  imports: [DatePipe, InlineSearchComponent],
   template: `
     <div class="inline-panel">
       @if (cargando) {
@@ -19,25 +19,10 @@ import { INLINE_SEARCH_STYLES } from './inline-search.styles';
         <p class="empty-inline">Sin préstamos registrados</p>
       } @else {
         <div class="audit-filters">
-          <div class="audit-search-wrap">
-            <i class="fas fa-search search-icon"></i>
-            <input
-              type="text"
-              [(ngModel)]="filtroTexto"
-              placeholder="Buscar por # préstamo o equipo..."
-              class="admin-search"
-            />
-            @if (filtroTexto) {
-              <button
-                class="clear-search"
-                (click)="filtroTexto = ''"
-                title="Limpiar búsqueda"
-                type="button"
-              >
-                <i class="fas fa-times"></i>
-              </button>
-            }
-          </div>
+          <app-inline-search
+            [(texto)]="filtroTexto"
+            placeholder="Buscar por # préstamo o equipo..."
+          ></app-inline-search>
         </div>
         @if (itemsFiltrados.length === 0) {
           <p class="empty-inline">Ningún préstamo coincide con la búsqueda</p>
@@ -122,43 +107,27 @@ import { INLINE_SEARCH_STYLES } from './inline-search.styles';
   `,
   styles: [INLINE_SEARCH_STYLES],
 })
-export class PrestamosInlineComponent implements OnInit {
+export class PrestamosInlineComponent extends InlineListComponent<PrestamoInlineItem> {
   @Input() carnet!: string;
-  items: PrestamoInlineItem[] = [];
-  cargando = true;
-  filtroTexto = '';
 
-  constructor(private readonly http: HttpClient) {}
-
-  get itemsFiltrados(): PrestamoInlineItem[] {
-    const texto = this.filtroTexto.trim().toLowerCase();
-    if (!texto) return this.items;
-    return this.items.filter(
-      (p) =>
-        p.Id?.toString().includes(texto) ||
-        (p.NombreGrupoEquipo ?? '').toLowerCase().includes(texto) ||
-        (p.CodigoImt ?? '').toLowerCase().includes(texto) ||
-        (p.CodigoUcb ?? '').toLowerCase().includes(texto) ||
-        (p.NumeroSerial ?? '').toLowerCase().includes(texto) ||
-        (p.UbicacionEquipo ?? '').toLowerCase().includes(texto) ||
-        (p.NombreMueble ?? '').toLowerCase().includes(texto) ||
-        (p.NombreGavetero ?? '').toLowerCase().includes(texto),
-    );
+  constructor(private readonly api: AdminInlineApiService) {
+    super();
   }
 
-  ngOnInit() {
-    this.http
-      .get<ApiResponse<PrestamoInlineItem[]>>(
-        `${environment.apiUrl}/api/prestamos?carnet=${encodeURIComponent(this.carnet)}`,
-      )
-      .subscribe({
-        next: (res) => {
-          this.items = extractApiValue(res, []);
-          this.cargando = false;
-        },
-        error: () => {
-          this.cargando = false;
-        },
-      });
+  protected cargar(): Observable<PrestamoInlineItem[]> {
+    return this.api.obtenerPrestamosPorCarnet(this.carnet);
+  }
+
+  protected camposBusqueda(prestamo: PrestamoInlineItem): unknown[] {
+    return [
+      prestamo.Id,
+      prestamo.NombreGrupoEquipo,
+      prestamo.CodigoImt,
+      prestamo.CodigoUcb,
+      prestamo.NumeroSerial,
+      prestamo.UbicacionEquipo,
+      prestamo.NombreMueble,
+      prestamo.NombreGavetero,
+    ];
   }
 }

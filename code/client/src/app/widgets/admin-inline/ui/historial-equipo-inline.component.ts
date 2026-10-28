@@ -1,35 +1,27 @@
-import { CommonModule, DatePipe } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HistorialEquipoDto } from '@entities/admin';
-import { environment } from '@environments/environment';
-import { ApiResponse, extractApiValue } from '@shared/api';
+import { estadoEquipoCssClass, estadoEquipoLabel } from '@entities/equipment';
+import { ESTADO_PRESTAMO_FILTRO_OPCIONES } from '@entities/loan';
 import { FlatpickrDirective } from '@shared/lib/directives';
-import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
+import { CustomSelectComponent } from '@shared/ui';
 import flatpickr from 'flatpickr';
-import { EquipoHistorialInlineItem } from '../model';
+import { Observable } from 'rxjs';
+import { AdminInlineApiService } from '../api/admin-inline-api.service';
+import { InlineListComponent } from './inline-list';
+import { InlineSearchComponent } from './inline-search.component';
 import { INLINE_SEARCH_STYLES } from './inline-search.styles';
-
-const ESTADOS_PRESTAMO = [
-  'pendiente',
-  'aprobado',
-  'activo',
-  'atrasado',
-  'finalizado',
-  'rechazado',
-  'cancelado',
-];
 
 @Component({
   selector: 'app-historial-equipo-inline',
   standalone: true,
   imports: [
-    CommonModule,
     DatePipe,
     FormsModule,
     FlatpickrDirective,
     CustomSelectComponent,
+    InlineSearchComponent,
   ],
   template: `
     <div class="inline-panel">
@@ -37,25 +29,10 @@ const ESTADOS_PRESTAMO = [
         <p class="empty-inline">Cargando historial...</p>
       } @else {
         <div class="audit-filters">
-          <div class="audit-search-wrap">
-            <i class="fas fa-search search-icon"></i>
-            <input
-              type="text"
-              [(ngModel)]="filtroTexto"
-              placeholder="Buscar por # préstamo o usuario..."
-              class="admin-search"
-            />
-            @if (filtroTexto) {
-              <button
-                class="clear-search"
-                (click)="filtroTexto = ''"
-                title="Limpiar búsqueda"
-                type="button"
-              >
-                <i class="fas fa-times"></i>
-              </button>
-            }
-          </div>
+          <app-inline-search
+            [(texto)]="filtroTexto"
+            placeholder="Buscar por # préstamo o usuario..."
+          ></app-inline-search>
           <input
             type="text"
             appFlatpickr
@@ -140,7 +117,7 @@ const ESTADOS_PRESTAMO = [
                         'badge badge-estado-' +
                         estadoEquipoCssClass(h.EstadoEquipo)
                       "
-                      >{{ estadoEquipoBadgeLabel(h.EstadoEquipo) }}</span
+                      >{{ estadoEquipoLabel(h.EstadoEquipo) }}</span
                     >
                   </td>
                   @if (h.Observacion) {
@@ -165,22 +142,6 @@ const ESTADOS_PRESTAMO = [
   styles: [
     INLINE_SEARCH_STYLES,
     `
-      .badge-estado-operativo {
-        background: var(--success-bg);
-        color: var(--success);
-      }
-      .badge-estado-parcialmente-operativo {
-        background: #fff7ed;
-        color: #b45309;
-      }
-      .badge-estado-inoperativo {
-        background: var(--error-bg);
-        color: var(--error);
-      }
-      .badge-estado-none {
-        background: var(--sidebar);
-        color: var(--ink-muted);
-      }
       .obs-cell {
         max-width: 220px;
         overflow: hidden;
@@ -250,95 +211,40 @@ const ESTADOS_PRESTAMO = [
     `,
   ],
 })
-export class HistorialEquipoInlineComponent implements OnInit {
+export class HistorialEquipoInlineComponent extends InlineListComponent<HistorialEquipoDto> {
   @Input() equipoId!: number;
   @Output() observacionClick = new EventEmitter<string>();
-  items: HistorialEquipoDto[] = [];
-  cargando = true;
-
-  filtroTexto = '';
   filtroEstado = '';
   fechaDesde = '';
   fechaHasta = '';
-  estadosPrestamo = ESTADOS_PRESTAMO;
-  readonly estadoOpciones: OpcionSelect[] = [
-    { value: '', label: 'Todos los estados' },
-    ...ESTADOS_PRESTAMO.map((estado) => ({
-      value: estado,
-      label: estado.charAt(0).toUpperCase() + estado.slice(1),
-    })),
-  ];
   fpDesde?: flatpickr.Instance;
   fpHasta?: flatpickr.Instance;
+  protected readonly estadoOpciones = ESTADO_PRESTAMO_FILTRO_OPCIONES;
+  protected readonly estadoEquipoLabel = estadoEquipoLabel;
+  protected readonly estadoEquipoCssClass = estadoEquipoCssClass;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(private readonly api: AdminInlineApiService) {
+    super();
+  }
 
-  get itemsFiltrados(): HistorialEquipoDto[] {
-    const texto = this.filtroTexto.trim().toLowerCase();
+  override get itemsFiltrados(): HistorialEquipoDto[] {
     const desde = this.fechaDesde ? new Date(this.fechaDesde) : null;
     const hasta = this.fechaHasta
       ? new Date(this.fechaHasta + 'T23:59:59')
       : null;
-    return this.items.filter((h) => {
-      if (texto) {
-        const matchId = h.IdPrestamo?.toString().includes(texto) ?? false;
-        const matchNombre =
-          h.NombreUsuario?.toLowerCase().includes(texto) ?? false;
-        if (!matchId && !matchNombre) return false;
-      }
-      if (this.filtroEstado && h.EstadoPrestamo !== this.filtroEstado)
-        return false;
-      if (desde || hasta) {
-        const fecha = h.FechaPrestamo ? new Date(h.FechaPrestamo) : null;
-        if (!fecha) return false;
-        if (desde && fecha < desde) return false;
-        if (hasta && fecha > hasta) return false;
-      }
-      return true;
-    });
-  }
-
-  estadoEquipoLabel(estado?: string): string {
-    switch (estado) {
-      case 'operativo':
-        return 'Operativo';
-      case 'parcialmente_operativo':
-        return 'Parcialmente operativo';
-      case 'inoperativo':
-        return 'Inoperativo';
-      case 'pendiente':
-        return 'Pendiente';
-      case 'aprobado':
-        return 'Aprobado';
-      case 'activo':
-        return 'Activo';
-      case 'atrasado':
-        return 'Atrasado';
-      case 'finalizado':
-        return 'Finalizado';
-      case 'rechazado':
-        return 'Rechazado';
-      case 'cancelado':
-        return 'Cancelado';
-      default:
-        return '—';
-    }
-  }
-
-  estadoEquipoBadgeLabel(estado?: string): string {
-    return estado ? this.estadoEquipoLabel(estado) : '—';
-  }
-
-  estadoEquipoCssClass(estado?: string): string {
-    return estado ? estado.replaceAll('_', '-') : 'none';
+    return super.itemsFiltrados.filter(
+      (h) =>
+        (!this.filtroEstado || h.EstadoPrestamo === this.filtroEstado) &&
+        this.dentroDeRango(h.FechaPrestamo, desde, hasta),
+    );
   }
 
   onFechaDesde(dates: Date[]) {
-    this.fechaDesde = dates[0] ? dates[0].toISOString().split('T')[0] : '';
+    this.fechaDesde = this.fechaIso(dates);
   }
 
   onFechaHasta(dates: Date[]) {
-    this.fechaHasta = dates[0] ? dates[0].toISOString().split('T')[0] : '';
+    this.fechaHasta = this.fechaIso(dates);
   }
 
   limpiarFiltros() {
@@ -350,36 +256,25 @@ export class HistorialEquipoInlineComponent implements OnInit {
     this.fpHasta?.clear();
   }
 
-  ngOnInit() {
-    this.http
-      .get<ApiResponse<EquipoHistorialInlineItem[]>>(
-        `${environment.apiUrl}/api/equipos/${this.equipoId}/prestamos`,
-      )
-      .subscribe({
-        next: (res) => {
-          const data = extractApiValue(res, []);
-          this.items = data.map((item) => ({
-            IdPrestamo: item.IdPrestamo,
-            NombreUsuario: item.NombreUsuario ?? undefined,
-            Carnet: item.Carnet ?? undefined,
-            EstadoPrestamo: item.EstadoPrestamo ?? undefined,
-            EstadoEquipo: item.EstadoEquipo ?? undefined,
-            Observacion: item.Observacion ?? undefined,
-            FechaPrestamo: item.FechaPrestamo
-              ? new Date(item.FechaPrestamo)
-              : undefined,
-            FechaDevolucionEsperada: item.FechaDevolucionEsperada
-              ? new Date(item.FechaDevolucionEsperada)
-              : undefined,
-            FechaDevolucion: item.FechaDevolucion
-              ? new Date(item.FechaDevolucion)
-              : undefined,
-          }));
-          this.cargando = false;
-        },
-        error: () => {
-          this.cargando = false;
-        },
-      });
+  protected cargar(): Observable<HistorialEquipoDto[]> {
+    return this.api.obtenerHistorialEquipo(this.equipoId);
+  }
+
+  protected camposBusqueda(historial: HistorialEquipoDto): unknown[] {
+    return [historial.IdPrestamo, historial.NombreUsuario];
+  }
+
+  private dentroDeRango(
+    fecha: Date | undefined,
+    desde: Date | null,
+    hasta: Date | null,
+  ): boolean {
+    if (!desde && !hasta) return true;
+    if (!fecha) return false;
+    return (!desde || fecha >= desde) && (!hasta || fecha <= hasta);
+  }
+
+  private fechaIso(dates: Date[]): string {
+    return dates[0] ? dates[0].toISOString().split('T')[0] : '';
   }
 }

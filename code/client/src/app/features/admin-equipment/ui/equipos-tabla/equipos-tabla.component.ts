@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Equipos } from '@entities/admin';
-import { EquipoService } from '@entities/equipment';
+import { ESTADO_EQUIPO_OPCIONES, EquipoService } from '@entities/equipment';
 import { BuscadorComponent } from '@features/admin-search';
 import { Tabla, TablePaginationComponent } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
@@ -72,34 +72,14 @@ export class EquiposTablaComponent extends Tabla {
   ];
 
   estadoSeleccionado = '';
-  estadosDisponibles = [
-    'operativo',
-    'parcialmente_operativo',
-    'inoperativo',
-    'en_mantenimiento',
-  ];
   readonly estadoFiltroOpciones: OpcionSelect[] = [
     { value: '', label: 'Todos los estados' },
-    { value: 'operativo', label: 'Operativo' },
-    { value: 'parcialmente_operativo', label: 'Parcialmente operativo' },
-    { value: 'inoperativo', label: 'Inoperativo' },
+    ...ESTADO_EQUIPO_OPCIONES,
   ];
   private busquedaActual?: [string, string];
   seleccionarEstado(estado: string) {
     this.estadoSeleccionado = estado;
     this.aplicarFiltros();
-  }
-  estadoEquipoLabel(estado: string): string {
-    switch (estado) {
-      case 'operativo':
-        return 'Operativo';
-      case 'parcialmente_operativo':
-        return 'Parcialmente operativo';
-      case 'inoperativo':
-        return 'Inoperativo';
-      default:
-        return estado;
-    }
   }
   constructor(private readonly equiposapi: EquipoService) {
     super();

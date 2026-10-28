@@ -9,6 +9,7 @@ import {
 import { FormsModule } from '@angular/forms';
 import { AuditLogDto } from '@entities/admin';
 import { AuditLogApiService } from '@entities/audit-log';
+import { estadoEquipoCssClass, estadoEquipoLabel } from '@entities/equipment';
 import {
   FlatpickrDirective,
   StickyScrollDirective,
@@ -295,22 +296,8 @@ export class AuditPanelComponent implements OnChanges, OnDestroy {
     );
   }
 
-  estadoEquipoLabel(estado?: string): string {
-    switch (estado) {
-      case 'operativo':
-        return 'Operativo';
-      case 'parcialmente_operativo':
-        return 'Parcialmente operativo';
-      case 'inoperativo':
-        return 'Inoperativo';
-      default:
-        return estado || '—';
-    }
-  }
-
-  estadoEquipoCssClass(estado?: string): string {
-    return estado ? estado.replaceAll('_', '-') : 'none';
-  }
+  protected readonly estadoEquipoLabel = estadoEquipoLabel;
+  protected readonly estadoEquipoCssClass = estadoEquipoCssClass;
 
   badgeClass(accion: string | undefined): string {
     switch (accion?.toLowerCase()) {

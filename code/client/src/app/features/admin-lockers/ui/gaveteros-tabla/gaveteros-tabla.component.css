@@ -70,55 +70,6 @@
 .button:hover {
   background-color: var(--brand);
 }
-.search-container {
-  margin-bottom: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.search-input-wrapper {
-  position: relative;
-  width: 100%;
-  max-width: 30rem;
-}
-.search-icon {
-  position: absolute;
-  left: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--ink-secondary);
-}
-.search-input {
-  width: 100%;
-  padding: 0.75rem 2.5rem;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  transition: var(--t-base);
-}
-.search-input:focus {
-  outline: none;
-  border-color: var(--interactive);
-  box-shadow: 0 0 0 3px var(--interactive-subtle);
-}
-.clear-search {
-  position: absolute;
-  right: 1rem;
-  top: 50%;
-  transform: translateY(-50%);
-  background: none;
-  border: none;
-  color: var(--ink-secondary);
-  cursor: pointer;
-  padding: 0.25rem;
-  border-radius: var(--radius-full);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.clear-search:hover {
-  background-color: rgba(0, 0, 0, 0.05);
-}
 .table-responsive {
   overflow-x: auto;
   scrollbar-width: none;
@@ -167,9 +118,6 @@
   min-width: 120px;
   text-align: right;
 }
-.precio-column {
-  text-align: right;
-}
 .btn {
   padding: 0.625rem 1.25rem;
   border: none;
@@ -178,14 +126,6 @@
   font-weight: 500;
   cursor: pointer;
   transition: var(--t-base);
-}
-.btn-outline {
-  background-color: transparent;
-  border: 1px solid var(--interactive);
-  color: var(--ink);
-}
-.btn-outline:hover {
-  background-color: rgba(255, 215, 0, 0.06);
 }
 .btn-icon {
   display: inline-flex;
@@ -222,72 +162,6 @@
   gap: 1rem;
   color: var(--ink-secondary);
 }
-.alerta-eliminar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100dvh;
-  background-color: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  animation: fadeIn 0.3s ease-in-out;
-}
-.modal-content {
-  background-color: #ffffff !important;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  animation: slideIn 0.3s ease-out;
-  min-width: 400px;
-  max-width: 90vw;
-}
-.modal-content p {
-  margin: 0 0 1.5rem 0;
-  font-size: 1.1rem;
-  color: var(--ink);
-  font-weight: 500;
-  line-height: 1.5;
-}
-.modal-content .btn {
-  margin: 0 0.5rem;
-  padding: 0.75rem 1.5rem;
-  font-size: 0.9rem;
-  font-weight: 600;
-  border-radius: 8px;
-  transition:
-    color var(--t-base),
-    background-color var(--t-base),
-    border-color var(--t-base),
-    box-shadow var(--t-base);
-  min-width: 80px;
-}
-.btn-confirm {
-  background-color: #dc2626;
-  color: white;
-  border: 2px solid #dc2626;
-}
-.btn-confirm:hover {
-  background-color: #b91c1c;
-  border-color: #b91c1c;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
-}
-.btn-cancel {
-  background-color: #5f6368;
-  color: white;
-  border: 2px solid #5f6368;
-}
-.btn-cancel:hover {
-  background-color: var(--brand);
-  color: #333;
-  border-color: var(--ink);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 207, 0, 0.3);
-}
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -306,35 +180,11 @@
     opacity: 1;
   }
 }
-@media (max-width: 480px) {
-  .modal-content {
-    min-width: 90vw;
-    padding: 1.5rem;
-  }
-  .modal-content p {
-    font-size: 1rem;
-    margin-bottom: 1.25rem;
-  }
-  .modal-content .btn {
-    margin: 0.25rem;
-    width: auto;
-    min-width: 90px;
-  }
-}
 @media (max-width: 768px) {
   .table-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 1rem;
-  }
-  .search-container {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.75rem;
-  }
-  .search-input-wrapper {
-    width: 100%;
-    max-width: none;
   }
   .botoncrear {
     padding: 6px 10px;
@@ -353,19 +203,6 @@
   .subtitle {
     font-size: 0.75rem;
   }
-  .search-container {
-    gap: 0.5rem;
-  }
-  .search-input {
-    padding: 0.55rem 2rem;
-    font-size: 0.75rem;
-  }
-  .search-icon {
-    left: 0.75rem;
-  }
-  .clear-search {
-    right: 0.75rem;
-  }
   .data-table th,
   .data-table td {
     padding: 0.6rem;
@@ -378,18 +215,6 @@
   .btn-icon {
     width: 1.75rem;
     height: 1.75rem;
-  }
-  .modal-content {
-    padding: 1.2rem;
-    min-width: 92vw;
-  }
-  .modal-content p {
-    font-size: 0.9rem;
-  }
-  .modal-content .btn {
-    width: auto;
-    min-width: 80px;
-    margin: 0.25rem;
   }
 }
 
