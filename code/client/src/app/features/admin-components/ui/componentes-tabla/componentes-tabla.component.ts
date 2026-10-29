@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { Componente } from '@entities/admin';
 import { ComponenteService } from '@entities/component';
 import { BuscadorComponent } from '@features/admin-search';
-import { Tabla } from '@shared/lib/admin-table';
+import { AdminTabsComponent, Tabla } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -24,6 +24,7 @@ import { ComponentesFormularioComponent } from '../componentes-formulario/compon
   selector: 'app-componentes-tabla',
   standalone: true,
   imports: [
+    AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,
     FormsModule,
@@ -34,7 +35,10 @@ import { ComponentesFormularioComponent } from '../componentes-formulario/compon
     AuditPanelComponent,
   ],
   templateUrl: './componentes-tabla.component.html',
-  styleUrl: './componentes-tabla.component.css',
+  styleUrls: [
+    '../../../../shared/lib/admin-table/tabla-admin.css',
+    './componentes-tabla.component.css',
+  ],
 })
 export class ComponentesTablaComponent extends Tabla implements OnInit {
   private readonly toast = inject(ToastService);

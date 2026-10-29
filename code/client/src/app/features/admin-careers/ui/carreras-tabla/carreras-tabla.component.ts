@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Carrera } from '@entities/admin';
 import { CarreraService } from '@entities/career';
 import { BuscadorComponent } from '@features/admin-search';
-import { Tabla } from '@shared/lib/admin-table';
+import { AdminTabsComponent, Tabla } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -18,6 +18,7 @@ import { CarrerasFormularioComponent } from '../carreras-formulario/carreras-for
   selector: 'app-carreras-tabla',
   standalone: true,
   imports: [
+    AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,
     FormsModule,
@@ -28,7 +29,10 @@ import { CarrerasFormularioComponent } from '../carreras-formulario/carreras-for
     AuditPanelComponent,
   ],
   templateUrl: './carreras-tabla.component.html',
-  styleUrl: './carreras-tabla.component.css',
+  styleUrls: [
+    '../../../../shared/lib/admin-table/tabla-admin.css',
+    './carreras-tabla.component.css',
+  ],
 })
 export class CarrerasTablaComponent extends Tabla {
   private readonly toast = inject(ToastService);

@@ -26,9 +26,10 @@ import {
 import { ESTADO_EQUIPO_OPCIONES } from '@entities/equipment';
 import { BuscadorComponent } from '@features/admin-search';
 import {
-  printTable,
+  AdminTabsComponent,
   Tabla,
   TablePaginationComponent,
+  printTable,
 } from '@shared/lib/admin-table';
 import {
   FlatpickrDirective,
@@ -52,6 +53,7 @@ import { VercontratoComponent } from '@entities/loan';
   selector: 'app-prestamos-tabla',
   standalone: true,
   imports: [
+    AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,
     NombreRolPipe,
@@ -70,7 +72,10 @@ import { VercontratoComponent } from '@entities/loan';
     FlatpickrDirective,
   ],
   templateUrl: './prestamos-tabla.component.html',
-  styleUrls: ['./prestamos-tabla.component.css'],
+  styleUrls: [
+    '../../../../shared/lib/admin-table/tabla-admin.css',
+    './prestamos-tabla.component.css',
+  ],
 })
 export class PrestamosTablaComponent extends Tabla implements OnInit {
   private readonly toast = inject(ToastService);
@@ -117,57 +122,43 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   exportarPrestamos(): void {
     this.exportarCsv(
       'prestamos',
-      [
-        'Usuario',
-        'Carnet',
-        'Rol',
-        'Teléfono',
-        'Equipos',
-        'Fecha Solicitud',
-        'Fecha Préstamo Esperada',
-        'Fecha Devolución Esperada',
-        'Estado',
-      ],
-      this.prestamosTabla.map(({ value }) => [
-        `${value.datosgrupo.NombreUsuario ?? ''} ${value.datosgrupo.ApellidoPaternoUsuario ?? ''}`.trim(),
-        value.datosgrupo.CarnetUsuario,
-        nombreRol(value.datosgrupo.TipoUsuario),
-        value.datosgrupo.TelefonoUsuario,
-        this.detalleEquipos(value),
-        formatBoliviaDateTime(value.datosgrupo.FechaSolicitud),
-        formatBoliviaDateTime(value.datosgrupo.FechaPrestamoEsperada),
-        formatBoliviaDateTime(value.datosgrupo.FechaDevolucionEsperada),
-        this.getEstadoCalculado(value),
-      ]),
+      this.columnasExportacion,
+      this.filasExportacion(),
     );
   }
 
   imprimirPrestamos(): void {
     printTable({
       title: 'Préstamos',
-      headers: [
-        'Usuario',
-        'Carnet',
-        'Rol',
-        'Teléfono',
-        'Equipos',
-        'Fecha solicitud',
-        'Inicio esperado',
-        'Devolución esperada',
-        'Estado',
-      ],
-      rows: this.prestamosTabla.map(({ value }) => [
-        `${value.datosgrupo.NombreUsuario ?? ''} ${value.datosgrupo.ApellidoPaternoUsuario ?? ''}`.trim(),
-        value.datosgrupo.CarnetUsuario,
-        nombreRol(value.datosgrupo.TipoUsuario),
-        value.datosgrupo.TelefonoUsuario,
-        this.detalleEquipos(value),
-        formatBoliviaDateTime(value.datosgrupo.FechaSolicitud),
-        formatBoliviaDateTime(value.datosgrupo.FechaPrestamoEsperada),
-        formatBoliviaDateTime(value.datosgrupo.FechaDevolucionEsperada),
-        this.getEstadoCalculado(value),
-      ]),
+      headers: this.columnasExportacion,
+      rows: this.filasExportacion(),
     });
+  }
+
+  private readonly columnasExportacion = [
+    'Usuario',
+    'Carnet',
+    'Rol',
+    'Teléfono',
+    'Equipos',
+    'Fecha Solicitud',
+    'Fecha Préstamo Esperada',
+    'Fecha Devolución Esperada',
+    'Estado',
+  ];
+
+  private filasExportacion() {
+    return this.prestamosTabla.map(({ value }) => [
+      `${value.datosgrupo.NombreUsuario ?? ''} ${value.datosgrupo.ApellidoPaternoUsuario ?? ''}`.trim(),
+      value.datosgrupo.CarnetUsuario,
+      nombreRol(value.datosgrupo.TipoUsuario),
+      value.datosgrupo.TelefonoUsuario,
+      this.detalleEquipos(value),
+      formatBoliviaDateTime(value.datosgrupo.FechaSolicitud),
+      formatBoliviaDateTime(value.datosgrupo.FechaPrestamoEsperada),
+      formatBoliviaDateTime(value.datosgrupo.FechaDevolucionEsperada),
+      this.getEstadoCalculado(value),
+    ]);
   }
 
   vercontrato: WritableSignal<boolean> = signal(false);

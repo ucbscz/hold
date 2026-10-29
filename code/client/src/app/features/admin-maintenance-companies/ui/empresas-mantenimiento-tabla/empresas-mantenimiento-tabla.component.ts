@@ -10,7 +10,7 @@ import { FormsModule } from '@angular/forms';
 import { EmpresaMantenimiento } from '@entities/admin';
 import { EmpresamantenimientoService } from '@entities/maintenance-company';
 import { BuscadorComponent } from '@features/admin-search';
-import { Tabla } from '@shared/lib/admin-table';
+import { AdminTabsComponent, Tabla } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -24,6 +24,7 @@ import { EmpresasMantenimientoFormularioComponent } from '../empresas-mantenimie
   selector: 'app-empresas-mantenimiento-tabla',
   standalone: true,
   imports: [
+    AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,
     FormsModule,
@@ -34,7 +35,10 @@ import { EmpresasMantenimientoFormularioComponent } from '../empresas-mantenimie
     AuditPanelComponent,
   ],
   templateUrl: './empresas-mantenimiento-tabla.component.html',
-  styleUrl: './empresas-mantenimiento-tabla.component.css',
+  styleUrls: [
+    '../../../../shared/lib/admin-table/tabla-admin.css',
+    './empresas-mantenimiento-tabla.component.css',
+  ],
 })
 export class EmpresasMantenimientoTablaComponent
   extends Tabla

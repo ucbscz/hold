@@ -19,6 +19,7 @@ import {
 } from '@entities/user';
 import { BuscadorComponent } from '@features/admin-search';
 import {
+  AdminTabsComponent,
   Tabla,
   TablePaginationComponent,
   printTable,
@@ -36,6 +37,7 @@ import { Subscription, finalize } from 'rxjs';
   selector: 'app-catalogos-inventario',
   standalone: true,
   imports: [
+    AdminTabsComponent,
     CommonModule,
     ValidatedFormsModule,
     BuscadorComponent,
@@ -78,7 +80,7 @@ import { Subscription, finalize } from 'rxjs';
           <i class="fas fa-print"></i>
         </button>
       </app-buscador>
-      <ng-container [ngTemplateOutlet]="tabs" />
+      <app-admin-tabs [activa]="activeTab" (cambiar)="seleccionarTab($event)" />
       @if (mensajeError) {
         <p class="catalog-error" role="alert">{{ mensajeError }}</p>
       }
@@ -187,29 +189,13 @@ import { Subscription, finalize } from 'rxjs';
         [entidad]="tipo === 'ambientes' ? 'Ambiente' : 'Procedencia'"
         [refreshTrigger]="auditRefresh"
       >
-        <div admin-tabs><ng-container [ngTemplateOutlet]="tabs" /></div>
+        <app-admin-tabs
+          admin-tabs
+          [activa]="activeTab"
+          (cambiar)="seleccionarTab($event)"
+        />
       </app-audit-panel>
     }
-    <ng-template #tabs
-      ><nav class="admin-tabs" aria-label="Vistas del catálogo">
-        <button
-          type="button"
-          class="admin-tabs__button"
-          [class.admin-tabs__button--active]="activeTab === 'tabla'"
-          (click)="seleccionarTab('tabla')"
-        >
-          Tabla
-        </button>
-        <button
-          type="button"
-          class="admin-tabs__button"
-          [class.admin-tabs__button--active]="activeTab === 'auditoria'"
-          (click)="seleccionarTab('auditoria')"
-        >
-          Auditoría
-        </button>
-      </nav></ng-template
-    >
     <dialog
       #editor
       aria-labelledby="catalog-editor-title"

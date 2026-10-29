@@ -13,22 +13,7 @@
     </app-buscador>
   }
   @if (activeTab === "tabla") {
-    <div class="admin-tabs">
-      <button
-        class="admin-tabs__button"
-        [class.admin-tabs__button--active]="estaTabActiva('tabla')"
-        (click)="seleccionarTab('tabla')"
-      >
-        Tabla
-      </button>
-      <button
-        class="admin-tabs__button"
-        [class.admin-tabs__button--active]="estaTabActiva('auditoria')"
-        (click)="seleccionarTab('auditoria')"
-      >
-        Auditoría
-      </button>
-    </div>
+    <app-admin-tabs [activa]="activeTab" (cambiar)="seleccionarTab($event)" />
     <div class="table-responsive" appStickyScroll>
       <table class="data-table">
         <thead>
@@ -115,22 +100,11 @@
     </div>
   } @else {
     <app-audit-panel [refreshTrigger]="auditRefresh" [entidad]="'Gavetero'">
-      <div admin-tabs class="admin-tabs">
-        <button
-          class="admin-tabs__button"
-          [class.admin-tabs__button--active]="estaTabActiva('tabla')"
-          (click)="seleccionarTab('tabla')"
-        >
-          Tabla
-        </button>
-        <button
-          class="admin-tabs__button"
-          [class.admin-tabs__button--active]="estaTabActiva('auditoria')"
-          (click)="seleccionarTab('auditoria')"
-        >
-          Auditoría
-        </button>
-      </div>
+      <app-admin-tabs
+        admin-tabs
+        [activa]="activeTab"
+        (cambiar)="seleccionarTab($event)"
+      />
     </app-audit-panel>
   }
   @if (alertaeliminar) {

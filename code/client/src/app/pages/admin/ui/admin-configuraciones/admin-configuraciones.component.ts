@@ -217,23 +217,20 @@ export class AdminConfiguracionesComponent implements OnInit {
         takeUntilDestroyed(this.destroyRef),
       )
       .subscribe({
-        next: (data) => {
-          this.config.set({ ...data });
-          this.responsables.set(
-            data.CarnetJefeCarrera
-              ? [
-                  {
-                    value: data.CarnetJefeCarrera,
-                    label: data.NombreJefeCarrera,
-                  },
-                ]
-              : [],
-          );
-          this.parseHorarios(data);
-        },
+        next: (data) => this.aplicarConfiguracion(data),
         error: () =>
           this.mostrarMensaje('Error al cargar la configuración', true),
       });
+  }
+
+  private aplicarConfiguracion(data: ConfiguracionDto): void {
+    this.config.set({ ...data });
+    this.responsables.set(
+      data.CarnetJefeCarrera
+        ? [{ value: data.CarnetJefeCarrera, label: data.NombreJefeCarrera }]
+        : [],
+    );
+    this.parseHorarios(data);
   }
 
   abrirFirma(): void {
@@ -273,18 +270,7 @@ export class AdminConfiguracionesComponent implements OnInit {
       )
       .subscribe({
         next: (data) => {
-          this.config.set({ ...data });
-          this.responsables.set(
-            data.CarnetJefeCarrera
-              ? [
-                  {
-                    value: data.CarnetJefeCarrera,
-                    label: data.NombreJefeCarrera,
-                  },
-                ]
-              : [],
-          );
-          this.parseHorarios(data);
+          this.aplicarConfiguracion(data);
           this.mostrarMensaje('Configuración guardada exitosamente', false);
         },
         error: (error) =>

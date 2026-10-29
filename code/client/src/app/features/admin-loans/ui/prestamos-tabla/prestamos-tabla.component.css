@@ -19,16 +19,6 @@
   white-space: nowrap;
   height: 32px;
 }
-.botoncrear:hover {
-  background-color: var(--brand-hover);
-  color: var(--brand-text);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(255, 216, 20, 0.4);
-}
-.botoncrear:active {
-  transform: translateY(0);
-  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
-}
 .botoncrear i {
   font-size: 12px;
 }
@@ -118,17 +108,6 @@ app-buscador {
   gap: 1rem;
   flex-wrap: wrap;
 }
-.header-title h1 {
-  margin: 0;
-  font-size: 1.75rem;
-  font-weight: 600;
-  color: var(--ink);
-}
-.subtitle {
-  margin: 0.25rem 0 0 0;
-  color: var(--ink-secondary);
-  font-size: 0.875rem;
-}
 .table-responsive {
   overflow-x: auto;
   scrollbar-width: none;
@@ -141,31 +120,6 @@ app-buscador {
   position: relative;
   padding-bottom: 0.35rem;
   scroll-padding-inline-end: 2rem;
-}
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-.data-table th,
-.data-table td {
-  padding: 1rem;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-.data-table th {
-  font-weight: 600;
-  cursor: pointer;
-  user-select: none;
-  transition: var(--t-base);
-}
-.data-table th i {
-  margin-left: 0.25rem;
-}
-.data-table tbody tr {
-  transition: var(--t-base);
-}
-.data-table tbody tr:hover {
-  background-color: rgba(255, 215, 0, 0.06);
 }
 .actions-column {
   width: 280px;
@@ -181,41 +135,6 @@ td.actions-column {
 }
 .precio-column {
   text-align: right;
-}
-.btn {
-  padding: 0.625rem 1.25rem;
-  border: none;
-  border-radius: var(--radius-md);
-  font-size: 0.875rem;
-  font-weight: 500;
-  cursor: pointer;
-  transition: var(--t-base);
-}
-.btn-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 2rem;
-  height: 2rem;
-  border-radius: var(--radius-full);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: var(--t-base);
-}
-.btn-delete {
-  color: var(--error);
-}
-.btn-delete:hover {
-  background-color: rgba(239, 68, 68, 0.1);
-}
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
-  color: var(--ink-secondary);
 }
 
 .empty-state--viewport {
@@ -449,24 +368,6 @@ td.actions-column {
 .btn-action i {
   font-size: 0.7rem;
 }
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes slideIn {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
-}
 @keyframes fadeInDown {
   from {
     opacity: 0;
@@ -559,24 +460,6 @@ td.actions-column {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.025em;
-}
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-@keyframes slideIn {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
 }
 @keyframes fadeInDown {
   from {

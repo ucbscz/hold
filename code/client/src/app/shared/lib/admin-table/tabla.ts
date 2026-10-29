@@ -15,10 +15,6 @@ export abstract class Tabla extends BaseTablaComponent {
     this.activeTab = tab;
   }
 
-  estaTabActiva(tab: AdminTableTab): boolean {
-    return this.activeTab === tab;
-  }
-
   protected formatDate(date: Date | string | null): string {
     if (!date) return '';
 

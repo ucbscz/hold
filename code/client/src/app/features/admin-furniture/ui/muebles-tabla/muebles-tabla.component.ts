@@ -10,7 +10,11 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Muebles } from '@entities/admin';
 import { MuebleService } from '@entities/furniture';
 import { BuscadorComponent } from '@features/admin-search';
-import { Tabla, TablePaginationComponent } from '@shared/lib/admin-table';
+import {
+  AdminTabsComponent,
+  Tabla,
+  TablePaginationComponent,
+} from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -25,6 +29,7 @@ import { MueblesFormularioComponent } from '../muebles-formulario/muebles-formul
   selector: 'app-muebles-tabla',
   standalone: true,
   imports: [
+    AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,
     TablePaginationComponent,
@@ -38,7 +43,10 @@ import { MueblesFormularioComponent } from '../muebles-formulario/muebles-formul
     AuditPanelComponent,
   ],
   templateUrl: './muebles-tabla.component.html',
-  styleUrl: './muebles-tabla.component.css',
+  styleUrls: [
+    '../../../../shared/lib/admin-table/tabla-admin.css',
+    './muebles-tabla.component.css',
+  ],
 })
 export class MueblesTablaComponent extends Tabla implements OnInit {
   private readonly toast = inject(ToastService);

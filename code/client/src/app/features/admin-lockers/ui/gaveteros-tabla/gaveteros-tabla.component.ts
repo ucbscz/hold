@@ -4,7 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Gaveteros } from '@entities/admin';
 import { GaveteroService } from '@entities/locker';
 import { BuscadorComponent } from '@features/admin-search';
-import { Tabla } from '@shared/lib/admin-table';
+import { AdminTabsComponent, Tabla } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -19,6 +19,7 @@ import { GaveterosFormularioComponent } from '../gaveteros-formulario/gaveteros-
   selector: 'app-gaveteros-tabla',
   standalone: true,
   imports: [
+    AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,
     FormsModule,
@@ -31,7 +32,10 @@ import { GaveterosFormularioComponent } from '../gaveteros-formulario/gaveteros-
     AuditPanelComponent,
   ],
   templateUrl: './gaveteros-tabla.component.html',
-  styleUrls: ['./gaveteros-tabla.component.css'],
+  styleUrls: [
+    '../../../../shared/lib/admin-table/tabla-admin.css',
+    './gaveteros-tabla.component.css',
+  ],
 })
 export class GaveterosTablaComponent extends Tabla {
   private readonly toast = inject(ToastService);

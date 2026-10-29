@@ -11,7 +11,7 @@ import { Categorias } from '@entities/admin';
 import { CategoriaService } from '@entities/category';
 import { GrupoEquipo, GrupoequipoService } from '@entities/equipment-group';
 import { BuscadorComponent } from '@features/admin-search';
-import { Tabla } from '@shared/lib/admin-table';
+import { AdminTabsComponent, Tabla } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -26,6 +26,7 @@ import { GruposEquiposFormularioComponent } from '../grupos-equipos-formulario/g
   selector: 'app-grupos-equipos-tabla',
   standalone: true,
   imports: [
+    AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,
     FormsModule,
@@ -38,7 +39,10 @@ import { GruposEquiposFormularioComponent } from '../grupos-equipos-formulario/g
     AuditPanelComponent,
   ],
   templateUrl: './grupos-equipos-tabla.component.html',
-  styleUrl: './grupos-equipos-tabla.component.css',
+  styleUrls: [
+    '../../../../shared/lib/admin-table/tabla-admin.css',
+    './grupos-equipos-tabla.component.css',
+  ],
 })
 export class GruposEquiposTablaComponent extends Tabla implements OnInit {
   private readonly toast = inject(ToastService);

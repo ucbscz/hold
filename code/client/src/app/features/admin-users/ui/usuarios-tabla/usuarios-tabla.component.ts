@@ -20,7 +20,11 @@ import {
   ROL_OPCIONES,
 } from '@entities/user';
 import { BuscadorComponent } from '@features/admin-search';
-import { Tabla, TablePaginationComponent } from '@shared/lib/admin-table';
+import {
+  AdminTabsComponent,
+  Tabla,
+  TablePaginationComponent,
+} from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -37,6 +41,7 @@ import { UsuariosFormularioComponent } from '../usuarios-formulario/usuarios-for
   selector: 'app-usuarios-tabla',
   standalone: true,
   imports: [
+    AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,
     NombreRolPipe,
@@ -51,7 +56,10 @@ import { UsuariosFormularioComponent } from '../usuarios-formulario/usuarios-for
     CustomSelectComponent,
   ],
   templateUrl: './usuarios-tabla.component.html',
-  styleUrls: ['./usuarios-tabla.component.css'],
+  styleUrls: [
+    '../../../../shared/lib/admin-table/tabla-admin.css',
+    './usuarios-tabla.component.css',
+  ],
 })
 export class UsuariosTablaComponent extends Tabla implements OnInit {
   private readonly toast = inject(ToastService);

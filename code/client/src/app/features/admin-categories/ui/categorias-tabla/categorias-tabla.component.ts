@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Categorias } from '@entities/admin';
 import { CategoriaService } from '@entities/category';
 import { BuscadorComponent } from '@features/admin-search';
-import { Tabla } from '@shared/lib/admin-table';
+import { AdminTabsComponent, Tabla } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
@@ -18,6 +18,7 @@ import { CategoriasFormularioComponent } from '../categorias-formulario/categori
   selector: 'app-categorias-tabla',
   standalone: true,
   imports: [
+    AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,
     FormsModule,
@@ -28,7 +29,10 @@ import { CategoriasFormularioComponent } from '../categorias-formulario/categori
     AuditPanelComponent,
   ],
   templateUrl: './categorias-tabla.component.html',
-  styleUrl: './categorias-tabla.component.css',
+  styleUrls: [
+    '../../../../shared/lib/admin-table/tabla-admin.css',
+    './categorias-tabla.component.css',
+  ],
 })
 export class CategoriasTablaComponent extends Tabla {
   private readonly toast = inject(ToastService);

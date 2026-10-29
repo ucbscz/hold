@@ -13,7 +13,11 @@ import {
   MantenimientoService,
 } from '@entities/maintenance';
 import { BuscadorComponent } from '@features/admin-search';
-import { Tabla, TablePaginationComponent } from '@shared/lib/admin-table';
+import {
+  AdminTabsComponent,
+  Tabla,
+  TablePaginationComponent,
+} from '@shared/lib/admin-table';
 import {
   FlatpickrDirective,
   StickyScrollDirective,
@@ -31,6 +35,7 @@ import { DetallesMantenimientoComponent } from './detalles-mantenimiento/detalle
   selector: 'app-mantenimientos-tabla',
   standalone: true,
   imports: [
+    AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,
     FormsModule,
@@ -45,7 +50,10 @@ import { DetallesMantenimientoComponent } from './detalles-mantenimiento/detalle
     TablePaginationComponent,
   ],
   templateUrl: './mantenimientos-tabla.component.html',
-  styleUrl: './mantenimientos-tabla.component.css',
+  styleUrls: [
+    '../../../../shared/lib/admin-table/tabla-admin.css',
+    './mantenimientos-tabla.component.css',
+  ],
 })
 export class MantenimientosTablaComponent extends Tabla implements OnInit {
   private readonly toast = inject(ToastService);
