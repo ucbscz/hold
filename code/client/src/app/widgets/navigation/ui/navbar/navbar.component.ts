@@ -75,6 +75,7 @@ export class NavbarComponent {
       cleanUrl.includes('/registro') ||
       cleanUrl.includes('/recuperar') ||
       cleanUrl.includes('/terminos') ||
+      cleanUrl.includes('/privacidad') ||
       cleanUrl.includes('/verificar');
 
     if (isLoginOrRegister) {

@@ -14,6 +14,7 @@ describe('application routes', () => {
     'historial',
     'registro',
     'terminos',
+    'privacidad',
     'verificar',
     'recuperar',
   ];

@@ -72,6 +72,11 @@ export const routes: Routes = [
       import('@pages/terms').then((page) => page.TerminosComponent),
   },
   {
+    path: 'privacidad',
+    loadComponent: () =>
+      import('@pages/terms').then((page) => page.PrivacidadComponent),
+  },
+  {
     path: 'verificar',
     loadComponent: () =>
       import('@pages/email-verification').then(

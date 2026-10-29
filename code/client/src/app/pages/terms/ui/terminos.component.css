@@ -51,3 +51,7 @@
   font-size: 0.9rem;
   line-height: 1.65;
 }
+.terms-page section p a {
+  color: var(--interactive-text);
+  font-weight: 700;
+}

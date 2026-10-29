@@ -467,12 +467,14 @@
           />
           <span>
             He leído y acepto los
-            <a routerLink="/terminos"> términos y condiciones </a>.
+            <a routerLink="/terminos"> términos y condiciones </a> y la
+            <a routerLink="/privacidad"> política de privacidad </a>.
           </span>
         </label>
         @if (submitted && !aceptaTerminos) {
           <div class="error-message">
-            Debes aceptar los términos para continuar.
+            Debes aceptar los términos y la política de privacidad para
+            continuar.
           </div>
         }
         <button type="submit" class="register-button" [disabled]="registrando">
