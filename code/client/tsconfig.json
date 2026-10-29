@@ -10,7 +10,8 @@
       "@features/*": ["./src/app/features/*"],
       "@entities/*": ["./src/app/entities/*"],
       "@shared/*": ["./src/app/shared/*"],
-      "@environments/*": ["./src/environments/*"]
+      "@environments/*": ["./src/environments/*"],
+      "@brand/*": ["./src/brand/*"]
     },
     "strict": true,
     "noImplicitOverride": true,
@@ -21,6 +22,7 @@
     "isolatedModules": true,
     "types": ["jasmine"],
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "experimentalDecorators": true,
     "moduleResolution": "bundler",
     "importHelpers": true,

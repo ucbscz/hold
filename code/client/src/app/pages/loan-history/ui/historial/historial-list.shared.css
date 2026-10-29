@@ -82,7 +82,7 @@
   align-self: flex-start;
   width: auto;
   padding: 0.2rem 0.625rem;
-  border: 1px solid rgba(255, 215, 0, 0.4);
+  border: 1px solid color-mix(in srgb, var(--brand) 40%, transparent);
   border-radius: var(--radius-full);
   background: var(--interactive-subtle);
   color: var(--brand-text);

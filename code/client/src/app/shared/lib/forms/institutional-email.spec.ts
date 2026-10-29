@@ -1,9 +1,9 @@
-import { environment } from '@environments/environment';
+import { BRAND } from '@brand/brand';
 import { INSTITUTIONAL_EMAIL } from './institutional-email';
 
 describe('INSTITUTIONAL_EMAIL', () => {
   const pattern = new RegExp(INSTITUTIONAL_EMAIL.pattern);
-  const domain = environment.institutionalEmailDomain;
+  const domain = BRAND.institutionalEmailDomain;
 
   it('accepts only addresses from the configured domain', () => {
     expect(pattern.test(`ana.perez@${domain}`)).toBeTrue();

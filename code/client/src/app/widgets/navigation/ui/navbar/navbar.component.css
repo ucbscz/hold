@@ -428,7 +428,7 @@
 }
 .notif__mark-all:hover {
   background: var(--dropdown-hover-bg);
-  border-color: rgba(255, 215, 0, 0.45);
+  border-color: color-mix(in srgb, var(--brand) 45%, transparent);
   color: var(--brand-text);
 }
 .notif__close {

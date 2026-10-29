@@ -1,3 +1,4 @@
+import { BRAND } from '@brand/brand';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
@@ -8,4 +9,6 @@ import { RouterLink } from '@angular/router';
   templateUrl: './terminos.component.html',
   styleUrl: './terminos.component.css',
 })
-export class TerminosComponent {}
+export class TerminosComponent {
+  protected readonly marca = BRAND;
+}

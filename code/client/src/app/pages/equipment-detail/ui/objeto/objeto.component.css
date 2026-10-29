@@ -312,7 +312,7 @@
 @media (hover: hover) and (pointer: fine) {
   .boton-carrito:not(.plomo):hover {
     background: var(--brand-hover);
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--brand) 40%, transparent);
     transform: translateY(-1px);
   }
 }
@@ -506,7 +506,8 @@
 .comentarios-equipo__textarea:focus {
   outline: none;
   border-color: var(--interactive-text);
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--brand-secondary) 12%, transparent);
 }
 .comentarios-equipo__form-footer {
   display: flex;
@@ -670,7 +671,7 @@
 }
 .comentarios-equipo__action:not(:disabled):hover {
   background: var(--interactive-subtle);
-  border-color: rgba(255, 215, 0, 0.6);
+  border-color: color-mix(in srgb, var(--brand) 60%, transparent);
   color: var(--brand-text);
 }
 .comentarios-equipo__action:not(:disabled):active {

@@ -1,3 +1,4 @@
+import { INVENTORY_LABELS } from '@brand/brand';
 import { CommonModule } from '@angular/common';
 import { Component, Input, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -32,7 +33,13 @@ export class ListaEquipoComponent extends Tabla {
   grupoSeleccionado: number | null = null;
   gruposOpciones: OpcionSelect[] = [];
   override sortColumn = 'Nombre';
-  override columnas = ['Nombre', 'Estado', 'Ubicación', 'Código IMT', 'Costo'];
+  override columnas = [
+    'Nombre',
+    'Estado',
+    'Ubicación',
+    INVENTORY_LABELS.internalCode,
+    'Costo',
+  ];
 
   get equiposDisponibles(): Equipos[] {
     return this.equipos.filter((equipo) => !this.equipoYaSeleccionado(equipo));
@@ -172,7 +179,7 @@ export class ListaEquipoComponent extends Tabla {
       Nombre: (equipo) => equipo.NombreGrupoEquipo,
       Estado: (equipo) => equipo.EstadoEquipo,
       Ubicación: (equipo) => equipo.Ubicacion,
-      'Código IMT': (equipo) => equipo.CodigoImt,
+      [INVENTORY_LABELS.internalCode]: (equipo) => equipo.CodigoImt,
       Costo: (equipo) => equipo.CostoReferencia,
     });
   }

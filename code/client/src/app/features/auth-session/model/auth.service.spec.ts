@@ -12,8 +12,6 @@ describe('AuthService', () => {
 
   beforeEach(() => {
     sessionStorage.clear();
-    sessionStorage.setItem('ucbhold_access', 'legacy-access');
-    sessionStorage.setItem('ucbhold_refresh', 'legacy-refresh');
     TestBed.configureTestingModule(withDefaultTestingProviders());
     service = TestBed.inject(AuthService);
     http = TestBed.inject(HttpTestingController);
@@ -30,8 +28,7 @@ describe('AuthService', () => {
 
     expect(service.isLoggedIn()).toBeTrue();
     expect(service.getRole()).toBe('docente');
-    expect(sessionStorage.getItem('ucbhold_access')).toBeNull();
-    expect(sessionStorage.getItem('ucbhold_refresh')).toBeNull();
+    expect(sessionStorage.length).toBe(1);
   });
 
   it('refreshes using only the HttpOnly cookie', () => {

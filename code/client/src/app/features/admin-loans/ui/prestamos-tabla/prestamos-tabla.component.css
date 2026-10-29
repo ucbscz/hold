@@ -295,7 +295,7 @@ td.actions-column {
   background: var(--brand);
   color: var(--brand-text);
   border: none;
-  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.3);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--brand) 30%, transparent);
 }
 @media (hover: hover) and (pointer: fine) {
   .devuelto-btn-cancel:hover {
@@ -305,7 +305,7 @@ td.actions-column {
   }
   .devuelto-btn-confirm:hover {
     background: var(--brand-hover);
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--brand) 40%, transparent);
     transform: translateY(-1px);
   }
 }

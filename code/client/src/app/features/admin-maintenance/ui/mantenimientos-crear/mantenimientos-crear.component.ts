@@ -1,3 +1,4 @@
+import { INVENTORY_LABELS } from '@brand/brand';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -41,6 +42,7 @@ import { ListaEquipoComponent } from './lista-equipo/lista-equipo.component';
   styleUrl: './mantenimientos-crear.component.css',
 })
 export class MantenimientosCrearComponent extends BaseTablaComponent {
+  protected readonly etiquetas = INVENTORY_LABELS;
   private readonly toast = inject(ToastService);
   @Input() botoncrear: WritableSignal<boolean> = signal(true);
   @Output() Actualizar = new EventEmitter<void>();

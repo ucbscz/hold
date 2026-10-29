@@ -1,8 +1,4 @@
 :root {
-  --brand: #ffd700;
-  --brand-hover: #f5c800;
-  --brand-text: #4a4200;
-
   --bg: #f1f5f9;
   --surface: #ffffff;
   --sidebar: #f8fafc;
@@ -12,8 +8,8 @@
   --ink-muted: #94a3b8;
 
   --interactive: var(--brand);
-  --interactive-text: #00457b;
-  --interactive-subtle: rgba(255, 215, 0, 0.12);
+  --interactive-text: var(--brand-secondary);
+  --interactive-subtle: color-mix(in srgb, var(--brand) 12%, transparent);
 
   --glass-backdrop: saturate(180%) blur(18px);
 
@@ -23,9 +19,9 @@
   --dropdown-shadow:
     0 8px 24px rgba(0, 0, 0, 0.1), 0 1px 4px rgba(0, 0, 0, 0.06);
   --dropdown-blur: blur(16px) saturate(160%);
-  --dropdown-hover-bg: rgba(255, 215, 0, 0.1);
+  --dropdown-hover-bg: color-mix(in srgb, var(--brand) 10%, transparent);
   --dropdown-hover-color: var(--ink);
-  --dropdown-active-bg: rgba(255, 215, 0, 0.18);
+  --dropdown-active-bg: color-mix(in srgb, var(--brand) 18%, transparent);
   --dropdown-active-color: var(--brand-text);
   --dropdown-item-padding: 0.7rem 1rem;
   --dropdown-item-font: 0.875rem;
@@ -69,8 +65,6 @@
   --shadow-md: 0 4px 8px rgba(0, 0, 0, 0.06), 0 2px 4px rgba(0, 0, 0, 0.04);
   --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.08), 0 4px 8px rgba(0, 0, 0, 0.04);
   --shadow-xl: 0 20px 40px rgba(0, 0, 0, 0.1), 0 8px 16px rgba(0, 0, 0, 0.06);
-
-  --font: "Manrope", system-ui, -apple-system, sans-serif;
 
   --sp-1: 0.25rem;
   --sp-2: 0.5rem;
@@ -321,7 +315,7 @@ body {
 @media (hover: hover) and (pointer: fine) {
   .btn-primary:not(:disabled):hover {
     background: var(--brand-hover);
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--brand) 40%, transparent);
     transform: translateY(-1px);
   }
 }
@@ -414,7 +408,8 @@ body {
 .admin-toolbar-button:focus-visible {
   outline: none;
   border-color: var(--interactive-text) !important;
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--brand-secondary) 12%, transparent);
 }
 
 .admin-date-filter {
@@ -432,7 +427,8 @@ body {
 .admin-date-filter:focus {
   outline: none;
   border-color: var(--interactive-text);
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--brand-secondary) 12%, transparent);
 }
 
 .btn-icon.btn-lock:not(.btn-icon--block-active) {
@@ -502,7 +498,7 @@ body {
   .btn-update:hover,
   .boton-carrito:hover {
     background: var(--brand-hover) !important;
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4) !important;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--brand) 40%, transparent) !important;
     transform: translateY(-1px) !important;
   }
 }
@@ -560,7 +556,8 @@ body {
 
 :where(button, a, [role="button"]):focus-visible {
   outline: none !important;
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.14) !important;
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--brand-secondary) 14%, transparent) !important;
 }
 
 input[type="date"] {
@@ -1085,7 +1082,7 @@ app-administrador .table-responsive::-webkit-scrollbar-track {
   padding: 0.2rem 0.5rem 0.2rem 0.75rem;
   background: var(--interactive-subtle);
   color: var(--brand-text);
-  border: 1px solid rgba(255, 215, 0, 0.4);
+  border: 1px solid color-mix(in srgb, var(--brand) 40%, transparent);
   border-radius: var(--radius-full);
   font-size: 0.72rem;
   font-weight: 600;
@@ -1557,11 +1554,13 @@ select.form-input:focus,
 textarea.form-input:focus {
   outline: none !important;
   border-color: var(--interactive-text) !important;
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12) !important;
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--brand-secondary) 12%, transparent) !important;
 }
 input[type="date"]:focus {
   border-color: var(--interactive-text) !important;
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12) !important;
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--brand-secondary) 12%, transparent) !important;
 }
 
 form
@@ -1635,12 +1634,20 @@ body select:not(.ng-select):not([multiple]):not([size]) {
 @media (hover: hover) and (pointer: fine) {
   .btn-icon.btn-history:hover {
     color: var(--interactive-text) !important;
-    background: rgba(0, 69, 123, 0.08) !important;
+    background: color-mix(
+      in srgb,
+      var(--brand-secondary) 8%,
+      transparent
+    ) !important;
   }
 }
 .btn-icon.btn-history.active {
   color: var(--interactive-text) !important;
-  background: rgba(0, 69, 123, 0.08) !important;
+  background: color-mix(
+    in srgb,
+    var(--brand-secondary) 8%,
+    transparent
+  ) !important;
 }
 .btn-icon:active {
   transform: scale(0.92) !important;
@@ -1705,7 +1712,7 @@ body select:not(.ng-select):not([multiple]):not([size]) {
   .obs-close:hover {
     background: var(--interactive-subtle) !important;
     border-color: var(--brand) !important;
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.18) !important;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--brand) 18%, transparent) !important;
     transform: translateY(-1px) !important;
   }
 }
@@ -1817,8 +1824,8 @@ body select:not(.ng-select):not([multiple]):not([size]) {
 }
 .data-table tbody tr:hover,
 .audit-table tbody tr:hover {
-  background: rgba(255, 215, 0, 0.04) !important;
-  box-shadow: inset 3px 0 0 rgba(255, 215, 0, 0.5) !important;
+  background: color-mix(in srgb, var(--brand) 4%, transparent) !important;
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brand) 50%, transparent) !important;
 }
 
 td.actions-column {
@@ -1913,7 +1920,7 @@ td.actions-column .btn-icon {
 }
 
 .data-table tbody tr:hover {
-  box-shadow: inset 3px 0 0 rgba(255, 215, 0, 0.5);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brand) 50%, transparent);
 }
 .dropdown-item {
   display: flex;

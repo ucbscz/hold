@@ -115,7 +115,7 @@
   opacity: 1;
 }
 .search-input:focus-within {
-  box-shadow: inset 0 0 0 2px rgba(255, 215, 0, 0.3);
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--brand) 30%, transparent);
 }
 .icon {
   width: 20px;
@@ -251,7 +251,7 @@
   color: var(--brand-text);
   border-color: var(--brand);
   font-weight: 700;
-  box-shadow: 0 2px 8px rgba(255, 215, 0, 0.35);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--brand) 35%, transparent);
 }
 
 @media (max-width: 768px) {

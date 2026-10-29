@@ -171,7 +171,8 @@ import { INLINE_SEARCH_STYLES } from './inline-search.styles';
       .date-input:focus {
         outline: none;
         border-color: var(--interactive-text);
-        box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
+        box-shadow: 0 0 0 3px
+          color-mix(in srgb, var(--brand-secondary) 12%, transparent);
       }
       .date-input::placeholder {
         color: #757575;

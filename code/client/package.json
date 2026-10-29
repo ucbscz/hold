@@ -3,14 +3,17 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
+    "brand": "node tools/render-index.mjs",
+    "prestart": "node aspnetcore-https && npm run brand",
     "start": "run-script-os",
+    "prebuild": "npm run brand",
     "build": "ng build",
+    "prewatch": "npm run brand",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "test:coverage": "ng test --code-coverage --watch=false --browsers=ChromeHeadlessNoSandbox",
     "format": "prettier --write \"**/*.{ts,html,css,json,js,mjs,cjs,scss,md,yml,yaml}\"",
     "format:check": "prettier --check \"**/*.{ts,html,css,json,js,mjs,cjs,scss,md,yml,yaml}\"",
-    "prestart": "node aspnetcore-https",
     "start:windows": "ng serve",
     "start:default": "ng serve"
   },

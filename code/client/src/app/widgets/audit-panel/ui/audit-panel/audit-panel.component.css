@@ -46,7 +46,8 @@
 .admin-search:focus {
   outline: none;
   border-color: var(--interactive-text);
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--brand-secondary) 12%, transparent);
 }
 .clear-search {
   position: absolute;
@@ -121,7 +122,8 @@
 .date-input:focus {
   outline: none;
   border-color: var(--interactive-text);
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--brand-secondary) 12%, transparent);
 }
 
 .audit-table {
@@ -170,8 +172,8 @@
   color: var(--ink);
 }
 .audit-table tbody tr:hover {
-  background: rgba(255, 215, 0, 0.04);
-  box-shadow: inset 3px 0 0 rgba(255, 215, 0, 0.5);
+  background: color-mix(in srgb, var(--brand) 4%, transparent);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brand) 50%, transparent);
 }
 .table-responsive {
   background-color: transparent;

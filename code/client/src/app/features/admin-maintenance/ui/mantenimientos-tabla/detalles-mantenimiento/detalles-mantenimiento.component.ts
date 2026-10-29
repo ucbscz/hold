@@ -1,3 +1,4 @@
+import { INVENTORY_LABELS } from '@brand/brand';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -18,6 +19,7 @@ import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
   styleUrl: './detalles-mantenimiento.component.css',
 })
 export class DetallesMantenimientoComponent {
+  protected readonly etiquetas = INVENTORY_LABELS;
   @Input() mantenimientos: Mantenimientos[] = [];
   @Input() mostrardetalles: WritableSignal<boolean> = signal(true);
   @Output() actualizado = new EventEmitter<void>();

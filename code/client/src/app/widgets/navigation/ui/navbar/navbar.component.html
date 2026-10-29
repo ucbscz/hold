@@ -61,8 +61,8 @@
   <div class="logo-container">
     <img
       (click)="botonhome()"
-      src="assets/logo_universidad.png"
-      alt="Logo UCB"
+      [src]="marca.assets.logo"
+      [alt]="'Logo ' + marca.organization.shortName"
       class="logo-image"
       title="Ir al home"
       width="58"
@@ -211,8 +211,8 @@
                             <span class="notif__equipment">
                               <strong>{{ equipo.nombre }}</strong>
                               <small
-                                >IMT {{ equipo.codigo }} ·
-                                {{ equipo.estado }}</small
+                                >{{ marca.inventory.internalCodeLabel }}
+                                {{ equipo.codigo }} · {{ equipo.estado }}</small
                               >
                             </span>
                           }

@@ -86,7 +86,7 @@ input[type="checkbox"] {
 
 .btn-back:hover {
   background: var(--interactive-subtle);
-  border-color: rgba(255, 215, 0, 0.45);
+  border-color: color-mix(in srgb, var(--brand) 45%, transparent);
 }
 
 .btn-back:active {
@@ -133,7 +133,8 @@ input[type="checkbox"] {
 .search-input:focus {
   outline: none;
   border-color: var(--interactive-text);
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--brand-secondary) 12%, transparent);
 }
 
 .search-input::placeholder {
@@ -249,8 +250,8 @@ input[type="checkbox"] {
 }
 
 .data-table tbody tr:hover {
-  background: rgba(255, 215, 0, 0.04);
-  box-shadow: inset 3px 0 0 rgba(255, 215, 0, 0.5);
+  background: color-mix(in srgb, var(--brand) 4%, transparent);
+  box-shadow: inset 3px 0 0 color-mix(in srgb, var(--brand) 50%, transparent);
 }
 
 .precio-column {

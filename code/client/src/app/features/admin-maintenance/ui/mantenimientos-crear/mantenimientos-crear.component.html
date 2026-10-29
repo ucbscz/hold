@@ -99,7 +99,9 @@
               ) {
                 <div class="equipo-pill">
                   <div class="equipo-pill__identity">
-                    <span class="equipo-id">IMT {{ item.key }}</span>
+                    <span class="equipo-id">{{
+                      etiquetas.internalCodeOf(item.key)
+                    }}</span>
                     <span class="equipo-nombre" [title]="item.value.nombre">{{
                       item.value.nombre
                     }}</span>

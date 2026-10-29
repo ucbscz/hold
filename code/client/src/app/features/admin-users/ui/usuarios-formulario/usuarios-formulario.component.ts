@@ -5,21 +5,20 @@ import {
   UsuarioService,
   UsuarioServiceAPI,
 } from '@entities/user';
-import { FormularioAdminComponent } from '@shared/lib/admin-form';
-import { ValidatedFormsModule, INSTITUTIONAL_EMAIL } from '@shared/lib/forms';
 import {
-  Aviso,
-  CustomSelectComponent,
-  MostrarerrorComponent,
-  PasswordInputComponent,
-} from '@shared/ui';
+  FormularioAdminComponent,
+  FormularioAdminEnvioComponent,
+  FormularioAdminMarcoComponent,
+} from '@shared/lib/admin-form';
+import { ValidatedFormsModule, INSTITUTIONAL_EMAIL } from '@shared/lib/forms';
+import { CustomSelectComponent, PasswordInputComponent } from '@shared/ui';
 
 @Component({
   selector: 'app-usuarios-formulario',
   imports: [
+    FormularioAdminMarcoComponent,
+    FormularioAdminEnvioComponent,
     ValidatedFormsModule,
-    MostrarerrorComponent,
-    Aviso,
     CustomSelectComponent,
     PasswordInputComponent,
   ],

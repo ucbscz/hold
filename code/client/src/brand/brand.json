@@ -1,0 +1,27 @@
+{
+  "productName": "UCB Hold",
+  "tagline": "Préstamo de equipos institucionales",
+  "description": "Plataforma para consultar, reservar y gestionar equipos institucionales de UCB Santa Cruz.",
+  "socialDescription": "Consulta, reserva y gestiona equipos institucionales de UCB Santa Cruz.",
+  "siteUrl": "https://ucbhold.dev",
+  "themeColor": "#ffffff",
+  "organization": {
+    "legalName": "Universidad Católica Boliviana «San Pablo»",
+    "shortName": "UCB",
+    "campus": "Regional Santa Cruz",
+    "unit": "Laboratorio de Mecatrónica",
+    "copyrightHolder": "Universidad Católica Boliviana San Pablo"
+  },
+  "inventory": {
+    "internalCodeLabel": "IMT",
+    "organizationCodeLabel": "UCB",
+    "ownerName": "IMT"
+  },
+  "institutionalEmailDomain": "ucb.edu.bo",
+  "assets": {
+    "logo": "brand/logo.png",
+    "favicon": "brand/favicon.ico",
+    "socialCover": "brand/social-cover.png",
+    "contractTemplate": "brand/contrato.html"
+  }
+}

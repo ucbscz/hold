@@ -1,3 +1,4 @@
+import { INVENTORY_LABELS } from '@brand/brand';
 import { Component, Input } from '@angular/core';
 import { estadoEquipoCssClass, estadoEquipoLabel } from '@entities/equipment';
 import { Observable } from 'rxjs';
@@ -36,7 +37,7 @@ import { INLINE_SEARCH_STYLES } from './inline-search.styles';
           <table>
             <thead>
               <tr>
-                <th>Código IMT</th>
+                <th>{{ etiquetas.internalCode }}</th>
                 <th>Estado</th>
                 <th>Serial</th>
                 @if (!porGavetero) {
@@ -74,6 +75,7 @@ import { INLINE_SEARCH_STYLES } from './inline-search.styles';
   styles: [INLINE_SEARCH_STYLES],
 })
 export class EquiposInlineComponent extends InlineListComponent<EquipoInlineItem> {
+  protected readonly etiquetas = INVENTORY_LABELS;
   @Input() grupoEquipoId?: number;
   @Input() gaveteroId?: number;
   protected readonly estadoEquipoLabel = estadoEquipoLabel;

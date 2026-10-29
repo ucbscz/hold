@@ -1,3 +1,4 @@
+import { INVENTORY_LABELS } from '@brand/brand';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -59,7 +60,7 @@ export class ComponentesTablaComponent extends Tabla implements OnInit {
     'Nombre',
     'Modelo',
     'Tipo',
-    'Código IMT del Equipo',
+    INVENTORY_LABELS.equipmentInternalCode,
     'Precio Referencia',
   ];
   constructor(private readonly componenteService: ComponenteService) {
@@ -118,7 +119,7 @@ export class ComponentesTablaComponent extends Tabla implements OnInit {
             return this.normalizeText(componente.Tipo || '').includes(
               busquedaNormalizada,
             );
-          case 'Código IMT del Equipo':
+          case INVENTORY_LABELS.equipmentInternalCode:
             return this.normalizeText(
               String(componente.CodigoImtEquipo || ''),
             ).includes(busquedaNormalizada);
@@ -160,7 +161,8 @@ export class ComponentesTablaComponent extends Tabla implements OnInit {
       Nombre: (componente) => componente.Nombre,
       Modelo: (componente) => componente.Modelo,
       Tipo: (componente) => componente.Tipo,
-      'Código IMT del Equipo': (componente) => componente.CodigoImtEquipo,
+      [INVENTORY_LABELS.equipmentInternalCode]: (componente) =>
+        componente.CodigoImtEquipo,
       'Precio Referencia': (componente) => componente.PrecioReferencia,
     });
   }

@@ -55,7 +55,7 @@ export const INLINE_SEARCH_STYLES = `
   .admin-search:focus {
     outline: none;
     border-color: var(--interactive-text);
-    box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--brand-secondary) 12%, transparent);
   }
   .clear-search {
     position: absolute;

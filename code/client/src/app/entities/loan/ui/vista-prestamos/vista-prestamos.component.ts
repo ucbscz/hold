@@ -1,3 +1,4 @@
+import { BRAND } from '@brand/brand';
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { VercontratoComponent } from '../contrato/vercontrato.component';
 import { PrestamoDto } from '@entities/admin';
@@ -8,6 +9,7 @@ import { PrestamoDto } from '@entities/admin';
   styleUrl: './vista-prestamos.component.css',
 })
 export class VistaPrestamosComponent {
+  protected readonly inventario = BRAND.inventory;
   readonly contratoVisible = signal(false);
   @Input() prestamos: PrestamoDto[] = [];
   @Output() cerrar: EventEmitter<void> = new EventEmitter<void>();

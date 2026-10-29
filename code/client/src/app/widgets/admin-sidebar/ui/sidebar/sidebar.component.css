@@ -124,7 +124,7 @@
   color: var(--ink);
 }
 .item.active {
-  background: rgba(255, 215, 0, 0.18);
+  background: color-mix(in srgb, var(--brand) 18%, transparent);
   color: var(--ink);
   font-weight: 600;
 }

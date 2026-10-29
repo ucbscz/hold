@@ -1,3 +1,4 @@
+import { BRAND } from '@brand/brand';
 import { CommonModule, DatePipe, Location } from '@angular/common';
 import {
   Component,
@@ -26,6 +27,7 @@ import { UsuarioPrevioComponent } from './usuario-previo/usuario-previo.componen
   styleUrls: ['./navbar.component.css'],
 })
 export class NavbarComponent {
+  protected readonly marca = BRAND;
   showUserMenu: WritableSignal<boolean> = signal(false);
   showNotifications: WritableSignal<boolean> = signal(false);
   activeNotificationTab: WritableSignal<'usuario' | 'admin'> =

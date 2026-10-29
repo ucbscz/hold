@@ -1,25 +1,25 @@
+import { INVENTORY_LABELS } from '@brand/brand';
 import { Component, inject, OnInit } from '@angular/core';
 import { Equipos, Gaveteros } from '@entities/admin';
 import { ESTADO_EQUIPO_OPCIONES, EquipoService } from '@entities/equipment';
 import { GrupoEquipo, GrupoequipoService } from '@entities/equipment-group';
 import { GaveteroService } from '@entities/locker';
-import { FormularioAdminComponent } from '@shared/lib/admin-form';
-import { ValidatedFormsModule } from '@shared/lib/forms';
 import {
-  Aviso,
-  CustomSelectComponent,
-  MostrarerrorComponent,
-  OpcionSelect,
-} from '@shared/ui';
+  FormularioAdminComponent,
+  FormularioAdminEnvioComponent,
+  FormularioAdminMarcoComponent,
+} from '@shared/lib/admin-form';
+import { ValidatedFormsModule } from '@shared/lib/forms';
+import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
 import { CatalogoSelectorComponent } from '../catalogo-selector.component';
 
 @Component({
   selector: 'app-equipos-formulario',
   imports: [
+    FormularioAdminMarcoComponent,
+    FormularioAdminEnvioComponent,
     ValidatedFormsModule,
     CatalogoSelectorComponent,
-    MostrarerrorComponent,
-    Aviso,
     CustomSelectComponent,
   ],
   templateUrl: './equipos-formulario.component.html',
@@ -29,6 +29,7 @@ export class EquiposFormularioComponent
   extends FormularioAdminComponent<Equipos>
   implements OnInit
 {
+  protected readonly etiquetas = INVENTORY_LABELS;
   private readonly equipoService = inject(EquipoService);
   private readonly grupoEquipoService = inject(GrupoequipoService);
   private readonly gaveteroService = inject(GaveteroService);

@@ -1,3 +1,4 @@
+import { BRAND } from '@brand/brand';
 import { CommonModule, NgOptimizedImage } from '@angular/common';
 import {
   AfterViewInit,
@@ -47,6 +48,8 @@ const DEFAULT_MAX_QUANTITY = 99;
 export class ListaObjetosComponent
   implements OnChanges, OnDestroy, OnInit, AfterViewInit
 {
+  protected readonly marca = BRAND;
+  protected readonly anioActual = new Date().getFullYear();
   @ViewChild('gridContainer') gridContainer?: ElementRef<HTMLElement>;
   @Input() categorias: string[] = [];
   @Input() producto: string = '';

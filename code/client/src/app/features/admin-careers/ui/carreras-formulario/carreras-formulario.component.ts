@@ -1,13 +1,20 @@
 import { Component, inject } from '@angular/core';
 import { Carrera } from '@entities/admin';
 import { CarreraService } from '@entities/career';
-import { FormularioAdminComponent } from '@shared/lib/admin-form';
+import {
+  FormularioAdminComponent,
+  FormularioAdminEnvioComponent,
+  FormularioAdminMarcoComponent,
+} from '@shared/lib/admin-form';
 import { ValidatedFormsModule } from '@shared/lib/forms';
-import { Aviso, MostrarerrorComponent } from '@shared/ui';
 
 @Component({
   selector: 'app-carreras-formulario',
-  imports: [ValidatedFormsModule, MostrarerrorComponent, Aviso],
+  imports: [
+    FormularioAdminMarcoComponent,
+    FormularioAdminEnvioComponent,
+    ValidatedFormsModule,
+  ],
   templateUrl: './carreras-formulario.component.html',
   styleUrl: '../../../../shared/lib/admin-form/formulario-admin.css',
 })

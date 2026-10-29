@@ -341,7 +341,8 @@
 .availability-selector__field-switch button:focus-visible,
 .availability-selector__watch:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.14);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--brand-secondary) 14%, transparent);
 }
 
 @media (hover: hover) and (pointer: fine) {

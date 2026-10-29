@@ -307,7 +307,7 @@
           <tbody>
             @for (e of obsAbierta.equipos; track e.codigo) {
               <tr>
-                <td>IMT {{ e.codigo }}</td>
+                <td>{{ etiquetas.internalCodeOf(e.codigo) }}</td>
                 <td>{{ e.nombre || "—" }}</td>
                 <td>
                   <span

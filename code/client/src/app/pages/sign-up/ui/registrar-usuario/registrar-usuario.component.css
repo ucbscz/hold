@@ -360,7 +360,7 @@
 @media (hover: hover) and (pointer: fine) {
   .register-button:hover:not(:disabled) {
     background: var(--brand-hover);
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--brand) 40%, transparent);
     transform: translateY(-1px);
   }
 }
@@ -671,7 +671,8 @@
 
 .form-input:focus {
   border-color: var(--interactive-text);
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.13);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--brand-secondary) 13%, transparent);
 }
 
 .error-message {

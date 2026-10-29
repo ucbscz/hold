@@ -203,7 +203,7 @@ textarea.form-input {
 }
 .equipo-pill:hover {
   background: var(--interactive-subtle);
-  border-color: rgba(255, 215, 0, 0.5);
+  border-color: color-mix(in srgb, var(--brand) 50%, transparent);
   transform: translateY(-1px);
 }
 .equipo-id {

@@ -1,3 +1,4 @@
+import { INVENTORY_LABELS } from '@brand/brand';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
   Component,
@@ -20,6 +21,7 @@ import { parseJsonResult } from '@shared/lib/result';
 import { formatBoliviaDateTime } from '@shared/lib/date';
 import { AuditObservationDetail } from '../../model/audit-observation-detail';
 
+const CAMPO_CODIGO_INTERNO = 'Código interno';
 const INTERVALO_ACTUALIZACION_MS = 30000;
 
 const ACCIONES_POR_ENTIDAD: Record<string, string[]> = {
@@ -64,6 +66,7 @@ const ACCIONES_POR_ENTIDAD: Record<string, string[]> = {
   styleUrl: './audit-panel.component.css',
 })
 export class AuditPanelComponent implements OnChanges, OnDestroy {
+  protected readonly etiquetas = INVENTORY_LABELS;
   @Input() entidad!: string;
   @Input() refreshTrigger: number = 0;
 
@@ -452,10 +455,11 @@ export class AuditPanelComponent implements OnChanges, OnDestroy {
     }
 
     if (log.Entidad === 'Equipo') {
-      const code = valueFor('Código IMT');
+      const code = valueFor(CAMPO_CODIGO_INTERNO);
       const name = valueFor('Nombre') || valueFor('Grupo de equipos');
-      if (code && name) return `IMT ${code} · ${name}`;
-      if (code) return `IMT ${code}`;
+      if (code && name)
+        return `${INVENTORY_LABELS.internalCodeOf(code)} · ${name}`;
+      if (code) return INVENTORY_LABELS.internalCodeOf(code);
     }
 
     return valueFor('Nombre');

@@ -1,0 +1,8 @@
+:root {
+  --brand: #ffd700;
+  --brand-hover: #f5c800;
+  --brand-text: #4a4200;
+  --brand-secondary: #00457b;
+  --brand-secondary-dark: #1f3a57;
+  --font: "Manrope", system-ui, -apple-system, sans-serif;
+}

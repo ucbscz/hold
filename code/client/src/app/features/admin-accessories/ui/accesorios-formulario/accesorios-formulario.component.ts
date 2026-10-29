@@ -2,21 +2,20 @@ import { Component, inject, OnInit } from '@angular/core';
 import { AccesoriosService } from '@entities/accessory';
 import { Accesorio, Equipos } from '@entities/admin';
 import { EquipoService } from '@entities/equipment';
-import { FormularioAdminComponent } from '@shared/lib/admin-form';
-import { ValidatedFormsModule } from '@shared/lib/forms';
 import {
-  Aviso,
-  CustomSelectComponent,
-  MostrarerrorComponent,
-  OpcionSelect,
-} from '@shared/ui';
+  FormularioAdminComponent,
+  FormularioAdminEnvioComponent,
+  FormularioAdminMarcoComponent,
+} from '@shared/lib/admin-form';
+import { ValidatedFormsModule } from '@shared/lib/forms';
+import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
 
 @Component({
   selector: 'app-accesorios-formulario',
   imports: [
+    FormularioAdminMarcoComponent,
+    FormularioAdminEnvioComponent,
     ValidatedFormsModule,
-    MostrarerrorComponent,
-    Aviso,
     CustomSelectComponent,
   ],
   templateUrl: './accesorios-formulario.component.html',

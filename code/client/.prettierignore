@@ -3,3 +3,5 @@ dist
 coverage
 .angular
 out-tsc
+
+src/index.html

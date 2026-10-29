@@ -1,3 +1,4 @@
+import { BRAND } from '@brand/brand';
 import { HttpClient } from '@angular/common/http';
 import {
   Component,
@@ -198,7 +199,7 @@ export class FormularioComponent implements OnInit {
     }
 
     this.http
-      .get('assets/contrato.html?v=' + new Date().getTime(), {
+      .get(BRAND.assets.contractTemplate + '?v=' + new Date().getTime(), {
         responseType: 'text',
       })
       .subscribe({

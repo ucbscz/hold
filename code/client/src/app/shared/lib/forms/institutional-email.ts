@@ -1,6 +1,6 @@
-import { environment } from '@environments/environment';
+import { BRAND } from '@brand/brand';
 
-const domain = environment.institutionalEmailDomain;
+const domain = BRAND.institutionalEmailDomain;
 const escapedDomain = domain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 export const INSTITUTIONAL_EMAIL = {

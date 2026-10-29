@@ -93,7 +93,8 @@
 :host(.inline-state-select) .cs-trigger.open,
 :host(.audit-select-wrap) .cs-trigger.open {
   border-color: var(--interactive-text);
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--brand-secondary) 12%, transparent);
 }
 .cs-value.placeholder {
   color: var(--ink-muted);
@@ -170,7 +171,8 @@
 }
 .cs-search__input:focus {
   border-color: var(--interactive-text);
-  box-shadow: 0 0 0 3px rgba(0, 69, 123, 0.12);
+  box-shadow: 0 0 0 3px
+    color-mix(in srgb, var(--brand-secondary) 12%, transparent);
 }
 .cs-search__input::placeholder {
   color: var(--ink-muted);

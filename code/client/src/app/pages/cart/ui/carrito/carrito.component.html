@@ -43,7 +43,9 @@
                     {{ item.value.nombre }}
                   </button>
                 </h3>
-                <p class="cart__product-owner">Propietario: IMT</p>
+                <p class="cart__product-owner">
+                  Propietario: {{ inventario.ownerName }}
+                </p>
               </div>
               <div class="cart__quantity">
                 <span class="cart__quantity-label">Cantidad</span>

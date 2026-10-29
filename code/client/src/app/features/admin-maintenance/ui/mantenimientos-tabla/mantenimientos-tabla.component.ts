@@ -1,3 +1,4 @@
+import { INVENTORY_LABELS } from '@brand/brand';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -75,7 +76,7 @@ export class MantenimientosTablaComponent extends Tabla implements OnInit {
   filtroBusqueda: [string, string] = ['', ''];
   override columnas: string[] = [
     'Empresa',
-    'Códigos IMT',
+    INVENTORY_LABELS.internalCodes,
     'Fecha Inicio',
     'Fecha Fin',
     'Costo',
@@ -154,7 +155,7 @@ export class MantenimientosTablaComponent extends Tabla implements OnInit {
                   return this.normalizeText(
                     mantenimiento.datosgrupo.NombreEmpresaMantenimiento || '',
                   ).includes(busquedaNormalizada);
-                case 'Códigos IMT':
+                case INVENTORY_LABELS.internalCodes:
                   return this.normalizeText(
                     String(mantenimiento.datosgrupo.CodigoImtEquipo || ''),
                   ).includes(busquedaNormalizada);
@@ -300,7 +301,7 @@ export class MantenimientosTablaComponent extends Tabla implements OnInit {
       {
         Empresa: (mantenimiento) =>
           mantenimiento.datosgrupo.NombreEmpresaMantenimiento,
-        'Códigos IMT': (mantenimiento) =>
+        [INVENTORY_LABELS.internalCodes]: (mantenimiento) =>
           mantenimiento.datosgrupo.CodigoImtEquipo,
         'Fecha Inicio': (mantenimiento) =>
           mantenimiento.datosgrupo.FechaMantenimiento,

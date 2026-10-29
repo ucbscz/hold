@@ -1,3 +1,4 @@
+import { BRAND } from '@brand/brand';
 import { CommonModule } from '@angular/common';
 import { InspeccionEquipoComponent } from '@features/equipment-inspection';
 import {
@@ -39,6 +40,7 @@ import { Subscription } from 'rxjs';
   styleUrl: './carrito.component.css',
 })
 export class CarritoComponent implements OnDestroy {
+  protected readonly inventario = BRAND.inventory;
   equipoDetalle: number | null = null;
   public step: number = 1;
   public errorSolicitudVisible: WritableSignal<boolean> = signal(false);

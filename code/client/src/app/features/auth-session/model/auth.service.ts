@@ -16,8 +16,6 @@ interface SessionResponse {
   };
 }
 
-const LEGACY_TOKEN_KEYS = ['ucbhold_access', 'ucbhold_refresh'];
-
 @Injectable({
   providedIn: 'root',
 })
@@ -29,7 +27,6 @@ export class AuthService {
     private readonly sessionStorage: BrowserSessionStorageService,
   ) {
     this.http = new HttpClient(backend);
-    this.clearLegacyTokens();
   }
 
   getStoredUser(): Usuario | null {
@@ -64,7 +61,6 @@ export class AuthService {
 
   clear(): void {
     this.sessionStorage.removeItem(SESSION_STORAGE_KEYS.user);
-    this.clearLegacyTokens();
   }
 
   logout(): Observable<void> {
@@ -75,9 +71,5 @@ export class AuthService {
         { withCredentials: true },
       )
       .pipe(finalize(() => this.clear()));
-  }
-
-  private clearLegacyTokens(): void {
-    LEGACY_TOKEN_KEYS.forEach((key) => this.sessionStorage.removeItem(key));
   }
 }

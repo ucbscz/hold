@@ -1,3 +1,4 @@
+import { INVENTORY_LABELS } from '@brand/brand';
 import { CommonModule } from '@angular/common';
 import { Component, inject, signal, WritableSignal } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -73,7 +74,7 @@ export class EquiposTablaComponent extends Tabla {
     'Nombre',
     'EstadoEquipo',
     'Ubicacion',
-    'Código IMT',
+    INVENTORY_LABELS.internalCode,
     'Costo',
   ];
 
@@ -144,7 +145,7 @@ export class EquiposTablaComponent extends Tabla {
             return this.normalizeText(equipo.Ubicacion || '').includes(
               busquedaNormalizada,
             );
-          case 'Código IMT':
+          case INVENTORY_LABELS.internalCode:
             return this.normalizeText(String(equipo.CodigoImt || '')).includes(
               busquedaNormalizada,
             );
@@ -229,7 +230,7 @@ export class EquiposTablaComponent extends Tabla {
       Nombre: (equipo) => equipo.NombreGrupoEquipo,
       EstadoEquipo: (equipo) => equipo.EstadoEquipo,
       Ubicacion: (equipo) => equipo.Ubicacion,
-      'Código IMT': (equipo) => equipo.CodigoImt,
+      [INVENTORY_LABELS.internalCode]: (equipo) => equipo.CodigoImt,
       Costo: (equipo) => equipo.CostoReferencia,
     });
   }

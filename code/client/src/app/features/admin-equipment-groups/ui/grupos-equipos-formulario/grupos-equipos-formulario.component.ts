@@ -1,21 +1,21 @@
 import { Component, inject, Input } from '@angular/core';
 import { GrupoEquipo, GrupoequipoService } from '@entities/equipment-group';
-import { FormularioAdminComponent } from '@shared/lib/admin-form';
+import {
+  FormularioAdminComponent,
+  FormularioAdminEnvioComponent,
+  FormularioAdminMarcoComponent,
+} from '@shared/lib/admin-form';
 import { extractErrorMessage } from '@shared/lib/error';
 import { ValidatedFormsModule } from '@shared/lib/forms';
-import {
-  Aviso,
-  CustomSelectComponent,
-  MostrarerrorComponent,
-} from '@shared/ui';
+import { CustomSelectComponent } from '@shared/ui';
 import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-grupos-equipos-formulario',
   imports: [
+    FormularioAdminMarcoComponent,
+    FormularioAdminEnvioComponent,
     ValidatedFormsModule,
-    MostrarerrorComponent,
-    Aviso,
     CustomSelectComponent,
   ],
   templateUrl: './grupos-equipos-formulario.component.html',

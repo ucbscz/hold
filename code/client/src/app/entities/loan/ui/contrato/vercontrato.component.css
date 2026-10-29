@@ -202,7 +202,7 @@
 ::ng-deep .contract-document h1 {
   max-width: 680px;
   margin: 0 auto 24px;
-  color: #1f3a57;
+  color: var(--brand-secondary-dark);
   font-size: 1.62rem;
   font-weight: 800;
   line-height: 1.25;
@@ -220,7 +220,7 @@
 }
 
 ::ng-deep .contract-document strong {
-  color: #1f3a57;
+  color: var(--brand-secondary-dark);
   font-weight: 800;
 }
 
@@ -242,7 +242,7 @@
 
 ::ng-deep .contract-document th {
   background: #eef2f7;
-  color: #1f3a57;
+  color: var(--brand-secondary-dark);
   font-weight: 800;
 }
 

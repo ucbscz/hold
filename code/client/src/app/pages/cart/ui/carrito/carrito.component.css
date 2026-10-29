@@ -202,7 +202,7 @@
 @media (hover: hover) and (pointer: fine) {
   .cart__button:not(:disabled):hover {
     background: var(--brand-hover);
-    box-shadow: 0 4px 12px rgba(255, 215, 0, 0.4);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--brand) 40%, transparent);
     transform: translateY(-1px);
   }
 }

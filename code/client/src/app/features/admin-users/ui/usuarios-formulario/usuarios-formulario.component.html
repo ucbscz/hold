@@ -1,215 +1,190 @@
-<div class="form-container">
-  <button class="btn-close" (click)="cerrar()">
-    <img src="assets/x.png" alt="Cerrar" />
-  </button>
-  <div class="form-content">
-    <h2>{{ textos.titulo }}</h2>
-    <form #form="ngForm" (ngSubmit)="form.valid && validarEnvio()">
-      @if (!editando) {
-        <div class="form-group">
-          <label for="carnet">Carnet</label>
-          <input
-            type="text"
-            id="carnet"
-            name="carnet"
-            pattern="[0-9]+"
-            minlength="7"
-            maxlength="10"
-            [(ngModel)]="modelo.carnet"
-            required
-            placeholder="12891161"
-            class="form-input"
-          />
-        </div>
-      }
+<app-formulario-admin-marco [formulario]="this">
+  <form #form="ngForm" (ngSubmit)="form.valid && validarEnvio()">
+    @if (!editando) {
       <div class="form-group">
-        <label for="nombre">Nombre</label>
+        <label for="carnet">Carnet</label>
         <input
           type="text"
-          id="nombre"
-          name="nombre"
-          [(ngModel)]="modelo.nombre"
-          required
-          maxlength="30"
-          placeholder="Nombre del usuario"
-          class="form-input"
-        />
-      </div>
-      <div class="form-group">
-        <label for="apellido_paterno">Apellido Paterno</label>
-        <input
-          type="text"
-          id="apellido_paterno"
-          name="apellido_paterno"
-          [(ngModel)]="modelo.apellido_paterno"
-          required
-          maxlength="30"
-          placeholder="Apellido paterno del usuario"
-          class="form-input"
-        />
-      </div>
-      <div class="form-group">
-        <label for="apellido_materno">Apellido Materno</label>
-        <input
-          type="text"
-          id="apellido_materno"
-          name="apellido_materno"
-          [(ngModel)]="modelo.apellido_materno"
-          required
-          maxlength="30"
-          placeholder="Apellido materno del usuario"
-          class="form-input"
-        />
-      </div>
-      <div class="form-group">
-        <label for="correo">Correo Institucional</label>
-        <input
-          type="email"
-          id="correo"
-          name="correo"
-          [(ngModel)]="modelo.correo"
-          required
-          maxlength="50"
-          [pattern]="correoInstitucional.pattern"
-          [placeholder]="correoInstitucional.placeholder"
-          class="form-input"
-        />
-      </div>
-      <div class="form-group">
-        <label for="usuario-contrasena">{{
-          editando ? "Nueva contraseña (opcional)" : "Contraseña"
-        }}</label>
-        <app-password-input
-          inputId="usuario-contrasena"
-          name="contrasena"
-          minlength="8"
-          pattern="^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}$"
-          [validationMessages]="{
-            pattern: 'Incluye una mayúscula, un número y un carácter especial.',
-          }"
-          [(ngModel)]="contrasena"
-          [required]="!editando"
-          [placeholder]="editando ? 'Sin cambios' : 'Contraseña del usuario'"
-        />
-      </div>
-      <div class="form-group">
-        <label for="usuario-repetir-contrasena">Repetir contraseña</label>
-        <app-password-input
-          inputId="usuario-repetir-contrasena"
-          name="repetirContrasena"
-          [fieldErrors]="false"
-          [(ngModel)]="repetirContrasena"
-          [required]="!editando || !!contrasena"
-          #confirmacion="ngModel"
-          [invalid]="!!confirmacion.touched && !contrasenasValidas"
-          [describedBy]="
-            confirmacion.touched && !contrasenasValidas
-              ? 'usuario-password-error'
-              : ''
-          "
-          placeholder="Repite la contraseña"
-        />
-        @if (confirmacion.touched && !contrasenasValidas) {
-          <p id="usuario-password-error" class="password-error" role="alert">
-            Las contraseñas deben coincidir.
-          </p>
-        }
-      </div>
-      <div class="form-group">
-        <label for="telefono">Teléfono</label>
-        <input
-          type="tel"
-          id="telefono"
-          name="telefono"
-          [(ngModel)]="modelo.telefono"
-          required
-          pattern="[0-9]{8,10}"
+          id="carnet"
+          name="carnet"
+          pattern="[0-9]+"
+          minlength="7"
           maxlength="10"
-          placeholder="79943044"
-          class="form-input"
-        />
-      </div>
-      <div class="form-group">
-        <label for="rol">Rol</label>
-        <app-custom-select
-          name="rol"
-          [(ngModel)]="modelo.rol"
+          [(ngModel)]="modelo.carnet"
           required
-          [opciones]="rolesOpciones"
-          placeholder="Seleccionar rol"
-        ></app-custom-select>
-      </div>
-      <div class="form-group">
-        <label for="carrera">Carrera</label>
-        <app-custom-select
-          name="carrera"
-          [(ngModel)]="modelo.carrera"
-          required
-          [opciones]="carreras"
-          placeholder="Selecciona una carrera"
-        ></app-custom-select>
-      </div>
-      <div class="form-group">
-        <label for="nombre_referencia">Nombre de Referencia</label>
-        <input
-          type="text"
-          id="nombre_referencia"
-          name="nombre_referencia"
-          maxlength="30"
-          [(ngModel)]="modelo.nombre_referencia"
-          placeholder="Nombre de referencia"
+          placeholder="12891161"
           class="form-input"
         />
       </div>
-      <div class="form-group">
-        <label for="telefono_referencia">Teléfono de Referencia</label>
-        <input
-          type="tel"
-          id="telefono_referencia"
-          name="telefono_referencia"
-          maxlength="10"
-          pattern="[0-9]{8,10}"
-          [(ngModel)]="modelo.telefono_referencia"
-          placeholder="Teléfono de referencia"
-          class="form-input"
-        />
-      </div>
-      <div class="form-group">
-        <label for="email_referencia">Email de Referencia</label>
-        <input
-          type="email"
-          id="email_referencia"
-          name="email_referencia"
-          maxlength="50"
-          pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
-          [(ngModel)]="modelo.email_referencia"
-          placeholder="Email de referencia"
-          class="form-input"
-        />
-      </div>
-      @if (error()) {
-        <app-mostrarerror
-          [inline]="true"
-          [error]="error"
-          [mensaje]="mensajeerror"
-        ></app-mostrarerror>
+    }
+    <div class="form-group">
+      <label for="nombre">Nombre</label>
+      <input
+        type="text"
+        id="nombre"
+        name="nombre"
+        [(ngModel)]="modelo.nombre"
+        required
+        maxlength="30"
+        placeholder="Nombre del usuario"
+        class="form-input"
+      />
+    </div>
+    <div class="form-group">
+      <label for="apellido_paterno">Apellido Paterno</label>
+      <input
+        type="text"
+        id="apellido_paterno"
+        name="apellido_paterno"
+        [(ngModel)]="modelo.apellido_paterno"
+        required
+        maxlength="30"
+        placeholder="Apellido paterno del usuario"
+        class="form-input"
+      />
+    </div>
+    <div class="form-group">
+      <label for="apellido_materno">Apellido Materno</label>
+      <input
+        type="text"
+        id="apellido_materno"
+        name="apellido_materno"
+        [(ngModel)]="modelo.apellido_materno"
+        required
+        maxlength="30"
+        placeholder="Apellido materno del usuario"
+        class="form-input"
+      />
+    </div>
+    <div class="form-group">
+      <label for="correo">Correo Institucional</label>
+      <input
+        type="email"
+        id="correo"
+        name="correo"
+        [(ngModel)]="modelo.correo"
+        required
+        maxlength="50"
+        [pattern]="correoInstitucional.pattern"
+        [placeholder]="correoInstitucional.placeholder"
+        class="form-input"
+      />
+    </div>
+    <div class="form-group">
+      <label for="usuario-contrasena">{{
+        editando ? "Nueva contraseña (opcional)" : "Contraseña"
+      }}</label>
+      <app-password-input
+        inputId="usuario-contrasena"
+        name="contrasena"
+        minlength="8"
+        pattern="^(?=.*[A-Z])(?=.*[0-9])(?=.*[^a-zA-Z0-9]).{8,}$"
+        [validationMessages]="{
+          pattern: 'Incluye una mayúscula, un número y un carácter especial.',
+        }"
+        [(ngModel)]="contrasena"
+        [required]="!editando"
+        [placeholder]="editando ? 'Sin cambios' : 'Contraseña del usuario'"
+      />
+    </div>
+    <div class="form-group">
+      <label for="usuario-repetir-contrasena">Repetir contraseña</label>
+      <app-password-input
+        inputId="usuario-repetir-contrasena"
+        name="repetirContrasena"
+        [fieldErrors]="false"
+        [(ngModel)]="repetirContrasena"
+        [required]="!editando || !!contrasena"
+        #confirmacion="ngModel"
+        [invalid]="!!confirmacion.touched && !contrasenasValidas"
+        [describedBy]="
+          confirmacion.touched && !contrasenasValidas
+            ? 'usuario-password-error'
+            : ''
+        "
+        placeholder="Repite la contraseña"
+      />
+      @if (confirmacion.touched && !contrasenasValidas) {
+        <p id="usuario-password-error" class="password-error" role="alert">
+          Las contraseñas deben coincidir.
+        </p>
       }
-      <div class="form-submit">
-        <button
-          type="submit"
-          class="register-button"
-          [disabled]="!form.valid || !contrasenasValidas || procesando"
-        >
-          <span>{{ textos.boton }}</span>
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-@if (aviso()) {
-  <app-aviso
-    [cerrar]="aviso"
-    [mensaje]="mensajeaviso"
-    (aceptar)="confirmar()"
-  ></app-aviso>
-}
+    </div>
+    <div class="form-group">
+      <label for="telefono">Teléfono</label>
+      <input
+        type="tel"
+        id="telefono"
+        name="telefono"
+        [(ngModel)]="modelo.telefono"
+        required
+        pattern="[0-9]{8,10}"
+        maxlength="10"
+        placeholder="79943044"
+        class="form-input"
+      />
+    </div>
+    <div class="form-group">
+      <label for="rol">Rol</label>
+      <app-custom-select
+        name="rol"
+        [(ngModel)]="modelo.rol"
+        required
+        [opciones]="rolesOpciones"
+        placeholder="Seleccionar rol"
+      ></app-custom-select>
+    </div>
+    <div class="form-group">
+      <label for="carrera">Carrera</label>
+      <app-custom-select
+        name="carrera"
+        [(ngModel)]="modelo.carrera"
+        required
+        [opciones]="carreras"
+        placeholder="Selecciona una carrera"
+      ></app-custom-select>
+    </div>
+    <div class="form-group">
+      <label for="nombre_referencia">Nombre de Referencia</label>
+      <input
+        type="text"
+        id="nombre_referencia"
+        name="nombre_referencia"
+        maxlength="30"
+        [(ngModel)]="modelo.nombre_referencia"
+        placeholder="Nombre de referencia"
+        class="form-input"
+      />
+    </div>
+    <div class="form-group">
+      <label for="telefono_referencia">Teléfono de Referencia</label>
+      <input
+        type="tel"
+        id="telefono_referencia"
+        name="telefono_referencia"
+        maxlength="10"
+        pattern="[0-9]{8,10}"
+        [(ngModel)]="modelo.telefono_referencia"
+        placeholder="Teléfono de referencia"
+        class="form-input"
+      />
+    </div>
+    <div class="form-group">
+      <label for="email_referencia">Email de Referencia</label>
+      <input
+        type="email"
+        id="email_referencia"
+        name="email_referencia"
+        maxlength="50"
+        pattern="[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}"
+        [(ngModel)]="modelo.email_referencia"
+        placeholder="Email de referencia"
+        class="form-input"
+      />
+    </div>
+    <app-formulario-admin-envio
+      [formulario]="this"
+      [deshabilitado]="!form.valid || !contrasenasValidas || procesando"
+    />
+  </form>
+</app-formulario-admin-marco>

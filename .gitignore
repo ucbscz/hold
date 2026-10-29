@@ -157,3 +157,5 @@ code/tests/TestResults/
 /DataBase/
 /package-lock.json
 /Code/base64_firma.txt
+
+code/client/src/index.html

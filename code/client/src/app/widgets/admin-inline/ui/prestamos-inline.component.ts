@@ -1,3 +1,4 @@
+import { BRAND } from '@brand/brand';
 import { DatePipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';
@@ -50,7 +51,7 @@ import { INLINE_SEARCH_STYLES } from './inline-search.styles';
                   <td>
                     <div class="equipment-identifiers">
                       <span
-                        ><strong>IMT</strong>
+                        ><strong>{{ inventario.internalCodeLabel }}</strong>
                         {{ p.CodigoImt || 'No asignado' }}</span
                       >
                       @if (p.CodigoUcb) {
@@ -108,6 +109,7 @@ import { INLINE_SEARCH_STYLES } from './inline-search.styles';
   styles: [INLINE_SEARCH_STYLES],
 })
 export class PrestamosInlineComponent extends InlineListComponent<PrestamoInlineItem> {
+  protected readonly inventario = BRAND.inventory;
   @Input() carnet!: string;
 
   constructor(private readonly api: AdminInlineApiService) {

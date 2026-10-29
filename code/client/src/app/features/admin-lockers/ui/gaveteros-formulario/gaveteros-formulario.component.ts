@@ -2,20 +2,20 @@ import { Component, inject, OnInit } from '@angular/core';
 import { Gaveteros } from '@entities/admin';
 import { MuebleService } from '@entities/furniture';
 import { GaveteroService } from '@entities/locker';
-import { FormularioAdminComponent } from '@shared/lib/admin-form';
-import { ValidatedFormsModule } from '@shared/lib/forms';
 import {
-  Aviso,
-  CustomSelectComponent,
-  MostrarerrorComponent,
-} from '@shared/ui';
+  FormularioAdminComponent,
+  FormularioAdminEnvioComponent,
+  FormularioAdminMarcoComponent,
+} from '@shared/lib/admin-form';
+import { ValidatedFormsModule } from '@shared/lib/forms';
+import { CustomSelectComponent } from '@shared/ui';
 
 @Component({
   selector: 'app-gaveteros-formulario',
   imports: [
+    FormularioAdminMarcoComponent,
+    FormularioAdminEnvioComponent,
     ValidatedFormsModule,
-    MostrarerrorComponent,
-    Aviso,
     CustomSelectComponent,
   ],
   templateUrl: './gaveteros-formulario.component.html',
