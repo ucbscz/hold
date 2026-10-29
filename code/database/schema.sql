@@ -5163,6 +5163,13 @@ CREATE INDEX idx_audit_entidad_accion_fecha ON public.audit_logs USING btree (en
 
 
 --
+-- Name: idx_audit_timestamp; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_audit_timestamp ON public.audit_logs USING btree ("timestamp" DESC) WHERE (estado_eliminado = false);
+
+
+--
 -- Name: idx_carreras_nombre; Type: INDEX; Schema: public; Owner: -
 --
 

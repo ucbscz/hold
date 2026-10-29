@@ -20,6 +20,8 @@ import { parseJsonResult } from '@shared/lib/result';
 import { formatBoliviaDateTime } from '@shared/lib/date';
 import { AuditObservationDetail } from '../../model/audit-observation-detail';
 
+const INTERVALO_ACTUALIZACION_MS = 30000;
+
 const ACCIONES_POR_ENTIDAD: Record<string, string[]> = {
   Prestamo: [
     'Crear',
@@ -144,8 +146,9 @@ export class AuditPanelComponent implements OnChanges, OnDestroy {
     if (this.refreshTimer) return;
 
     this.refreshTimer = setInterval(() => {
-      if (!this.cargando && !this.obsAbierta) this.cargar(true);
-    }, 5000);
+      if (!this.cargando && !this.obsAbierta && !document.hidden)
+        this.cargar(true);
+    }, INTERVALO_ACTUALIZACION_MS);
   }
 
   seleccionarAccion(a: string) {
