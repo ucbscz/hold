@@ -2,16 +2,16 @@ using Ardalis.Result;
 using FluentValidation;
 using Microsoft.Extensions.Options;
 using BCryptLib = BCrypt.Net.BCrypt;
-using UsuarioEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Usuario;
-using IMT_Reservas.Server.Modules.Auditoria.Application;
-using IMT_Reservas.Server.Modules.Notificaciones.Application;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
-using IMT_Reservas.Server.Shared.Caching;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Security;
+using UsuarioEntity = UCB_Hold.Server.Modules.Usuarios.Domain.Usuario;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Notificaciones.Application;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
+using UCB_Hold.Server.Shared.Caching;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Application;
+namespace UCB_Hold.Server.Modules.Usuarios.Application;
 
 public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioDto>
 {
@@ -29,7 +29,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
     private readonly UsuarioReadRepository _queries;
     private readonly SensitiveDataProtector _sensitiveData;
     private readonly VerificacionCorreoService _emailVerification;
-    private readonly CodigoGoogleService _googleCodes;
+    private readonly CodigoExternoService _codigosExternos;
 
     public UsuarioService(
         UsuarioRepository repository,
@@ -44,7 +44,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         UsuarioReadRepository queries,
         SensitiveDataProtector sensitiveData,
         VerificacionCorreoService emailVerification,
-        CodigoGoogleService googleCodes
+        CodigoExternoService codigosExternos
     )
         : base(repository, validator, mapper, audit)
     {
@@ -57,7 +57,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         _queries = queries;
         _sensitiveData = sensitiveData;
         _emailVerification = emailVerification;
-        _googleCodes = googleCodes;
+        _codigosExternos = codigosExternos;
     }
 
     public async Task<Result<object>> SetBlocked(
@@ -150,9 +150,9 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         CancellationToken cancellationToken
     )
     {
-        if (!puedeGestionar && string.IsNullOrWhiteSpace(dto.CodigoGoogle))
+        if (!puedeGestionar && string.IsNullOrWhiteSpace(dto.CodigoExterno))
             return Result<UsuarioDto>.Unauthorized(
-                "Verifica tu correo institucional con Google para crear tu cuenta"
+                "Verifica tu correo institucional para crear tu cuenta"
             );
 
         return await Create(dto, puedeGestionar, isLabAdmin, cancellationToken);
@@ -168,18 +168,18 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         dto.Carnet = dto.Carnet?.Trim().ToUpperInvariant();
         dto.Rol = dto.Rol?.Trim().ToLowerInvariant();
         dto.Email = dto.Email?.Trim().ToLowerInvariant();
-        var googleRegistration = string.IsNullOrWhiteSpace(dto.CodigoGoogle)
+        var registroExterno = string.IsNullOrWhiteSpace(dto.CodigoExterno)
             ? null
-            : await _googleCodes.Get(dto.CodigoGoogle, cancellationToken);
-        if (googleRegistration != null && googleRegistration.Tipo != TipoCodigoGoogle.Registro)
-            googleRegistration = null;
+            : await _codigosExternos.Get(dto.CodigoExterno, cancellationToken);
+        if (registroExterno != null && registroExterno.Tipo != TipoCodigoExterno.Registro)
+            registroExterno = null;
 
-        if (!string.IsNullOrWhiteSpace(dto.CodigoGoogle) && googleRegistration == null)
-            return Result<UsuarioDto>.Unauthorized("El registro con Google expiró o ya fue utilizado");
+        if (!string.IsNullOrWhiteSpace(dto.CodigoExterno) && registroExterno == null)
+            return Result<UsuarioDto>.Unauthorized("El registro con la cuenta institucional expiró o ya fue utilizado");
 
-        if (googleRegistration != null)
+        if (registroExterno != null)
         {
-            dto.Email = googleRegistration.Email;
+            dto.Email = registroExterno.Email;
             dto.Contrasena = $"Gg1!{AuthTokenGenerator.Create()}";
             dto.EmailVerificado = true;
         }
@@ -199,7 +199,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             return Result<UsuarioDto>.Forbidden();
         dto.Bloqueado = false;
         dto.MotivoBloqueo = null;
-        dto.EmailVerificado = isAdmin || googleRegistration != null;
+        dto.EmailVerificado = isAdmin || registroExterno != null;
 
         await ResolveCarrera(dto, cancellationToken);
 
@@ -217,9 +217,9 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         {
             var existingEmail = await _authRepository.GetTrackedByEmail(dto.Email!, cancellationToken);
             return Result<UsuarioDto>.Error(
-                string.IsNullOrWhiteSpace(existingEmail?.GoogleId)
+                string.IsNullOrWhiteSpace(existingEmail?.IdentidadExternaId)
                     ? "Email ya existe"
-                    : "El correo ya está registrado. Inicia sesión con Google"
+                    : "El correo ya está registrado. Inicia sesión con tu cuenta institucional"
             );
         }
 
@@ -246,8 +246,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             entity.ImagenFirma = dto.ImagenFirma;
         }
 
-        entity.EmailVerificado = isAdmin || googleRegistration != null;
-        entity.GoogleId = googleRegistration?.GoogleId;
+        entity.EmailVerificado = isAdmin || registroExterno != null;
+        entity.IdentidadExternaId = registroExterno?.IdentidadExternaId;
         entity.TokenVerificacionHash = null;
         entity.TokenVerificacionExpira = null;
 
@@ -266,10 +266,10 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         if (result.IsSuccess && result.Value != null)
         {
-            if (googleRegistration != null)
+            if (registroExterno != null)
             {
-                if (!await _googleCodes.Consume(dto.CodigoGoogle!, CancellationToken.None))
-                    return Result<UsuarioDto>.Conflict("El registro con Google ya fue utilizado");
+                if (!await _codigosExternos.Consume(dto.CodigoExterno!, CancellationToken.None))
+                    return Result<UsuarioDto>.Conflict("El registro con la cuenta institucional ya fue utilizado");
             }
             else if (!isAdmin)
             {

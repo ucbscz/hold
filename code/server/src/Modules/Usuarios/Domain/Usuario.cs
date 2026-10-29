@@ -1,6 +1,6 @@
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Domain;
+namespace UCB_Hold.Server.Modules.Usuarios.Domain;
 
 public class Usuario : Entity
 {
@@ -25,7 +25,7 @@ public class Usuario : Entity
     public string? RefreshToken { get; set; }
     public DateTime? RefreshTokenExpiry { get; set; }
     public bool EmailVerificado { get; set; } = true;
-    public string? GoogleId { get; set; }
+    public string? IdentidadExternaId { get; set; }
     public string? TokenVerificacionHash { get; set; }
     public DateTime? TokenVerificacionExpira { get; set; }
 }

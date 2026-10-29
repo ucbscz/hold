@@ -2,9 +2,9 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Shared.Web;
+namespace UCB_Hold.Server.Shared.Web;
 
 public sealed class ExceptionHandler : IExceptionHandler
 {

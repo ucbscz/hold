@@ -1,19 +1,19 @@
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Application;
+namespace UCB_Hold.Server.Modules.Usuarios.Application;
 
-public sealed class CodigoGoogleService
+public sealed class CodigoExternoService
 {
     private static readonly TimeSpan Lifetime = TimeSpan.FromMinutes(10);
     private readonly CodigoAutenticacionRepository _repository;
 
-    public CodigoGoogleService(CodigoAutenticacionRepository repository) => _repository = repository;
+    public CodigoExternoService(CodigoAutenticacionRepository repository) => _repository = repository;
 
     public async Task<string> Create(
         string type,
         string email,
-        string googleId,
+        string identidadExternaId,
         string name,
         string paternalSurname,
         string maternalSurname,
@@ -27,7 +27,7 @@ public sealed class CodigoGoogleService
                 Hash = AuthTokenGenerator.Hash(token),
                 Tipo = type,
                 Email = email,
-                GoogleId = googleId,
+                IdentidadExternaId = identidadExternaId,
                 Nombre = name,
                 ApellidoPaterno = paternalSurname,
                 ApellidoMaterno = maternalSurname,

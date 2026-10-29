@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Shared.Search;
+namespace UCB_Hold.Server.Shared.Search;
 
 public sealed class ElasticsearchSettings
 {

@@ -1,6 +1,6 @@
-using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using UCB_Hold.Server.Modules.Prestamos.Domain;
 
-namespace IMT_Reservas.Server.Modules.Prestamos.Application;
+namespace UCB_Hold.Server.Modules.Prestamos.Application;
 
 public static class PrestamoAvailabilityPolicy
 {

@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Modules.Usuarios.Application;
+namespace UCB_Hold.Server.Modules.Usuarios.Application;
 
 public sealed class TokenDto
 {
@@ -17,7 +17,7 @@ public sealed class ResetPasswordDto
     public string Contrasena { get; set; } = string.Empty;
 }
 
-public sealed class GoogleAuthDto
+public sealed class ExternalAuthDto
 {
     public bool RequiereRegistro { get; set; }
     public string? CodigoRegistro { get; set; }

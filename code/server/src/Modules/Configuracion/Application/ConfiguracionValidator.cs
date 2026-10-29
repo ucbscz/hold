@@ -1,8 +1,8 @@
 using System.Globalization;
 using FluentValidation;
-using IMT_Reservas.Server.Shared.Security;
+using UCB_Hold.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Modules.Configuracion.Application;
+namespace UCB_Hold.Server.Modules.Configuracion.Application;
 
 public class ConfiguracionValidator : AbstractValidator<ConfiguracionDto>
 {

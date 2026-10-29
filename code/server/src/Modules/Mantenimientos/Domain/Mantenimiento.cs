@@ -1,6 +1,6 @@
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Mantenimientos.Domain;
+namespace UCB_Hold.Server.Modules.Mantenimientos.Domain;
 
 public class Mantenimiento : Entity
 {

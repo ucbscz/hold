@@ -39,12 +39,9 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="icon" type="image/x-icon" href="{{ assets.favicon }}" />
     <link rel="apple-touch-icon" href="{{ assets.logo }}" />
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+    <link rel="preconnect" href="{{ fonts.styleOrigin }}" />
+    <link rel="preconnect" href="{{ fonts.fileOrigin }}" crossorigin />
+    <link href="{{ fonts.stylesheet }}" rel="stylesheet" />
   </head>
   <body>
     <app-root ngCspNonce="**CSP_NONCE**"></app-root>

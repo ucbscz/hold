@@ -1,37 +1,36 @@
 <div
   class="register-container"
-  [class.register-container--gate]="!registroGoogle"
+  [class.register-container--gate]="!registroExterno"
 >
   <div class="register-card">
     <header class="auth-header">
       <h1 class="title">
-        {{ registroGoogle ? "Completa tu cuenta" : "Crear cuenta" }}
+        {{ registroExterno ? "Completa tu cuenta" : "Crear cuenta" }}
       </h1>
       <p>
         {{
-          registroGoogle
-            ? "Revisa los datos proporcionados por Google y completa los campos pendientes."
-            : "Primero verifica tu correo institucional con Google."
+          registroExterno
+            ? "Revisa los datos proporcionados por " +
+              proveedorIdentidad.name +
+              " y completa los campos pendientes."
+            : "Primero verifica tu correo institucional con " +
+              proveedorIdentidad.name +
+              "."
         }}
       </p>
     </header>
-    @if (!registroGoogle) {
-      <div class="google-registration">
+    @if (!registroExterno) {
+      <div class="identity-registration">
         <button
           type="button"
-          class="google-button"
+          class="identity-button"
           [disabled]="registrando"
-          (click)="iniciarRegistroGoogle()"
+          (click)="iniciarRegistroExterno()"
         >
-          <img
-            src="assets/identity/google-logo.svg"
-            width="20"
-            height="20"
-            alt=""
-          />
-          Verificar correo con Google
+          <img [src]="proveedorIdentidad.logo" width="20" height="20" alt="" />
+          Verificar correo con {{ proveedorIdentidad.name }}
         </button>
-        <p class="google-help">
+        <p class="identity-help">
           Debes utilizar una cuenta institucional
           {{ correoInstitucional.suffix }}.
         </p>
@@ -40,7 +39,7 @@
         </p>
       </div>
     }
-    @if (registroGoogle) {
+    @if (registroExterno) {
       <form
         (ngSubmit)="registrar(registerForm)"
         class="register-form"
@@ -143,7 +142,7 @@
               type="email"
               name="correo"
               [(ngModel)]="nuevoUsuario.correo"
-              [readonly]="registroGoogle"
+              [readonly]="registroExterno"
               required
               email
               maxlength="255"
@@ -355,7 +354,7 @@
             />
           </div>
         </div>
-        @if (!registroGoogle) {
+        @if (!registroExterno) {
           <div class="form-section">
             <h3>Contraseña</h3>
             <div class="form-group">

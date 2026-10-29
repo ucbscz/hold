@@ -1,7 +1,7 @@
 using BCryptLib = BCrypt.Net.BCrypt;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
-using IMT_Reservas.Tests.Helpers;
+using UCB_Hold.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
@@ -9,19 +9,19 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.AspNetCore.DataProtection;
 using Moq;
-using CarreraEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Carrera;
-using IMT_Reservas.Server.Modules.Auditoria.Application;
-using IMT_Reservas.Server.Modules.Auditoria.Infrastructure;
-using IMT_Reservas.Server.Modules.Notificaciones.Application;
-using IMT_Reservas.Server.Modules.Notificaciones.Infrastructure;
-using IMT_Reservas.Server.Modules.Usuarios.Application;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
-using IMT_Reservas.Server.Shared.Caching;
-using IMT_Reservas.Server.Shared.Email;
-using IMT_Reservas.Server.Shared.Persistence;
-using IMT_Reservas.Server.Shared.Security;
-namespace IMT_Reservas.Tests.Integration.Modules.Usuarios;
+using CarreraEntity = UCB_Hold.Server.Modules.Usuarios.Domain.Carrera;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Auditoria.Infrastructure;
+using UCB_Hold.Server.Modules.Notificaciones.Application;
+using UCB_Hold.Server.Modules.Notificaciones.Infrastructure;
+using UCB_Hold.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
+using UCB_Hold.Server.Shared.Caching;
+using UCB_Hold.Server.Shared.Email;
+using UCB_Hold.Server.Shared.Persistence;
+using UCB_Hold.Server.Shared.Security;
+namespace UCB_Hold.Tests.Integration.Modules.Usuarios;
 
 [TestFixture]
 internal class UsuarioServiceTests : ServiceTest<UsuarioService>
@@ -82,7 +82,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
             emailDelivery,
             Options.Create(TestAuthenticationSettings)
         );
-        var googleCodes = new CodigoGoogleService(new CodigoAutenticacionRepository(db));
+        var codigosExternos = new CodigoExternoService(new CodigoAutenticacionRepository(db));
 
         return new UsuarioService(
             repo,
@@ -101,7 +101,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
                 NullLogger<SensitiveDataProtector>.Instance
             ),
             verification,
-            googleCodes
+            codigosExternos
         );
     }
 
@@ -369,9 +369,9 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     }
 
     [Test]
-    public async Task GoogleExchangeCode_CanOnlyBeConsumedOnce()
+    public async Task ExternalExchangeCode_CanOnlyBeConsumedOnce()
     {
-        var codes = new CodigoGoogleService(new CodigoAutenticacionRepository(Db));
+        var codes = new CodigoExternoService(new CodigoAutenticacionRepository(Db));
         var token = await codes.Create(
             "login",
             "u001@ucb.edu.bo",
@@ -752,7 +752,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     }
 
     [Test]
-    public async Task Registrar_WithoutGoogleCodeForSelfSignUp_IsUnauthorized()
+    public async Task Registrar_WithoutExternalCodeForSelfSignUp_IsUnauthorized()
     {
         var result = await Sut.Registrar(BuildValidUsuario("U001", "u001@ucb.edu.bo"), false, false, default);
 

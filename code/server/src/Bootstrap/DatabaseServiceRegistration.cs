@@ -1,13 +1,13 @@
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Modules.Prestamos.Domain;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Shared.Configuration;
-using IMT_Reservas.Server.Shared.Persistence;
-using IMT_Reservas.Server.Shared.Persistence.RowLevelSecurity;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Modules.Prestamos.Domain;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Shared.Configuration;
+using UCB_Hold.Server.Shared.Persistence;
+using UCB_Hold.Server.Shared.Persistence.RowLevelSecurity;
 
-namespace IMT_Reservas.Server.Bootstrap;
+namespace UCB_Hold.Server.Bootstrap;
 
 public static class DatabaseServiceRegistration
 {

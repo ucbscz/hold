@@ -1,9 +1,9 @@
 {
-  "name": "imt-reservas.client",
+  "name": "ucb-hold.client",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "brand": "node tools/render-index.mjs",
+    "brand": "node tools/render-templates.mjs",
     "prestart": "node aspnetcore-https && npm run brand",
     "start": "run-script-os",
     "prebuild": "npm run brand",

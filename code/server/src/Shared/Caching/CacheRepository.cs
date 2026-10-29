@@ -1,9 +1,9 @@
 using System.Text.Json;
 using Ardalis.Result;
 using Microsoft.Extensions.Caching.Distributed;
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Shared.Caching;
+namespace UCB_Hold.Server.Shared.Caching;
 
 public class CacheRepository
 {

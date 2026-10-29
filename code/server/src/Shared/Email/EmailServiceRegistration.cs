@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Shared.Email;
+namespace UCB_Hold.Server.Shared.Email;
 
 public static class EmailServiceRegistration
 {

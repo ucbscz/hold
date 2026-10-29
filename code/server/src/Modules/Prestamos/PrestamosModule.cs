@@ -1,10 +1,10 @@
 using FluentValidation;
-using IMT_Reservas.Server.Modules.Prestamos.Application;
-using IMT_Reservas.Server.Modules.Prestamos.Domain;
-using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Modules.Prestamos.Application;
+using UCB_Hold.Server.Modules.Prestamos.Domain;
+using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Prestamos;
+namespace UCB_Hold.Server.Modules.Prestamos;
 
 public static class PrestamosModule
 {

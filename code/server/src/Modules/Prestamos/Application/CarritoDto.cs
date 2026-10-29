@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Modules.Prestamos.Application;
+namespace UCB_Hold.Server.Modules.Prestamos.Application;
 
 public class CarritoDto
 {

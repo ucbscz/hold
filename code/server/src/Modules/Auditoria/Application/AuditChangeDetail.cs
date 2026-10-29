@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
 
-namespace IMT_Reservas.Server.Modules.Auditoria.Application;
+namespace UCB_Hold.Server.Modules.Auditoria.Application;
 
 public static class AuditChangeDetail
 {
@@ -11,7 +11,7 @@ public static class AuditChangeDetail
     {
         "Id",
         "EstadoEliminado",
-        "CodigoGoogle",
+        "CodigoExterno",
         "EmailVerificacionEnviada",
         "AceptaTerminos",
     };
@@ -26,7 +26,7 @@ public static class AuditChangeDetail
         "ImagenAtrasCarnet",
         "ImagenFirma",
         "RefreshToken",
-        "GoogleId",
+        "IdentidadExternaId",
         "TokenVerificacionHash",
     };
 

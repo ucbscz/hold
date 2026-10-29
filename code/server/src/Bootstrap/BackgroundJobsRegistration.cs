@@ -1,11 +1,11 @@
 using Hangfire;
 using Hangfire.PostgreSql;
-using IMT_Reservas.Server.Modules.Mantenimientos.Application;
-using IMT_Reservas.Server.Modules.Prestamos.Application;
-using IMT_Reservas.Server.Shared.Configuration;
-using IMT_Reservas.Server.Shared.Jobs;
+using UCB_Hold.Server.Modules.Mantenimientos.Application;
+using UCB_Hold.Server.Modules.Prestamos.Application;
+using UCB_Hold.Server.Shared.Configuration;
+using UCB_Hold.Server.Shared.Jobs;
 
-namespace IMT_Reservas.Server.Bootstrap;
+namespace UCB_Hold.Server.Bootstrap;
 
 public static class BackgroundJobsRegistration
 {

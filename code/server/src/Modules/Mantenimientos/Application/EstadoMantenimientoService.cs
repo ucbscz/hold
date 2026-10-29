@@ -1,10 +1,10 @@
 using System.Globalization;
-using IMT_Reservas.Server.Modules.Auditoria.Application;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Modules.Mantenimientos.Infrastructure;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Modules.Mantenimientos.Infrastructure;
 
-namespace IMT_Reservas.Server.Modules.Mantenimientos.Application;
+namespace UCB_Hold.Server.Modules.Mantenimientos.Application;
 
 public sealed class EstadoMantenimientoService
 {

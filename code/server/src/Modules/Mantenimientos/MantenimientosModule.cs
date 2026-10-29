@@ -1,10 +1,10 @@
 using FluentValidation;
-using IMT_Reservas.Server.Modules.Mantenimientos.Application;
-using IMT_Reservas.Server.Modules.Mantenimientos.Domain;
-using IMT_Reservas.Server.Modules.Mantenimientos.Infrastructure;
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Modules.Mantenimientos.Application;
+using UCB_Hold.Server.Modules.Mantenimientos.Domain;
+using UCB_Hold.Server.Modules.Mantenimientos.Infrastructure;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Mantenimientos;
+namespace UCB_Hold.Server.Modules.Mantenimientos;
 
 public static class MantenimientosModule
 {

@@ -1,9 +1,9 @@
-using IMT_Reservas.Server.Shared.Web;
+using UCB_Hold.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using IMT_Reservas.Server.Modules.Notificaciones.Application;
+using UCB_Hold.Server.Modules.Notificaciones.Application;
 
-namespace IMT_Reservas.Server.Modules.Notificaciones.Api;
+namespace UCB_Hold.Server.Modules.Notificaciones.Api;
 
 [Authorize]
 [Route("api/notificaciones")]

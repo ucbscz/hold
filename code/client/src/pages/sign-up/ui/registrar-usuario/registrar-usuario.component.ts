@@ -1,3 +1,4 @@
+import { EXTERNAL_SERVICES } from '@external-services/external-services';
 import { INSTITUTIONAL_EMAIL } from '@shared/lib/forms';
 import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
@@ -28,6 +29,7 @@ import {
   styleUrl: './registrar-usuario.component.css',
 })
 export class RegistrarUsuarioComponent {
+  protected readonly proveedorIdentidad = EXTERNAL_SERVICES.identityProvider;
   protected readonly correoInstitucional = INSTITUTIONAL_EMAIL;
   nuevoUsuario: Usuario = new Usuario();
   password: string = '';
@@ -38,8 +40,8 @@ export class RegistrarUsuarioComponent {
   submitted: boolean = false;
   registrando: boolean = false;
   aceptaTerminos = false;
-  registroGoogle = false;
-  codigoGoogle: string | null = null;
+  registroExterno = false;
+  codigoExterno: string | null = null;
   procesandoImagen = false;
   fotoPerfilPreview = '';
   carnetFrentePreview = '';
@@ -67,14 +69,14 @@ export class RegistrarUsuarioComponent {
         );
       },
     });
-    const googleCode = this.route.snapshot.queryParamMap.get('google');
-    if (googleCode) this.cargarDatosGoogle(googleCode);
-    const googleError = this.route.snapshot.queryParamMap.get('googleError');
-    if (googleError) {
+    const codigoExterno = this.route.snapshot.queryParamMap.get('externo');
+    if (codigoExterno) this.cargarDatosExternos(codigoExterno);
+    const errorExterno = this.route.snapshot.queryParamMap.get('errorExterno');
+    if (errorExterno) {
       this.toast.error(
-        googleError === 'configuracion'
-          ? 'El registro con Google no está disponible. Intenta nuevamente más tarde.'
-          : 'No se pudo verificar tu correo con Google. Usa tu cuenta institucional e intenta nuevamente.',
+        errorExterno === 'configuracion'
+          ? `El registro con ${EXTERNAL_SERVICES.identityProvider.name} no está disponible. Intenta nuevamente más tarde.`
+          : `No se pudo verificar tu correo con ${EXTERNAL_SERVICES.identityProvider.name}. Usa tu cuenta institucional e intenta nuevamente.`,
       );
     }
   }
@@ -83,8 +85,8 @@ export class RegistrarUsuarioComponent {
     if (this.registrando) return;
     if (
       form.invalid ||
-      !this.registroGoogle ||
-      !this.codigoGoogle ||
+      !this.registroExterno ||
+      !this.codigoExterno ||
       this.validartelefono(this.nuevoUsuario.telefono) ||
       !this.nuevoUsuario.carrera ||
       !this.aceptaTerminos ||
@@ -100,13 +102,13 @@ export class RegistrarUsuarioComponent {
         this.password,
         'estudiante',
         this.aceptaTerminos,
-        this.codigoGoogle,
+        this.codigoExterno,
       )
       .subscribe({
         next: () => {
           this.registrando = false;
           this.toast.success(
-            'Cuenta creada. Ya puedes iniciar sesión con Google.',
+            `Cuenta creada. Ya puedes iniciar sesión con ${EXTERNAL_SERVICES.identityProvider.name}.`,
           );
           void this.router.navigate(['/login']);
         },
@@ -122,16 +124,16 @@ export class RegistrarUsuarioComponent {
       });
   }
 
-  private cargarDatosGoogle(codigo: string): void {
+  private cargarDatosExternos(codigo: string): void {
     this.registrando = true;
-    this.registrarcuenta.intercambiarCodigoGoogle(codigo).subscribe({
+    this.registrarcuenta.intercambiarCodigoExterno(codigo).subscribe({
       next: (result) => {
         if (!result.RequiereRegistro || !result.CodigoRegistro) {
           void this.router.navigate(['/login']);
           return;
         }
-        this.registroGoogle = true;
-        this.codigoGoogle = result.CodigoRegistro;
+        this.registroExterno = true;
+        this.codigoExterno = result.CodigoRegistro;
         this.nuevoUsuario.correo = result.Email;
         this.nuevoUsuario.nombre = result.Nombre;
         this.nuevoUsuario.apellido_paterno = result.ApellidoPaterno;
@@ -141,7 +143,7 @@ export class RegistrarUsuarioComponent {
       error: () => {
         this.registrando = false;
         this.toast.error(
-          'La verificación con Google expiró. Vuelve a verificar tu correo.',
+          `La verificación con ${EXTERNAL_SERVICES.identityProvider.name} expiró. Vuelve a verificar tu correo.`,
         );
       },
     });
@@ -150,8 +152,8 @@ export class RegistrarUsuarioComponent {
     this.router.navigate(['/login']);
   }
 
-  iniciarRegistroGoogle(): void {
-    if (!this.registrando) this.registrarcuenta.iniciarSesionGoogle(true);
+  iniciarRegistroExterno(): void {
+    if (!this.registrando) this.registrarcuenta.iniciarSesionExterna(true);
   }
 
   alternarVisibilidadPassword(): void {

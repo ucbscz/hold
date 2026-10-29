@@ -1,7 +1,7 @@
-using IMT_Reservas.Server.Modules.Auditoria.Application;
-using IMT_Reservas.Server.Modules.Auditoria.Infrastructure;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Auditoria.Infrastructure;
 
-namespace IMT_Reservas.Server.Modules.Auditoria;
+namespace UCB_Hold.Server.Modules.Auditoria;
 
 public static class AuditoriaModule
 {

@@ -46,13 +46,13 @@
   gap: 1.5rem;
 }
 
-.google-registration {
+.identity-registration {
   display: grid;
   gap: 0.75rem;
   margin-bottom: 1.5rem;
 }
 
-.google-registration p {
+.identity-registration p {
   margin: 0;
   color: var(--ink-secondary);
   font-size: 0.875rem;
@@ -60,7 +60,7 @@
   text-align: left;
 }
 
-.google-button {
+.identity-button {
   min-height: 44px;
   display: inline-flex;
   align-items: center;
@@ -75,20 +75,20 @@
   cursor: pointer;
 }
 
-.google-button img {
+.identity-button img {
   display: block;
   width: 20px;
   height: 20px;
 }
 
-.google-button:hover:not(:disabled),
-.google-button:focus-visible:not(:disabled) {
+.identity-button:hover:not(:disabled),
+.identity-button:focus-visible:not(:disabled) {
   background: #f8f9fa;
   outline: 2px solid var(--interactive-text);
   outline-offset: 2px;
 }
 
-.google-button:disabled {
+.identity-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
@@ -580,23 +580,23 @@
   font-size: 0.9375rem;
 }
 
-.google-registration,
+.identity-registration,
 .register-form {
   margin-inline: 2.5rem;
 }
 
-.google-registration {
+.identity-registration {
   gap: 1rem;
   margin-top: 0.75rem;
   margin-bottom: 1.75rem;
 }
 
-.google-registration .google-help,
-.google-registration .login-link {
+.identity-registration .identity-help,
+.identity-registration .login-link {
   text-align: center;
 }
 
-.google-button {
+.identity-button {
   width: 100%;
   min-height: 44px;
   padding: 0 0.75rem;
@@ -614,17 +614,17 @@
     box-shadow var(--t-fast);
 }
 
-.google-button img {
+.identity-button img {
   width: 18px;
   height: 18px;
 }
 
-.google-button:hover:not(:disabled) {
+.identity-button:hover:not(:disabled) {
   background: #f8f9fa;
   box-shadow: 0 1px 2px rgba(60, 64, 67, 0.3);
 }
 
-.google-button:focus-visible:not(:disabled) {
+.identity-button:focus-visible:not(:disabled) {
   outline: 2px solid #1a73e8;
   outline-offset: 2px;
   background: #fff;
@@ -706,12 +706,12 @@
     padding: 1.75rem 1.25rem 1rem;
   }
 
-  .google-registration,
+  .identity-registration,
   .register-form {
     margin-inline: 1.25rem;
   }
 
-  .google-registration {
+  .identity-registration {
     margin-top: 1.5rem;
   }
 

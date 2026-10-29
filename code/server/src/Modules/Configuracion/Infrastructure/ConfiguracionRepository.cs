@@ -1,12 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using IMT_Reservas.Server.Modules.Configuracion.Domain;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Shared.Caching;
-using IMT_Reservas.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Configuracion.Domain;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Shared.Caching;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
+namespace UCB_Hold.Server.Modules.Configuracion.Infrastructure;
 
 public class ConfiguracionRepository
 {

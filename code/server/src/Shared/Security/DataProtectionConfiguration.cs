@@ -1,7 +1,7 @@
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.DataProtection;
 
-namespace IMT_Reservas.Server.Shared.Security;
+namespace UCB_Hold.Server.Shared.Security;
 
 public static class DataProtectionConfiguration
 {

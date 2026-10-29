@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Shared.Kernel;
+namespace UCB_Hold.Server.Shared.Kernel;
 
 public interface IMapper<TEntity, TDto>
 {

@@ -1,8 +1,8 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using IMT_Reservas.Server.Shared.Persistence;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Application;
+namespace UCB_Hold.Server.Modules.Usuarios.Application;
 
 public class CarreraValidator : AbstractValidator<CarreraDto>
 {

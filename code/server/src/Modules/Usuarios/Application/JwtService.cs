@@ -6,7 +6,7 @@ using System.Text;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Application;
+namespace UCB_Hold.Server.Modules.Usuarios.Application;
 
 public class JwtService
 {

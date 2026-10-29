@@ -1,8 +1,8 @@
 using Riok.Mapperly.Abstractions;
-using CategoriaEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Categoria;
-using IMT_Reservas.Server.Shared.Kernel;
+using CategoriaEntity = UCB_Hold.Server.Modules.Inventario.Domain.Categoria;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Application;
+namespace UCB_Hold.Server.Modules.Inventario.Application;
 
 [Mapper]
 public partial class CategoriaMapper : IMapper<CategoriaEntity, CategoriaDto>

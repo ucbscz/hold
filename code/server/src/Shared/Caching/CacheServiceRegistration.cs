@@ -1,6 +1,6 @@
 using StackExchange.Redis;
 
-namespace IMT_Reservas.Server.Shared.Caching;
+namespace UCB_Hold.Server.Shared.Caching;
 
 public static class CacheServiceRegistration
 {

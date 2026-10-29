@@ -1,8 +1,8 @@
 using Riok.Mapperly.Abstractions;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Application;
+namespace UCB_Hold.Server.Modules.Inventario.Application;
 
 [Mapper]
 public partial class ProcedenciaMapper : IMapper<Procedencia, CatalogoInventarioDto>

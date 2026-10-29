@@ -1,10 +1,10 @@
 using FluentValidation;
-using IMT_Reservas.Server.Modules.Configuracion.Application;
-using IMT_Reservas.Server.Modules.Configuracion.Domain;
-using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Modules.Configuracion.Application;
+using UCB_Hold.Server.Modules.Configuracion.Domain;
+using UCB_Hold.Server.Modules.Configuracion.Infrastructure;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Configuracion;
+namespace UCB_Hold.Server.Modules.Configuracion;
 
 public static class ConfiguracionModule
 {

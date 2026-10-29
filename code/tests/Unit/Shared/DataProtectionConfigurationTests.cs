@@ -7,10 +7,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
-using IMT_Reservas.Tests.Helpers;
-using IMT_Reservas.Server.Shared.Security;
+using UCB_Hold.Tests.Helpers;
+using UCB_Hold.Server.Shared.Security;
 
-namespace IMT_Reservas.Tests.Unit.Shared;
+namespace UCB_Hold.Tests.Unit.Shared;
 
 [TestFixture]
 internal sealed class DataProtectionConfigurationTests

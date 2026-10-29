@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 
-namespace IMT_Reservas.Server.Shared.Web;
+namespace UCB_Hold.Server.Shared.Web;
 
 public static class RequestLimits
 {

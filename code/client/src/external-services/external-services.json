@@ -1,0 +1,15 @@
+{
+  "identityProvider": {
+    "name": "Google",
+    "logo": "assets/identity/google-logo.svg"
+  },
+  "hosting": {
+    "networkProvider": "Cloudflare",
+    "analyticsScriptOrigin": "https://static.cloudflareinsights.com",
+    "analyticsConnectOrigin": "https://cloudflareinsights.com"
+  },
+  "hotlinkBlockedImageOrigins": [
+    "https://kingsunmachining.com",
+    "https://www.maisondudrone.com"
+  ]
+}

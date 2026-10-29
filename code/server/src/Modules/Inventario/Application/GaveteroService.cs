@@ -1,12 +1,12 @@
 using System.Globalization;
 using Ardalis.Result;
 using FluentValidation;
-using GaveteroEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Gavetero;
-using IMT_Reservas.Server.Modules.Auditoria.Application;
-using IMT_Reservas.Server.Modules.Inventario.Infrastructure;
-using IMT_Reservas.Server.Shared.Kernel;
+using GaveteroEntity = UCB_Hold.Server.Modules.Inventario.Domain.Gavetero;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Inventario.Infrastructure;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Application;
+namespace UCB_Hold.Server.Modules.Inventario.Application;
 
 public class GaveteroService : Service<GaveteroEntity, GaveteroRepository, GaveteroDto>
 {

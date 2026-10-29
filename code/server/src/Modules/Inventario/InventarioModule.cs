@@ -1,11 +1,11 @@
 using FluentValidation;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Modules.Inventario.Infrastructure;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Search;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Modules.Inventario.Infrastructure;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Search;
 
-namespace IMT_Reservas.Server.Modules.Inventario;
+namespace UCB_Hold.Server.Modules.Inventario;
 
 public static class InventarioModule
 {

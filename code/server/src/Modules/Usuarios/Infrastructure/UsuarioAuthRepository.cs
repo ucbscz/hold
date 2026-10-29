@@ -1,10 +1,10 @@
 using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
-using UsuarioEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Usuario;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Shared.Persistence;
+using UsuarioEntity = UCB_Hold.Server.Modules.Usuarios.Domain.Usuario;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+namespace UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
 public sealed class UsuarioAuthRepository
 {
@@ -115,9 +115,9 @@ public sealed class UsuarioAuthRepository
                 cancellationToken) == 1;
     }
 
-    public async Task LinkGoogle(
+    public async Task LinkExternal(
         string carnet,
-        string googleId,
+        string identidadExternaId,
         CancellationToken cancellationToken = default
     )
     {
@@ -125,7 +125,7 @@ public sealed class UsuarioAuthRepository
             item => item.Carnet == carnet,
             cancellationToken
         );
-        user.GoogleId = googleId;
+        user.IdentidadExternaId = identidadExternaId;
         user.EmailVerificado = true;
         user.TokenVerificacionHash = null;
         user.TokenVerificacionExpira = null;
@@ -233,7 +233,7 @@ public sealed class UsuarioAuthRepository
                         user.RefreshToken,
                         user.RefreshTokenExpiry,
                         user.EmailVerificado,
-                        user.GoogleId,
+                        user.IdentidadExternaId,
                         user.Bloqueado,
                         user.MotivoBloqueo,
                         career.Nombre
@@ -264,7 +264,7 @@ public sealed class UsuarioAuthRepository
                 RefreshToken = data.RefreshToken,
                 RefreshTokenExpiry = data.RefreshTokenExpiry,
                 EmailVerificado = data.EmailVerificado,
-                GoogleId = data.GoogleId,
+                IdentidadExternaId = data.IdentidadExternaId,
                 Bloqueado = data.Bloqueado,
                 MotivoBloqueo = data.MotivoBloqueo,
             },
@@ -288,7 +288,7 @@ public sealed class UsuarioAuthRepository
         string? RefreshToken,
         DateTime? RefreshTokenExpiry,
         bool EmailVerificado,
-        string? GoogleId,
+        string? IdentidadExternaId,
         bool Bloqueado,
         string? MotivoBloqueo,
         string CarreraNombre

@@ -1,8 +1,8 @@
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Search;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Search;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Infrastructure;
+namespace UCB_Hold.Server.Modules.Inventario.Infrastructure;
 
 public sealed class SearchReindexer : IHostedService
 {

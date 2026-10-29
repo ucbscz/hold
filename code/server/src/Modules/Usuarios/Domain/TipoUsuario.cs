@@ -1,6 +1,6 @@
 using NpgsqlTypes;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Domain;
+namespace UCB_Hold.Server.Modules.Usuarios.Domain;
 
 public enum TipoUsuario
 {

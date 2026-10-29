@@ -2,14 +2,14 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Routing;
-using IMT_Reservas.Server.Modules.Auditoria.Api;
-using IMT_Reservas.Server.Modules.Inventario.Api;
-using IMT_Reservas.Server.Modules.Mantenimientos.Api;
-using IMT_Reservas.Server.Modules.Notificaciones.Api;
-using IMT_Reservas.Server.Modules.Prestamos.Api;
-using IMT_Reservas.Server.Modules.Usuarios.Api;
+using UCB_Hold.Server.Modules.Auditoria.Api;
+using UCB_Hold.Server.Modules.Inventario.Api;
+using UCB_Hold.Server.Modules.Mantenimientos.Api;
+using UCB_Hold.Server.Modules.Notificaciones.Api;
+using UCB_Hold.Server.Modules.Prestamos.Api;
+using UCB_Hold.Server.Modules.Usuarios.Api;
 
-namespace IMT_Reservas.Tests.Unit.Shared;
+namespace UCB_Hold.Tests.Unit.Shared;
 
 [TestFixture]
 internal class ApiRouteConventionTests

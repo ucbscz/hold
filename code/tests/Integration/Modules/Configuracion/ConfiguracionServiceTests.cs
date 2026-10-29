@@ -10,16 +10,16 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.DataProtection;
 using System.Text.Json;
-using IMT_Reservas.Tests.Helpers;
-using IMT_Reservas.Server.Modules.Configuracion.Api;
-using IMT_Reservas.Server.Modules.Configuracion.Application;
-using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Shared.Caching;
-using IMT_Reservas.Server.Shared.Persistence;
-using IMT_Reservas.Server.Shared.Security;
+using UCB_Hold.Tests.Helpers;
+using UCB_Hold.Server.Modules.Configuracion.Api;
+using UCB_Hold.Server.Modules.Configuracion.Application;
+using UCB_Hold.Server.Modules.Configuracion.Infrastructure;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Shared.Caching;
+using UCB_Hold.Server.Shared.Persistence;
+using UCB_Hold.Server.Shared.Security;
 
-namespace IMT_Reservas.Tests.Integration.Modules.Configuracion;
+namespace UCB_Hold.Tests.Integration.Modules.Configuracion;
 
 [TestFixture]
 internal class ConfiguracionServiceTests

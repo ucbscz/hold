@@ -1,12 +1,12 @@
 using FluentValidation;
-using IMT_Reservas.Server.Modules.Usuarios.Api;
-using IMT_Reservas.Server.Modules.Usuarios.Application;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
-using IMT_Reservas.Server.Shared.Configuration;
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Modules.Usuarios.Api;
+using UCB_Hold.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
+using UCB_Hold.Server.Shared.Configuration;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Usuarios;
+namespace UCB_Hold.Server.Modules.Usuarios;
 
 public static class UsuariosModule
 {
@@ -31,8 +31,8 @@ public static class UsuariosModule
         services.AddScoped<EmailDeliveryService>();
         services.AddScoped<VerificacionCorreoService>();
         services.AddScoped<RecuperacionContrasenaService>();
-        services.AddScoped<CodigoGoogleService>();
-        services.AddScoped<AutenticacionGoogleService>();
+        services.AddScoped<CodigoExternoService>();
+        services.AddScoped<AutenticacionExternaService>();
         services.AddScoped<Service<Carrera, Repository<Carrera, CarreraDto>, CarreraDto>>();
 
         services.AddMapper<Usuario, UsuarioDto, UsuarioMapper>();

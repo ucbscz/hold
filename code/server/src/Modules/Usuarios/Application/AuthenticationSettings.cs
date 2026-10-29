@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Modules.Usuarios.Application;
+namespace UCB_Hold.Server.Modules.Usuarios.Application;
 
 public sealed class AuthenticationSettings
 {

@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using IMT_Reservas.Server.Modules.Configuracion.Domain;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Configuracion.Domain;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
+namespace UCB_Hold.Server.Modules.Configuracion.Infrastructure;
 
 internal sealed class ConfiguracionSistemaConfiguration : IEntityTypeConfiguration<ConfiguracionSistema>
 {

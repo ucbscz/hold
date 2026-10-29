@@ -1,7 +1,7 @@
-using IMT_Reservas.Server.Modules.Usuarios.Application;
-using IMT_Reservas.Server.Shared.Configuration;
+using UCB_Hold.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Shared.Configuration;
 
-namespace IMT_Reservas.Server.Bootstrap;
+namespace UCB_Hold.Server.Bootstrap;
 
 public static class ServerConfigurationValidator
 {

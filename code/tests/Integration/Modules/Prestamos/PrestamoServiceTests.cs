@@ -1,26 +1,26 @@
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
-using IMT_Reservas.Tests.Helpers;
+using UCB_Hold.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging.Abstractions;
-using IMT_Reservas.Server.Modules.Auditoria.Application;
-using IMT_Reservas.Server.Modules.Auditoria.Infrastructure;
-using IMT_Reservas.Server.Modules.Configuracion.Application;
-using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Modules.Notificaciones.Application;
-using IMT_Reservas.Server.Modules.Notificaciones.Infrastructure;
-using IMT_Reservas.Server.Modules.Prestamos.Application;
-using IMT_Reservas.Server.Modules.Prestamos.Domain;
-using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
-using IMT_Reservas.Server.Modules.Usuarios.Application;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
-using IMT_Reservas.Server.Shared.Persistence;
-using IMT_Reservas.Server.Shared.Security;
-namespace IMT_Reservas.Tests.Integration.Modules.Prestamos;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Auditoria.Infrastructure;
+using UCB_Hold.Server.Modules.Configuracion.Application;
+using UCB_Hold.Server.Modules.Configuracion.Infrastructure;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Modules.Notificaciones.Application;
+using UCB_Hold.Server.Modules.Notificaciones.Infrastructure;
+using UCB_Hold.Server.Modules.Prestamos.Application;
+using UCB_Hold.Server.Modules.Prestamos.Domain;
+using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
+using UCB_Hold.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
+using UCB_Hold.Server.Shared.Persistence;
+using UCB_Hold.Server.Shared.Security;
+namespace UCB_Hold.Tests.Integration.Modules.Prestamos;
 
 [TestFixture]
 internal class PrestamoServiceTests : ServiceTest<PrestamoService>

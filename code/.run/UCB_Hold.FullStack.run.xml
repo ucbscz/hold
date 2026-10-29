@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="UCB_Hold.FullStack" type="CompoundRunConfigurationType" factoryName="Compound" singleton="false">
+    <toRun name="UCB_Hold.Server" type="DotNetProject" run_configuration_name="UCB_Hold.Server" />
+    <toRun name="UCB_Hold.Client" type="js.build_tools.npm" run_configuration_name="UCB_Hold.Client" />
+    <method v="2" />
+  </configuration>
+</component>

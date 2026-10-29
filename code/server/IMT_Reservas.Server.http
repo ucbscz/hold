@@ -1,6 +1,0 @@
-@IMT_Reservas.Server_HostAddress = http://localhost:5190
-
-GET {{IMT_Reservas.Server_HostAddress}}/IMT_Reservas/
-Accept: application/json
-
-###

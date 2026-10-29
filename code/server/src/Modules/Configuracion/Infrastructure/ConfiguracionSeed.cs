@@ -1,6 +1,6 @@
-using IMT_Reservas.Server.Modules.Configuracion.Domain;
+using UCB_Hold.Server.Modules.Configuracion.Domain;
 
-namespace IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
+namespace UCB_Hold.Server.Modules.Configuracion.Infrastructure;
 
 public static class ConfiguracionSeed
 {

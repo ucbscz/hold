@@ -25,7 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\server\IMT_Reservas.Server.csproj" />
+        <ProjectReference Include="..\server\UCB_Hold.Server.csproj" />
     </ItemGroup>
 
 </Project>

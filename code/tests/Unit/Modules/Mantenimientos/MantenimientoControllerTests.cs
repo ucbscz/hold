@@ -2,11 +2,11 @@ using Ardalis.Result;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using IMT_Reservas.Server.Modules.Mantenimientos.Api;
-using IMT_Reservas.Server.Modules.Mantenimientos.Application;
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Modules.Mantenimientos.Api;
+using UCB_Hold.Server.Modules.Mantenimientos.Application;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Tests.Unit.Modules.Mantenimientos;
+namespace UCB_Hold.Tests.Unit.Modules.Mantenimientos;
 
 [TestFixture]
 public class MantenimientoControllerTests

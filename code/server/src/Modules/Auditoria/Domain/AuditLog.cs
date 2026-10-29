@@ -1,6 +1,6 @@
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Auditoria.Domain;
+namespace UCB_Hold.Server.Modules.Auditoria.Domain;
 
 public class AuditLog : Entity
 {

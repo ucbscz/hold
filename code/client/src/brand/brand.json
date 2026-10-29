@@ -23,5 +23,11 @@
     "favicon": "brand/favicon.ico",
     "socialCover": "brand/social-cover.png",
     "contractTemplate": "brand/contrato.html"
+  },
+  "fonts": {
+    "provider": "Google Fonts",
+    "stylesheet": "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap",
+    "styleOrigin": "https://fonts.googleapis.com",
+    "fileOrigin": "https://fonts.gstatic.com"
   }
 }

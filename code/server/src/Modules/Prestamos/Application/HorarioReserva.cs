@@ -1,7 +1,7 @@
-using IMT_Reservas.Server.Modules.Configuracion.Domain;
-using IMT_Reservas.Server.Shared.Configuration;
+using UCB_Hold.Server.Modules.Configuracion.Domain;
+using UCB_Hold.Server.Shared.Configuration;
 
-namespace IMT_Reservas.Server.Modules.Prestamos.Application;
+namespace UCB_Hold.Server.Modules.Prestamos.Application;
 
 public sealed class HorarioReserva
 {

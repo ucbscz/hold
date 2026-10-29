@@ -1,9 +1,9 @@
 using Ardalis.Result;
 using BCryptLib = BCrypt.Net.BCrypt;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Application;
+namespace UCB_Hold.Server.Modules.Usuarios.Application;
 
 public sealed class RecuperacionContrasenaService
 {
@@ -47,7 +47,7 @@ public sealed class RecuperacionContrasenaService
                 Hash = AuthTokenGenerator.Hash($"{normalizedEmail}:{token}"),
                 Tipo = ResetCodeType,
                 Email = user.Email,
-                GoogleId = string.Empty,
+                IdentidadExternaId = string.Empty,
                 Nombre = string.Empty,
                 ApellidoPaterno = string.Empty,
                 ApellidoMaterno = string.Empty,

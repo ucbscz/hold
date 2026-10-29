@@ -1,12 +1,12 @@
 using System.Globalization;
 using Ardalis.Result;
 using Microsoft.EntityFrameworkCore;
-using AccesorioEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Accesorio;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Persistence;
+using AccesorioEntity = UCB_Hold.Server.Modules.Inventario.Domain.Accesorio;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Infrastructure;
+namespace UCB_Hold.Server.Modules.Inventario.Infrastructure;
 
 public class AccesorioRepository : Repository<AccesorioEntity, AccesorioDto>
 {

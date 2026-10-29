@@ -1,10 +1,10 @@
 using Microsoft.Extensions.Options;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Modules.Prestamos.Application;
-using IMT_Reservas.Server.Shared.Configuration;
-using IMT_Reservas.Server.Shared.Security;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Modules.Prestamos.Application;
+using UCB_Hold.Server.Shared.Configuration;
+using UCB_Hold.Server.Shared.Security;
 
-namespace IMT_Reservas.Tests.Helpers;
+namespace UCB_Hold.Tests.Helpers;
 
 internal static class TestBranding
 {

@@ -1,13 +1,13 @@
 using Ardalis.Result;
 using Microsoft.EntityFrameworkCore;
 using ValidationError = Ardalis.Result.ValidationError;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Infrastructure;
+namespace UCB_Hold.Server.Modules.Inventario.Infrastructure;
 
 public sealed class CatalogoInventarioRepository<TEntity>(ApplicationDbContext db, IMapper<TEntity, CatalogoInventarioDto> mapper)
     : Repository<TEntity, CatalogoInventarioDto>(db, mapper) where TEntity : Entity

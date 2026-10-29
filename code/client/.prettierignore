@@ -5,3 +5,4 @@ coverage
 out-tsc
 
 src/index.html
+nginx.conf

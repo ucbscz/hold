@@ -1,7 +1,7 @@
 using FluentValidation;
-using IMT_Reservas.Server.Modules.Mantenimientos.Infrastructure;
+using UCB_Hold.Server.Modules.Mantenimientos.Infrastructure;
 
-namespace IMT_Reservas.Server.Modules.Mantenimientos.Application;
+namespace UCB_Hold.Server.Modules.Mantenimientos.Application;
 
 public class EmpresaMantenimientoValidator : AbstractValidator<EmpresaMantenimientoDto>
 {

@@ -1,6 +1,6 @@
 using NpgsqlTypes;
 
-namespace IMT_Reservas.Server.Modules.Prestamos.Domain;
+namespace UCB_Hold.Server.Modules.Prestamos.Domain;
 
 public enum EstadoPrestamo
 {

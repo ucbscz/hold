@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+namespace UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
 internal sealed class CarreraConfiguration : IEntityTypeConfiguration<Carrera>
 {
@@ -48,14 +48,14 @@ internal sealed class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         entity.Property(e => e.RefreshToken).HasColumnName("refresh_token");
         entity.Property(e => e.RefreshTokenExpiry).HasColumnName("refresh_token_expiry");
         entity.Property(e => e.EmailVerificado).HasColumnName("email_verificado").HasDefaultValue(true);
-        entity.Property(e => e.GoogleId).HasMaxLength(255).HasColumnName("google_id");
+        entity.Property(e => e.IdentidadExternaId).HasMaxLength(255).HasColumnName("google_id");
         entity.Property(e => e.TokenVerificacionHash).HasMaxLength(64).HasColumnName("token_verificacion_hash");
         entity.Property(e => e.TokenVerificacionExpira).HasColumnName("token_verificacion_expira");
         entity.HasOne<Carrera>().WithMany().HasForeignKey(e => e.IdCarrera).IsRequired();
         entity.HasIndex(e => new { e.Nombre, e.EstadoEliminado });
         entity.HasIndex(e => e.Email).IsUnique();
         entity.HasIndex(e => e.RefreshToken);
-        entity.HasIndex(e => e.GoogleId).IsUnique();
+        entity.HasIndex(e => e.IdentidadExternaId).IsUnique();
         entity.HasIndex(e => e.TokenVerificacionHash).IsUnique();
         entity.HasQueryFilter(e => !e.EstadoEliminado);
     }
@@ -70,7 +70,7 @@ internal sealed class CodigoAutenticacionConfiguration : IEntityTypeConfiguratio
         entity.Property(e => e.Hash).HasMaxLength(64).HasColumnName("hash");
         entity.Property(e => e.Tipo).HasMaxLength(20).HasColumnName("tipo");
         entity.Property(e => e.Email).HasMaxLength(255).HasColumnName("email");
-        entity.Property(e => e.GoogleId).HasMaxLength(255).HasColumnName("google_id");
+        entity.Property(e => e.IdentidadExternaId).HasMaxLength(255).HasColumnName("google_id");
         entity.Property(e => e.Nombre).HasMaxLength(64).HasColumnName("nombre");
         entity.Property(e => e.ApellidoPaterno).HasMaxLength(64).HasColumnName("apellido_paterno");
         entity.Property(e => e.ApellidoMaterno).HasMaxLength(64).HasColumnName("apellido_materno");

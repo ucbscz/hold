@@ -1,13 +1,13 @@
 using System.Globalization;
 using System.Text.Json;
 using Ardalis.Result;
-using IMT_Reservas.Server.Modules.Configuracion.Domain;
-using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
-using IMT_Reservas.Server.Modules.Notificaciones.Application;
-using IMT_Reservas.Server.Modules.Prestamos.Domain;
-using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
+using UCB_Hold.Server.Modules.Configuracion.Domain;
+using UCB_Hold.Server.Modules.Configuracion.Infrastructure;
+using UCB_Hold.Server.Modules.Notificaciones.Application;
+using UCB_Hold.Server.Modules.Prestamos.Domain;
+using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
 
-namespace IMT_Reservas.Server.Modules.Prestamos.Application;
+namespace UCB_Hold.Server.Modules.Prestamos.Application;
 
 public class AvisoDisponibilidadService
 {

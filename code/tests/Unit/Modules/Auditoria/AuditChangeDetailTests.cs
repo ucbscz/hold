@@ -1,10 +1,10 @@
 using System.Text.Json;
 using FluentAssertions;
-using IMT_Reservas.Server.Modules.Auditoria.Application;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Modules.Usuarios.Application;
 
-namespace IMT_Reservas.Tests.Unit.Modules.Auditoria;
+namespace UCB_Hold.Tests.Unit.Modules.Auditoria;
 
 [TestFixture]
 internal class AuditChangeDetailTests

@@ -1,8 +1,8 @@
 using Ardalis.Result;
-using IMT_Reservas.Server.Modules.Auditoria.Application;
-using IMT_Reservas.Server.Modules.Inventario.Infrastructure;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Inventario.Infrastructure;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Application;
+namespace UCB_Hold.Server.Modules.Inventario.Application;
 
 public class ComentarioEquipoService
 {

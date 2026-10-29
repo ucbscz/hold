@@ -1,10 +1,10 @@
 using System.Reflection;
 using System.Text.Json;
 using FluentAssertions;
-using IMT_Reservas.Server.Modules.Usuarios.Application;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
 
-namespace IMT_Reservas.Tests.Unit.Architecture;
+namespace UCB_Hold.Tests.Unit.Architecture;
 
 [TestFixture]
 internal class LayerBoundaryTests
@@ -49,7 +49,7 @@ internal class LayerBoundaryTests
         var types = ServerAssembly.GetTypes();
         var abstractions = types
             .Where(type => type.IsInterface)
-            .Where(type => type.Namespace?.StartsWith("IMT_Reservas.Server.Shared", StringComparison.Ordinal) == true)
+            .Where(type => type.Namespace?.StartsWith("UCB_Hold.Server.Shared", StringComparison.Ordinal) == true)
             .ToList();
 
         var singleUseAbstractions = abstractions

@@ -82,15 +82,17 @@
     <section>
       <h2>7. Terceros que intervienen</h2>
       <p>
-        Si eliges iniciar sesión con Google, esa empresa autentica tu cuenta
+        Si eliges iniciar sesión con
+        {{ servicios.identityProvider.name }}, esa empresa autentica tu cuenta
         institucional y la plataforma recibe solo tu identificador, correo y
         nombre. El envío de correos de verificación y recuperación se realiza
         mediante un proveedor de correo electrónico. La plataforma se aloja en
         infraestructura en la nube y utiliza servicios de red y seguridad de
-        Cloudflare; las tipografías se cargan desde Google Fonts, por lo que
-        estos proveedores pueden recibir tu dirección IP al servir esos
-        recursos. No vendemos ni cedemos tus datos a terceros, salvo mandato de
-        autoridad competente conforme a la ley.
+        {{ servicios.hosting.networkProvider }}; las tipografías se cargan desde
+        {{ marca.fonts.provider }}, por lo que estos proveedores pueden recibir
+        tu dirección IP al servir esos recursos. No vendemos ni cedemos tus
+        datos a terceros, salvo mandato de autoridad competente conforme a la
+        ley.
       </p>
     </section>
     <section>

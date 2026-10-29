@@ -94,18 +94,18 @@
       <div class="auth-separator"><span>o</span></div>
       <button
         type="button"
-        class="google-button google-button--sign-in"
+        class="identity-button identity-button--sign-in"
         [disabled]="loading"
-        (click)="iniciarGoogle()"
+        (click)="iniciarExterno()"
       >
         <img
-          class="google-mark"
-          src="assets/identity/google-logo.svg"
+          class="identity-mark"
+          [src]="proveedorIdentidad.logo"
           width="20"
           height="20"
           alt=""
         />
-        Iniciar sesión con Google
+        Iniciar sesión con {{ proveedorIdentidad.name }}
       </button>
       <div class="additional-options">
         <p class="register-link">

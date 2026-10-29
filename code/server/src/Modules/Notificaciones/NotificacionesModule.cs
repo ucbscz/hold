@@ -1,7 +1,7 @@
-using IMT_Reservas.Server.Modules.Notificaciones.Application;
-using IMT_Reservas.Server.Modules.Notificaciones.Infrastructure;
+using UCB_Hold.Server.Modules.Notificaciones.Application;
+using UCB_Hold.Server.Modules.Notificaciones.Infrastructure;
 
-namespace IMT_Reservas.Server.Modules.Notificaciones;
+namespace UCB_Hold.Server.Modules.Notificaciones;
 
 public static class NotificacionesModule
 {

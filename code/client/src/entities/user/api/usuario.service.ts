@@ -19,7 +19,7 @@ export class UsuarioServiceAPI {
     contrasena: string,
     rol: string | null,
     aceptaTerminos = false,
-    codigoGoogle: string | null = null,
+    codigoExterno: string | null = null,
   ) {
     if (!rol) {
       rol = 'Estudiante';
@@ -43,7 +43,7 @@ export class UsuarioServiceAPI {
       ImagenAtrasCarnet: usuario.imagen_atras_carnet,
       ImagenFirma: usuario.imagen_firma,
       AceptaTerminos: aceptaTerminos,
-      CodigoGoogle: codigoGoogle,
+      CodigoExterno: codigoExterno,
     };
     return this.http
       .post<ApiResponse<{ EmailVerificacionEnviada?: boolean }>>(
@@ -69,14 +69,14 @@ export class UsuarioServiceAPI {
     );
   }
 
-  iniciarSesionGoogle(registro = false): void {
+  iniciarSesionExterna(registro = false): void {
     const origen = registro ? 'registro' : 'login';
     window.location.assign(
-      `${environment.apiUrl}/api/auth/google?origen=${origen}`,
+      `${environment.apiUrl}/api/auth/externo?origen=${origen}`,
     );
   }
 
-  intercambiarCodigoGoogle(codigo: string) {
+  intercambiarCodigoExterno(codigo: string) {
     return this.http
       .post<
         ApiResponse<{
@@ -88,7 +88,7 @@ export class UsuarioServiceAPI {
           ApellidoMaterno: string | null;
           Sesion: UsuarioLoginApiResponse['Value'] | null;
         }>
-      >(`${environment.apiUrl}/api/auth/google/intercambiar`, {
+      >(`${environment.apiUrl}/api/auth/externo/intercambiar`, {
         Token: codigo,
       })
       .pipe(
@@ -132,7 +132,7 @@ export class UsuarioServiceAPI {
     });
   }
 
-  mapearSesionGoogle(session: UsuarioLoginApiResponse['Value']) {
+  mapearSesionExterna(session: UsuarioLoginApiResponse['Value']) {
     return {
       usuario: this.mapearUsuario(session.Usuario),
     };

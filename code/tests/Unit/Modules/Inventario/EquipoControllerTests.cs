@@ -2,11 +2,11 @@ using Ardalis.Result;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using IMT_Reservas.Server.Modules.Inventario.Api;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Modules.Inventario.Api;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Tests.Unit.Modules.Inventario;
+namespace UCB_Hold.Tests.Unit.Modules.Inventario;
 
 [TestFixture]
 public class EquipoControllerTests

@@ -1,11 +1,11 @@
+import { EXTERNAL_SERVICES } from '@external-services/external-services';
 import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })
 export class ImageCacheService {
-  private readonly blockedOrigins = new Set([
-    'https://kingsunmachining.com',
-    'https://www.maisondudrone.com',
-  ]);
+  private readonly blockedOrigins = new Set(
+    EXTERNAL_SERVICES.hotlinkBlockedImageOrigins,
+  );
   private readonly loadedUrls = new Set<string>();
   private readonly failedUrls = new Set<string>();
   private readonly requestedUrls = new Set<string>();

@@ -1,9 +1,9 @@
 using Ardalis.Result;
-using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
-using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Modules.Configuracion.Infrastructure;
+using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Prestamos.Application;
+namespace UCB_Hold.Server.Modules.Prestamos.Application;
 
 public class CarritoService
 {

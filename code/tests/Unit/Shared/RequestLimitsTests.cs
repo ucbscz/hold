@@ -3,9 +3,9 @@ using System.Security.Claims;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.RateLimiting;
-using IMT_Reservas.Server.Shared.Web;
+using UCB_Hold.Server.Shared.Web;
 
-namespace IMT_Reservas.Tests.Unit.Shared;
+namespace UCB_Hold.Tests.Unit.Shared;
 
 [TestFixture]
 public class RequestLimitsTests

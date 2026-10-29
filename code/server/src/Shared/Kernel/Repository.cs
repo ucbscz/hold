@@ -1,9 +1,9 @@
 using System.Linq.Expressions;
 using Ardalis.Result;
 using Microsoft.EntityFrameworkCore;
-using IMT_Reservas.Server.Shared.Persistence;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Shared.Kernel;
+namespace UCB_Hold.Server.Shared.Kernel;
 
 public class Repository<TEntity, TDto>
     where TEntity : Entity

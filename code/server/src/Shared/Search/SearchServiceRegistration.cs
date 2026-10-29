@@ -1,6 +1,6 @@
 using Elastic.Clients.Elasticsearch;
 
-namespace IMT_Reservas.Server.Shared.Search;
+namespace UCB_Hold.Server.Shared.Search;
 
 public static class SearchServiceRegistration
 {

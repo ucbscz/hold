@@ -1,7 +1,7 @@
 using FluentAssertions;
-using IMT_Reservas.Server.Modules.Prestamos.Application.State;
-using IMT_Reservas.Server.Modules.Prestamos.Domain;
-namespace IMT_Reservas.Tests.Unit.Modules.Prestamos;
+using UCB_Hold.Server.Modules.Prestamos.Application.State;
+using UCB_Hold.Server.Modules.Prestamos.Domain;
+namespace UCB_Hold.Tests.Unit.Modules.Prestamos;
 
 [TestFixture]
 internal class PrestamoStateTests

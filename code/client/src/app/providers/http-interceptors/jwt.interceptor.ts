@@ -29,7 +29,7 @@ export class JwtInterceptor implements HttpInterceptor {
       outgoingRequest.url.includes('/api/auth/login') ||
       outgoingRequest.url.includes('/api/auth/refresh') ||
       outgoingRequest.url.includes('/api/auth/logout') ||
-      outgoingRequest.url.includes('/api/auth/google/intercambiar');
+      outgoingRequest.url.includes('/api/auth/externo/intercambiar');
 
     if (isSessionEndpoint) return nextHandler.handle(requestWithCookies);
 

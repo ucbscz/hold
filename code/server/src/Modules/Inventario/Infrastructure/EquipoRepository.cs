@@ -1,12 +1,12 @@
 using Microsoft.EntityFrameworkCore;
-using EquipoEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Equipo;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Modules.Mantenimientos.Domain;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Persistence;
+using EquipoEntity = UCB_Hold.Server.Modules.Inventario.Domain.Equipo;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Modules.Mantenimientos.Domain;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Infrastructure;
+namespace UCB_Hold.Server.Modules.Inventario.Infrastructure;
 
 public class EquipoRepository : Repository<EquipoEntity, EquipoDto>
 {

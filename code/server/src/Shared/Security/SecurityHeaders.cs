@@ -1,5 +1,5 @@
-using IMT_Reservas.Server.Shared.Web;
-namespace IMT_Reservas.Server.Shared.Security;
+using UCB_Hold.Server.Shared.Web;
+namespace UCB_Hold.Server.Shared.Security;
 
 public static class SecurityHeaders
 {

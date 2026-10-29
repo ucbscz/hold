@@ -1,15 +1,15 @@
 using System.Globalization;
 using Ardalis.Result;
 using Microsoft.EntityFrameworkCore;
-using MantenimientoEntity = IMT_Reservas.Server.Modules.Mantenimientos.Domain.Mantenimiento;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Modules.Mantenimientos.Application;
-using IMT_Reservas.Server.Modules.Mantenimientos.Domain;
-using IMT_Reservas.Server.Modules.Prestamos.Application;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Persistence;
+using MantenimientoEntity = UCB_Hold.Server.Modules.Mantenimientos.Domain.Mantenimiento;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Modules.Mantenimientos.Application;
+using UCB_Hold.Server.Modules.Mantenimientos.Domain;
+using UCB_Hold.Server.Modules.Prestamos.Application;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Mantenimientos.Infrastructure;
+namespace UCB_Hold.Server.Modules.Mantenimientos.Infrastructure;
 
 public class MantenimientoRepository : Repository<MantenimientoEntity, MantenimientoDto>
 {

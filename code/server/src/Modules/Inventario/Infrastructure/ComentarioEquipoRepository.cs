@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Infrastructure;
+namespace UCB_Hold.Server.Modules.Inventario.Infrastructure;
 
 public class ComentarioEquipoRepository
 {

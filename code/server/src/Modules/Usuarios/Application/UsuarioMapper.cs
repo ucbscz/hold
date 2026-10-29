@@ -1,9 +1,9 @@
 using Riok.Mapperly.Abstractions;
-using UsuarioEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Usuario;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Shared.Kernel;
+using UsuarioEntity = UCB_Hold.Server.Modules.Usuarios.Domain.Usuario;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Application;
+namespace UCB_Hold.Server.Modules.Usuarios.Application;
 
 [Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName, EnumMappingIgnoreCase = true)]
 public partial class UsuarioMapper : IMapper<UsuarioEntity, UsuarioDto>
@@ -11,7 +11,7 @@ public partial class UsuarioMapper : IMapper<UsuarioEntity, UsuarioDto>
     [MapperIgnoreTarget(nameof(UsuarioDto.Contrasena))]
     [MapperIgnoreTarget(nameof(UsuarioDto.CarreraNombre))]
     [MapperIgnoreTarget(nameof(UsuarioDto.AceptaTerminos))]
-    [MapperIgnoreTarget(nameof(UsuarioDto.CodigoGoogle))]
+    [MapperIgnoreTarget(nameof(UsuarioDto.CodigoExterno))]
     [MapperIgnoreTarget(nameof(UsuarioDto.EmailVerificacionEnviada))]
     [MapperIgnoreTarget(nameof(UsuarioDto.ImagenPerfil))]
     [MapperIgnoreTarget(nameof(UsuarioDto.ImagenFrenteCarnet))]
@@ -20,12 +20,12 @@ public partial class UsuarioMapper : IMapper<UsuarioEntity, UsuarioDto>
     public partial UsuarioDto ToDto(UsuarioEntity entity);
 
     [MapperIgnoreSource(nameof(UsuarioDto.AceptaTerminos))]
-    [MapperIgnoreSource(nameof(UsuarioDto.CodigoGoogle))]
+    [MapperIgnoreSource(nameof(UsuarioDto.CodigoExterno))]
     [MapperIgnoreSource(nameof(UsuarioDto.EmailVerificacionEnviada))]
     public partial UsuarioEntity ToEntity(UsuarioDto dto);
 
     [MapperIgnoreSource(nameof(UsuarioDto.AceptaTerminos))]
-    [MapperIgnoreSource(nameof(UsuarioDto.CodigoGoogle))]
+    [MapperIgnoreSource(nameof(UsuarioDto.CodigoExterno))]
     [MapperIgnoreSource(nameof(UsuarioDto.EmailVerificacionEnviada))]
     [MapperIgnoreSource(nameof(UsuarioDto.Contrasena))]
     [MapperIgnoreTarget(nameof(UsuarioEntity.EmailVerificado))]

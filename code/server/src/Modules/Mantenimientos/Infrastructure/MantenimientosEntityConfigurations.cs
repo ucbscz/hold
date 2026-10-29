@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Modules.Mantenimientos.Domain;
-using IMT_Reservas.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Modules.Mantenimientos.Domain;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Mantenimientos.Infrastructure;
+namespace UCB_Hold.Server.Modules.Mantenimientos.Infrastructure;
 
 internal sealed class EmpresaMantenimientoConfiguration : IEntityTypeConfiguration<EmpresaMantenimiento>
 {

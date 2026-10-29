@@ -4,10 +4,10 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Moq;
-using IMT_Reservas.Server.Modules.Usuarios.Api;
-using IMT_Reservas.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Modules.Usuarios.Api;
+using UCB_Hold.Server.Modules.Usuarios.Application;
 
-namespace IMT_Reservas.Tests.Unit.Modules.Usuarios;
+namespace UCB_Hold.Tests.Unit.Modules.Usuarios;
 
 [TestFixture]
 internal sealed class AuthCookieServiceTests

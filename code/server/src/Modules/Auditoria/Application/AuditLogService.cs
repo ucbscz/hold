@@ -1,10 +1,10 @@
 using Ardalis.Result;
 using System.IdentityModel.Tokens.Jwt;
-using IMT_Reservas.Server.Modules.Auditoria.Infrastructure;
-using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Modules.Auditoria.Infrastructure;
+using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Auditoria.Application;
+namespace UCB_Hold.Server.Modules.Auditoria.Application;
 
 public class AuditLogService
 {

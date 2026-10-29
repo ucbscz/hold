@@ -1,12 +1,12 @@
 using Ardalis.Result;
 using Microsoft.EntityFrameworkCore;
-using ContratoEntity = IMT_Reservas.Server.Modules.Prestamos.Domain.Contrato;
-using PrestamoEntity = IMT_Reservas.Server.Modules.Prestamos.Domain.Prestamo;
-using IMT_Reservas.Server.Modules.Prestamos.Application;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Persistence;
+using ContratoEntity = UCB_Hold.Server.Modules.Prestamos.Domain.Contrato;
+using PrestamoEntity = UCB_Hold.Server.Modules.Prestamos.Domain.Prestamo;
+using UCB_Hold.Server.Modules.Prestamos.Application;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
+namespace UCB_Hold.Server.Modules.Prestamos.Infrastructure;
 
 public class ContratoRepository : Repository<ContratoEntity, ContratoDto>
 {

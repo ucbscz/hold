@@ -1,9 +1,9 @@
 using Ardalis.Result;
 using Microsoft.Extensions.Options;
-using UsuarioEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Usuario;
-using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+using UsuarioEntity = UCB_Hold.Server.Modules.Usuarios.Domain.Usuario;
+using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Application;
+namespace UCB_Hold.Server.Modules.Usuarios.Application;
 
 public sealed class VerificacionCorreoService
 {

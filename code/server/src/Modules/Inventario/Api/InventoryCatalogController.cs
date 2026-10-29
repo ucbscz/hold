@@ -1,11 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Security;
-using IMT_Reservas.Server.Shared.Web;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Security;
+using UCB_Hold.Server.Shared.Web;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Api;
+namespace UCB_Hold.Server.Modules.Inventario.Api;
 
 public abstract class InventoryCatalogController<TEntity>(
     Service<TEntity, Repository<TEntity, CatalogoInventarioDto>, CatalogoInventarioDto> service

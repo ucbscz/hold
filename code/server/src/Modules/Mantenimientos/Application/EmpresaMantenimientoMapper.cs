@@ -1,8 +1,8 @@
 using Riok.Mapperly.Abstractions;
-using EmpresaMantenimientoEntity = IMT_Reservas.Server.Modules.Mantenimientos.Domain.EmpresaMantenimiento;
-using IMT_Reservas.Server.Shared.Kernel;
+using EmpresaMantenimientoEntity = UCB_Hold.Server.Modules.Mantenimientos.Domain.EmpresaMantenimiento;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Mantenimientos.Application;
+namespace UCB_Hold.Server.Modules.Mantenimientos.Application;
 
 [Mapper]
 public partial class EmpresaMantenimientoMapper

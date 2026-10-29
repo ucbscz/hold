@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using IMT_Reservas.Server.Modules.Usuarios.Application;
-using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
-using IMT_Reservas.Server.Shared.Security;
-using IMT_Reservas.Server.Shared.Web;
+using UCB_Hold.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
+using UCB_Hold.Server.Shared.Security;
+using UCB_Hold.Server.Shared.Web;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Api;
+namespace UCB_Hold.Server.Modules.Usuarios.Api;
 
 [Authorize]
 [Route("api/usuarios")]

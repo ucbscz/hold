@@ -1,14 +1,14 @@
 using System.Globalization;
 using Ardalis.Result;
 using FluentValidation;
-using GrupoEquipoEntity = IMT_Reservas.Server.Modules.Inventario.Domain.GrupoEquipo;
-using IMT_Reservas.Server.Modules.Auditoria.Application;
-using IMT_Reservas.Server.Modules.Inventario.Infrastructure;
-using IMT_Reservas.Server.Shared.Caching;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Search;
+using GrupoEquipoEntity = UCB_Hold.Server.Modules.Inventario.Domain.GrupoEquipo;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Inventario.Infrastructure;
+using UCB_Hold.Server.Shared.Caching;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Search;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Application;
+namespace UCB_Hold.Server.Modules.Inventario.Application;
 
 public class GrupoEquipoService : Service<GrupoEquipoEntity, GrupoEquipoRepository, GrupoEquipoDto>
 {

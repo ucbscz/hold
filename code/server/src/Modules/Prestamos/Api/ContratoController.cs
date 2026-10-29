@@ -1,10 +1,10 @@
-using IMT_Reservas.Server.Shared.Web;
+using UCB_Hold.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using IMT_Reservas.Server.Modules.Prestamos.Application;
-using IMT_Reservas.Server.Shared.Security;
+using UCB_Hold.Server.Modules.Prestamos.Application;
+using UCB_Hold.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Modules.Prestamos.Api;
+namespace UCB_Hold.Server.Modules.Prestamos.Api;
 
 [Authorize]
 [Route("api/contratos")]

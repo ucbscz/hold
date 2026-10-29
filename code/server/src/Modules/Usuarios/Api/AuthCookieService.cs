@@ -1,8 +1,8 @@
 using Microsoft.Extensions.Options;
-using IMT_Reservas.Server.Modules.Usuarios.Application;
-using IMT_Reservas.Server.Shared.Web;
+using UCB_Hold.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Shared.Web;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Api;
+namespace UCB_Hold.Server.Modules.Usuarios.Api;
 
 public sealed class AuthCookieService
 {

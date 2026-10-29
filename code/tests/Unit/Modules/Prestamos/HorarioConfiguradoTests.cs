@@ -1,9 +1,9 @@
 using FluentAssertions;
-using IMT_Reservas.Server.Modules.Configuracion.Domain;
-using IMT_Reservas.Server.Modules.Prestamos.Application;
-using IMT_Reservas.Tests.Helpers;
+using UCB_Hold.Server.Modules.Configuracion.Domain;
+using UCB_Hold.Server.Modules.Prestamos.Application;
+using UCB_Hold.Tests.Helpers;
 
-namespace IMT_Reservas.Tests.Unit.Modules.Prestamos;
+namespace UCB_Hold.Tests.Unit.Modules.Prestamos;
 
 [TestFixture]
 public class HorarioConfiguradoTests

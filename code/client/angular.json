@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "imt_reservas.client": {
+    "ucb_hold.client": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -23,7 +23,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:application",
           "options": {
-            "outputPath": "dist/imt_reservas.client",
+            "outputPath": "dist/ucb_hold.client",
             "index": "src/index.html",
             "browser": "src/main.ts",
             "polyfills": ["zone.js"],
@@ -75,10 +75,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "imt_reservas.client:build:production"
+              "buildTarget": "ucb_hold.client:build:production"
             },
             "development": {
-              "buildTarget": "imt_reservas.client:build:development"
+              "buildTarget": "ucb_hold.client:build:development"
             }
           },
           "defaultConfiguration": "development",

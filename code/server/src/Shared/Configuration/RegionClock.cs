@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Options;
 
-namespace IMT_Reservas.Server.Shared.Configuration;
+namespace UCB_Hold.Server.Shared.Configuration;
 
 public sealed class RegionClock
 {

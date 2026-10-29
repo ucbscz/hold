@@ -12,7 +12,8 @@
       "@shared/*": ["./src/shared/*"],
       "@environments/*": ["./src/environments/*"],
       "@brand/*": ["./src/brand/*"],
-      "@region/*": ["./src/region/*"]
+      "@region/*": ["./src/region/*"],
+      "@external-services/*": ["./src/external-services/*"]
     },
     "strict": true,
     "noImplicitOverride": true,

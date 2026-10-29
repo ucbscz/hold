@@ -1,11 +1,11 @@
-namespace IMT_Reservas.Server.Modules.Usuarios.Domain;
+namespace UCB_Hold.Server.Modules.Usuarios.Domain;
 
 public sealed class CodigoAutenticacion
 {
     public string Hash { get; set; } = string.Empty;
     public string Tipo { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;
-    public string GoogleId { get; set; } = string.Empty;
+    public string IdentidadExternaId { get; set; } = string.Empty;
     public string Nombre { get; set; } = string.Empty;
     public string ApellidoPaterno { get; set; } = string.Empty;
     public string ApellidoMaterno { get; set; } = string.Empty;

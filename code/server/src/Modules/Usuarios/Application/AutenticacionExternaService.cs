@@ -1,21 +1,21 @@
 using System.Security.Claims;
 using Ardalis.Result;
 using Microsoft.Extensions.Options;
-using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Application;
+namespace UCB_Hold.Server.Modules.Usuarios.Application;
 
-public sealed class AutenticacionGoogleService
+public sealed class AutenticacionExternaService
 {
-    private readonly CodigoGoogleService _codes;
+    private readonly CodigoExternoService _codes;
     private readonly UsuarioAuthRepository _users;
     private readonly UsuarioMapper _mapper;
     private readonly JwtService _jwt;
     private readonly JwtSettings _jwtSettings;
     private readonly InstitutionalEmailPolicy _institutionalEmail;
 
-    public AutenticacionGoogleService(
-        CodigoGoogleService codes,
+    public AutenticacionExternaService(
+        CodigoExternoService codes,
         UsuarioAuthRepository users,
         UsuarioMapper mapper,
         JwtService jwt,
@@ -36,18 +36,18 @@ public sealed class AutenticacionGoogleService
         CancellationToken cancellationToken
     )
     {
-        var googleId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+        var identidadExternaId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         var email = principal.FindFirstValue(ClaimTypes.Email)?.Trim().ToLowerInvariant();
-        if (string.IsNullOrWhiteSpace(googleId) || !_institutionalEmail.Accepts(email))
+        if (string.IsNullOrWhiteSpace(identidadExternaId) || !_institutionalEmail.Accepts(email))
             return Result<string>.Unauthorized($"Debes usar una cuenta institucional {_institutionalEmail.Suffix}");
 
         var (user, _) = await _users.GetByEmailWithCarrera(email!, cancellationToken);
-        var type = user == null ? TipoCodigoGoogle.Registro : TipoCodigoGoogle.Login;
+        var type = user == null ? TipoCodigoExterno.Registro : TipoCodigoExterno.Login;
         if (user != null)
         {
-            if (!string.IsNullOrWhiteSpace(user.GoogleId) && user.GoogleId != googleId)
-                return Result<string>.Unauthorized("El correo ya está vinculado con otra cuenta de Google");
-            await _users.LinkGoogle(user.Carnet, googleId, cancellationToken);
+            if (!string.IsNullOrWhiteSpace(user.IdentidadExternaId) && user.IdentidadExternaId != identidadExternaId)
+                return Result<string>.Unauthorized("El correo ya está vinculado con otra cuenta institucional");
+            await _users.LinkExternal(user.Carnet, identidadExternaId, cancellationToken);
         }
 
         var fullName = principal.FindFirstValue(ClaimTypes.Name)?.Trim() ?? string.Empty;
@@ -60,7 +60,7 @@ public sealed class AutenticacionGoogleService
         var code = await _codes.Create(
             type,
             email!,
-            googleId,
+            identidadExternaId,
             name,
             surnames.FirstOrDefault() ?? string.Empty,
             surnames.Skip(1).FirstOrDefault() ?? string.Empty,
@@ -69,17 +69,17 @@ public sealed class AutenticacionGoogleService
         return Result<string>.Success(code);
     }
 
-    public async Task<Result<GoogleAuthDto>> Exchange(
+    public async Task<Result<ExternalAuthDto>> Exchange(
         string token,
         CancellationToken cancellationToken
     )
     {
         var code = await _codes.Get(token, cancellationToken);
         if (code == null)
-            return Result<GoogleAuthDto>.Unauthorized("El acceso con Google expiró o ya fue utilizado");
+            return Result<ExternalAuthDto>.Unauthorized("El acceso con la cuenta institucional expiró o ya fue utilizado");
 
-        if (code.Tipo == TipoCodigoGoogle.Registro)
-            return Result<GoogleAuthDto>.Success(new GoogleAuthDto
+        if (code.Tipo == TipoCodigoExterno.Registro)
+            return Result<ExternalAuthDto>.Success(new ExternalAuthDto
             {
                 RequiereRegistro = true,
                 CodigoRegistro = token,
@@ -90,11 +90,11 @@ public sealed class AutenticacionGoogleService
             });
 
         if (!await _codes.Consume(token, cancellationToken))
-            return Result<GoogleAuthDto>.Unauthorized("El acceso con Google ya fue utilizado");
+            return Result<ExternalAuthDto>.Unauthorized("El acceso con la cuenta institucional ya fue utilizado");
 
         var (user, careerName) = await _users.GetByEmailWithCarrera(code.Email, cancellationToken);
-        if (user == null || user.GoogleId != code.GoogleId)
-            return Result<GoogleAuthDto>.Unauthorized("No se pudo vincular la cuenta de Google");
+        if (user == null || user.IdentidadExternaId != code.IdentidadExternaId)
+            return Result<ExternalAuthDto>.Unauthorized("No se pudo vincular la cuenta institucional");
 
         var dto = _mapper.ToDto(user);
         dto.CarreraNombre = careerName;
@@ -111,7 +111,7 @@ public sealed class AutenticacionGoogleService
             cancellationToken
         );
 
-        return Result<GoogleAuthDto>.Success(new GoogleAuthDto
+        return Result<ExternalAuthDto>.Success(new ExternalAuthDto
         {
             Sesion = new LoginDto
             {

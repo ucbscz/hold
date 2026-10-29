@@ -3,14 +3,14 @@ using Ardalis.Result;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Npgsql;
-using PrestamoEntity = IMT_Reservas.Server.Modules.Prestamos.Domain.Prestamo;
-using IMT_Reservas.Server.Modules.Prestamos.Application;
-using IMT_Reservas.Server.Modules.Prestamos.Domain;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Persistence;
-using IMT_Reservas.Server.Shared.Security;
+using PrestamoEntity = UCB_Hold.Server.Modules.Prestamos.Domain.Prestamo;
+using UCB_Hold.Server.Modules.Prestamos.Application;
+using UCB_Hold.Server.Modules.Prestamos.Domain;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Persistence;
+using UCB_Hold.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
+namespace UCB_Hold.Server.Modules.Prestamos.Infrastructure;
 
 public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
 {

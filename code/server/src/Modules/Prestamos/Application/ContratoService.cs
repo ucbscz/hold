@@ -1,13 +1,13 @@
 using Ardalis.Result;
 using FluentValidation;
-using ContratoEntity = IMT_Reservas.Server.Modules.Prestamos.Domain.Contrato;
-using IMT_Reservas.Server.Modules.Auditoria.Application;
-using IMT_Reservas.Server.Modules.Configuracion.Application;
-using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Security;
+using ContratoEntity = UCB_Hold.Server.Modules.Prestamos.Domain.Contrato;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Configuracion.Application;
+using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Modules.Prestamos.Application;
+namespace UCB_Hold.Server.Modules.Prestamos.Application;
 
 public class ContratoService : Service<ContratoEntity, ContratoRepository, ContratoDto>
 {

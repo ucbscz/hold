@@ -1,12 +1,12 @@
 using Ardalis.Result;
 using Microsoft.EntityFrameworkCore;
-using UsuarioEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Usuario;
-using IMT_Reservas.Server.Modules.Prestamos.Domain;
-using IMT_Reservas.Server.Modules.Usuarios.Application;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Persistence;
+using UsuarioEntity = UCB_Hold.Server.Modules.Usuarios.Domain.Usuario;
+using UCB_Hold.Server.Modules.Prestamos.Domain;
+using UCB_Hold.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+namespace UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
 public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
 {

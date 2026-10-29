@@ -1,12 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
-using GrupoEquipoEntity = IMT_Reservas.Server.Modules.Inventario.Domain.GrupoEquipo;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Persistence;
+using GrupoEquipoEntity = UCB_Hold.Server.Modules.Inventario.Domain.GrupoEquipo;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Infrastructure;
+namespace UCB_Hold.Server.Modules.Inventario.Infrastructure;
 
 public class GrupoEquipoRepository : Repository<GrupoEquipoEntity, GrupoEquipoDto>
 {

@@ -2,9 +2,9 @@ using System.Security.Claims;
 using FluentAssertions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using IMT_Reservas.Server.Shared.Persistence.RowLevelSecurity;
+using UCB_Hold.Server.Shared.Persistence.RowLevelSecurity;
 
-namespace IMT_Reservas.Tests.Unit.Shared;
+namespace UCB_Hold.Tests.Unit.Shared;
 
 [TestFixture]
 public class DatabaseIdentityTests

@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="IMT_Reservas.Database" type="ShellScriptRunConfiguration" factoryName="Shell Script" singleton="true">
+  <configuration default="false" name="UCB_Hold.Database" type="ShellScriptRunConfiguration" factoryName="Shell Script" singleton="true">
     <option name="SCRIPT_TEXT" value="docker compose up -d ucb_db ucb_redis" />
     <option name="SCRIPT_WORKING_DIRECTORY" value="$PROJECT_DIR$" />
     <option name="INTERPRETER_PATH" value="/bin/sh" />

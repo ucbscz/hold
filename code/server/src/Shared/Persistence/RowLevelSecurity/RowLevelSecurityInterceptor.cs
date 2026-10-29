@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 
-namespace IMT_Reservas.Server.Shared.Persistence.RowLevelSecurity;
+namespace UCB_Hold.Server.Shared.Persistence.RowLevelSecurity;
 
 public sealed class RowLevelSecurityInterceptor(IHttpContextAccessor httpContextAccessor)
     : DbConnectionInterceptor

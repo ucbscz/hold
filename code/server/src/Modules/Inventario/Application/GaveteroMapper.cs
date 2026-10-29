@@ -1,8 +1,8 @@
 using Riok.Mapperly.Abstractions;
-using GaveteroEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Gavetero;
-using IMT_Reservas.Server.Shared.Kernel;
+using GaveteroEntity = UCB_Hold.Server.Modules.Inventario.Domain.Gavetero;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Application;
+namespace UCB_Hold.Server.Modules.Inventario.Application;
 
 [Mapper]
 public partial class GaveteroMapper : IMapper<GaveteroEntity, GaveteroDto>

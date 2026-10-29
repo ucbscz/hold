@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Modules.Inventario.Domain;
+namespace UCB_Hold.Server.Modules.Inventario.Domain;
 
 public static class EstadoEquipoNombre
 {

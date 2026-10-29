@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using IMT_Reservas.Server.Modules.Auditoria.Domain;
-using IMT_Reservas.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Auditoria.Domain;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Auditoria.Infrastructure;
+namespace UCB_Hold.Server.Modules.Auditoria.Infrastructure;
 
 internal sealed class AuditLogConfiguration : IEntityTypeConfiguration<AuditLog>
 {

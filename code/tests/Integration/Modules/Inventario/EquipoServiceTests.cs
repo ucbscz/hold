@@ -1,15 +1,15 @@
 using FluentAssertions;
-using IMT_Reservas.Tests.Helpers;
+using UCB_Hold.Tests.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
-using IMT_Reservas.Server.Modules.Auditoria.Application;
-using IMT_Reservas.Server.Modules.Auditoria.Infrastructure;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Modules.Inventario.Infrastructure;
-using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
-using IMT_Reservas.Server.Shared.Persistence;
-namespace IMT_Reservas.Tests.Integration.Modules.Inventario;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Auditoria.Infrastructure;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Modules.Inventario.Infrastructure;
+using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
+using UCB_Hold.Server.Shared.Persistence;
+namespace UCB_Hold.Tests.Integration.Modules.Inventario;
 
 [TestFixture]
 internal class EquipoServiceTests : ServiceTest<EquipoService>

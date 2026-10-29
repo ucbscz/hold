@@ -3,9 +3,9 @@ using FluentAssertions;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using IMT_Reservas.Server.Shared.Caching;
+using UCB_Hold.Server.Shared.Caching;
 
-namespace IMT_Reservas.Tests.Unit.Shared;
+namespace UCB_Hold.Tests.Unit.Shared;
 
 [TestFixture]
 internal class CacheRepositoryTests

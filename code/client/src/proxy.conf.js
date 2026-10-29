@@ -8,7 +8,7 @@ const target = env.ASPNETCORE_HTTPS_PORT
 
 const PROXY_CONFIG = [
   {
-    context: ["/IMT_Reservas", "/api"],
+    context: ["/api"],
     target,
     secure: false,
   },

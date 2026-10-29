@@ -1,3 +1,4 @@
+import { EXTERNAL_SERVICES } from '@external-services/external-services';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
 import { ValidatedFormsModule, INSTITUTIONAL_EMAIL } from '@shared/lib/forms';
@@ -17,6 +18,7 @@ const UNAUTHORIZED_STATUS = 401;
   styleUrls: ['./iniciar-sesion.component.css'],
 })
 export class IniciarSesionComponent implements OnInit {
+  protected readonly proveedorIdentidad = EXTERNAL_SERVICES.identityProvider;
   protected readonly correoInstitucional = INSTITUTIONAL_EMAIL;
   email: string = '';
   contrasena: string = '';
@@ -38,13 +40,13 @@ export class IniciarSesionComponent implements OnInit {
 
   ngOnInit(): void {
     const codigo = this.route.snapshot.queryParamMap.get('codigo');
-    if (codigo) this.procesarCodigoGoogle(codigo);
-    const googleError = this.route.snapshot.queryParamMap.get('googleError');
-    if (googleError) {
+    if (codigo) this.procesarCodigoExterno(codigo);
+    const errorExterno = this.route.snapshot.queryParamMap.get('errorExterno');
+    if (errorExterno) {
       this.mensajeError =
-        googleError === 'configuracion'
-          ? 'El acceso con Google aún no está configurado. Usa tu correo y contraseña institucional.'
-          : 'No se pudo iniciar sesión con Google. Usa una cuenta institucional e inténtalo nuevamente.';
+        errorExterno === 'configuracion'
+          ? `El acceso con ${EXTERNAL_SERVICES.identityProvider.name} aún no está configurado. Usa tu correo y contraseña institucional.`
+          : `No se pudo iniciar sesión con ${EXTERNAL_SERVICES.identityProvider.name}. Usa una cuenta institucional e inténtalo nuevamente.`;
       this.incorrecto = true;
     }
   }
@@ -84,8 +86,8 @@ export class IniciarSesionComponent implements OnInit {
     });
   }
 
-  iniciarGoogle(): void {
-    if (!this.loading) this.usuarioapi.iniciarSesionGoogle();
+  iniciarExterno(): void {
+    if (!this.loading) this.usuarioapi.iniciarSesionExterna();
   }
 
   reenviarVerificacion(): void {
@@ -105,34 +107,33 @@ export class IniciarSesionComponent implements OnInit {
     });
   }
 
-  private procesarCodigoGoogle(codigo: string): void {
+  private procesarCodigoExterno(codigo: string): void {
     this.loading = true;
-    this.usuarioapi.intercambiarCodigoGoogle(codigo).subscribe({
+    this.usuarioapi.intercambiarCodigoExterno(codigo).subscribe({
       next: (result) => {
         if (result.RequiereRegistro) {
           void this.router.navigate(['/registro'], {
-            queryParams: { google: result.CodigoRegistro },
+            queryParams: { externo: result.CodigoRegistro },
           });
           return;
         }
         if (!result.Sesion) {
-          this.mostrarErrorGoogle();
+          this.mostrarErrorExterno();
           return;
         }
-        const data = this.usuarioapi.mapearSesionGoogle(result.Sesion);
+        const data = this.usuarioapi.mapearSesionExterna(result.Sesion);
         this.usuario.guardarSesion(data.usuario);
         void this.router.navigate([
           this.authService.isAdmin() ? '/administracion' : '/inicio',
         ]);
       },
-      error: () => this.mostrarErrorGoogle(),
+      error: () => this.mostrarErrorExterno(),
     });
   }
 
-  private mostrarErrorGoogle(): void {
+  private mostrarErrorExterno(): void {
     this.loading = false;
-    this.mensajeError =
-      'El acceso con Google expiró o no pudo completarse. Intenta nuevamente.';
+    this.mensajeError = `El acceso con ${EXTERNAL_SERVICES.identityProvider.name} expiró o no pudo completarse. Intenta nuevamente.`;
     this.incorrecto = true;
   }
   registrarUsuario(): void {

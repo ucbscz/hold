@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Net.Http.Headers;
 using Microsoft.Extensions.Options;
-using IMT_Reservas.Server.Modules.Usuarios.Application;
-using IMT_Reservas.Server.Shared.Web;
+using UCB_Hold.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Shared.Web;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Api;
+namespace UCB_Hold.Server.Modules.Usuarios.Api;
 
 [AllowAnonymous]
 [EnableRateLimiting(RequestLimits.AuthPolicy)]
@@ -18,7 +18,7 @@ public class AuthController : ApiController
     private readonly UsuarioService _service;
     private readonly VerificacionCorreoService _verification;
     private readonly RecuperacionContrasenaService _passwordRecovery;
-    private readonly AutenticacionGoogleService _google;
+    private readonly AutenticacionExternaService _external;
     private readonly AuthenticationSettings _authentication;
     private readonly ExternalIdentityScheme _externalScheme;
     private readonly AuthCookieService _cookies;
@@ -27,7 +27,7 @@ public class AuthController : ApiController
         UsuarioService service,
         VerificacionCorreoService verification,
         RecuperacionContrasenaService passwordRecovery,
-        AutenticacionGoogleService google,
+        AutenticacionExternaService external,
         IOptions<AuthenticationSettings> authentication,
         ExternalIdentityScheme externalScheme,
         AuthCookieService cookies
@@ -36,7 +36,7 @@ public class AuthController : ApiController
         _service = service;
         _verification = verification;
         _passwordRecovery = passwordRecovery;
-        _google = google;
+        _external = external;
         _authentication = authentication.Value;
         _externalScheme = externalScheme;
         _cookies = cookies;
@@ -111,48 +111,48 @@ public class AuthController : ApiController
         )
     );
 
-    [HttpGet("google")]
-    public IActionResult Google([FromQuery] string? origen)
+    [HttpGet("externo")]
+    public IActionResult External([FromQuery] string? origen)
     {
         var frontend = FrontendUrl;
-        var ruta = GoogleRoute(origen);
+        var ruta = ExternalRoute(origen);
         if (!_externalScheme.IsConfigured)
-            return Redirect($"{frontend}/{ruta}?googleError=configuracion");
+            return Redirect($"{frontend}/{ruta}?errorExterno=configuracion");
 
         return Challenge(
-            new AuthenticationProperties { RedirectUri = $"/api/auth/google/resultado?origen={ruta}" },
+            new AuthenticationProperties { RedirectUri = $"/api/auth/externo/resultado?origen={ruta}" },
             _externalScheme.Name
         );
     }
 
-    [HttpGet("google/resultado")]
-    public async Task<IActionResult> GoogleResult(
+    [HttpGet("externo/resultado")]
+    public async Task<IActionResult> ExternalResult(
         [FromQuery] string? origen,
         CancellationToken cancellationToken
     )
     {
         var authentication = await HttpContext.AuthenticateAsync(AuthSchemes.External);
         var frontend = FrontendUrl;
-        var ruta = GoogleRoute(origen);
+        var ruta = ExternalRoute(origen);
         if (!authentication.Succeeded || authentication.Principal == null)
-            return Redirect($"{frontend}/{ruta}?googleError=cancelado");
+            return Redirect($"{frontend}/{ruta}?errorExterno=cancelado");
 
-        var result = await _google.Begin(authentication.Principal, cancellationToken);
+        var result = await _external.Begin(authentication.Principal, cancellationToken);
         await HttpContext.SignOutAsync(AuthSchemes.External);
         if (!result.IsSuccess)
-            return Redirect($"{frontend}/{ruta}?googleError=cuenta");
+            return Redirect($"{frontend}/{ruta}?errorExterno=cuenta");
 
         return Redirect($"{frontend}/login?codigo={Uri.EscapeDataString(result.Value)}");
     }
 
-    [HttpPost("google/intercambiar")]
-    public async Task<IActionResult> ExchangeGoogle(
+    [HttpPost("externo/intercambiar")]
+    public async Task<IActionResult> ExchangeExternal(
         [FromBody] TokenDto request,
         CancellationToken cancellationToken
     )
     {
         Response.Headers.CacheControl = CacheControlHeaderValue.NoStoreString;
-        var result = await _google.Exchange(request.Token, cancellationToken);
+        var result = await _external.Exchange(request.Token, cancellationToken);
         if (!result.IsSuccess)
             return ToResponse(result);
 
@@ -165,8 +165,8 @@ public class AuthController : ApiController
         }
 
         return ToResponse(
-            Result<GoogleAuthResponseDto>.Success(
-                new GoogleAuthResponseDto
+            Result<ExternalAuthResponseDto>.Success(
+                new ExternalAuthResponseDto
                 {
                     RequiereRegistro = value.RequiereRegistro,
                     CodigoRegistro = value.CodigoRegistro,
@@ -182,8 +182,8 @@ public class AuthController : ApiController
 
     private string FrontendUrl => _authentication.FrontendBaseUrl;
 
-    private static string GoogleRoute(string? origen) =>
-        origen == TipoCodigoGoogle.Registro ? TipoCodigoGoogle.Registro : TipoCodigoGoogle.Login;
+    private static string ExternalRoute(string? origen) =>
+        origen == TipoCodigoExterno.Registro ? TipoCodigoExterno.Registro : TipoCodigoExterno.Login;
 
     private IActionResult SessionResponse(Result<LoginDto> result)
     {

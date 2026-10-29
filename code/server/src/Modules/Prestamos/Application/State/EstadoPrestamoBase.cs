@@ -1,6 +1,6 @@
-using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using UCB_Hold.Server.Modules.Prestamos.Domain;
 
-namespace IMT_Reservas.Server.Modules.Prestamos.Application.State;
+namespace UCB_Hold.Server.Modules.Prestamos.Application.State;
 
 public abstract class EstadoPrestamoBase
 {

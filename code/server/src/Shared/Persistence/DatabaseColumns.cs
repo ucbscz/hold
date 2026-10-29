@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Shared.Persistence;
+namespace UCB_Hold.Server.Shared.Persistence;
 
 internal static class DatabaseColumns
 {

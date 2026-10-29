@@ -517,7 +517,7 @@ export class AuditPanelComponent implements OnChanges, OnDestroy {
   }
 
   private esClaveSensible(key: string): boolean {
-    return /(contrasena|password|token|hash|secret|imagen|firma|googleid|refresh)/i.test(
+    return /(contrasena|password|token|hash|secret|imagen|firma|identidadexternaid|googleid|refresh)/i.test(
       key,
     );
   }

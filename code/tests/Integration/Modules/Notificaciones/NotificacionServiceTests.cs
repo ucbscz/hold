@@ -1,12 +1,12 @@
 using FluentAssertions;
-using IMT_Reservas.Tests.Helpers;
+using UCB_Hold.Tests.Helpers;
 using System.Text.Json;
-using IMT_Reservas.Server.Modules.Notificaciones.Application;
-using IMT_Reservas.Server.Modules.Notificaciones.Infrastructure;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Notificaciones.Application;
+using UCB_Hold.Server.Modules.Notificaciones.Infrastructure;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Tests.Integration.Modules.Notificaciones;
+namespace UCB_Hold.Tests.Integration.Modules.Notificaciones;
 
 [TestFixture]
 internal class NotificacionServiceTests : ServiceTest<NotificacionService>

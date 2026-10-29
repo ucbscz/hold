@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Application;
+namespace UCB_Hold.Server.Modules.Usuarios.Application;
 
 public class UsuarioDto
 {
@@ -27,6 +27,6 @@ public class UsuarioDto
     public bool? AceptaTerminos { get; set; }
     public bool? EmailVerificado { get; set; }
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
-    public string? CodigoGoogle { get; set; }
+    public string? CodigoExterno { get; set; }
     public bool? EmailVerificacionEnviada { get; set; }
 }

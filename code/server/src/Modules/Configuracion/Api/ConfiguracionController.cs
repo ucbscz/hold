@@ -1,11 +1,11 @@
-using IMT_Reservas.Server.Shared.Web;
+using UCB_Hold.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
-using IMT_Reservas.Server.Modules.Configuracion.Application;
-using IMT_Reservas.Server.Shared.Security;
+using UCB_Hold.Server.Modules.Configuracion.Application;
+using UCB_Hold.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Modules.Configuracion.Api;
+namespace UCB_Hold.Server.Modules.Configuracion.Api;
 
 [Route("api/configuracion")]
 public class ConfiguracionController : ApiController

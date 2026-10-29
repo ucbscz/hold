@@ -19,14 +19,14 @@ describe('RegistrarUsuarioComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('shows Google verification before the registration form', () => {
+  it('shows identity provider verification before the registration form', () => {
     const element = fixture.nativeElement as HTMLElement;
 
-    expect(element.querySelector('.google-button')).not.toBeNull();
+    expect(element.querySelector('.identity-button')).not.toBeNull();
     expect(element.querySelector('.register-form')).toBeNull();
   });
 
-  it('does not submit an account before Google verification', () => {
+  it('does not submit an account before identity provider verification', () => {
     const users = TestBed.inject(UsuarioServiceAPI);
     const register = spyOn(users, 'registrarCuenta');
 

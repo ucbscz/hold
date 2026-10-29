@@ -1,8 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using IMT_Reservas.Server.Modules.Usuarios.Domain;
-using IMT_Reservas.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+namespace UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
 public sealed class CodigoAutenticacionRepository
 {

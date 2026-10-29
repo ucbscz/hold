@@ -1,8 +1,8 @@
 using Riok.Mapperly.Abstractions;
-using IMT_Reservas.Server.Modules.Configuracion.Domain;
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Modules.Configuracion.Domain;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Configuracion.Application;
+namespace UCB_Hold.Server.Modules.Configuracion.Application;
 
 [Mapper]
 public partial class ConfiguracionMapper : IMapper<ConfiguracionSistema, ConfiguracionDto>

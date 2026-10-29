@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Modules.Configuracion.Domain;
+namespace UCB_Hold.Server.Modules.Configuracion.Domain;
 
 public sealed record HorarioAtencion
 {

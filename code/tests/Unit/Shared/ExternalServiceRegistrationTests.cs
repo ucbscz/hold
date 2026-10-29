@@ -4,12 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using IMT_Reservas.Server.Modules.Usuarios.Api;
-using IMT_Reservas.Server.Modules.Usuarios.Application;
-using IMT_Reservas.Server.Shared.Email;
-using IMT_Reservas.Server.Shared.Web;
+using UCB_Hold.Server.Modules.Usuarios.Api;
+using UCB_Hold.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Shared.Email;
+using UCB_Hold.Server.Shared.Web;
 
-namespace IMT_Reservas.Tests.Unit.Shared;
+namespace UCB_Hold.Tests.Unit.Shared;
 
 [TestFixture]
 internal sealed class ExternalServiceRegistrationTests

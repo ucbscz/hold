@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="IMT_Reservas.Server" type="DotNetProject" factoryName=".NET Project" singleton="false">
-    <option name="PROJECT_PATH" value="$PROJECT_DIR$/Server/IMT_Reservas.Server.csproj" />
+  <configuration default="false" name="UCB_Hold.Server" type="DotNetProject" factoryName=".NET Project" singleton="false">
+    <option name="PROJECT_PATH" value="$PROJECT_DIR$/Server/UCB_Hold.Server.csproj" />
     <option name="CONFIGURATION" value="Debug" />
     <option name="PASS_PARENT_ENVS" value="1" />
     <envs>
@@ -9,7 +9,7 @@
       <env name="ASPNETCORE_HTTPS_PORT" value="7216" />
     </envs>
     <method v="2">
-      <option name="RunConfigurationTask" enabled="true" run_configuration_name="IMT_Reservas.Database" run_configuration_type="ShellScriptRunConfiguration" />
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="UCB_Hold.Database" run_configuration_type="ShellScriptRunConfiguration" />
     </method>
   </configuration>
 </component>

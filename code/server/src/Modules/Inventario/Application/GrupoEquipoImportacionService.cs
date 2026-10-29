@@ -4,7 +4,7 @@ using System.Text.Json;
 using AngleSharp.Html.Parser;
 using Ardalis.Result;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Application;
+namespace UCB_Hold.Server.Modules.Inventario.Application;
 
 public sealed class GrupoEquipoImportacionDto
 {

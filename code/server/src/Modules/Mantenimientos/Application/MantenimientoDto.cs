@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Modules.Mantenimientos.Application;
+namespace UCB_Hold.Server.Modules.Mantenimientos.Application;
 
 public class MantenimientoDto
 {

@@ -5,10 +5,10 @@ using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
-using IMT_Reservas.Server.Modules.Usuarios.Application;
-using IMT_Reservas.Server.Shared.Web;
+using UCB_Hold.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Shared.Web;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Api;
+namespace UCB_Hold.Server.Modules.Usuarios.Api;
 
 public static class AuthenticationRegistration
 {

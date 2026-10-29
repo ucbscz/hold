@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Application;
+namespace UCB_Hold.Server.Modules.Inventario.Application;
 
 public class CatalogoInventarioDto
 {

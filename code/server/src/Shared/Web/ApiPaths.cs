@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Shared.Web;
+namespace UCB_Hold.Server.Shared.Web;
 
 public static class ApiPaths
 {

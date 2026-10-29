@@ -1,10 +1,10 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Modules.Prestamos.Domain;
-using IMT_Reservas.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Modules.Prestamos.Domain;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
+namespace UCB_Hold.Server.Modules.Prestamos.Infrastructure;
 
 internal sealed class AvisoDisponibilidadConfiguration : IEntityTypeConfiguration<AvisoDisponibilidad>
 {

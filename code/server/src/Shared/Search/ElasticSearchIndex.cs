@@ -2,7 +2,7 @@ using Ardalis.Result;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
 
-namespace IMT_Reservas.Server.Shared.Search;
+namespace UCB_Hold.Server.Shared.Search;
 
 public sealed class ElasticSearchIndex<TDocument> : ISearchIndex<TDocument>
     where TDocument : class

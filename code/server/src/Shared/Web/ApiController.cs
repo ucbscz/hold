@@ -1,9 +1,9 @@
 using Ardalis.Result;
 using Microsoft.AspNetCore.Mvc;
-using AppValidationError = IMT_Reservas.Server.Shared.Kernel.ValidationError;
-using IMT_Reservas.Server.Shared.Kernel;
+using AppValidationError = UCB_Hold.Server.Shared.Kernel.ValidationError;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Shared.Web;
+namespace UCB_Hold.Server.Shared.Web;
 
 [ApiController]
 public abstract class ApiController : ControllerBase

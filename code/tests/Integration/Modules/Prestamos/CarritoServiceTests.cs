@@ -1,13 +1,13 @@
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
-using IMT_Reservas.Tests.Helpers;
-using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Modules.Prestamos.Application;
-using IMT_Reservas.Server.Modules.Prestamos.Domain;
-using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
-using IMT_Reservas.Server.Shared.Persistence;
-namespace IMT_Reservas.Tests.Integration.Modules.Prestamos;
+using UCB_Hold.Tests.Helpers;
+using UCB_Hold.Server.Modules.Configuracion.Infrastructure;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Modules.Prestamos.Application;
+using UCB_Hold.Server.Modules.Prestamos.Domain;
+using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
+using UCB_Hold.Server.Shared.Persistence;
+namespace UCB_Hold.Tests.Integration.Modules.Prestamos;
 
 [TestFixture]
 internal class CarritoServiceTests : ServiceTest<CarritoService>

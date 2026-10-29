@@ -1,9 +1,9 @@
 using System.Globalization;
 using Ardalis.Result;
 using FluentValidation;
-using IMT_Reservas.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Auditoria.Application;
 
-namespace IMT_Reservas.Server.Shared.Kernel;
+namespace UCB_Hold.Server.Shared.Kernel;
 
 public class Service<TEntity, TRepository, TDto>
     where TEntity : Entity

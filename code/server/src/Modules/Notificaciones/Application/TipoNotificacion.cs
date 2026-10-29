@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Modules.Notificaciones.Application;
+namespace UCB_Hold.Server.Modules.Notificaciones.Application;
 
 public enum TipoNotificacion
 {

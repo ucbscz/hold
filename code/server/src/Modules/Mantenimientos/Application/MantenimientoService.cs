@@ -1,12 +1,12 @@
 using System.Globalization;
 using Ardalis.Result;
 using FluentValidation;
-using MantenimientoEntity = IMT_Reservas.Server.Modules.Mantenimientos.Domain.Mantenimiento;
-using IMT_Reservas.Server.Modules.Auditoria.Application;
-using IMT_Reservas.Server.Modules.Mantenimientos.Infrastructure;
-using IMT_Reservas.Server.Shared.Kernel;
+using MantenimientoEntity = UCB_Hold.Server.Modules.Mantenimientos.Domain.Mantenimiento;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Mantenimientos.Infrastructure;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Mantenimientos.Application;
+namespace UCB_Hold.Server.Modules.Mantenimientos.Application;
 
 public class MantenimientoService
     : Service<MantenimientoEntity, MantenimientoRepository, MantenimientoDto>

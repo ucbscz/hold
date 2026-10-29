@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Modules.Auditoria.Application;
+namespace UCB_Hold.Server.Modules.Auditoria.Application;
 
 public enum AuditAccion
 {

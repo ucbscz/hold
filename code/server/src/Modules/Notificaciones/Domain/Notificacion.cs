@@ -1,6 +1,6 @@
-using IMT_Reservas.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Modules.Notificaciones.Domain;
+namespace UCB_Hold.Server.Modules.Notificaciones.Domain;
 
 public class Notificacion : Entity
 {

@@ -1,10 +1,10 @@
-using IMT_Reservas.Server.Shared.Web;
+using UCB_Hold.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Shared.Security;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Api;
+namespace UCB_Hold.Server.Modules.Inventario.Api;
 
 [Authorize]
 [Route("api/grupos")]

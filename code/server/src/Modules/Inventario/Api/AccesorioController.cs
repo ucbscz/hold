@@ -1,13 +1,13 @@
-using IMT_Reservas.Server.Shared.Web;
+using UCB_Hold.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using AccesorioEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Accesorio;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Modules.Inventario.Infrastructure;
-using IMT_Reservas.Server.Shared.Kernel;
-using IMT_Reservas.Server.Shared.Security;
+using AccesorioEntity = UCB_Hold.Server.Modules.Inventario.Domain.Accesorio;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Modules.Inventario.Infrastructure;
+using UCB_Hold.Server.Shared.Kernel;
+using UCB_Hold.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Api;
+namespace UCB_Hold.Server.Modules.Inventario.Api;
 
 [Authorize]
 [Route("api/accesorios")]

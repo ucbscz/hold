@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.13.35931.197
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IMT_Reservas.Server", "server\IMT_Reservas.Server.csproj", "{3B927C25-A636-4FD3-ABDE-C2ED0EF06232}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UCB_Hold.Server", "server\UCB_Hold.Server.csproj", "{3B927C25-A636-4FD3-ABDE-C2ED0EF06232}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IMT_Reservas.Tests", "tests\\IMT_Reservas.Tests.csproj", "{6868FE5D-AED9-46BD-8DFF-2D5C8D4A76F5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UCB_Hold.Tests", "tests\\UCB_Hold.Tests.csproj", "{6868FE5D-AED9-46BD-8DFF-2D5C8D4A76F5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

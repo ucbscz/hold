@@ -1,3 +1,4 @@
+import { EXTERNAL_SERVICES } from '@external-services/external-services';
 import { BRAND } from '@brand/brand';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
@@ -10,5 +11,6 @@ import { RouterLink } from '@angular/router';
   styleUrl: './terminos.component.css',
 })
 export class TerminosComponent {
+  protected readonly servicios = EXTERNAL_SERVICES;
   protected readonly marca = BRAND;
 }

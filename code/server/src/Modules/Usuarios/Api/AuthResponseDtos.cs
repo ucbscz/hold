@@ -1,13 +1,13 @@
-using IMT_Reservas.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Modules.Usuarios.Application;
 
-namespace IMT_Reservas.Server.Modules.Usuarios.Api;
+namespace UCB_Hold.Server.Modules.Usuarios.Api;
 
 public sealed class AuthSessionResponseDto
 {
     public UsuarioDto Usuario { get; init; } = new();
 }
 
-public sealed class GoogleAuthResponseDto
+public sealed class ExternalAuthResponseDto
 {
     public bool RequiereRegistro { get; init; }
     public string? CodigoRegistro { get; init; }

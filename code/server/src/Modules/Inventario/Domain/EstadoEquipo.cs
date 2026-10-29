@@ -1,6 +1,6 @@
 using NpgsqlTypes;
 
-namespace IMT_Reservas.Server.Modules.Inventario.Domain;
+namespace UCB_Hold.Server.Modules.Inventario.Domain;
 
 public enum EstadoEquipo
 {

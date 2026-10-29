@@ -1,11 +1,11 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using IMT_Reservas.Server.Modules.Inventario.Application;
-using IMT_Reservas.Server.Modules.Inventario.Domain;
-using IMT_Reservas.Server.Modules.Inventario.Infrastructure;
-using IMT_Reservas.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Modules.Inventario.Domain;
+using UCB_Hold.Server.Modules.Inventario.Infrastructure;
+using UCB_Hold.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Tests.Unit.Modules.Inventario;
+namespace UCB_Hold.Tests.Unit.Modules.Inventario;
 
 [TestFixture]
 public class GrupoEquipoRepositoryTests

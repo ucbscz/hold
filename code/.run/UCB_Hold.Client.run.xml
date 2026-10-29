@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="IMT_Reservas.Client" type="js.build_tools.npm" factoryName="npm" singleton="false">
+  <configuration default="false" name="UCB_Hold.Client" type="js.build_tools.npm" factoryName="npm" singleton="false">
     <package-json value="$PROJECT_DIR$/Client/package.json" />
     <command value="run" />
     <scripts>

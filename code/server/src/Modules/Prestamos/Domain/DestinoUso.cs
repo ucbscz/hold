@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Modules.Prestamos.Domain;
+namespace UCB_Hold.Server.Modules.Prestamos.Domain;
 
 public static class DestinoUso
 {
