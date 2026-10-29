@@ -11,6 +11,9 @@ public static class ConfiguracionModule
     public static IServiceCollection AddConfiguracionModule(this IServiceCollection services)
     {
         services.AddScoped<ConfiguracionRepository>();
+        services.AddScoped<IConfiguracionProvider>(sp =>
+            sp.GetRequiredService<ConfiguracionRepository>()
+        );
         services.AddScoped<ConfiguracionService>();
         services.AddScoped<ConfiguracionMapper>();
         services.AddScoped<IMapper<ConfiguracionSistema, ConfiguracionDto>>(sp =>

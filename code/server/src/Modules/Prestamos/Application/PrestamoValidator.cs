@@ -1,6 +1,6 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using UCB_Hold.Server.Modules.Configuracion.Infrastructure;
+using UCB_Hold.Server.Modules.Configuracion.Application;
 using UCB_Hold.Server.Modules.Prestamos.Domain;
 using UCB_Hold.Server.Shared.Persistence;
 
@@ -12,7 +12,7 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
     public PrestamoValidator(
         ApplicationDbContext dbContext,
         HorarioReserva horario,
-        ConfiguracionRepository configRepository
+        IConfiguracionProvider configRepository
     )
     {
         _horario = horario;

@@ -1,6 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using UCB_Hold.Server.Modules.Configuracion.Application;
 using UCB_Hold.Server.Modules.Configuracion.Domain;
 using UCB_Hold.Server.Modules.Usuarios.Domain;
 using UCB_Hold.Server.Shared.Caching;
@@ -8,7 +9,7 @@ using UCB_Hold.Server.Shared.Persistence;
 
 namespace UCB_Hold.Server.Modules.Configuracion.Infrastructure;
 
-public class ConfiguracionRepository
+public class ConfiguracionRepository : IConfiguracionProvider
 {
     private readonly ApplicationDbContext _dbContext;
     private readonly CacheRepository _cache;

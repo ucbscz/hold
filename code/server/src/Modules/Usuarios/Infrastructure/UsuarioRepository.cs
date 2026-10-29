@@ -8,7 +8,7 @@ using UCB_Hold.Server.Shared.Persistence;
 
 namespace UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
-public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
+public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>, IUsuarioBloqueo
 {
     private readonly UsuarioReadRepository _queries;
 

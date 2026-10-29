@@ -10,6 +10,7 @@ using UCB_Hold.Server.Modules.Inventario.Domain;
 using UCB_Hold.Server.Modules.Inventario.Infrastructure;
 using UCB_Hold.Server.Modules.Prestamos.Domain;
 using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
+using UCB_Hold.Server.Modules.Usuarios.Application;
 using UCB_Hold.Server.Modules.Usuarios.Domain;
 using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 using UCB_Hold.Server.Shared.Kernel;
@@ -46,7 +47,7 @@ internal class CatalogoInventarioTests : ServiceTest<CatalogoInventarioRepositor
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         services.AddSingleton(TestBranding.Labels);
         services.AddScoped<AuditLogRepository>();
-        services.AddScoped<UsuarioReadRepository>();
+        services.AddScoped<IUsuarioConsultas, UsuarioReadRepository>();
         services.AddScoped<AuditLogService>();
         services.AddInventoryCatalogs();
         using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });

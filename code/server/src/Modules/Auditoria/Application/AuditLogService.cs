@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using System.IdentityModel.Tokens.Jwt;
 using UCB_Hold.Server.Modules.Auditoria.Infrastructure;
-using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
+using UCB_Hold.Server.Modules.Usuarios.Application;
 using UCB_Hold.Server.Shared.Kernel;
 
 namespace UCB_Hold.Server.Modules.Auditoria.Application;
@@ -12,12 +12,12 @@ public class AuditLogService
 
     private readonly AuditLogRepository _repository;
     private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly UsuarioReadRepository _users;
+    private readonly IUsuarioConsultas _users;
 
     public AuditLogService(
         AuditLogRepository repository,
         IHttpContextAccessor httpContextAccessor,
-        UsuarioReadRepository users
+        IUsuarioConsultas users
     )
     {
         _repository = repository;

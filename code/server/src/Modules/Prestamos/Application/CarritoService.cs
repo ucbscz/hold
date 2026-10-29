@@ -1,5 +1,5 @@
 using Ardalis.Result;
-using UCB_Hold.Server.Modules.Configuracion.Infrastructure;
+using UCB_Hold.Server.Modules.Configuracion.Application;
 using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
 using UCB_Hold.Server.Shared.Kernel;
 
@@ -11,13 +11,13 @@ public class CarritoService
     private readonly HorarioReserva _horario;
     private readonly CarritoRepository _repository;
     private readonly ILogger<CarritoService> _logger;
-    private readonly ConfiguracionRepository _configuracionRepository;
+    private readonly IConfiguracionProvider _configuracionRepository;
 
     public CarritoService(
         CarritoRepository repository,
         ILogger<CarritoService> logger,
         HorarioReserva horario,
-        ConfiguracionRepository configuracionRepository
+        IConfiguracionProvider configuracionRepository
     )
     {
         _horario = horario;

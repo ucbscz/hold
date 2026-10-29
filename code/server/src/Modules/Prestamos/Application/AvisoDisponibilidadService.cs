@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using Ardalis.Result;
 using UCB_Hold.Server.Modules.Configuracion.Domain;
-using UCB_Hold.Server.Modules.Configuracion.Infrastructure;
+using UCB_Hold.Server.Modules.Configuracion.Application;
 using UCB_Hold.Server.Modules.Notificaciones.Application;
 using UCB_Hold.Server.Modules.Prestamos.Domain;
 using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
@@ -13,13 +13,13 @@ public class AvisoDisponibilidadService
 {
     private readonly HorarioReserva _horario;
     private readonly AvisoDisponibilidadRepository _repository;
-    private readonly ConfiguracionRepository _configRepo;
+    private readonly IConfiguracionProvider _configRepo;
     private readonly PrestamoDisponibilidadRepository _availability;
     private readonly NotificacionService _notifications;
 
     public AvisoDisponibilidadService(
         AvisoDisponibilidadRepository repository,
-        ConfiguracionRepository configRepo,
+        IConfiguracionProvider configRepo,
         HorarioReserva horario,
         PrestamoDisponibilidadRepository availability,
         NotificacionService notifications

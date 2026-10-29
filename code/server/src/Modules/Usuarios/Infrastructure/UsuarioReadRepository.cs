@@ -6,7 +6,7 @@ using UCB_Hold.Server.Shared.Persistence;
 
 namespace UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
-public sealed class UsuarioReadRepository
+public sealed class UsuarioReadRepository : IUsuarioConsultas
 {
     public const int MaxPageSize = 500;
     private readonly ApplicationDbContext _dbContext;

@@ -3,11 +3,10 @@ using System.Text.Json;
 using PrestamoEntity = UCB_Hold.Server.Modules.Prestamos.Domain.Prestamo;
 using UsuarioEntity = UCB_Hold.Server.Modules.Usuarios.Domain.Usuario;
 using UCB_Hold.Server.Modules.Auditoria.Application;
-using UCB_Hold.Server.Modules.Configuracion.Infrastructure;
+using UCB_Hold.Server.Modules.Configuracion.Application;
 using UCB_Hold.Server.Modules.Notificaciones.Application;
 using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
 using UCB_Hold.Server.Modules.Usuarios.Application;
-using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
 namespace UCB_Hold.Server.Modules.Prestamos.Application;
 
@@ -16,19 +15,19 @@ public class EstadoPrestamoService
     private readonly NotificacionService _notifications;
     private readonly AuditLogService _audit;
     private readonly PrestamoEstadoRepository _prestamoRepository;
-    private readonly UsuarioRepository _usuarioRepository;
-    private readonly UsuarioReadRepository _usuarioQueries;
+    private readonly IUsuarioBloqueo _usuarioRepository;
+    private readonly IUsuarioConsultas _usuarioQueries;
     private readonly AvisoDisponibilidadService _availabilityWatches;
-    private readonly ConfiguracionRepository _configuracionRepository;
+    private readonly IConfiguracionProvider _configuracionRepository;
 
     public EstadoPrestamoService(
         NotificacionService notifications,
         AuditLogService audit,
         PrestamoEstadoRepository prestamoRepository,
-        UsuarioRepository usuarioRepository,
-        UsuarioReadRepository usuarioQueries,
+        IUsuarioBloqueo usuarioRepository,
+        IUsuarioConsultas usuarioQueries,
         AvisoDisponibilidadService availabilityWatches,
-        ConfiguracionRepository configuracionRepository
+        IConfiguracionProvider configuracionRepository
     )
     {
         _notifications = notifications;

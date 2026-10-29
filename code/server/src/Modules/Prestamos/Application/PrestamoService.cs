@@ -5,7 +5,6 @@ using FluentValidation;
 using PrestamoEntity = UCB_Hold.Server.Modules.Prestamos.Domain.Prestamo;
 using UCB_Hold.Server.Modules.Auditoria.Application;
 using UCB_Hold.Server.Modules.Configuracion.Application;
-using UCB_Hold.Server.Modules.Configuracion.Infrastructure;
 using UCB_Hold.Server.Modules.Inventario.Application;
 using UCB_Hold.Server.Modules.Inventario.Domain;
 using UCB_Hold.Server.Modules.Notificaciones.Application;
@@ -13,7 +12,6 @@ using UCB_Hold.Server.Modules.Prestamos.Application.State;
 using UCB_Hold.Server.Modules.Prestamos.Domain;
 using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
 using UCB_Hold.Server.Modules.Usuarios.Application;
-using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 using UCB_Hold.Server.Shared.Kernel;
 
 namespace UCB_Hold.Server.Modules.Prestamos.Application;
@@ -21,9 +19,9 @@ namespace UCB_Hold.Server.Modules.Prestamos.Application;
 public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, PrestamoDto>
 {
     private readonly NotificacionService _notifications;
-    private readonly UsuarioRepository _usuarioRepository;
+    private readonly IUsuarioBloqueo _usuarioRepository;
     private readonly AvisoDisponibilidadService _availabilityWatches;
-    private readonly ConfiguracionRepository _configuracionRepository;
+    private readonly IConfiguracionProvider _configuracionRepository;
     private readonly PrestamoReadRepository _queries;
     private readonly PrestamoEstadoRepository _states;
     private readonly PrestamoDisponibilidadRepository _availability;
@@ -37,9 +35,9 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         IValidator<PrestamoDto> validator,
         AuditLogService audit,
         NotificacionService notifications,
-        UsuarioRepository usuarioRepository,
+        IUsuarioBloqueo usuarioRepository,
         AvisoDisponibilidadService availabilityWatches,
-        ConfiguracionRepository configuracionRepository,
+        IConfiguracionProvider configuracionRepository,
         PrestamoReadRepository queries,
         PrestamoEstadoRepository states,
         PrestamoDisponibilidadRepository availability,

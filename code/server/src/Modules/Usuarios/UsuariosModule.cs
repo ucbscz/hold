@@ -24,6 +24,8 @@ public static class UsuariosModule
         services.AddScoped<UsuarioRepository>();
         services.AddScoped<UsuarioAuthRepository>();
         services.AddScoped<UsuarioReadRepository>();
+        services.AddScoped<IUsuarioBloqueo>(sp => sp.GetRequiredService<UsuarioRepository>());
+        services.AddScoped<IUsuarioConsultas>(sp => sp.GetRequiredService<UsuarioReadRepository>());
         services.AddScoped<CodigoAutenticacionRepository>();
         services.AddScoped<Repository<Carrera, CarreraDto>>();
 
