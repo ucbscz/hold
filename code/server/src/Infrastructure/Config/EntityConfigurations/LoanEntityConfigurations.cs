@@ -21,7 +21,7 @@ internal sealed class UsuarioConfiguration : IEntityTypeConfiguration<Usuario>
         entity.Property(e => e.TelefonoReferencia).HasMaxLength(32).HasColumnName("telefono_referencia");
         entity.Property(e => e.NombreReferencia).HasMaxLength(32).HasColumnName("nombre_referencia");
         entity.Property(e => e.EmailReferencia).HasMaxLength(255).HasColumnName("email_referencia");
-        entity.Property(e => e.Rol).HasColumnType("tipo_usuario").HasDefaultValue(TipoUsuario.Estudiante).HasSentinel((TipoUsuario)(-1)).HasColumnName("rol");
+        entity.Property(e => e.Rol).HasColumnType(PostgresEnumNames.TipoUsuario).HasDefaultValue(TipoUsuario.Estudiante).HasSentinel((TipoUsuario)(-1)).HasColumnName("rol");
         entity.Property(e => e.IdCarrera).HasColumnName("id_carrera");
         entity.Property(e => e.Bloqueado).HasColumnName("bloqueado");
         entity.Property(e => e.MotivoBloqueo).HasColumnName("motivo_bloqueo");
@@ -81,11 +81,11 @@ internal sealed class PrestamoConfiguration : IEntityTypeConfiguration<Prestamo>
         entity.Property(e => e.MotivoRechazo).HasMaxLength(1024).HasColumnName("motivo_rechazo");
         entity.Property(e => e.AutorizadoPor).HasMaxLength(255).HasColumnName("autorizado_por");
         entity.Property(e => e.EntregadoPor).HasMaxLength(255).HasColumnName("entregado_por");
-        entity.Property(e => e.EstadoPrestamo).HasColumnType("estado_prestamo").HasDefaultValue(EstadoPrestamo.Pendiente).HasColumnName("estado_prestamo");
+        entity.Property(e => e.EstadoPrestamo).HasColumnType(PostgresEnumNames.EstadoPrestamo).HasDefaultValue(EstadoPrestamo.Pendiente).HasColumnName("estado_prestamo");
         entity.Property(e => e.IdContrato).HasColumnName("id_contrato");
         entity.Property(e => e.Carnet).HasMaxLength(20).HasColumnName("carnet");
         entity.Property(e => e.RecordatorioEnviado).HasColumnName("recordatorio_enviado").HasDefaultValue(false);
-        entity.Property(e => e.DestinoPrestamo).HasMaxLength(50).HasColumnName("destino_prestamo").HasDefaultValue("Universidad");
+        entity.Property(e => e.DestinoPrestamo).HasMaxLength(50).HasColumnName("destino_prestamo").HasDefaultValue(DestinoUso.Universidad);
         entity.Property(e => e.IdCarrera).HasColumnName("id_carrera");
         entity.Property(e => e.NombreMateria).HasMaxLength(255).HasColumnName("nombre_materia");
         entity.Property(e => e.Guardado).HasColumnName("guardado").HasDefaultValue(false);

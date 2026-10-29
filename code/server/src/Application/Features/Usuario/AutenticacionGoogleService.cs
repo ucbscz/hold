@@ -36,11 +36,11 @@ public sealed class AutenticacionGoogleService
     {
         var googleId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         var email = principal.FindFirstValue(ClaimTypes.Email)?.Trim().ToLowerInvariant();
-        if (string.IsNullOrWhiteSpace(googleId) || !IsInstitutionalEmail(email))
-            return Result<string>.Unauthorized("Debes usar una cuenta institucional @ucb.edu.bo");
+        if (string.IsNullOrWhiteSpace(googleId) || !CorreoInstitucional.Es(email))
+            return Result<string>.Unauthorized($"Debes usar una cuenta institucional {CorreoInstitucional.Dominio}");
 
         var (user, _) = await _users.GetByEmailWithCarrera(email!, cancellationToken);
-        var type = user == null ? "registro" : "login";
+        var type = user == null ? TipoCodigoGoogle.Registro : TipoCodigoGoogle.Login;
         if (user != null)
         {
             if (!string.IsNullOrWhiteSpace(user.GoogleId) && user.GoogleId != googleId)
@@ -76,7 +76,7 @@ public sealed class AutenticacionGoogleService
         if (code == null)
             return Result<GoogleAuthDto>.Unauthorized("El acceso con Google expiró o ya fue utilizado");
 
-        if (code.Tipo == "registro")
+        if (code.Tipo == TipoCodigoGoogle.Registro)
             return Result<GoogleAuthDto>.Success(new GoogleAuthDto
             {
                 RequiereRegistro = true,
@@ -119,8 +119,4 @@ public sealed class AutenticacionGoogleService
             },
         });
     }
-
-    private static bool IsInstitutionalEmail(string? email) =>
-        !string.IsNullOrWhiteSpace(email)
-        && email.EndsWith("@ucb.edu.bo", StringComparison.OrdinalIgnoreCase);
 }

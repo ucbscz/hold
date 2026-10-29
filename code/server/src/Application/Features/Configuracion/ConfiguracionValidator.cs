@@ -1,3 +1,4 @@
+using System.Globalization;
 using FluentValidation;
 using IMT_Reservas.Server.Application.Security;
 
@@ -8,7 +9,7 @@ public class ConfiguracionValidator : AbstractValidator<ConfiguracionDto>
     public ConfiguracionValidator()
     {
         RuleFor(c => c.Horarios).NotNull().Must(h => h != null && h.Count <= 373 && h.All(d => d != null)
-            && h.Select(d => d.Fecha?.ToString("yyyy-MM-dd") ?? d.DiaSemana.ToString()).Distinct().Count() == h.Count)
+            && h.Select(d => d.Fecha?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) ?? d.DiaSemana.ToString(CultureInfo.InvariantCulture)).Distinct().Count() == h.Count)
             .WithMessage("No repitas días u horarios y limita las excepciones a un año.");
         RuleForEach(c => c.Horarios).Must((config, h) => h != null && h.DiaSemana is >= 0 and <= 6
             && h.InicioMinutos is >= 0 and < 1440 && h.FinMinutos is >= 0 and < 1440

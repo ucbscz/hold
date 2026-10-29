@@ -6,6 +6,8 @@ namespace IMT_Reservas.Server.Infrastructure.Config;
 
 public static class RequestLimits
 {
+    public const string AuthPolicy = "auth";
+
     public static void Configure(RateLimiterOptions options)
     {
         options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
@@ -21,7 +23,7 @@ public static class RequestLimits
                 detail = $"Espera {seconds} segundos antes de volver a intentar.",
             }, token);
         };
-        options.AddPolicy("auth", context => RateLimitPartition.GetFixedWindowLimiter(
+        options.AddPolicy(AuthPolicy, context => RateLimitPartition.GetFixedWindowLimiter(
             context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
             _ => new FixedWindowRateLimiterOptions
             {

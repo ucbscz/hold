@@ -11,6 +11,8 @@ namespace IMT_Reservas.Server.Application.Features.Jwt;
 
 public class JwtService
 {
+    public const string RoleClaim = "role";
+
     private readonly JwtSettings _settings;
 
     public JwtService(IOptions<JwtSettings> settings) => _settings = settings.Value;
@@ -33,7 +35,7 @@ public class JwtService
                     .ToString(CultureInfo.InvariantCulture),
                 ClaimValueTypes.Integer64
             ),
-            new Claim("role", usuario.Rol?.ToLowerInvariant() ?? "estudiante"),
+            new Claim(RoleClaim, usuario.Rol?.ToLowerInvariant() ?? "estudiante"),
         };
 
         var securityToken = new JwtSecurityToken(

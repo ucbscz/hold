@@ -8,15 +8,15 @@ public static class ServerConfigurationValidator
 
     public static void Validate(IConfiguration configuration)
     {
-        ValidateConnectionString(configuration.GetConnectionString("PostgreSQL"));
-        ValidateJwtSettings(configuration.GetSection("Jwt").Get<JwtSettings>());
+        ValidateConnectionString(configuration.GetConnectionString(ConfigurationKeys.PostgreSql));
+        ValidateJwtSettings(configuration.GetSection(ConfigurationKeys.Jwt).Get<JwtSettings>());
         ValidateAuthentication(configuration);
     }
 
     private static void ValidateAuthentication(IConfiguration configuration)
     {
-        var clientId = configuration["Authentication:Google:ClientId"];
-        var clientSecret = configuration["Authentication:Google:ClientSecret"];
+        var clientId = configuration[ConfigurationKeys.GoogleClientId];
+        var clientSecret = configuration[ConfigurationKeys.GoogleClientSecret];
         if (string.IsNullOrWhiteSpace(clientId) != string.IsNullOrWhiteSpace(clientSecret))
             throw new InvalidOperationException(
                 "Authentication:Google:ClientId and ClientSecret must be configured together."

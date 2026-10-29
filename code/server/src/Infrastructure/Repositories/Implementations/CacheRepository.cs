@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Ardalis.Result;
 using Microsoft.Extensions.Caching.Distributed;
+using IMT_Reservas.Server.Application.Abstraction;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 
@@ -37,7 +38,7 @@ public class CacheRepository
         }
         catch (Exception exception)
         {
-            _logger.LogWarning(exception, "No se pudo leer un valor de la caché");
+            _logger.CacheReadFailed(exception);
             return Result<T>.NotFound();
         }
     }
@@ -70,7 +71,7 @@ public class CacheRepository
         }
         catch (Exception exception)
         {
-            _logger.LogWarning(exception, "No se pudo escribir un valor en la caché");
+            _logger.CacheWriteFailed(exception);
             return Result.Error("Caché no disponible");
         }
     }
@@ -92,7 +93,7 @@ public class CacheRepository
         }
         catch (Exception exception)
         {
-            _logger.LogWarning(exception, "No se pudo invalidar un valor de la caché");
+            _logger.CacheRemoveFailed(exception);
             return Result.Error("Caché no disponible");
         }
     }

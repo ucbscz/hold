@@ -3,6 +3,7 @@ using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Infrastructure.Config;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
+using IMT_Reservas.Server.Core.Entities;
 
 namespace IMT_Reservas.Server.Application.Features.Prestamo;
 
@@ -13,9 +14,9 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
         ConfiguracionRepository configRepository
     )
     {
-        RuleFor(p => p.DestinoPrestamo).Must(d => d is "Universidad" or "Clase" or "Casa")
+        RuleFor(p => p.DestinoPrestamo).Must(DestinoUso.EsValido)
             .WithMessage("Selecciona uso interno o externo");
-        RuleFor(p => p).Must(p => p.DestinoPrestamo == "Casa"
+        RuleFor(p => p).Must(p => p.DestinoPrestamo == DestinoUso.Casa
             || !p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue
             || HorarioReserva.MismoDia(p.FechaPrestamoEsperada.Value, p.FechaDevolucionEsperada.Value))
             .WithMessage("El uso interno en clases o laboratorio requiere devolución el mismo día");

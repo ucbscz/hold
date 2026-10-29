@@ -41,6 +41,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
 using StackExchange.Redis;
+using Microsoft.AspNetCore.Authentication.Google;
+using System.IdentityModel.Tokens.Jwt;
 using CarreraEntity = IMT_Reservas.Server.Core.Entities.Carrera;
 using CategoriaEntity = IMT_Reservas.Server.Core.Entities.Categoria;
 using EmpresaMantenimientoEntity = IMT_Reservas.Server.Core.Entities.EmpresaMantenimiento;
@@ -48,17 +50,19 @@ using JwtSettings = IMT_Reservas.Server.Application.Features.Jwt.JwtSettings;
 using JwtSvc = IMT_Reservas.Server.Application.Features.Jwt.JwtService;
 using MuebleEntity = IMT_Reservas.Server.Core.Entities.Mueble;
 
+const string FrontendCorsPolicy = "AllowFrontend";
+
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 ServerConfigurationValidator.Validate(builder.Configuration);
 
-var connectionString = builder.Configuration.GetConnectionString("PostgreSQL");
+var connectionString = builder.Configuration.GetConnectionString(ConfigurationKeys.PostgreSql);
 
 var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
-dataSourceBuilder.MapEnum<EstadoPrestamo>("estado_prestamo");
-dataSourceBuilder.MapEnum<TipoUsuario>("tipo_usuario");
-dataSourceBuilder.MapEnum<EstadoEquipo>("estado_equipo");
+dataSourceBuilder.MapEnum<EstadoPrestamo>(PostgresEnumNames.EstadoPrestamo);
+dataSourceBuilder.MapEnum<TipoUsuario>(PostgresEnumNames.TipoUsuario);
+dataSourceBuilder.MapEnum<EstadoEquipo>(PostgresEnumNames.EstadoEquipo);
 var dataSource = dataSourceBuilder.Build();
 
 builder.Services.AddDbContext<ApplicationDbContext>(
@@ -77,12 +81,12 @@ builder
         options.JsonSerializerOptions.PropertyNamingPolicy = null;
     });
 
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>() ?? [];
+var allowedOrigins = builder.Configuration.GetSection(ConfigurationKeys.AllowedOrigins).Get<string[]>() ?? [];
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(
-        "AllowFrontend",
+        FrontendCorsPolicy,
         corsBuilder =>
         {
             corsBuilder
@@ -128,11 +132,11 @@ builder.Services.AddSwaggerGen(options =>
 builder.Services.AddHealthChecks();
 DataProtectionConfiguration.Configure(builder.Services, builder.Configuration, builder.Environment);
 
-builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("Jwt"));
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(ConfigurationKeys.Jwt));
 builder.Services.AddSingleton<JwtSvc>();
 builder.Services.AddSingleton<AuthCookieService>();
 
-var jwtSettings = builder.Configuration.GetSection("Jwt").Get<JwtSettings>()!;
+var jwtSettings = builder.Configuration.GetSection(ConfigurationKeys.Jwt).Get<JwtSettings>()!;
 
 builder
     .Services.AddAuthentication(options =>
@@ -160,25 +164,25 @@ builder
             ValidIssuer = jwtSettings.Issuer,
             ValidAudience = jwtSettings.Audience,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
-            RoleClaimType = "role",
-            NameClaimType = "sub",
+            RoleClaimType = JwtSvc.RoleClaim,
+            NameClaimType = JwtRegisteredClaimNames.Sub,
             ClockSkew = TimeSpan.Zero,
         };
     })
-    .AddCookie("GoogleExternal", options =>
+    .AddCookie(AuthSchemes.GoogleExternal, options =>
     {
-        options.Cookie.Name = "ucb_google";
+        options.Cookie.Name = AuthSchemes.GoogleExternalCookie;
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.SameSite = SameSiteMode.None;
         options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
     })
-    .AddGoogle("Google", options =>
+    .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
     {
-        options.SignInScheme = "GoogleExternal";
-        options.ClientId = builder.Configuration["Authentication:Google:ClientId"] ?? string.Empty;
-        options.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"] ?? string.Empty;
-        options.CallbackPath = "/api/auth/google/callback";
+        options.SignInScheme = AuthSchemes.GoogleExternal;
+        options.ClientId = builder.Configuration[ConfigurationKeys.GoogleClientId] ?? string.Empty;
+        options.ClientSecret = builder.Configuration[ConfigurationKeys.GoogleClientSecret] ?? string.Empty;
+        options.CallbackPath = ApiPaths.GoogleCallback;
         options.SaveTokens = false;
     });
 builder.Services.AddAuthorizationBuilder()
@@ -207,7 +211,7 @@ builder.Services.AddSingleton<ContractHtmlProcessor>();
 builder.Services.AddScoped<ComponenteRepository>();
 builder.Services.AddScoped<CarritoRepository>();
 builder.Services.AddScoped<UsuarioService>();
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("Email"));
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(ConfigurationKeys.Email));
 builder.Services.AddScoped<EmailDeliveryService>();
 builder.Services.AddScoped<VerificacionCorreoService>();
 builder.Services.AddScoped<RecuperacionContrasenaService>();
@@ -405,7 +409,7 @@ if (!app.Environment.IsDevelopment() && useHttpsRedirection)
 
 app.UseSecurityHeaders();
 
-app.UseCors("AllowFrontend");
+app.UseCors(FrontendCorsPolicy);
 app.UseExceptionHandler(_ => { });
 
 if (app.Environment.IsDevelopment())
@@ -418,7 +422,7 @@ app.UseAuthentication();
 app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
-app.MapHealthChecks("/api/health").AllowAnonymous();
+app.MapHealthChecks(ApiPaths.Health).AllowAnonymous();
 if (hangfireEnabled)
 {
     app.UseHangfireDashboard(

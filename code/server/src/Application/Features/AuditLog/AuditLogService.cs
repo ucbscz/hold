@@ -1,5 +1,7 @@
 using Ardalis.Result;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+using IMT_Reservas.Server.Application.Abstraction;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace IMT_Reservas.Server.Application.Features.AuditLog;
 
@@ -59,8 +61,8 @@ public class AuditLogService
         entidad,
         entidadId,
         detalle,
-        "sistema",
-        "Sistema"
+        SystemActor.Carnet,
+        SystemActor.Nombre
     );
 
     public async Task<Result<List<AuditLogDto>>> GetFiltered(
@@ -80,10 +82,10 @@ public class AuditLogService
     private async Task<(string Carnet, string Nombre)> GetActor()
     {
         var user = _httpContextAccessor.HttpContext?.User;
-        var carnet = user?.FindFirst("sub")?.Value;
+        var carnet = user?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value;
 
         if (string.IsNullOrWhiteSpace(carnet))
-            return ("sistema", "Sistema");
+            return (SystemActor.Carnet, SystemActor.Nombre);
 
         var name = await _users.GetDisplayName(carnet);
         return (carnet, string.IsNullOrWhiteSpace(name) ? carnet : name);

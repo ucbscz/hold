@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.DataProtection;
+using IMT_Reservas.Server.Application.Abstraction;
 
 namespace IMT_Reservas.Server.Application.Security;
 
@@ -43,7 +44,7 @@ public sealed class SensitiveDataProtector
         }
         catch (CryptographicException exception)
         {
-            _logger.LogError(exception, "No se pudo descifrar un dato sensible");
+            _logger.SensitiveDataDecryptionFailed(exception);
             return null;
         }
     }
@@ -71,7 +72,7 @@ public sealed class SensitiveDataProtector
             exception is CryptographicException or FormatException
         )
         {
-            _logger.LogError(exception, "No se pudo descifrar un contrato");
+            _logger.ContractDecryptionFailed(exception);
             return string.Empty;
         }
     }

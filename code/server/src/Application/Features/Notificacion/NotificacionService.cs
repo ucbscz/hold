@@ -1,12 +1,14 @@
+using System.Globalization;
 using Ardalis.Result;
 using System.Text.Json;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+using IMT_Reservas.Server.Application.Abstraction;
 
 namespace IMT_Reservas.Server.Application.Features.Notificacion;
 
 public class NotificacionService
 {
-    public const string SystemEmitter = "Sistema";
+    public const string SystemEmitter = SystemActor.Nombre;
     public const string DateFormat = "dd/MM/yyyy HH:mm";
 
     private readonly NotificacionRepository _repository;
@@ -91,7 +93,7 @@ public class NotificacionService
                 emisor = string.IsNullOrWhiteSpace(emitter) ? SystemEmitter : emitter,
                 motivo = reason,
                 prestamoId,
-                fecha = DateTime.UtcNow.ToString(DateFormat),
+                fecha = DateTime.UtcNow.ToString(DateFormat, CultureInfo.InvariantCulture),
             }
         );
 }

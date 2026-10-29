@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.Mail;
 using Microsoft.Extensions.Options;
+using IMT_Reservas.Server.Application.Abstraction;
 
 namespace IMT_Reservas.Server.Application.Features.Usuario;
 
@@ -71,7 +72,7 @@ public sealed class EmailDeliveryService
         }
         catch (Exception exception)
         {
-            _logger.LogError(exception, "No se pudo enviar el correo");
+            _logger.EmailDeliveryFailed(exception);
             return false;
         }
     }

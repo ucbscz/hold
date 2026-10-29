@@ -20,7 +20,7 @@ public sealed class PrestamoReadRepository
     public async Task<Result<List<PrestamoDto>>> GetAll(
         CancellationToken cancellationToken = default
     ) => Result<List<PrestamoDto>>.Success(
-        await GetPage(null, null, 0, MaxPageSize, cancellationToken)
+        await GetPage(null, null, 0, MaxPageSize, cancellationToken: cancellationToken)
     );
 
     public async Task<Result<PrestamoDto>> Get(
@@ -61,8 +61,8 @@ public sealed class PrestamoReadRepository
         EstadoPrestamo? estado,
         int page = 1,
         int pageSize = MaxPageSize,
-        CancellationToken cancellationToken = default,
-        bool? guardado = null
+        bool? guardado = null,
+        CancellationToken cancellationToken = default
     )
     {
         var safePageSize = Math.Clamp(pageSize, 1, MaxPageSize);
@@ -73,8 +73,8 @@ public sealed class PrestamoReadRepository
                 estado,
                 (safePage - 1) * safePageSize,
                 safePageSize,
-                cancellationToken,
-                guardado
+                guardado,
+                cancellationToken
             )
         );
     }
@@ -84,8 +84,8 @@ public sealed class PrestamoReadRepository
         EstadoPrestamo? estado,
         int offset,
         int limit,
-        CancellationToken cancellationToken = default,
-        bool? guardado = null
+        bool? guardado = null,
+        CancellationToken cancellationToken = default
     )
     {
         var safeOffset = Math.Max(0, offset);

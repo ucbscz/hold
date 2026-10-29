@@ -1,4 +1,5 @@
 using FluentValidation;
+using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,14 +7,6 @@ namespace IMT_Reservas.Server.Application.Features.Equipo;
 
 public class EquipoValidator : AbstractValidator<EquipoDto>
 {
-    private static readonly string[] ValidosEstados =
-    [
-        "operativo",
-        "parcialmente_operativo",
-        "inoperativo",
-        "en_mantenimiento",
-    ];
-
     public EquipoValidator(ApplicationDbContext dbContext)
     {
         RuleFor(e => e.IdAmbiente).MustAsync((id, token) => dbContext.Ambientes.AnyAsync(a => a.Id == id, token))
@@ -49,7 +42,7 @@ public class EquipoValidator : AbstractValidator<EquipoDto>
 
         RuleFor(e => e.EstadoEquipo)
             .Must(estado =>
-                string.IsNullOrEmpty(estado) || ValidosEstados.Contains(estado.ToLowerInvariant())
+                string.IsNullOrEmpty(estado) || EstadoEquipoNombre.Validos.Contains(estado.ToLowerInvariant())
             )
             .WithMessage("Estado equipo inválido");
     }

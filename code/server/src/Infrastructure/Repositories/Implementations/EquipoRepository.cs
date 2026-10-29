@@ -118,21 +118,13 @@ public class EquipoRepository : Repository<EquipoEntity, EquipoDto>
                 FechaDevolucion = r.FechaDevolucion,
                 EstadoPrestamo = r.EstadoPrestamo.ToString().ToLowerInvariant(),
                 EstadoEquipo = r.EstadoEquipoRetorno.HasValue
-                        ? ToPostgresEstadoEquipo(r.EstadoEquipoRetorno.Value)
+                        ? EstadoEquipoNombre.ToName(r.EstadoEquipoRetorno.Value)
                         : null,
                 Observacion = r.Observacion,
             })
             .ToList();
     }
 
-    private static string ToPostgresEstadoEquipo(EstadoEquipo state) =>
-        state switch
-        {
-            EstadoEquipo.ParcialmenteOperativo => "parcialmente_operativo",
-            EstadoEquipo.Inoperativo => "inoperativo",
-            EstadoEquipo.EnMantenimiento => "en_mantenimiento",
-            _ => "operativo",
-        };
 
     protected override async Task CascadeDelete(EquipoEntity equipment)
     {

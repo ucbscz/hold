@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
@@ -76,6 +77,8 @@ public class ConfiguracionRepository
             .OrderBy(u => u.Carnet)
             .FirstOrDefaultAsync(cancellationToken);
 
+    [SuppressMessage("Globalization", "CA1304", Justification = SqlTranslation.Justification)]
+    [SuppressMessage("Globalization", "CA1311", Justification = SqlTranslation.Justification)]
     public Task<List<Usuario>> BuscarResponsables(string? buscar, CancellationToken cancellationToken)
     {
         var query = UsuariosDisponibles();

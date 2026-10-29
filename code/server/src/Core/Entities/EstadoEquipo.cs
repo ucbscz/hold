@@ -4,15 +4,15 @@ namespace IMT_Reservas.Server.Core.Entities;
 
 public enum EstadoEquipo
 {
-    [PgName("operativo")]
+    [PgName(EstadoEquipoNombre.Operativo)]
     Operativo,
 
-    [PgName("parcialmente_operativo")]
+    [PgName(EstadoEquipoNombre.ParcialmenteOperativo)]
     ParcialmenteOperativo,
 
-    [PgName("inoperativo")]
+    [PgName(EstadoEquipoNombre.Inoperativo)]
     Inoperativo,
 
-    [PgName("en_mantenimiento")]
+    [PgName(EstadoEquipoNombre.EnMantenimiento)]
     EnMantenimiento,
 }

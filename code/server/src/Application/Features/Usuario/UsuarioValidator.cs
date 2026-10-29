@@ -42,8 +42,8 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
             .NotEmpty()
             .EmailAddress()
             .WithMessage("Email inválido")
-            .Must(email => email != null && email.EndsWith("@ucb.edu.bo", StringComparison.OrdinalIgnoreCase))
-            .WithMessage("Debes usar un correo institucional @ucb.edu.bo")
+            .Must(CorreoInstitucional.Es)
+            .WithMessage($"Debes usar un correo institucional {CorreoInstitucional.Dominio}")
             .MaximumLength(255)
             .WithMessage("Email no puede superar 255 caracteres");
         RuleFor(usuario => usuario.Contrasena)

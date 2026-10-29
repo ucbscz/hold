@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text.Json;
 using Ardalis.Result;
 using IMT_Reservas.Server.Application.Features.Notificacion;
@@ -51,20 +52,27 @@ public class AvisoDisponibilidadService
     {
         var pending = await _repository.GetPending();
         var available = new List<Core.Entities.AvisoDisponibilidad>();
+        var checkedSlots = new Dictionary<(int Grupo, DateTime Fecha), bool>();
 
         foreach (var watch in pending)
         {
             var end = MinimumEnd(watch.Fecha, config);
+            if (!HorarioReserva.EsValido(watch.Fecha, end, config))
+                continue;
 
-            if (
-                HorarioReserva.EsValido(watch.Fecha, end, config)
-                && await _availability.HasAvailableEquipo(
+            var slot = (watch.IdGrupoEquipo, watch.Fecha);
+            if (!checkedSlots.TryGetValue(slot, out var isAvailable))
+            {
+                isAvailable = await _availability.HasAvailableEquipo(
                     watch.IdGrupoEquipo,
                     watch.Fecha,
                     end,
                     cancellationToken
-                )
-            )
+                );
+                checkedSlots[slot] = isAvailable;
+            }
+
+            if (isAvailable)
                 available.Add(watch);
         }
 
@@ -85,13 +93,13 @@ public class AvisoDisponibilidadService
             Tipo = nameof(TipoNotificacion.DisponibilidadLiberada),
             Titulo = "Disponibilidad liberada",
             Contenido =
-                $"Un equipo que esperabas está disponible el {watch.Fecha.ToString(NotificacionService.DateFormat)}.",
+                $"Un equipo que esperabas está disponible el {watch.Fecha.ToString(NotificacionService.DateFormat, CultureInfo.InvariantCulture)}.",
             Detalle = JsonSerializer.Serialize(
                 new
                 {
                     emisor = NotificacionService.SystemEmitter,
                     grupoEquipoId = watch.IdGrupoEquipo,
-                    fecha = watch.Fecha.ToString(NotificacionService.DateFormat),
+                    fecha = watch.Fecha.ToString(NotificacionService.DateFormat, CultureInfo.InvariantCulture),
                 }
             ),
         };

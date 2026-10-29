@@ -23,19 +23,19 @@ public sealed class AuthCookieService
         cookies.Append(
             AccessTokenName,
             session.AccessToken,
-            BuildOptions("/api", TimeSpan.FromMinutes(_settings.ExpiresInMinutes))
+            BuildOptions(ApiPaths.Api, TimeSpan.FromMinutes(_settings.ExpiresInMinutes))
         );
         cookies.Append(
             RefreshTokenName,
             session.RefreshToken,
-            BuildOptions("/api/auth", TimeSpan.FromDays(_settings.RefreshTokenExpiryDays))
+            BuildOptions(ApiPaths.Auth, TimeSpan.FromDays(_settings.RefreshTokenExpiryDays))
         );
     }
 
     public void Clear(IResponseCookies cookies)
     {
-        cookies.Delete(AccessTokenName, BuildOptions("/api", TimeSpan.Zero));
-        cookies.Delete(RefreshTokenName, BuildOptions("/api/auth", TimeSpan.Zero));
+        cookies.Delete(AccessTokenName, BuildOptions(ApiPaths.Api, TimeSpan.Zero));
+        cookies.Delete(RefreshTokenName, BuildOptions(ApiPaths.Auth, TimeSpan.Zero));
     }
 
     private CookieOptions BuildOptions(string path, TimeSpan maxAge) =>

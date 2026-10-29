@@ -1,6 +1,7 @@
 using Ardalis.Result;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.Extensions.Options;
+using IMT_Reservas.Server.Infrastructure.Config;
 using UsuarioEntity = IMT_Reservas.Server.Core.Entities.Usuario;
 
 namespace IMT_Reservas.Server.Application.Features.Usuario;
@@ -20,8 +21,7 @@ public sealed class VerificacionCorreoService
     {
         _repository = repository;
         _email = email;
-        _frontendUrl = configuration["Authentication:FrontendUrl"]?.TrimEnd('/')
-            ?? "http://localhost:4200";
+        _frontendUrl = ConfigurationKeys.GetFrontendUrl(configuration);
     }
 
     public async Task<bool> Issue(UsuarioEntity user, CancellationToken cancellationToken)

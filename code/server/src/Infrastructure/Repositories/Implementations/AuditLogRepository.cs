@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using IMT_Reservas.Server.Application.Features.AuditLog;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
@@ -64,6 +65,8 @@ public class AuditLogRepository
         await _db.SaveChangesAsync();
     }
 
+    [SuppressMessage("Globalization", "CA1304", Justification = SqlTranslation.Justification)]
+    [SuppressMessage("Globalization", "CA1311", Justification = SqlTranslation.Justification)]
     public async Task<List<AuditLogDto>> GetFiltered(
         string? entidad,
         string? actor,
@@ -79,7 +82,7 @@ public class AuditLogRepository
             query = query.Where(a => a.Entidad == entidad);
         if (!string.IsNullOrWhiteSpace(actor))
         {
-            var normalizedActor = actor.Trim().ToLower();
+            var normalizedActor = actor.Trim().ToLowerInvariant();
             query = query.Where(a =>
                 a.AdminCarnet.ToLower().Contains(normalizedActor)
                 || a.AdminNombre.ToLower().Contains(normalizedActor)

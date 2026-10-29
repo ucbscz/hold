@@ -67,8 +67,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         string? blockReason,
         bool isAdmin,
         string? actorCarnet = null,
-        CancellationToken cancellationToken = default,
-        bool isLabAdmin = false
+        bool isLabAdmin = false,
+        CancellationToken cancellationToken = default
     )
     {
         if (!isAdmin)
@@ -125,12 +125,12 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             notificationType,
             notificationTitle,
             notificationContent,
-            NotificacionService.BuildEmitterDetail(actorName ?? "Sistema", notificationReason),
+            NotificacionService.BuildEmitterDetail(actorName ?? NotificacionService.SystemEmitter, notificationReason),
             saveChanges: false
         );
 
         await Repository.SaveChanges(cancellationToken);
-        _ = _cacheRepository.Remove(CacheKeys.Usuario(carnet));
+        _ = _cacheRepository.Remove(CacheKeys.Usuario(carnet), CancellationToken.None);
 
         return Result<object>.Success(null!);
     }
@@ -144,15 +144,20 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
     public override async Task<Result<UsuarioDto>> Create(UsuarioDto dto) =>
         await Create(dto, isAdmin: false);
 
-    public async Task<Result<UsuarioDto>> Create(UsuarioDto dto, bool isAdmin, bool isLabAdmin = false)
+    public async Task<Result<UsuarioDto>> Create(
+        UsuarioDto dto,
+        bool isAdmin,
+        bool isLabAdmin = false,
+        CancellationToken cancellationToken = default
+    )
     {
         dto.Carnet = dto.Carnet?.Trim().ToUpperInvariant();
         dto.Rol = dto.Rol?.Trim().ToLowerInvariant();
         dto.Email = dto.Email?.Trim().ToLowerInvariant();
         var googleRegistration = string.IsNullOrWhiteSpace(dto.CodigoGoogle)
             ? null
-            : await _googleCodes.Get(dto.CodigoGoogle, CancellationToken.None);
-        if (googleRegistration != null && googleRegistration.Tipo != "registro")
+            : await _googleCodes.Get(dto.CodigoGoogle, cancellationToken);
+        if (googleRegistration != null && googleRegistration.Tipo != TipoCodigoGoogle.Registro)
             googleRegistration = null;
 
         if (!string.IsNullOrWhiteSpace(dto.CodigoGoogle) && googleRegistration == null)
@@ -182,21 +187,21 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         dto.MotivoBloqueo = null;
         dto.EmailVerificado = isAdmin || googleRegistration != null;
 
-        await ResolveCarrera(dto);
+        await ResolveCarrera(dto, cancellationToken);
 
-        var validation = await Validator.ValidateAsync(dto);
+        var validation = await Validator.ValidateAsync(dto, cancellationToken);
 
         if (!validation.IsValid)
             return validation.ToResult<UsuarioDto>();
 
-        var deletedUser = await Repository.GetDeletedByCarnet(dto.Carnet!);
+        var deletedUser = await Repository.GetDeletedByCarnet(dto.Carnet!, cancellationToken);
 
-        if (deletedUser == null && await _queries.ExistsByCarnet(dto.Carnet!))
+        if (deletedUser == null && await _queries.ExistsByCarnet(dto.Carnet!, cancellationToken))
             return Result<UsuarioDto>.Error("Carnet ya existe");
 
-        if (await _queries.ExistsByEmail(dto.Email!, deletedUser?.Carnet))
+        if (await _queries.ExistsByEmail(dto.Email!, deletedUser?.Carnet, cancellationToken))
         {
-            var existingEmail = await _authRepository.GetTrackedByEmail(dto.Email!);
+            var existingEmail = await _authRepository.GetTrackedByEmail(dto.Email!, cancellationToken);
             return Result<UsuarioDto>.Error(
                 string.IsNullOrWhiteSpace(existingEmail?.GoogleId)
                     ? "Email ya existe"
@@ -206,7 +211,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         if (
             !string.IsNullOrWhiteSpace(dto.Telefono)
-            && await _queries.ExistsByTelefono(dto.Telefono, deletedUser?.Carnet)
+            && await _queries.ExistsByTelefono(dto.Telefono, deletedUser?.Carnet, cancellationToken)
         )
             return Result<UsuarioDto>.Error("Teléfono ya registrado");
 
@@ -241,7 +246,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         }
         else
         {
-            await Repository.UpdateEntity(entity);
+            await Repository.UpdateEntity(entity, cancellationToken: cancellationToken);
             result = Result<UsuarioDto>.Success(_mapper.ToDto(entity));
         }
 
@@ -259,7 +264,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
                     CancellationToken.None
                 );
             }
-            result.Value.CarreraNombre = await _queries.GetCarreraName(entity.IdCarrera);
+            result.Value.CarreraNombre = await _queries.GetCarreraName(entity.IdCarrera, CancellationToken.None);
             var auditDetail = AuditChangeDetail.BuildCreated(result.Value);
             ClearProfileDocuments(result.Value);
             await Audit!.Log(
@@ -367,24 +372,27 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             : result;
     }
 
-    public async Task<Result<UsuarioDto>> Get(string carnet)
+    public async Task<Result<UsuarioDto>> Get(
+        string carnet,
+        CancellationToken cancellationToken = default
+    )
     {
         var cacheKey = CacheKeys.Usuario(carnet);
-        var cacheResult = await _cacheRepository.Get<UsuarioDto>(cacheKey);
+        var cacheResult = await _cacheRepository.Get<UsuarioDto>(cacheKey, cancellationToken);
 
         if (cacheResult.IsSuccess)
             return Result<UsuarioDto>.Success(cacheResult.Value);
 
-        var user = await _queries.GetByCarnet(carnet);
+        var user = await _queries.GetByCarnet(carnet, cancellationToken);
 
         if (user == null)
             return Result<UsuarioDto>.NotFound();
 
         var dto = _mapper.ToDto(user);
-        dto.CarreraNombre = await _queries.GetCarreraName(user.IdCarrera);
+        dto.CarreraNombre = await _queries.GetCarreraName(user.IdCarrera, cancellationToken);
         ClearProfileDocuments(dto);
 
-        _ = await _cacheRepository.Set(cacheKey, dto, UsuarioCacheTtl);
+        _ = await _cacheRepository.Set(cacheKey, dto, UsuarioCacheTtl, cancellationToken);
 
         return Result<UsuarioDto>.Success(dto);
     }
@@ -509,15 +517,18 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         );
     }
 
-    public async Task<Result<object>> Delete(string carnet)
+    public async Task<Result<object>> Delete(
+        string carnet,
+        CancellationToken cancellationToken = default
+    )
     {
-        var previous = await Repository.GetTrackedByCarnet(carnet);
+        var previous = await Repository.GetTrackedByCarnet(carnet, cancellationToken);
         var previousDto = previous == null ? null : _mapper.ToDto(previous);
-        var deleteResult = await Repository.Delete(carnet);
+        var deleteResult = await Repository.Delete(carnet, cancellationToken);
 
         if (deleteResult.IsSuccess)
         {
-            _ = await _cacheRepository.Remove(CacheKeys.Usuario(carnet));
+            _ = await _cacheRepository.Remove(CacheKeys.Usuario(carnet), CancellationToken.None);
             await Audit!.Log(
                 AuditAccion.Eliminar,
                 typeof(UsuarioEntity).Name,

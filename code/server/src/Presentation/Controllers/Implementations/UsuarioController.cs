@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using IMT_Reservas.Server.Infrastructure.Config;
 using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
 
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
@@ -51,18 +52,21 @@ public class UsuarioController : Controller
     ) => ToResponse(await _service.GetAll(pagina, tamanoPagina, cancellationToken));
 
     [HttpGet("{carnet}")]
-    public async Task<IActionResult> Get(string carnet)
+    public async Task<IActionResult> Get(string carnet, CancellationToken cancellationToken)
     {
         if (!User.PuedeGestionar() && CurrentCarnet != carnet)
             return Forbid();
 
-        return ToResponse(await _service.Get(carnet));
+        return ToResponse(await _service.Get(carnet, cancellationToken));
     }
 
     [AllowAnonymous]
-    [EnableRateLimiting("auth")]
+    [EnableRateLimiting(RequestLimits.AuthPolicy)]
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] UsuarioDto dto)
+    public async Task<IActionResult> Create(
+        [FromBody] UsuarioDto dto,
+        CancellationToken cancellationToken
+    )
     {
         if (!User.PuedeGestionar() && string.IsNullOrWhiteSpace(dto.CodigoGoogle))
             return ToResponse(
@@ -71,7 +75,12 @@ public class UsuarioController : Controller
                 )
             );
 
-        var result = await _service.Create(dto, User.PuedeGestionar(), User.IsInRole(Permisos.AdministradorLaboratorio));
+        var result = await _service.Create(
+            dto,
+            User.PuedeGestionar(),
+            User.IsInRole(Permisos.AdministradorLaboratorio),
+            cancellationToken
+        );
         return ToCreatedResponse(result, nameof(Get), new { carnet = result.Value?.Carnet });
     }
 
@@ -94,8 +103,8 @@ public class UsuarioController : Controller
 
     [Authorize(Roles = Permisos.Administrador)]
     [HttpDelete("{carnet}")]
-    public async Task<IActionResult> Delete(string carnet) =>
-        ToDeleteResponse(await _service.Delete(carnet));
+    public async Task<IActionResult> Delete(string carnet, CancellationToken cancellationToken) =>
+        ToDeleteResponse(await _service.Delete(carnet, cancellationToken));
 
     [Authorize(Roles = Permisos.Gestion)]
     [HttpPatch("{carnet}/bloqueo")]
@@ -111,8 +120,8 @@ public class UsuarioController : Controller
                 request.MotivoBloqueo,
                 User.PuedeGestionar(),
                 CurrentCarnet,
-                cancellationToken,
-                User.IsInRole(Permisos.AdministradorLaboratorio)
+                User.IsInRole(Permisos.AdministradorLaboratorio),
+                cancellationToken
             )
         );
 

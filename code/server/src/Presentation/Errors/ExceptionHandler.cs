@@ -83,16 +83,8 @@ public sealed class ExceptionHandler : IExceptionHandler
     private void LogException(Exception exception, int statusCode, string traceIdentifier)
     {
         if (statusCode >= StatusCodes.Status500InternalServerError)
-            _logger.LogError(
-                "Error no controlado {ExceptionType}. TraceId: {TraceId}",
-                exception.GetType().Name,
-                traceIdentifier
-            );
+            _logger.UnhandledException(exception.GetType().Name, traceIdentifier);
         else
-            _logger.LogWarning(
-                "Error controlado {ExceptionType}. TraceId: {TraceId}",
-                exception.GetType().Name,
-                traceIdentifier
-            );
+            _logger.HandledException(exception.GetType().Name, traceIdentifier);
     }
 }

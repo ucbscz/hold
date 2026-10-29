@@ -181,7 +181,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         if (loan == null || loan.Carnet != carnet) return Result<PrestamoDto>.NotFound();
         if (loan.EstadoPrestamo != EstadoPrestamo.Pendiente && loan.EstadoPrestamo != EstadoPrestamo.Aprobado)
             return Result<PrestamoDto>.Error("Solo puedes cancelar préstamos pendientes o aprobados");
-        return await UpdateStatus(id, "cancelado", actorCarnet: carnet, cancellationToken: cancellationToken);
+        return await UpdateStatus(id, PrestamoState.ToText(EstadoPrestamo.Cancelado), actorCarnet: carnet, cancellationToken: cancellationToken);
     }
 
     public Task<Result<PrestamoDto>> GetAuthorized(
@@ -228,7 +228,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
                 "No se puede aprobar una reserva cuyo horario de inicio ya venció"
             );
 
-        var actor = string.IsNullOrWhiteSpace(actorCarnet) ? "Sistema"
+        var actor = string.IsNullOrWhiteSpace(actorCarnet) ? SystemActor.Nombre
             : await _queries.GetUsuarioDisplayName(actorCarnet, cancellationToken);
 
         if (parsedState.Value == EstadoPrestamo.Aprobado)
@@ -315,7 +315,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             auditDetail
         );
 
-        var emitter = actor ?? "Sistema";
+        var emitter = actor ?? SystemActor.Nombre;
 
         await NotifyStatusChange(
             id,
@@ -496,7 +496,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         foreach (var item in body.EquiposRetorno)
         {
             if (int.TryParse(item.CodigoImt, out var codigoImt))
-                statesByCodigoImt[codigoImt] = ParseEstadoEquipo(item.EstadoEquipo);
+                statesByCodigoImt[codigoImt] = EstadoEquipoNombre.Parse(item.EstadoEquipo);
         }
 
         var appliedReturns = await _states.ApplyEstadoEquipoRetorno(
@@ -505,7 +505,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             cancellationToken
         );
         var affectedEquipment = appliedReturns
-            .Where(equipment => equipment.EstadoEquipo != "operativo")
+            .Where(equipment => equipment.EstadoEquipo != EstadoEquipoNombre.Operativo)
             .ToList();
 
         var auditDetail = JsonSerializer.Serialize(
@@ -535,7 +535,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             return (auditDetail, null, false);
 
         var inoperableEquipment = affectedEquipment
-            .Where(equipment => equipment.EstadoEquipo == "inoperativo")
+            .Where(equipment => equipment.EstadoEquipo == EstadoEquipoNombre.Inoperativo)
             .ToList();
         var selectedEquipment = inoperableEquipment.Count > 0
             ? inoperableEquipment
@@ -548,7 +548,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             )
         );
         var stateText = inoperableEquipment.Count > 0
-            ? "inoperativo"
+            ? EstadoEquipoNombre.Inoperativo
             : "con observación";
         var message = selectedEquipment.Count == 1
             ? $"Se ha marcado {equipmentNames} como {stateText} en tu préstamo."
@@ -557,14 +557,6 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         return (auditDetail, message, true);
     }
 
-    private static EstadoEquipo ParseEstadoEquipo(string? estado) =>
-        estado switch
-        {
-            "parcialmente_operativo" => EstadoEquipo.ParcialmenteOperativo,
-            "inoperativo" => EstadoEquipo.Inoperativo,
-            "en_mantenimiento" => EstadoEquipo.EnMantenimiento,
-            _ => EstadoEquipo.Operativo,
-        };
 
     public async Task<Result<EstadoReservaDto>> GetReservationStatus(
         string carnet,
@@ -607,8 +599,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         string estadoPrestamo,
         int page = 1,
         int pageSize = PrestamoReadRepository.MaxPageSize,
-        CancellationToken cancellationToken = default,
-        bool? guardado = null
+        bool? guardado = null,
+        CancellationToken cancellationToken = default
     )
     {
         if (string.IsNullOrEmpty(carnetUsuario))
@@ -619,8 +611,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             estadoPrestamo,
             page,
             pageSize,
-            cancellationToken,
-            guardado
+            guardado,
+            cancellationToken
         );
     }
 
@@ -629,14 +621,14 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         string estadoPrestamo,
         int page = 1,
         int pageSize = PrestamoReadRepository.MaxPageSize,
-        CancellationToken cancellationToken = default,
-        bool? guardado = null
+        bool? guardado = null,
+        CancellationToken cancellationToken = default
     )
     {
 
         EstadoPrestamo? estado = null;
 
-        if (!string.IsNullOrEmpty(estadoPrestamo) && estadoPrestamo != "todos")
+        if (!string.IsNullOrEmpty(estadoPrestamo) && estadoPrestamo != PrestamoState.TodosFiltro)
         {
             estado = PrestamoState.Parse(estadoPrestamo);
 
@@ -649,8 +641,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             estado,
             page,
             pageSize,
-            cancellationToken,
-            guardado
+            guardado,
+            cancellationToken
         );
     }
 }

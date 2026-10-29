@@ -32,22 +32,10 @@ public partial class EquipoMapper : IMapper<EquipoEntity, EquipoDto>
             : equipo.Ambiente != null ? equipo.Ambiente.Nombre : null;
 
     private static string EstadoEquipoToString(EstadoEquipo estado) =>
-        estado switch
-        {
-            EstadoEquipo.ParcialmenteOperativo => "parcialmente_operativo",
-            EstadoEquipo.Inoperativo => "inoperativo",
-            EstadoEquipo.EnMantenimiento => "en_mantenimiento",
-            _ => "operativo",
-        };
+        EstadoEquipoNombre.ToName(estado);
 
     private static EstadoEquipo StringToEstadoEquipo(string? estado) =>
-        estado switch
-        {
-            "parcialmente_operativo" => EstadoEquipo.ParcialmenteOperativo,
-            "inoperativo" => EstadoEquipo.Inoperativo,
-            "en_mantenimiento" => EstadoEquipo.EnMantenimiento,
-            _ => EstadoEquipo.Operativo,
-        };
+        EstadoEquipoNombre.Parse(estado);
 
     private static DateTime? DateOnlyToDateTime(DateOnly source) =>
         source.ToDateTime(TimeOnly.MinValue);

@@ -1,3 +1,5 @@
+using IMT_Reservas.Server.Core.Entities;
+
 namespace IMT_Reservas.Server.Application.Features.Prestamo;
 
 public class PrestamoDto
@@ -31,7 +33,7 @@ public class PrestamoDto
     public string? Contrato { get; set; }
     public string? EstadoEquipo { get; set; }
     public List<PrestamoDto>? EquiposRetorno { get; set; }
-    public string DestinoPrestamo { get; set; } = "Universidad";
+    public string DestinoPrestamo { get; set; } = DestinoUso.Universidad;
     public int? IdCarrera { get; set; }
     public string? NombreMateria { get; set; }
     public string? TipoUsuario { get; set; }

@@ -4,6 +4,8 @@ namespace IMT_Reservas.Server.Application.Features.Prestamo.State;
 
 public static class PrestamoState
 {
+    public const string TodosFiltro = "todos";
+
     private static readonly Dictionary<EstadoPrestamo, EstadoPrestamoBase> States = new()
     {
         [EstadoPrestamo.Pendiente] = new EstadoPendiente(),

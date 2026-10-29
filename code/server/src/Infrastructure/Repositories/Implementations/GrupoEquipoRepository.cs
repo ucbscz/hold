@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using IMT_Reservas.Server.Application.Features.GrupoEquipo;
 using IMT_Reservas.Server.Application.Features.Componente;
 using IMT_Reservas.Server.Core.Entities;
@@ -12,6 +13,7 @@ public class GrupoEquipoRepository : Repository<GrupoEquipoEntity, GrupoEquipoDt
 {
     private readonly EquipoRepository _equipos;
 
+    [SuppressMessage("Globalization", "CA1305", Justification = SqlTranslation.Justification)]
     public Task<List<ComponenteDto>> GetComponents(int id, int page, CancellationToken token) =>
         (from componente in DbContext.Componentes.AsNoTracking()
          join equipo in DbContext.Equipos.AsNoTracking() on componente.IdEquipo equals equipo.Id

@@ -22,7 +22,7 @@ public static class SecurityHeaders
 #pragma warning disable S7039
                 headers.Append(
                     "Content-Security-Policy",
-                    context.Request.Path.StartsWithSegments("/api")
+                    context.Request.Path.StartsWithSegments(ApiPaths.Api, StringComparison.OrdinalIgnoreCase)
                         ? ApiContentSecurityPolicy
                         : PageContentSecurityPolicy
                 );

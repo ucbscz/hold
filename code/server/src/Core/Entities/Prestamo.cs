@@ -17,7 +17,7 @@ public class Prestamo : Entity
     public string? EntregadoPor { get; set; }
     public int? IdContrato { get; set; }
     public bool RecordatorioEnviado { get; set; } = false;
-    public string DestinoPrestamo { get; set; } = "Universidad";
+    public string DestinoPrestamo { get; set; } = DestinoUso.Universidad;
     public int? IdCarrera { get; set; }
     public string? NombreMateria { get; set; }
     public bool Guardado { get; set; }

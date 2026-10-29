@@ -42,17 +42,18 @@ public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>
         .Usuarios.IgnoreQueryFilters()
         .FirstOrDefaultAsync(user => user.Carnet == carnet && user.EstadoEliminado, cancellationToken);
 
-    public async Task<Result<object>> Delete(string carnet)
+    public async Task<Result<object>> Delete(
+        string carnet,
+        CancellationToken cancellationToken = default
+    )
     {
-        var entity = await DbContext.Usuarios.FirstOrDefaultAsync(user =>
-            user.Carnet == carnet && !user.EstadoEliminado
-        );
+        var entity = await GetTrackedByCarnet(carnet, cancellationToken);
 
         if (entity == null)
             return Result<object>.NotFound();
 
         await SoftDelete(entity);
-        await DbContext.SaveChangesAsync();
+        await DbContext.SaveChangesAsync(cancellationToken);
         return Result<object>.Success(null!);
     }
 

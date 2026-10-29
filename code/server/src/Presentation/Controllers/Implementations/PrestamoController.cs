@@ -3,6 +3,7 @@ using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using IMT_Reservas.Server.Application.Features.Prestamo.State;
 using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
 
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
@@ -32,8 +33,8 @@ public class PrestamoController : Controller
                     string.IsNullOrWhiteSpace(estado) ? string.Empty : estado,
                     pagina,
                     tamanoPagina,
-                    cancellationToken,
-                    guardado
+                    guardado,
+                    cancellationToken
                 )
             );
 
@@ -43,8 +44,8 @@ public class PrestamoController : Controller
                 estado ?? string.Empty,
                 pagina,
                 tamanoPagina,
-                cancellationToken,
-                guardado
+                guardado,
+                cancellationToken
             )
         );
     }
@@ -92,7 +93,7 @@ public class PrestamoController : Controller
     {
         if (!User.PuedeGestionar())
         {
-            if (!string.Equals(request.EstadoPrestamo, "cancelado", StringComparison.OrdinalIgnoreCase))
+            if (PrestamoState.Parse(request.EstadoPrestamo) != EstadoPrestamo.Cancelado)
                 return Forbid();
             return ToResponse(await _service.CancelForUser(id, CurrentCarnet, cancellationToken));
         }

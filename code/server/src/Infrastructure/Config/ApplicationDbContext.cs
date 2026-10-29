@@ -37,9 +37,9 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
-        modelBuilder.HasPostgresEnum<EstadoPrestamo>("estado_prestamo");
-        modelBuilder.HasPostgresEnum<TipoUsuario>("tipo_usuario");
-        modelBuilder.HasPostgresEnum<EstadoEquipo>("estado_equipo");
+        modelBuilder.HasPostgresEnum<EstadoPrestamo>(PostgresEnumNames.EstadoPrestamo);
+        modelBuilder.HasPostgresEnum<TipoUsuario>(PostgresEnumNames.TipoUsuario);
+        modelBuilder.HasPostgresEnum<EstadoEquipo>(PostgresEnumNames.EstadoEquipo);
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
         ApplyUtcDateTimeConverter(modelBuilder);
     }

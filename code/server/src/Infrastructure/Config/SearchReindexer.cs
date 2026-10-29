@@ -28,10 +28,7 @@ public sealed class SearchReindexer : IHostedService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(
-                ex,
-                "Search reindex skipped on startup. The database or search engine may not be ready yet. The index will populate as data is added."
-            );
+            _logger.SearchReindexSkipped(ex);
         }
     }
 

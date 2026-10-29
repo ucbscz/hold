@@ -1,6 +1,7 @@
 using Ardalis.Result;
 using IMT_Reservas.Server.Application.Features.Prestamo;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+using IMT_Reservas.Server.Application.Abstraction;
 
 namespace IMT_Reservas.Server.Application.Features.Carrito;
 
@@ -34,8 +35,7 @@ public class CarritoService
             || request.ArrayIds.Count == 0
         )
         {
-            _logger.LogWarning(
-                "Disponibilidad request missing fields or empty IDs: Inicio={Inicio}, Fin={Fin}, IdsCount={IdsCount}",
+            _logger.InvalidAvailabilityRequest(
                 request.FechaInicio,
                 request.FechaFin,
                 request.ArrayIds?.Count

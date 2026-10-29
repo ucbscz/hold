@@ -232,7 +232,7 @@ public class EstadoPrestamoJob
                 carnet = loan.CarnetUsuario,
                 producto = loan.NombreGrupoEquipo,
                 motivo,
-                fecha = fechaRelacionada?.ToString(NotificacionService.DateFormat),
+                fecha = fechaRelacionada?.ToString(NotificacionService.DateFormat, CultureInfo.InvariantCulture),
             }
         );
 }

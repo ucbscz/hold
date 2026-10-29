@@ -2,6 +2,7 @@ using IMT_Reservas.Server.Application.Features.Configuracion;
 using IMT_Reservas.Server.Core.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
 
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
@@ -21,7 +22,7 @@ public class ConfiguracionController : Controller
     public async Task<IActionResult> Get(CancellationToken cancellationToken)
     {
         var result = await _service.GetConfiguracion(cancellationToken);
-        Response.Headers.CacheControl = "no-store";
+        Response.Headers.CacheControl = CacheControlHeaderValue.NoStoreString;
         return Ok(
             User.IsInRole(Permisos.Administrador)
                 ? result
@@ -33,7 +34,7 @@ public class ConfiguracionController : Controller
     [Authorize(Roles = Permisos.Administrador)]
     public async Task<IActionResult> Responsables([FromQuery] string? buscar, CancellationToken cancellationToken)
     {
-        Response.Headers.CacheControl = "no-store";
+        Response.Headers.CacheControl = CacheControlHeaderValue.NoStoreString;
         if (buscar?.Length > 100) return BadRequest("La búsqueda no puede superar 100 caracteres.");
         return Ok(await _service.BuscarResponsables(buscar, cancellationToken));
     }

@@ -6,12 +6,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using IMT_Reservas.Server.Infrastructure.Config;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.Net.Http.Headers;
 using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
 
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
 
 [AllowAnonymous]
-[EnableRateLimiting("auth")]
+[EnableRateLimiting(RequestLimits.AuthPolicy)]
 [Route("api/auth")]
 public class AuthController : Controller
 {
@@ -113,12 +116,12 @@ public class AuthController : Controller
     {
         var frontend = FrontendUrl;
         var ruta = GoogleRoute(origen);
-        if (string.IsNullOrWhiteSpace(_configuration["Authentication:Google:ClientId"]))
+        if (string.IsNullOrWhiteSpace(_configuration[ConfigurationKeys.GoogleClientId]))
             return Redirect($"{frontend}/{ruta}?googleError=configuracion");
 
         return Challenge(
             new AuthenticationProperties { RedirectUri = $"/api/auth/google/resultado?origen={ruta}" },
-            "Google"
+            GoogleDefaults.AuthenticationScheme
         );
     }
 
@@ -128,14 +131,14 @@ public class AuthController : Controller
         CancellationToken cancellationToken
     )
     {
-        var authentication = await HttpContext.AuthenticateAsync("GoogleExternal");
+        var authentication = await HttpContext.AuthenticateAsync(AuthSchemes.GoogleExternal);
         var frontend = FrontendUrl;
         var ruta = GoogleRoute(origen);
         if (!authentication.Succeeded || authentication.Principal == null)
             return Redirect($"{frontend}/{ruta}?googleError=cancelado");
 
         var result = await _google.Begin(authentication.Principal, cancellationToken);
-        await HttpContext.SignOutAsync("GoogleExternal");
+        await HttpContext.SignOutAsync(AuthSchemes.GoogleExternal);
         if (!result.IsSuccess)
             return Redirect($"{frontend}/{ruta}?googleError=cuenta");
 
@@ -148,7 +151,7 @@ public class AuthController : Controller
         CancellationToken cancellationToken
     )
     {
-        Response.Headers.CacheControl = "no-store";
+        Response.Headers.CacheControl = CacheControlHeaderValue.NoStoreString;
         var result = await _google.Exchange(request.Token, cancellationToken);
         if (!result.IsSuccess)
             return ToResponse(result);
@@ -178,14 +181,14 @@ public class AuthController : Controller
     }
 
     private string FrontendUrl =>
-        _configuration["Authentication:FrontendUrl"]?.TrimEnd('/') ?? "http://localhost:4200";
+        ConfigurationKeys.GetFrontendUrl(_configuration);
 
     private static string GoogleRoute(string? origen) =>
-        origen == "registro" ? "registro" : "login";
+        origen == TipoCodigoGoogle.Registro ? TipoCodigoGoogle.Registro : TipoCodigoGoogle.Login;
 
     private IActionResult SessionResponse(Result<LoginDto> result)
     {
-        Response.Headers.CacheControl = "no-store";
+        Response.Headers.CacheControl = CacheControlHeaderValue.NoStoreString;
         if (!result.IsSuccess)
             return ToResponse(result);
 
