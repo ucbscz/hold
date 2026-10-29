@@ -106,27 +106,9 @@ public static class AuditChangeDetail
         var previousValue = property.GetValue(previous);
         var currentValue = property.GetValue(current);
 
-        if (ValuesEqual(previousValue, currentValue))
-            return null;
-
-        var label = Labels.GetValueOrDefault(property.Name, SplitName(property.Name));
-
-        if (ProtectedProperties.Contains(property.Name))
-            return new
-            {
-                campo = label,
-                protegido = true,
-                anterior = (string?)null,
-                nuevo = (string?)null,
-            };
-
-        return new
-        {
-            campo = label,
-            protegido = false,
-            anterior = FormatValue(previousValue),
-            nuevo = FormatValue(currentValue),
-        };
+        return ValuesEqual(previousValue, currentValue)
+            ? null
+            : CreateEntry(property, FormatValue(previousValue), FormatValue(currentValue));
     }
 
     private static object? CreateSnapshot<T>(PropertyInfo property, T value, bool created)
@@ -136,6 +118,14 @@ public static class AuditChangeDetail
         if (propertyValue == null || propertyValue is string text && string.IsNullOrWhiteSpace(text))
             return null;
 
+        var formatted = FormatValue(propertyValue);
+        return created
+            ? CreateEntry(property, null, formatted)
+            : CreateEntry(property, formatted, null);
+    }
+
+    private static object CreateEntry(PropertyInfo property, string? previous, string? current)
+    {
         var label = Labels.GetValueOrDefault(property.Name, SplitName(property.Name));
 
         if (ProtectedProperties.Contains(property.Name))
@@ -151,8 +141,8 @@ public static class AuditChangeDetail
         {
             campo = label,
             protegido = false,
-            anterior = created ? null : FormatValue(propertyValue),
-            nuevo = created ? FormatValue(propertyValue) : null,
+            anterior = previous,
+            nuevo = current,
         };
     }
 

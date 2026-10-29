@@ -58,7 +58,7 @@ public class CarritoService
                 "La fecha y hora final debe ser posterior a la fecha y hora inicial"
             );
 
-        var config = await _configuracionRepository.GetConfiguracion();
+        var config = await _configuracionRepository.GetConfiguracion(cancellationToken);
         if (fechaFin - fechaInicio < TimeSpan.FromMinutes(config.TiempoMinimoReservaMinutos))
             return Result<List<CarritoDto>>.Error(
                 $"La duracion minima de un prestamo es de {config.TiempoMinimoReservaMinutos} minutos"
@@ -82,20 +82,13 @@ public class CarritoService
             );
 
         var cantidades = await _repository.GetCantidadesByGrupos(groupIds, cancellationToken);
-        var prestamosActivos = await _repository.GetPrestamosActivosEnRango(
+        var ocupadosEnRango = await _repository.GetEquiposOcupadosEnRango(
             groupIds,
             fechaInicio,
             fechaFin,
             cancellationToken
         );
-        var mantenimientosActivos = await _repository.GetMantenimientosActivosEnRango(
-            groupIds,
-            fechaInicio,
-            fechaFin,
-            cancellationToken
-        );
-        var unavailableByGroup = prestamosActivos
-            .Concat(mantenimientosActivos)
+        var unavailableByGroup = ocupadosEnRango
             .GroupBy(item => item.IdGrupoEquipo)
             .ToDictionary(
                 group => group.Key,

@@ -71,7 +71,7 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
             {
                 if (!p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue) return true;
 
-                var config = await configRepository.GetConfiguracion();
+                var config = await configRepository.GetConfiguracion(cancellationToken);
                 var duracion = p.FechaDevolucionEsperada.Value - p.FechaPrestamoEsperada.Value;
 
                 if (duracion < TimeSpan.FromMinutes(config.TiempoMinimoReservaMinutos))
@@ -86,7 +86,7 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
             {
                 if (!p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue) return true;
 
-                var config = await configRepository.GetConfiguracion();
+                var config = await configRepository.GetConfiguracion(cancellationToken);
                 return HorarioReserva.EsValido(
                     p.FechaPrestamoEsperada.Value,
                     p.FechaDevolucionEsperada.Value,

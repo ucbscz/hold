@@ -338,7 +338,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         var auditDetail = AuditChangeDetail.Build(previous, resultDto);
         ClearProfileDocuments(resultDto);
 
-        _ = await _cacheRepository.Remove(CacheKeys.Usuario(carnet));
+        _ = await _cacheRepository.Remove(CacheKeys.Usuario(carnet), cancellationToken);
         await Audit!.Log(
             AuditAccion.Editar,
             typeof(UsuarioEntity).Name,

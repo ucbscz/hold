@@ -394,7 +394,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         ))
             return;
 
-        await _usuarioRepository.SetBlockedStatus([carnet], false, null);
+        await _usuarioRepository.SetBlockedStatus([carnet], false, null, cancellationToken);
         await Audit!.LogAsSystem(
             AuditAccion.Desbloquear,
             "Usuario",

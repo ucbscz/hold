@@ -51,65 +51,6 @@ public class CarritoRepository
                 cancellationToken
             );
 
-    public async Task<
-        List<(int IdGrupoEquipo, int IdEquipo)>
-    > GetPrestamosActivosEnRango(
-        List<int> grupoIds,
-        DateTime fechaInicio,
-        DateTime fechaFin,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var rows = await (
-            from detalle in _dbContext.DetallesPrestamos.AsNoTracking()
-            join prestamo in _dbContext.Prestamos.AsNoTracking()
-                on detalle.IdPrestamo equals prestamo.Id
-            join equipo in _dbContext.Equipos.AsNoTracking() on detalle.IdEquipo equals equipo.Id
-            where
-                grupoIds.Contains(equipo.IdGrupoEquipo)
-                && PrestamoAvailabilityPolicy.BlockingStates.Contains(
-                    prestamo.EstadoPrestamo
-                )
-                && prestamo.FechaPrestamoEsperada < fechaFin
-                && prestamo.FechaDevolucionEsperada > fechaInicio
-            select new { equipo.IdGrupoEquipo, equipo.Id }
-        ).ToListAsync(cancellationToken);
-
-        return rows.ConvertAll(r =>
-            (r.IdGrupoEquipo, r.Id)
-        );
-    }
-
-    public async Task<List<(int IdGrupoEquipo, int IdEquipo)>> GetMantenimientosActivosEnRango(
-        List<int> grupoIds,
-        DateTime fechaInicio,
-        DateTime fechaFin,
-        CancellationToken cancellationToken = default
-    )
-    {
-        var rows = await (
-            from detalle in _dbContext.DetallesMantenimientos.AsNoTracking()
-            join mantenimiento in _dbContext.Mantenimientos.AsNoTracking()
-                on detalle.IdMantenimiento equals mantenimiento.Id
-            join equipo in _dbContext.Equipos.AsNoTracking() on detalle.IdEquipo equals equipo.Id
-            where
-                grupoIds.Contains(equipo.IdGrupoEquipo)
-                && mantenimiento.FechaMantenimiento < fechaFin
-                && mantenimiento.FechaFinalMantenimiento > fechaInicio
-            select new
-            {
-                equipo.IdGrupoEquipo,
-                equipo.Id,
-                mantenimiento.FechaMantenimiento,
-                mantenimiento.FechaFinalMantenimiento,
-            }
-        ).ToListAsync(cancellationToken);
-
-        return rows.ConvertAll(r =>
-            (r.IdGrupoEquipo, r.Id)
-        );
-    }
-
     public async Task<List<EquipoOcupado>> GetEquiposOcupadosEnRango(
         List<int> grupoIds,
         DateTime fechaInicio,

@@ -66,7 +66,7 @@ public sealed class EmailDeliveryService
                 Credentials = new NetworkCredential(_settings.Username, _settings.Password),
                 Timeout = 15000,
             };
-            await client.SendMailAsync(message).WaitAsync(cancellationToken);
+            await client.SendMailAsync(message, cancellationToken);
             return true;
         }
         catch (Exception exception)

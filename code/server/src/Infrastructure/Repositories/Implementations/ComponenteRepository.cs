@@ -35,64 +35,49 @@ public class ComponenteRepository : Repository<ComponenteEntity, ComponenteDto>
 
     public override async Task<Result<List<ComponenteDto>>> GetAll()
     {
-        var rows = await (
-            from componente in DbContext.Componentes.AsNoTracking()
-            join equipo in DbContext.Equipos.AsNoTracking()
-                on componente.IdEquipo equals equipo.Id
-                into equipoJoin
-            from equipo in equipoJoin.DefaultIfEmpty()
-            select new
-            {
-                Componente = componente,
-                CodigoImtEquipo = equipo != null ? (int?)equipo.CodigoImt : null,
-                NombreEquipo = equipo != null ? equipo.Descripcion : null,
-            }
-        ).ToListAsync();
+        var rows = await QueryRows(DbContext.Componentes.AsNoTracking()).ToListAsync();
 
-        var dtos = rows
-            .Select(row => ToDto(row.Componente, row.CodigoImtEquipo, row.NombreEquipo))
-            .ToList();
-
-        return Result<List<ComponenteDto>>.Success(dtos);
+        return Result<List<ComponenteDto>>.Success(rows.ConvertAll(ToDto));
     }
 
     public override async Task<Result<ComponenteDto>> Get(int id)
     {
-        var row = await (
-            from componente in DbContext.Componentes.AsNoTracking().Where(c => c.Id == id)
-            join equipo in DbContext.Equipos.AsNoTracking()
-                on componente.IdEquipo equals equipo.Id
-                into equipoJoin
-            from equipo in equipoJoin.DefaultIfEmpty()
-            select new
-            {
-                Componente = componente,
-                CodigoImtEquipo = equipo != null ? (int?)equipo.CodigoImt : null,
-                NombreEquipo = equipo != null ? equipo.Descripcion : null,
-            }
-        ).FirstOrDefaultAsync();
+        var row = await QueryRows(DbContext.Componentes.AsNoTracking().Where(c => c.Id == id))
+            .FirstOrDefaultAsync();
 
-        var dto = row == null ? null : ToDto(row.Componente, row.CodigoImtEquipo, row.NombreEquipo);
-
-        return dto == null ? Result<ComponenteDto>.NotFound() : Result<ComponenteDto>.Success(dto);
+        return row == null ? Result<ComponenteDto>.NotFound() : Result<ComponenteDto>.Success(ToDto(row));
     }
 
-    private static ComponenteDto ToDto(
-        ComponenteEntity componente,
-        int? codigoImtEquipo,
-        string? nombreEquipo
-    ) =>
+    private IQueryable<ComponenteRow> QueryRows(IQueryable<ComponenteEntity> componentes) =>
+        from componente in componentes
+        join equipo in DbContext.Equipos.AsNoTracking()
+            on componente.IdEquipo equals equipo.Id
+            into equipoJoin
+        from equipo in equipoJoin.DefaultIfEmpty()
+        select new ComponenteRow(
+            componente,
+            equipo != null ? (int?)equipo.CodigoImt : null,
+            equipo != null ? equipo.Descripcion : null
+        );
+
+    private static ComponenteDto ToDto(ComponenteRow row) =>
         new()
         {
-            Id = componente.Id,
-            Nombre = componente.Nombre,
-            Modelo = componente.Modelo,
-            Tipo = componente.Tipo,
-            Descripcion = componente.Descripcion,
-            PrecioReferencia = componente.PrecioReferencia,
-            IdEquipo = componente.IdEquipo,
-            NombreEquipo = nombreEquipo,
-            CodigoImtEquipo = codigoImtEquipo?.ToString(CultureInfo.InvariantCulture),
-            UrlDataSheet = componente.UrlDataSheet,
+            Id = row.Componente.Id,
+            Nombre = row.Componente.Nombre,
+            Modelo = row.Componente.Modelo,
+            Tipo = row.Componente.Tipo,
+            Descripcion = row.Componente.Descripcion,
+            PrecioReferencia = row.Componente.PrecioReferencia,
+            IdEquipo = row.Componente.IdEquipo,
+            NombreEquipo = row.NombreEquipo,
+            CodigoImtEquipo = row.CodigoImtEquipo?.ToString(CultureInfo.InvariantCulture),
+            UrlDataSheet = row.Componente.UrlDataSheet,
         };
+
+    private sealed record ComponenteRow(
+        ComponenteEntity Componente,
+        int? CodigoImtEquipo,
+        string? NombreEquipo
+    );
 }
