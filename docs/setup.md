@@ -66,40 +66,60 @@ The server project already defines a `UserSecretsId`; do not run `dotnet user-se
 
 Local authentication configuration is stored with ASP.NET Core User Secrets. Production configuration is supplied by the deployment environment or its secret manager. The application consumes these keys:
 
-| Configuration key                    | Secret | Purpose                                                        |
-| ------------------------------------ | ------ | -------------------------------------------------------------- |
-| `Authentication:Google:ClientId`     | No     | Identifies the Google OAuth web client.                        |
-| `Authentication:Google:ClientSecret` | Yes    | Authenticates the backend with the Google OAuth client.        |
-| `Authentication:FrontendUrl`         | No     | Defines the trusted frontend destination after authentication. |
-| `Jwt:Key`                            | Yes    | Signs application access and refresh tokens.                   |
-| `ConnectionStrings:PostgreSQL`       | Yes    | Connects the backend to PostgreSQL.                            |
-| `Email:Username`                     | Yes    | Authenticates the configured email sender when required.       |
-| `Email:Password`                     | Yes    | Authenticates the configured email sender.                     |
+| Configuration key                        | Secret | Purpose                                                        |
+| ---------------------------------------- | ------ | -------------------------------------------------------------- |
+| `Authentication:Provider`                | No     | Selects the external identity provider module (`Google`).      |
+| `Authentication:InstitutionalDomain`     | No     | Restricts accounts to the institutional email domain.          |
+| `Authentication:<Provider>:ClientId`     | No     | Identifies the OAuth web client of the selected provider.      |
+| `Authentication:<Provider>:ClientSecret` | Yes    | Authenticates the backend with the selected provider.          |
+| `Authentication:FrontendUrl`             | No     | Defines the trusted frontend destination after authentication. |
+| `Jwt:Key`                                | Yes    | Signs application access and refresh tokens.                   |
+| `ConnectionStrings:PostgreSQL`           | Yes    | Connects the backend to PostgreSQL.                            |
+| `Email:Provider`                         | No     | Selects the email delivery module (`Smtp`).                    |
+| `Email:From` / `Email:SenderName`        | No     | Sender address and display name used in every message.         |
+| `Email:Username`                         | Yes    | Authenticates the configured email sender when required.       |
+| `Email:Password`                         | Yes    | Authenticates the configured email sender.                     |
 
-Google OAuth requires both `Authentication:Google:ClientId` and `Authentication:Google:ClientSecret`; configuring only one prevents the server from starting. Environment-specific values must not appear in tracked configuration, documentation, logs, issues or build artifacts. Do not commit `client_secret.json`, `server.env`, User Secrets output or production credentials.
+The selected provider requires both `ClientId` and `ClientSecret`; configuring only one prevents the server from starting. Environment-specific values must not appear in tracked configuration, documentation, logs, issues or build artifacts. Do not commit `client_secret.json`, `server.env`, User Secrets output or production credentials.
 
-#### Titan email for local development
+#### SMTP email for local development
 
-Run the following commands from the repository root. The password is entered without being displayed or stored in the shell history. Port `587` uses STARTTLS and is compatible with the backend email client.
+Run the following commands from the repository root. The host, sender and password are read interactively, so no provider or mailbox is written to the shell history. Port `587` uses STARTTLS.
 
 ```bash
 PROJECT="code/server/IMT_Reservas.Server.csproj"
 
-read -rp "Correo remitente de Titan: " SMTP_EMAIL
+read -rp "Servidor SMTP: " SMTP_HOST
+read -rp "Correo remitente: " SMTP_EMAIL
+read -rsp "Contraseña del remitente: " SMTP_PASSWORD
+echo
 
 dotnet user-secrets set "Email:Enabled" "true" --project "$PROJECT"
-dotnet user-secrets set "Email:Host" "smtp.titan.email" --project "$PROJECT"
+dotnet user-secrets set "Email:Provider" "Smtp" --project "$PROJECT"
+dotnet user-secrets set "Email:Host" "$SMTP_HOST" --project "$PROJECT"
 dotnet user-secrets set "Email:Port" "587" --project "$PROJECT"
 dotnet user-secrets set "Email:Username" "$SMTP_EMAIL" --project "$PROJECT"
 dotnet user-secrets set "Email:From" "$SMTP_EMAIL" --project "$PROJECT"
 dotnet user-secrets set "Email:EnableSsl" "true" --project "$PROJECT"
-
-read -rsp "Contraseña de la cuenta Titan: " SMTP_PASSWORD
-echo
 dotnet user-secrets set "Email:Password" "$SMTP_PASSWORD" --project "$PROJECT"
 
-unset SMTP_EMAIL SMTP_PASSWORD
+unset SMTP_HOST SMTP_EMAIL SMTP_PASSWORD
 ```
+
+#### Replacing an external service
+
+Each external dependency is registered by its own module, selected only through configuration:
+
+| Service           | Module                                              | Contract or settings                                     |
+| ----------------- | --------------------------------------------------- | -------------------------------------------------------- |
+| Email delivery    | `Infrastructure/Email/EmailServiceRegistration`     | `IEmailSender`, `Email:*`                                |
+| External identity | `Presentation/Security/AuthenticationRegistration`  | `Authentication:Provider`, `Authentication:<Provider>:*` |
+| Distributed cache | `Infrastructure/Config/CacheServiceRegistration`    | `Redis:*`                                                |
+| Search            | `Infrastructure/Config/SearchServiceRegistration`   | `ISearchIndex<T>`, `Elasticsearch:*`                     |
+| Background jobs   | `Infrastructure/Jobs/BackgroundJobsRegistration`    | `Hangfire:*`                                             |
+| Database          | `Infrastructure/Config/DatabaseServiceRegistration` | `ConnectionStrings:PostgreSQL`                           |
+
+Changing to another SMTP account only requires new `Email:*` values. A different delivery technology needs a class implementing `IEmailSender`, a new `EmailProvider` value and one case in `EmailServiceRegistration`; services that send messages do not change. A different identity provider needs a new `ExternalIdentityProvider` value and its registration case in `AuthenticationRegistration`; its callback becomes `/api/auth/<provider>/callback`. The institutional domain is configured in `Authentication:InstitutionalDomain` for the API and `institutionalEmailDomain` in `code/client/src/environments/environment.ts` for the browser.
 
 Redis and Hangfire are disabled by default in the Development environment. Enable them when testing the complete local infrastructure:
 
@@ -181,9 +201,9 @@ npm run test:coverage
 npm run build
 ```
 
-### Google and email authentication
+### External identity and email
 
-Google Cloud only provides the OAuth identity in this deployment. The Angular application, ASP.NET API, PostgreSQL and Redis can continue running on Oracle Cloud or any other host.
+The configured identity provider (Google in this deployment) only provides the OAuth identity. The Angular application, ASP.NET API, PostgreSQL and Redis can continue running on Oracle Cloud or any other host.
 
 The OAuth client type is **Web application** and the application requests only `openid`, `email` and `profile`. This server-side flow does not require an authorized JavaScript origin. Its expected callbacks are:
 
@@ -197,10 +217,14 @@ The OAuth client type is **Web application** and the application requests only `
 Set these values in `code/server.env` for deployment:
 
 ```dotenv
+Authentication__Provider=Google
 Authentication__FrontendUrl=https://<public-domain>
+Authentication__InstitutionalDomain=<institutional-email-domain>
 Authentication__Google__ClientId=<google-client-id>
 Authentication__Google__ClientSecret=<google-client-secret>
 Email__Enabled=true
+Email__Provider=Smtp
+Email__SenderName=<sender-display-name>
 Email__Host=<smtp-host>
 Email__Port=587
 Email__Username=<smtp-user>

@@ -34,7 +34,7 @@ UCB Hold uses PostgreSQL 16+ with Entity Framework Core 8. The database name, ad
 
 | Enum                 | Values                                                                                  | Used by                   |
 | -------------------- | --------------------------------------------------------------------------------------- | ------------------------- |
-| `estado_prestamo`    | `pendiente`, `aprobado`, `activo`, `atrasado`, `finalizado`, `rechazado`, `cancelado`     | `prestamos`               |
+| `estado_prestamo`    | `pendiente`, `aprobado`, `activo`, `atrasado`, `finalizado`, `rechazado`, `cancelado`   | `prestamos`               |
 | `estado_equipo`      | `operativo`, `parcialmente_operativo`, `inoperativo`                                    | `equipos`                 |
 | `tipo_usuario`       | `docente`, `administrativo`, `administrador`, `administrador_laboratorio`, `estudiante` | `usuarios`                |
 | `tipo_mantenimiento` | `correctivo`, `preventivo`                                                              | `detalles_mantenimientos` |
@@ -69,16 +69,19 @@ An equipment unit is unavailable when an overlapping loan is `aprobado`, `activo
 
 ## Indexes
 
-| Index                                           | Purpose                                   |
-| ----------------------------------------------- | ----------------------------------------- |
-| `idx_usuarios_email_estado`                     | Login and email lookup.                   |
-| `idx_usuarios_nombre_estado`                    | User listing and search.                  |
-| `idx_prestamos_temporal_usuario_estado`         | Loan history and date filters.            |
-| `idx_mantenimientos_temporal_empresa_estado`    | Maintenance history by provider and date. |
-| `idx_grupos_equipos_busqueda`                   | Equipment group catalog search.           |
-| `idx_equipos_agrupacion`                        | Joins between physical units and groups.  |
-| `idx_detalles_prestamos_por_prestamo`           | Loan detail lookups.                      |
-| `idx_detalles_mantenimientos_por_mantenimiento` | Maintenance detail lookups.               |
+| Index                                | Purpose                                   |
+| ------------------------------------ | ----------------------------------------- |
+| `idx_usuarios_email`                 | Login and email lookup.                   |
+| `idx_usuarios_nombre`                | User listing and search.                  |
+| `idx_muebles_nombre`                 | Furniture listing and search.             |
+| `idx_prestamos_fechas`               | Loan history and date filters.            |
+| `ix_prestamos_carnet_estado`         | Loans by owner and state.                 |
+| `idx_mantenimientos_fecha_empresa`   | Maintenance history by provider and date. |
+| `idx_grupos_equipos_identificadores` | Equipment group catalog search.           |
+| `idx_equipos_identificadores`        | Joins between physical units and groups.  |
+| `idx_detalles_prestamos`             | Loan detail lookups.                      |
+| `idx_detalles_mantenimientos`        | Maintenance detail lookups.               |
+| `idx_audit_timestamp`                | Latest audit entries.                     |
 
 ## Views
 
@@ -153,14 +156,14 @@ Then set `ConnectionStrings__PostgreSQL` to use the application role (`APP_DB_US
 
 Each EF Core connection publishes `app.carnet` and `app.rol`; policies use them:
 
-| Table | Regular user | Anonymous endpoints | Administrators and system |
-| --- | --- | --- | --- |
-| `usuarios` | Read; update own row | Read, register, update (login, verification, recovery) | Full access |
-| `prestamos` | Read; create and update own loans | Read | Full access |
-| `contratos` | Read contracts of own loans | None | Full access |
-| `notificaciones`, `avisos_disponibilidad` | Own rows | None | Full access |
-| `audit_logs` | None | None | Full access |
-| `codigos_autenticacion` | None | Full access | System only |
+| Table                                     | Regular user                      | Anonymous endpoints                                    | Administrators and system |
+| ----------------------------------------- | --------------------------------- | ------------------------------------------------------ | ------------------------- |
+| `usuarios`                                | Read; update own row              | Read, register, update (login, verification, recovery) | Full access               |
+| `prestamos`                               | Read; create and update own loans | Read                                                   | Full access               |
+| `contratos`                               | Read contracts of own loans       | None                                                   | Full access               |
+| `notificaciones`, `avisos_disponibilidad` | Own rows                          | None                                                   | Full access               |
+| `audit_logs`                              | None                              | None                                                   | Full access               |
+| `codigos_autenticacion`                   | None                              | Full access                                            | System only               |
 
 Writes performed on behalf of the system (audit entries, notifications, contract rendering, availability watches) run inside `ApplicationDbContext.RunAsSystemAsync()`. Sessions without context (`app.rol` unset) see no rows.
 

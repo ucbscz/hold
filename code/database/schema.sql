@@ -5243,7 +5243,14 @@ CREATE INDEX idx_mantenimientos_fecha_empresa ON public.mantenimientos USING btr
 -- Name: idx_muebles_nombre; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_muebles_nombre ON public.usuarios USING btree (nombre, estado_eliminado);
+CREATE INDEX idx_muebles_nombre ON public.muebles USING btree (nombre, estado_eliminado);
+
+
+--
+-- Name: idx_usuarios_nombre; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_usuarios_nombre ON public.usuarios USING btree (nombre, estado_eliminado);
 
 
 --
