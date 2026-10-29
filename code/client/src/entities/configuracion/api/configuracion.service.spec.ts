@@ -58,7 +58,7 @@ describe('ConfiguracionService', () => {
         request.params.get('buscar') === 'Ana Perez',
     );
     expect(request.request.method).toBe('GET');
-    request.flush(usuarios);
+    request.flush({ Status: 200, Value: usuarios });
     expect(recibido).toHaveBeenCalledOnceWith(usuarios);
   });
 

@@ -1,5 +1,7 @@
-const boliviaDateTimeFormatter = new Intl.DateTimeFormat('es-BO', {
-  timeZone: 'America/La_Paz',
+import { REGION } from '@region/region';
+
+const regionDateTimeFormatter = new Intl.DateTimeFormat(REGION.locale, {
+  timeZone: REGION.timeZone,
   day: '2-digit',
   month: '2-digit',
   year: 'numeric',
@@ -8,7 +10,7 @@ const boliviaDateTimeFormatter = new Intl.DateTimeFormat('es-BO', {
   hour12: false,
 });
 
-export function formatBoliviaDateTime(
+export function formatRegionDateTime(
   value: Date | string | null | undefined,
 ): string {
   if (!value) return '';
@@ -16,5 +18,5 @@ export function formatBoliviaDateTime(
   const date = value instanceof Date ? value : new Date(value);
   return Number.isNaN(date.getTime())
     ? ''
-    : boliviaDateTimeFormatter.format(date);
+    : regionDateTimeFormatter.format(date);
 }

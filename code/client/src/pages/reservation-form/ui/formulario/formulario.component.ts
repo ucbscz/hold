@@ -1,3 +1,4 @@
+import { REGION } from '@region/region';
 import { BRAND } from '@brand/brand';
 import { HttpClient } from '@angular/common/http';
 import {
@@ -143,7 +144,7 @@ export class FormularioComponent implements OnInit {
       carnet_atras: this.carnetAtras,
 
       dia: new Date().getDate().toString(),
-      mesliteral: new Intl.DateTimeFormat('es-ES', {
+      mesliteral: new Intl.DateTimeFormat(REGION.locale, {
         month: 'long',
       }).format(new Date()),
       año: new Date().getFullYear().toString(),
@@ -155,7 +156,7 @@ export class FormularioComponent implements OnInit {
       precio: this.carrito.calcularPrecioTotal().toString(),
       tablasegunda: this.quintavalordebienes(this.carrito.obtenerCarrito()),
       dia_devolucion: fechaFinal.getDate().toString(),
-      mes_devolucion: new Intl.DateTimeFormat('es-ES', {
+      mes_devolucion: new Intl.DateTimeFormat(REGION.locale, {
         month: 'long',
       }).format(fechaFinal),
       año_devolucion: fechaFinal.getFullYear().toString(),

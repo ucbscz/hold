@@ -21,7 +21,7 @@ import {
 import { printTable, TablePaginationComponent } from '@shared/lib/admin-table';
 import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
 import { parseJsonResult } from '@shared/lib/result';
-import { formatBoliviaDateTime } from '@shared/lib/date';
+import { formatRegionDateTime } from '@shared/lib/date';
 import { AuditObservationDetail } from '../../model/audit-observation-detail';
 
 const CAMPO_CODIGO_INTERNO = 'Código interno';
@@ -204,7 +204,7 @@ export class AuditPanelComponent implements OnChanges, OnDestroy {
       title: `Auditoría: ${this.entidad}`,
       headers: ['Fecha', 'Actor', 'Acción', 'Registro', 'Detalle'],
       rows: this.logs.map((log) => [
-        formatBoliviaDateTime(log.Timestamp),
+        formatRegionDateTime(log.Timestamp),
         log.AdminNombre || log.AdminCarnet,
         log.Accion,
         this.registroLabel(log),
@@ -300,7 +300,7 @@ export class AuditPanelComponent implements OnChanges, OnDestroy {
     if (!fecha) return '—';
 
     return (
-      formatBoliviaDateTime(fecha) ||
+      formatRegionDateTime(fecha) ||
       (fecha instanceof Date ? fecha.toISOString() : fecha)
     );
   }

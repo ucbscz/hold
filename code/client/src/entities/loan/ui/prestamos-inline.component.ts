@@ -89,16 +89,10 @@ import {
                     >
                   </td>
                   <td>
-                    {{
-                      p.FechaSolicitud
-                        | date: 'dd/MM/yyyy HH:mm' : 'America/La_Paz'
-                    }}
+                    {{ p.FechaSolicitud | date: 'dd/MM/yyyy HH:mm' }}
                   </td>
                   <td>
-                    {{
-                      p.FechaDevolucionEsperada
-                        | date: 'dd/MM/yyyy HH:mm' : 'America/La_Paz'
-                    }}
+                    {{ p.FechaDevolucionEsperada | date: 'dd/MM/yyyy HH:mm' }}
                   </td>
                 </tr>
               }

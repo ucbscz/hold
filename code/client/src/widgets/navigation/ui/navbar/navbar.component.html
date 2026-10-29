@@ -173,8 +173,7 @@
                       <div class="notif__detail-panel">
                         <span class="notif__detail-label">Fecha</span>
                         <span class="notif__detail-text">{{
-                          n.FechaEnvio
-                            | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
+                          n.FechaEnvio | date: "dd/MM/yyyy HH:mm"
                         }}</span>
                         @if (detalle.emisor) {
                           <span class="notif__detail-label">Emisor</span>
@@ -231,8 +230,7 @@
                     <div class="notif__detail-panel">
                       <span class="notif__detail-label">Fecha</span>
                       <span class="notif__detail-text">{{
-                        n.FechaEnvio
-                          | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
+                        n.FechaEnvio | date: "dd/MM/yyyy HH:mm"
                       }}</span>
                       <span class="notif__detail-label">Emisor</span>
                       <span class="notif__detail-text">Sistema</span>

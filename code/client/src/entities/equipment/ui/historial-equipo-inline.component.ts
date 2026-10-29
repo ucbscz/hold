@@ -97,15 +97,12 @@ import { EquipoService } from '../api/equipo.service';
                   <td>{{ h.NombreUsuario }}</td>
                   <td>{{ h.Carnet }}</td>
                   <td>
-                    {{
-                      h.FechaPrestamo
-                        | date: 'dd/MM/yyyy HH:mm' : 'America/La_Paz'
-                    }}
+                    {{ h.FechaPrestamo | date: 'dd/MM/yyyy HH:mm' }}
                   </td>
                   <td>
                     {{
                       h.FechaDevolucion || h.FechaDevolucionEsperada
-                        | date: 'dd/MM/yyyy HH:mm' : 'America/La_Paz'
+                        | date: 'dd/MM/yyyy HH:mm'
                     }}
                   </td>
                   <td>

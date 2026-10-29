@@ -1,3 +1,4 @@
+import { REGION } from '@region/region';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -105,7 +106,7 @@ export class CalendarioComponent {
   }
 
   get etiquetaMes(): string {
-    return new Intl.DateTimeFormat('es-BO', {
+    return new Intl.DateTimeFormat(REGION.locale, {
       month: 'long',
       year: 'numeric',
     }).format(this.mesVisible);
@@ -365,7 +366,7 @@ export class CalendarioComponent {
 
   formatearFecha(fecha: Date | null): string {
     if (!fecha) return 'Sin seleccionar';
-    return new Intl.DateTimeFormat('es-BO', {
+    return new Intl.DateTimeFormat(REGION.locale, {
       day: '2-digit',
       month: 'short',
       year: 'numeric',

@@ -1,1 +1,1 @@
-export * from './format-bolivia-date-time';
+export * from './format-region-date-time';

@@ -1,4 +1,4 @@
-import { registerLocaleData } from '@angular/common';
+import { DATE_PIPE_DEFAULT_OPTIONS, registerLocaleData } from '@angular/common';
 import {
   HTTP_INTERCEPTORS,
   provideHttpClient,
@@ -18,6 +18,7 @@ import { JwtInterceptor } from '@app/providers/http-interceptors/jwt.interceptor
 import { ResultResponseInterceptor } from '@app/providers/http-interceptors/result-response.interceptor';
 import { routes } from '@app/routing/app.routes';
 import { ConfiguracionService } from '@entities/configuracion';
+import { REGION } from '@region/region';
 
 registerLocaleData(localeEs);
 
@@ -38,7 +39,11 @@ export const appConfig: ApplicationConfig = {
     provideAppInitializer(() =>
       inject(ConfiguracionService).loadConfiguracion(),
     ),
-    { provide: LOCALE_ID, useValue: 'es' },
+    { provide: LOCALE_ID, useValue: REGION.angularLocale },
+    {
+      provide: DATE_PIPE_DEFAULT_OPTIONS,
+      useValue: { timezone: REGION.utcOffset },
+    },
     { provide: HTTP_INTERCEPTORS, useClass: JwtInterceptor, multi: true },
     {
       provide: HTTP_INTERCEPTORS,

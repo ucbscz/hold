@@ -1,3 +1,4 @@
+import { REGION } from '@region/region';
 import { Component, OnInit, signal } from '@angular/core';
 import { ValidatedFormsModule } from '@shared/lib/forms';
 import { Router } from '@angular/router';
@@ -168,15 +169,15 @@ export class ReservationPurposeComponent implements OnInit {
   private validarUsoInterno(): boolean {
     const inicio = this.carritoService.obtenerFechaInicio();
     const fin = this.carritoService.obtenerFechaFinal();
-    const fechaBolivia = (fecha: string | Date) =>
-      new Intl.DateTimeFormat('en-CA', { timeZone: 'America/La_Paz' }).format(
+    const fechaLocal = (fecha: string | Date) =>
+      new Intl.DateTimeFormat('en-CA', { timeZone: REGION.timeZone }).format(
         new Date(fecha),
       );
     if (
       this.destinoPrestamo !== 'Casa' &&
       inicio &&
       fin &&
-      fechaBolivia(inicio) !== fechaBolivia(fin)
+      fechaLocal(inicio) !== fechaLocal(fin)
     ) {
       this.mensajeError =
         'El uso interno requiere devolver los equipos el mismo día. Vuelve al horario para ajustar la devolución.';

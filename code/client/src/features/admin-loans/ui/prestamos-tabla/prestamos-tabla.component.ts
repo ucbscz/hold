@@ -46,7 +46,7 @@ import {
   StickyScrollDirective,
 } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
-import { formatBoliviaDateTime } from '@shared/lib/date';
+import { formatRegionDateTime } from '@shared/lib/date';
 import { AuditPanelComponent } from '@entities/audit-log';
 import { finalize } from 'rxjs';
 @Component({
@@ -154,9 +154,9 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
       nombreRol(value.datosgrupo.TipoUsuario),
       value.datosgrupo.TelefonoUsuario,
       this.detalleEquipos(value),
-      formatBoliviaDateTime(value.datosgrupo.FechaSolicitud),
-      formatBoliviaDateTime(value.datosgrupo.FechaPrestamoEsperada),
-      formatBoliviaDateTime(value.datosgrupo.FechaDevolucionEsperada),
+      formatRegionDateTime(value.datosgrupo.FechaSolicitud),
+      formatRegionDateTime(value.datosgrupo.FechaPrestamoEsperada),
+      formatRegionDateTime(value.datosgrupo.FechaDevolucionEsperada),
       this.getEstadoCalculado(value),
     ]);
   }

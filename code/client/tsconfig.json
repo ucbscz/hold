@@ -11,7 +11,8 @@
       "@entities/*": ["./src/entities/*"],
       "@shared/*": ["./src/shared/*"],
       "@environments/*": ["./src/environments/*"],
-      "@brand/*": ["./src/brand/*"]
+      "@brand/*": ["./src/brand/*"],
+      "@region/*": ["./src/region/*"]
     },
     "strict": true,
     "noImplicitOverride": true,

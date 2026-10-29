@@ -127,9 +127,7 @@
           @for (log of logsPaginados; track log.Id) {
             <tr>
               <td class="date-col" data-label="Fecha">
-                {{
-                  log.Timestamp | date: "dd/MM/yyyy HH:mm" : "America/La_Paz"
-                }}
+                {{ log.Timestamp | date: "dd/MM/yyyy HH:mm" }}
               </td>
               <td data-label="Actor">
                 <span class="admin-name">{{

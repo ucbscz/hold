@@ -36,12 +36,14 @@ export class ConfiguracionService {
   buscarResponsables(
     buscar = '',
   ): Observable<{ Carnet: string; Nombre: string }[]> {
-    return this.http.get<{ Carnet: string; Nombre: string }[]>(
-      `${this.url}/responsables`,
-      {
-        params: { buscar },
-      },
-    );
+    return this.http
+      .get<ApiResponse<{ Carnet: string; Nombre: string }[]>>(
+        `${this.url}/responsables`,
+        {
+          params: { buscar },
+        },
+      )
+      .pipe(map((respuesta) => extractApiValue(respuesta, [])));
   }
 
   public updateConfiguracion(
