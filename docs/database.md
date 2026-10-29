@@ -1,6 +1,6 @@
 # Database Guide
 
-UCB Hold uses PostgreSQL 16+ with Entity Framework Core 8. The database name used by the project is `IMT_Reservas`. Repository source and releases contain only the data-free schema reference in [`code/database/schema.sql`](../code/database/schema.sql). Production backups remain in private infrastructure.
+UCB Hold uses PostgreSQL 16+ with Entity Framework Core 8. The database name, administrator account and application role come from `code/server.env`. Repository source and releases contain only the data-free schema reference in [`code/database/schema.sql`](../code/database/schema.sql). Production backups remain in private infrastructure.
 
 ## Entity Relationship Diagram
 
@@ -90,8 +90,9 @@ An equipment unit is unavailable when an overlapping loan is `aprobado`, `activo
 ## Initialize Database
 
 ```bash
-psql -U postgres -c "CREATE DATABASE IMT_Reservas;"
-psql -U postgres -d IMT_Reservas -c "\dt"
+set -a; . code/server.env; set +a
+createdb -U "$POSTGRES_USER" "$POSTGRES_DB"
+psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "\dt"
 ```
 
 With Docker:
@@ -109,7 +110,7 @@ Generate the schema from Git Bash on Windows:
 
 ```bash
 export PATH="/c/Program Files/PostgreSQL/17/bin:$PATH"
-pg_dump -h localhost -U postgres -d IMT_Reservas --schema-only --no-owner --no-privileges --file code/database/schema.sql.tmp
+pg_dump -h localhost -U "$POSTGRES_USER" -d "$POSTGRES_DB" --schema-only --no-owner --no-privileges --file code/database/schema.sql.tmp
 mv code/database/schema.sql.tmp code/database/schema.sql
 ```
 
@@ -129,7 +130,7 @@ gh release upload <tag> code/database/schema.sql --repo ucbscz/hold --clobber
 Initialize an empty database:
 
 ```bash
-psql -U postgres -d IMT_Reservas -f code/database/schema.sql
+psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 -f code/database/schema.sql
 ```
 
 ## Row Level Security
@@ -137,16 +138,18 @@ psql -U postgres -d IMT_Reservas -f code/database/schema.sql
 The API must connect with a dedicated role that is not a superuser, does not own the tables and has `NOBYPASSRLS`. Outside Development the server refuses to start if the connected role bypasses RLS or if the Row Level Security section of `code/database/schema.sql` was not applied.
 
 ```bash
-psql -U postgres -d IMT_Reservas -c "ALTER ROLE ucbhold_app WITH LOGIN PASSWORD '<secret>';"
+psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v app_user="$APP_DB_USER" -v app_password="$APP_DB_PASSWORD" <<'SQL'
+ALTER ROLE :"app_user" WITH LOGIN PASSWORD :'app_password';
+SQL
 ```
 
-`schema.sql` creates `ucbhold_app` without login and applies the policies. On a database that already has data, apply only its idempotent RLS section:
+`schema.sql` creates the application role without login and applies the policies; `APP_DB_USER` must match it. On a database that already has data, apply only its idempotent RLS section:
 
 ```bash
-sed -n '/^-- Row Level Security/,$p' code/database/schema.sql | psql -U postgres -d IMT_Reservas -v ON_ERROR_STOP=1
+sed -n '/^-- Row Level Security/,$p' code/database/schema.sql | psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1
 ```
 
-Then set `ConnectionStrings__PostgreSQL` to use `ucbhold_app`.
+Then set `ConnectionStrings__PostgreSQL` to use the application role (`APP_DB_USER`).
 
 Each EF Core connection publishes `app.carnet` and `app.rol`; policies use them:
 

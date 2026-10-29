@@ -29,19 +29,18 @@ Generated files, local reports, IDE metadata and database backups should not be 
 
 ### Docker
 
-Create `code/server.env`:
+Copy the template and replace every placeholder:
 
-```ini
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=<database-password>
-POSTGRES_DB=IMT_Reservas
-ASPNETCORE_ENVIRONMENT=Production
-ConnectionStrings__PostgreSQL=Host=ucb_db;Port=5432;Database=IMT_Reservas;Username=ucbhold_app;Password=<app-role-password>;Pooling=true;MinPoolSize=2;MaxPoolSize=20
-Jwt__Key=<local-secret-with-at-least-32-characters>
-Redis__ConnectionString=ucb_redis:6379
-Redis__Enabled=true
-Hangfire__Enabled=true
-DataProtection__KeysPath=/app/data-protection-keys
+```bash
+cp code/server.env.example code/server.env
+```
+
+`code/server.env` is ignored by Git. `APP_DB_USER` must match the application role created by `code/database/schema.sql`, and `ConnectionStrings__PostgreSQL` must use that role, never the administrator account.
+
+Load those values into the current shell before running the database commands in this guide:
+
+```bash
+set -a; . code/server.env; set +a
 ```
 
 Generate a development key:
@@ -56,8 +55,8 @@ Before starting production, provision the Data Protection material through the t
 
 ```bash
 cd code/server
-dotnet user-secrets set "ConnectionStrings:PostgreSQL" "Host=localhost;Port=5432;Database=IMT_Reservas;Username=postgres;Password=<local-database-password>;Pooling=true;MinPoolSize=2;MaxPoolSize=20"
-dotnet user-secrets set "Jwt:Key" "<generated-local-jwt-key>"
+dotnet user-secrets set "ConnectionStrings:PostgreSQL" "${ConnectionStrings__PostgreSQL/ucb_db/localhost}"
+dotnet user-secrets set "Jwt:Key" "$Jwt__Key"
 dotnet user-secrets set "Redis:ConnectionString" "localhost:6379"
 ```
 
@@ -128,7 +127,9 @@ docker compose --env-file server.env up --build
 On the first start with an empty volume, PostgreSQL applies `code/database/schema.sql` automatically, including Row Level Security. Enable the application role once the database is healthy:
 
 ```bash
-docker exec ucb_db psql -U postgres -d IMT_Reservas -c "ALTER ROLE ucbhold_app WITH LOGIN PASSWORD '<app-role-password>';"
+docker exec -i ucb_db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v app_user="$APP_DB_USER" -v app_password="$APP_DB_PASSWORD" <<'SQL'
+ALTER ROLE :"app_user" WITH LOGIN PASSWORD :'app_password';
+SQL
 ```
 
 Docker Compose mounts the persistent Data Protection key ring and its external protection material with read-only access where applicable. Production validates this configuration at startup. Key lifecycle, backup and recovery are restricted operational responsibilities because the protected carnet images, signatures and contracts depend on them.
@@ -143,7 +144,7 @@ Docker Compose mounts the persistent Data Protection key ring and its external p
 Run backend:
 
 ```bash
-psql -U postgres -d IMT_Reservas -f code/database/schema.sql
+psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f code/database/schema.sql
 dotnet run --project code/server/IMT_Reservas.Server.csproj
 ```
 
@@ -223,14 +224,19 @@ The frontend runtime image contains only the compiled Angular output served by u
 Create the database:
 
 ```bash
-psql -U postgres -c "CREATE DATABASE IMT_Reservas;"
+createdb -U "$POSTGRES_USER" "$POSTGRES_DB"
 ```
 
 Apply the data-free schema attached to the release, which includes the Row Level Security policies, and enable the application role (see [database.md](database.md#row-level-security)):
 
 ```bash
-psql -U postgres -d IMT_Reservas -f code/database/schema.sql
-psql -U postgres -d IMT_Reservas -c "ALTER ROLE ucbhold_app WITH LOGIN PASSWORD '<secret>';"
+psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 -f code/database/schema.sql
+```
+
+```bash
+psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v app_user="$APP_DB_USER" -v app_password="$APP_DB_PASSWORD" <<'SQL'
+ALTER ROLE :"app_user" WITH LOGIN PASSWORD :'app_password';
+SQL
 ```
 
 The release never contains production data or full backups. Keep operational backups in private Oracle storage with restricted access. `schema.sql` initializes an empty database; it is not an upgrade script for a database that already contains data.

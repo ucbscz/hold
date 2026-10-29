@@ -95,19 +95,13 @@ Backend code separates presentation, application rules, core entities and infras
 
 ### Docker
 
-Create `code/server.env`:
+Copy the template and replace every placeholder:
 
-```ini
-POSTGRES_USER=postgres
-POSTGRES_PASSWORD=<database-password>
-POSTGRES_DB=IMT_Reservas
-ASPNETCORE_ENVIRONMENT=Production
-ConnectionStrings__PostgreSQL=Host=ucb_db;Port=5432;Database=IMT_Reservas;Username=ucbhold_app;Password=<app-role-password>;Pooling=true;MinPoolSize=2;MaxPoolSize=20
-Jwt__Key=<local-secret-with-at-least-32-characters>
-Redis__ConnectionString=ucb_redis:6379
-Redis__Enabled=true
-Hangfire__Enabled=true
+```bash
+cp code/server.env.example code/server.env
 ```
+
+`code/server.env` is ignored by Git. `APP_DB_USER` must match the application role created by `code/database/schema.sql`, and `ConnectionStrings__PostgreSQL` must use that role, never the administrator account.
 
 Production Docker requires Data Protection material provisioned at runtime through the team's private operations process. These files are ignored by Git and must never be included in source code, CI artifacts or releases.
 
@@ -118,10 +112,16 @@ cd code
 docker compose --env-file server.env up --build
 ```
 
-Enable the application role once the database is healthy:
+Enable the application role once the database is healthy, loading the values from `code/server.env`:
 
 ```bash
-docker exec ucb_db psql -U postgres -d IMT_Reservas -c "ALTER ROLE ucbhold_app WITH LOGIN PASSWORD '<app-role-password>';"
+set -a; . code/server.env; set +a
+```
+
+```bash
+docker exec -i ucb_db psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v app_user="$APP_DB_USER" -v app_password="$APP_DB_PASSWORD" <<'SQL'
+ALTER ROLE :"app_user" WITH LOGIN PASSWORD :'app_password';
+SQL
 ```
 
 | Service     | URL                   |
@@ -132,7 +132,8 @@ docker exec ucb_db psql -U postgres -d IMT_Reservas -c "ALTER ROLE ucbhold_app W
 ### Local Development
 
 ```bash
-psql -U postgres -d IMT_Reservas -f code/database/schema.sql
+set -a; . code/server.env; set +a
+psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f code/database/schema.sql
 dotnet run --project code/server/IMT_Reservas.Server.csproj
 ```
 
