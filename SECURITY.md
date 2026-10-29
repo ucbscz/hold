@@ -54,6 +54,6 @@ JWT access and refresh tokens are transported only in path-scoped `HttpOnly`, `S
 
 ASP.NET Data Protection keys are encrypted with external production key material supplied at runtime. Its generation, rotation, recovery and backup locations belong in a private operational runbook with restricted access; none of that material or those procedures belong in Git, CI artifacts or releases.
 
-GitHub releases contain only `code/database/schema.sql`, generated with `pg_dump --schema-only` and validated to contain no table data. Operational backups, Data Protection keys, user documents and exported contracts remain in restricted private storage.
+GitHub releases publish only source code. `code/database/schema.sql` is generated with `pg_dump --schema-only`, validated to contain no table data and never attached as a release asset. Operational backups, Data Protection keys, user documents and exported contracts remain in restricted private storage.
 
 If sensitive material reaches Git history, treat it as a security incident and follow the private response runbook. Do not document affected values, internal locations or incident-specific remediation details in this public repository.

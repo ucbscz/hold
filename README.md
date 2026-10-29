@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="docs/assets/logo.png" alt="UCB Hold" width="128" />
+<img src="docs/brand/logo.png" alt="UCB Hold" width="128" />
 
 # UCB Hold
 
@@ -77,17 +77,40 @@ The repository is organized around a small monorepo layout:
 `-- .github/         CI workflows
 ```
 
-Frontend modules follow Feature-Sliced Design:
+The frontend follows Feature-Sliced Design with its layers directly under `code/client/src`. Each slice exposes a public `index.ts`; slices import only from lower layers, and entity-to-entity references use the `@x` cross-import API.
 
-| Slice      | Responsibility                                                         |
-| ---------- | ---------------------------------------------------------------------- |
-| `pages`    | Routed screens and page-level composition.                             |
-| `widgets`  | Reusable application sections such as navigation, sidebars and panels. |
-| `features` | User actions and business flows.                                       |
-| `entities` | Domain models, API services and entity-specific UI.                    |
-| `shared`   | Cross-cutting utilities, directives, primitives and reusable UI.       |
+| Layer      | Responsibility                                                   |
+| ---------- | ---------------------------------------------------------------- |
+| `app`      | Bootstrap component, routing, guards and HTTP interceptors.      |
+| `pages`    | Routed screens and page-level composition.                       |
+| `widgets`  | Reusable application sections such as navigation and sidebars.   |
+| `features` | User actions and business flows.                                 |
+| `entities` | Domain models, API services and entity-specific UI.              |
+| `shared`   | Cross-cutting utilities, directives, primitives and reusable UI. |
+| `brand`    | Organization name, labels, colors, fonts and asset paths.        |
 
-Backend code separates presentation, application rules, core entities and infrastructure. Controllers expose HTTP contracts; services own business decisions; repositories encapsulate persistence. API DTOs do not expose domain entities, credentials, protected identity documents, or stored signatures. Automated boundary tests keep `Core` independent from outer layers and keep sensitive mapper defaults closed.
+The backend is a modular monolith. Each business module owns its domain, use cases, persistence and HTTP endpoints, and registers its services through a single `Add<Module>Module` extension:
+
+```text
+code/server/src/
+|-- Program.cs          Composition root
+|-- Bootstrap/          Database, background jobs and startup validation wiring
+|-- Modules/
+|   |-- Auditoria/      Audit trail
+|   |-- Configuracion/  System configuration and schedules
+|   |-- Inventario/     Equipment, groups, components, accessories, furniture and lockers
+|   |-- Mantenimientos/ Maintenance and maintenance companies
+|   |-- Notificaciones/ User notifications
+|   |-- Prestamos/      Loans, cart, contracts and availability alerts
+|   `-- Usuarios/       Users, careers, authentication and email verification
+|       |-- Domain/          Entities and enums
+|       |-- Application/     DTOs, mappers, validators and services
+|       |-- Infrastructure/  Repositories, EF Core configuration and jobs
+|       `-- Api/             Controllers and HTTP security
+`-- Shared/             Kernel, persistence, caching, search, email, jobs, security and web building blocks
+```
+
+API DTOs do not expose domain entities, credentials, protected identity documents, or stored signatures. Automated boundary tests keep every `Domain` namespace independent from outer layers and keep sensitive mapper defaults closed.
 
 ---
 
@@ -134,7 +157,7 @@ SQL
 ```bash
 set -a; . code/server.env; set +a
 psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f code/database/schema.sql
-dotnet run --project code/server/IMT_Reservas.Server.csproj
+dotnet run --project code/server/UCB_Hold.Server.csproj
 ```
 
 ```bash
@@ -152,8 +175,8 @@ Detailed setup instructions are available in [docs/setup.md](docs/setup.md).
 Run the same checks used by CI before opening a pull request:
 
 ```bash
-dotnet build code/IMT_Reservas.sln
-dotnet test code/tests/IMT_Reservas.Tests.csproj
+dotnet build code/UCB_Hold.sln
+dotnet test code/tests/UCB_Hold.Tests.csproj
 ```
 
 ```bash
@@ -175,7 +198,7 @@ Generated coverage and quality outputs must stay out of source control. CI publi
 | ----------------- | --------------------------------------------------------------------------------------------------------- |
 | Configuration     | Local secrets belong in `code/server.env`, environment variables or `dotnet user-secrets`.                |
 | Database schema   | `code/database/schema.sql` documents the database structure maintained by the application.                |
-| Database releases | Releases contain only the data-free `schema.sql`; production backups stay in private infrastructure.      |
+| Database releases | Releases publish source code only; `schema.sql` lives in the repository and backups stay private.         |
 | Generated reports | Coverage, SonarQube exports and HTML reports are ignored and uploaded by CI when needed.                  |
 | Releases          | Each release should include source changes, migration notes and operational artifacts only when required. |
 

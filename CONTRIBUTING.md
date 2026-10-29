@@ -14,13 +14,13 @@ Thank you for contributing to UCB Hold. This project favors small, reviewable ch
 
 Use short lowercase branch names:
 
-| Type | Example |
-| --- | --- |
-| Feature | `feature/comment-likes` |
-| Fix | `fix/mobile-notifications` |
+| Type     | Example                      |
+| -------- | ---------------------------- |
+| Feature  | `feature/comment-likes`      |
+| Fix      | `fix/mobile-notifications`   |
 | Refactor | `refactor/repository-layout` |
-| Docs | `docs/release-notes` |
-| CI | `ci/coverage-artifacts` |
+| Docs     | `docs/release-notes`         |
+| CI       | `ci/coverage-artifacts`      |
 
 ## Commit Standard
 
@@ -43,8 +43,8 @@ Prefer atomic commits. A commit should explain one reason for change and should 
 Backend:
 
 ```bash
-dotnet build code/IMT_Reservas.sln
-dotnet test code/tests/IMT_Reservas.Tests.csproj
+dotnet build code/UCB_Hold.sln
+dotnet test code/tests/UCB_Hold.Tests.csproj
 ```
 
 Frontend:
@@ -62,23 +62,23 @@ npm run build
 
 A pull request should include:
 
-| Section | Expected content |
-| --- | --- |
-| Summary | What changed and which area was affected. |
-| Motivation | Why the change is needed. |
-| Verification | Commands executed and manual scenarios tested. |
-| Risk | Migrations, data changes, UI impact, security considerations or compatibility concerns. |
-| Screenshots | Required for visible UI changes. |
+| Section      | Expected content                                                                        |
+| ------------ | --------------------------------------------------------------------------------------- |
+| Summary      | What changed and which area was affected.                                               |
+| Motivation   | Why the change is needed.                                                               |
+| Verification | Commands executed and manual scenarios tested.                                          |
+| Risk         | Migrations, data changes, UI impact, security considerations or compatibility concerns. |
+| Screenshots  | Required for visible UI changes.                                                        |
 
 ## Code Expectations
 
-| Area | Standard |
-| --- | --- |
-| Frontend | Use existing Angular and Feature-Sliced Design boundaries. Keep files in `kebab-case`. |
-| Backend | Keep business rules in services, validations explicit and persistence behind repositories. |
-| Tests | Add or update tests when behavior, permissions or data rules change. |
-| Documentation | Keep examples current and avoid environment-specific secrets. |
-| Generated files | Do not commit local reports, build output, caches or database backups. |
+| Area            | Standard                                                                                   |
+| --------------- | ------------------------------------------------------------------------------------------ |
+| Frontend        | Use existing Angular and Feature-Sliced Design boundaries. Keep files in `kebab-case`.     |
+| Backend         | Keep business rules in services, validations explicit and persistence behind repositories. |
+| Tests           | Add or update tests when behavior, permissions or data rules change.                       |
+| Documentation   | Keep examples current and avoid environment-specific secrets.                              |
+| Generated files | Do not commit local reports, build output, caches or database backups.                     |
 
 ## Dependencies
 

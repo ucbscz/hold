@@ -72,20 +72,20 @@ Validation and domain failures preserve the same structure:
 
 Successful local and Google authentication writes an access cookie and a rotating refresh cookie. Both are `HttpOnly`, `SameSite=Strict`, scoped to API paths and marked `Secure` outside Development. Authentication responses contain the safe user projection and never expose either token to JavaScript. API clients must preserve cookies between requests.
 
-| Method | Route                           | Purpose                                                         |
-| ------ | ------------------------------- | --------------------------------------------------------------- |
-| `POST` | `/api/usuarios`                 | Register a local user or complete a Google registration.        |
-| `POST` | `/api/auth/login`               | Authenticate a verified local account and create a session.     |
-| `POST` | `/api/auth/refresh`             | Rotate the access and refresh tokens.                           |
-| `POST` | `/api/auth/logout`              | Revoke the refresh token and clear both session cookies.        |
-| `POST` | `/api/auth/verificar`           | Consume a single-use local email-verification token.            |
-| `POST` | `/api/auth/reenviar`            | Issue a replacement token without disclosing account presence.  |
-| `POST` | `/api/auth/recuperar`           | Send a password reset link without disclosing account presence. |
-| `POST` | `/api/auth/restablecer`         | Consume a single-use password reset token.                      |
-| `GET`  | `/api/auth/google`              | Start Google OAuth 2.0 authentication.                          |
-| `GET`  | `/api/auth/google/callback`     | OAuth middleware callback registered with Google.               |
-| `GET`  | `/api/auth/google/resultado`    | Complete the server-side provider result.                       |
-| `POST` | `/api/auth/google/intercambiar` | Exchange the short-lived code for a session or registration.    |
+| Method | Route                            | Purpose                                                         |
+| ------ | -------------------------------- | --------------------------------------------------------------- |
+| `POST` | `/api/usuarios`                  | Register a local user or complete a Google registration.        |
+| `POST` | `/api/auth/login`                | Authenticate a verified local account and create a session.     |
+| `POST` | `/api/auth/refresh`              | Rotate the access and refresh tokens.                           |
+| `POST` | `/api/auth/logout`               | Revoke the refresh token and clear both session cookies.        |
+| `POST` | `/api/auth/verificar`            | Consume a single-use local email-verification token.            |
+| `POST` | `/api/auth/reenviar`             | Issue a replacement token without disclosing account presence.  |
+| `POST` | `/api/auth/recuperar`            | Send a password reset link without disclosing account presence. |
+| `POST` | `/api/auth/restablecer`          | Consume a single-use password reset token.                      |
+| `GET`  | `/api/auth/externo`              | Start authentication with the configured identity provider.     |
+| `GET`  | `/api/auth/<provider>/callback`  | OAuth middleware callback registered with the provider.         |
+| `GET`  | `/api/auth/externo/resultado`    | Complete the server-side provider result.                       |
+| `POST` | `/api/auth/externo/intercambiar` | Exchange the short-lived code for a session or registration.    |
 
 Local accounts are created with `EmailVerificado = false`. Verification links expire after 24 hours, store only a SHA-256 token hash and become unusable after confirmation. Resend responses are intentionally identical for existing and unknown accounts. The external identity provider accepts only identities from `Authentication:InstitutionalDomain`, uses middleware correlation/state protection and returns a ten-minute, single-use exchange code instead of placing JWT credentials in a URL. Existing local accounts are linked by their verified institutional email; new identities must complete carnet, career and contact information before the user record is created. The frontend sends credentials only to the same-origin `/api` proxy and retries one request after a successful cookie rotation when an access token expires.
 
@@ -195,9 +195,9 @@ The contract responsible is linked to an active user through `CarnetJefeCarrera`
 
 ## Security Boundaries
 
-Presentation accepts purpose-specific request DTOs and returns DTOs rather than persistence entities. Authentication requests contain only email and password. JWT claims contain only the subject identifier, role, token identifier, and issuance metadata; names and email addresses are excluded. The default user mapper omits password hashes, profile images, identity-card images, and signatures; only the authenticated profile flow explicitly decrypts and returns that user's documents. Login, refresh, administrative lists, cache entries, and generic user reads do not contain those documents.
+Module `Api` layers accept purpose-specific request DTOs and return DTOs rather than persistence entities. Authentication requests contain only email and password. JWT claims contain only the subject identifier, role, token identifier, and issuance metadata; names and email addresses are excluded. The default user mapper omits password hashes, profile images, identity-card images, and signatures; only the authenticated profile flow explicitly decrypts and returns that user's documents. Login, refresh, administrative lists, cache entries, and generic user reads do not contain those documents.
 
-Application services enforce ownership and role rules before calling persistence. Core owns domain entities; Infrastructure owns EF Core persistence, cache, protected storage, and external integrations. Core has no dependency on Application, Infrastructure, or Presentation. Stored contract HTML is allowlist-sanitized by the server and rendered through Angular's sanitizer without a trust bypass. Unhandled exceptions return generic messages and logs contain only the exception type and request trace identifier. CI verifies these dependency and DTO boundaries and rejects a database schema containing dumped table data.
+Application services enforce ownership and role rules before calling persistence. Each module's `Domain` owns its entities, its `Infrastructure` owns EF Core persistence, and `Shared` provides cache, protected storage, and external integrations. `Domain` namespaces have no dependency on `Application`, `Infrastructure`, or `Api`. Stored contract HTML is allowlist-sanitized by the server and rendered through Angular's sanitizer without a trust bypass. Unhandled exceptions return generic messages and logs contain only the exception type and request trace identifier. CI verifies these dependency and DTO boundaries and rejects a database schema containing dumped table data.
 
 `GET /api/configuracion/responsables?buscar=nombre` is root-only. It returns up to 30 active, non-blocked users as `{ Carnet, Nombre }`, ordered by name. Search accepts up to 100 characters and matches name parts case-insensitively. Refine the query for additional results. The schema stores `configuraciones_sistema.carnet_jefe_carrera` as a nullable foreign key to `usuarios.carnet`.
 
@@ -205,10 +205,10 @@ The global limit is 180 requests/minute per authenticated identity or anonymous 
 
 ## Audit and Health
 
-| Method | Route            | Purpose                                                                                                                          |
-| ------ | ---------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Method | Route            | Purpose                                                                                                                                                                                                                                           |
+| ------ | ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `GET`  | `/api/auditoria` | Query audit entries. Administrator only. Supports `buscar`, `entidad`, `actor` (name or carnet), `accion`, `desde`, and `hasta`; change details include previous and new values while credentials and stored identity documents remain protected. |
-| `GET`  | `/api/health`    | Health check for the API and database.                                                                                           |
+| `GET`  | `/api/health`    | Health check for the API and database.                                                                                                                                                                                                            |
 
 ## Business Rules
 
@@ -218,7 +218,7 @@ The global limit is 180 requests/minute per authenticated identity or anonymous 
 | Passwords          | Minimum 8 characters, at least one uppercase letter, one number, and one special character.                                                        |
 | Equipment          | `CodigoImt` is assigned when the unit is created and cannot be changed later.                                                                      |
 | Loans              | Users, equipment groups, start date, and return date are required.                                                                                 |
-| Availability       | Only loans in `aprobado`, `activo` or `atrasado` state block capacity.                                                                            |
+| Availability       | Only loans in `aprobado`, `activo` or `atrasado` state block capacity.                                                                             |
 | Approval           | Availability is revalidated before a pending loan can be approved.                                                                                 |
 | Blocking           | A blocked user cannot create a loan because the reservation validation reads the current PostgreSQL state.                                         |
 | Audit              | Administrative and loan workflow mutations record actor, action, entity, timestamp, and relevant detail. Automatic actions use `Sistema` as actor. |

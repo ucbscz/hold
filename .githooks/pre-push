@@ -1,13 +1,13 @@
 #!/bin/sh
 set -e
 
-dotnet format code/server/IMT_Reservas.Server.sln
+dotnet format code/UCB_Hold.sln
 
 cd code/client
 npm run format
 cd ../..
 
-if ! git diff --quiet -- code/server code/client; then
+if ! git diff --quiet -- code/server code/tests code/client; then
   echo "Los formateadores hicieron cambios. Revisa y commitea esos archivos antes de hacer push."
   exit 1
 fi

@@ -16,9 +16,9 @@ This guide describes how to run UCB Hold locally for development, testing and re
 
 ```text
 code/
-|-- client/      Angular frontend
-|-- server/      ASP.NET Core API
-|-- tests/       Backend tests
+|-- client/      Angular frontend (Feature-Sliced Design under src/)
+|-- server/      ASP.NET Core API (modular monolith under src/Modules)
+|-- tests/       Backend tests mirroring server modules
 |-- database/    Database schema reference
 `-- docker-compose.yml
 ```
@@ -87,7 +87,7 @@ The selected provider requires both `ClientId` and `ClientSecret`; configuring o
 Run the following commands from the repository root. The host, sender and password are read interactively, so no provider or mailbox is written to the shell history. Port `587` uses STARTTLS.
 
 ```bash
-PROJECT="code/server/IMT_Reservas.Server.csproj"
+PROJECT="code/server/UCB_Hold.Server.csproj"
 
 read -rp "Servidor SMTP: " SMTP_HOST
 read -rp "Correo remitente: " SMTP_EMAIL
@@ -110,16 +110,21 @@ unset SMTP_HOST SMTP_EMAIL SMTP_PASSWORD
 
 Every organization-specific value lives outside the application code:
 
-| Concern                                                                                                               | Location                                                                                               |
-| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Product name, organization, campus, unit, inventory code labels, institutional email domain, site URL and asset paths | `code/client/src/brand/brand.json`                                                                     |
-| Brand colors and font                                                                                                 | `code/client/src/brand/brand.css`                                                                      |
-| Logo, favicon, social cover and loan contract template                                                                | `code/client/public/brand/`                                                                            |
-| Social cover source                                                                                                   | `code/client/src/brand/social-cover.html`                                                              |
-| Page title and social metadata                                                                                        | `code/client/src/index.template.html`, rendered by `npm run brand` before `start`, `build` and `watch` |
-| Product name and inventory code labels used by the API                                                                | `Branding:*` in `code/server/appsettings.json`                                                         |
-| Email sender name and domain restriction                                                                              | `Email:SenderName`, `Authentication:InstitutionalDomain`                                               |
-| Data Protection identity                                                                                              | `DataProtection:ApplicationName`, `PayloadMarker`, `TextMarker`                                        |
+| Concern                                                                                                               | Location                                                                                                                                     |
+| --------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Product name, organization, campus, unit, inventory code labels, institutional email domain, site URL and asset paths | `code/client/src/brand/brand.json`                                                                                                           |
+| Font stylesheet and origins (also used by the Content Security Policy)                                                | `fonts` in `code/client/src/brand/brand.json`                                                                                                |
+| Brand colors and font                                                                                                 | `code/client/src/brand/brand.css`                                                                                                            |
+| Logo, favicon, social cover and loan contract template                                                                | `code/client/public/brand/`                                                                                                                  |
+| Social cover source                                                                                                   | `code/client/src/brand/social-cover.html`                                                                                                    |
+| Documentation logo                                                                                                    | `docs/brand/logo.png`                                                                                                                        |
+| Page title and social metadata                                                                                        | `code/client/src/index.template.html` and `code/client/nginx.template.conf`, rendered by `npm run brand` before `start`, `build` and `watch` |
+| Product name and inventory code labels used by the API                                                                | `Branding:*` in `code/server/appsettings.json`                                                                                               |
+| Email sender name and domain restriction                                                                              | `Email:SenderName`, `Authentication:InstitutionalDomain`                                                                                     |
+| Identity provider name and logo, network/analytics provider and blocked image origins                                 | `code/client/src/external-services/external-services.json`                                                                                   |
+| Browser locale and time zone                                                                                          | `code/client/src/region/region.json`                                                                                                         |
+| API time zone for opening hours                                                                                       | `Region:*` in `code/server/appsettings.json`                                                                                                 |
+| Data Protection identity                                                                                              | `DataProtection:ApplicationName`, `PayloadMarker`, `TextMarker`                                                                              |
 
 `DataProtection` identity values encrypt identity documents, signatures and contracts already stored in the database. Keep them unchanged for an existing deployment; change them only for a new organization with an empty database.
 
@@ -127,16 +132,16 @@ Every organization-specific value lives outside the application code:
 
 Each external dependency is registered by its own module, selected only through configuration:
 
-| Service           | Module                                              | Contract or settings                                     |
-| ----------------- | --------------------------------------------------- | -------------------------------------------------------- |
-| Email delivery    | `Infrastructure/Email/EmailServiceRegistration`     | `IEmailSender`, `Email:*`                                |
-| External identity | `Presentation/Security/AuthenticationRegistration`  | `Authentication:Provider`, `Authentication:<Provider>:*` |
-| Distributed cache | `Infrastructure/Config/CacheServiceRegistration`    | `Redis:*`                                                |
-| Search            | `Infrastructure/Config/SearchServiceRegistration`   | `ISearchIndex<T>`, `Elasticsearch:*`                     |
-| Background jobs   | `Infrastructure/Jobs/BackgroundJobsRegistration`    | `Hangfire:*`                                             |
-| Database          | `Infrastructure/Config/DatabaseServiceRegistration` | `ConnectionStrings:PostgreSQL`                           |
+| Service           | Module                                            | Contract or settings                                     |
+| ----------------- | ------------------------------------------------- | -------------------------------------------------------- |
+| Email delivery    | `Shared/Email/EmailServiceRegistration`           | `IEmailSender`, `Email:*`                                |
+| External identity | `Modules/Usuarios/Api/AuthenticationRegistration` | `Authentication:Provider`, `Authentication:<Provider>:*` |
+| Distributed cache | `Shared/Caching/CacheServiceRegistration`         | `Redis:*`                                                |
+| Search            | `Shared/Search/SearchServiceRegistration`         | `ISearchIndex<T>`, `Elasticsearch:*`                     |
+| Background jobs   | `Bootstrap/BackgroundJobsRegistration`            | `Hangfire:*`                                             |
+| Database          | `Bootstrap/DatabaseServiceRegistration`           | `ConnectionStrings:PostgreSQL`                           |
 
-Changing to another SMTP account only requires new `Email:*` values. A different delivery technology needs a class implementing `IEmailSender`, a new `EmailProvider` value and one case in `EmailServiceRegistration`; services that send messages do not change. A different identity provider needs a new `ExternalIdentityProvider` value and its registration case in `AuthenticationRegistration`; its callback becomes `/api/auth/<provider>/callback`. The institutional domain is configured in `Authentication:InstitutionalDomain` for the API and `institutionalEmailDomain` in `code/client/src/environments/environment.ts` for the browser.
+Changing to another SMTP account only requires new `Email:*` values. A different delivery technology needs a class implementing `IEmailSender`, a new `EmailProvider` value and one case in `EmailServiceRegistration`; services that send messages do not change. A different identity provider needs a new `ExternalIdentityProvider` value and its registration case in `AuthenticationRegistration`; its callback becomes `/api/auth/<provider>/callback`. The institutional domain is configured in `Authentication:InstitutionalDomain` for the API and `institutionalEmailDomain` in `code/client/src/brand/brand.json` for the browser.
 
 Redis and Hangfire are disabled by default in the Development environment. Enable them when testing the complete local infrastructure:
 
@@ -182,7 +187,7 @@ Run backend:
 
 ```bash
 psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f code/database/schema.sql
-dotnet run --project code/server/IMT_Reservas.Server.csproj
+dotnet run --project code/server/UCB_Hold.Server.csproj
 ```
 
 Run frontend:
@@ -203,8 +208,8 @@ npm start
 Backend:
 
 ```bash
-dotnet build code/IMT_Reservas.sln
-dotnet test code/tests/IMT_Reservas.Tests.csproj
+dotnet build code/UCB_Hold.sln
+dotnet test code/tests/UCB_Hold.Tests.csproj
 ```
 
 Frontend:
@@ -268,7 +273,7 @@ Create the database:
 createdb -U "$POSTGRES_USER" "$POSTGRES_DB"
 ```
 
-Apply the data-free schema attached to the release, which includes the Row Level Security policies, and enable the application role (see [database.md](database.md#row-level-security)):
+Apply the data-free `code/database/schema.sql` from the release source code, which includes the Row Level Security policies, and enable the application role (see [database.md](database.md#row-level-security)):
 
 ```bash
 psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 -f code/database/schema.sql

@@ -159,3 +159,4 @@ code/tests/TestResults/
 /Code/base64_firma.txt
 
 code/client/src/index.html
+code/client/nginx.conf

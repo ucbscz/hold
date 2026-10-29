@@ -1,6 +1,6 @@
 # Database Guide
 
-UCB Hold uses PostgreSQL 16+ with Entity Framework Core 8. The database name, administrator account and application role come from `code/server.env`. Repository source and releases contain only the data-free schema reference in [`code/database/schema.sql`](../code/database/schema.sql). Production backups remain in private infrastructure.
+UCB Hold uses PostgreSQL 16+ with Entity Framework Core 8. The database name, administrator account and application role come from `code/server.env`. The repository contains the data-free schema reference in [`code/database/schema.sql`](../code/database/schema.sql); releases publish only source code, without separate schema or backup assets. Production backups remain in private infrastructure.
 
 ## Entity Relationship Diagram
 
@@ -124,11 +124,7 @@ test -s code/database/schema.sql
 ! grep -Eq '^-- Data for Name:|^COPY public\.|^SELECT pg_catalog\.setval' code/database/schema.sql
 ```
 
-Append the `Row Level Security` section of the previous `schema.sql` before the closing comment, then upload it to the release:
-
-```bash
-gh release upload <tag> code/database/schema.sql --repo ucbscz/hold --clobber
-```
+Append the `Row Level Security` section of the previous `schema.sql` before the closing comment and commit the file. Do not attach it to GitHub releases.
 
 Initialize an empty database:
 

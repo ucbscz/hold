@@ -47,12 +47,12 @@ jobs:
         run: npm audit --omit=dev --audit-level=moderate
 
       - name: Restore backend
-        run: dotnet restore code/IMT_Reservas.sln
+        run: dotnet restore code/UCB_Hold.sln
 
       - name: Audit backend dependencies
         shell: bash
         run: |
-          dotnet list code/IMT_Reservas.sln package --vulnerable --include-transitive --no-restore | tee vulnerable-packages.txt
+          dotnet list code/UCB_Hold.sln package --vulnerable --include-transitive --no-restore | tee vulnerable-packages.txt
           if grep -Eq '\s(Low|Moderate|High|Critical)\s+https?://' vulnerable-packages.txt; then
             echo "Backend dependencies have known vulnerabilities"
             exit 1
@@ -73,12 +73,12 @@ jobs:
       - name: Validate row level security policies
         shell: bash
         run: |
-          docker run -d --name rls-db -e POSTGRES_PASSWORD=ci -e POSTGRES_DB=IMT_Reservas -v "$PWD/code/database:/sql:ro" postgres:16-alpine
+          docker run -d --name rls-db -e POSTGRES_PASSWORD=ci -e POSTGRES_DB=UCB_Hold -v "$PWD/code/database:/sql:ro" postgres:16-alpine
           until docker logs rls-db 2>&1 | grep -q "PostgreSQL init process complete"; do sleep 1; done
-          until docker exec rls-db pg_isready -U postgres -d IMT_Reservas; do sleep 1; done
-          docker exec rls-db psql -q -U postgres -d IMT_Reservas -v ON_ERROR_STOP=1 -f /sql/schema.sql
-          docker exec rls-db psql -q -U postgres -d IMT_Reservas -c "ALTER ROLE reservas_app WITH LOGIN;"
-          visible=$(docker exec rls-db psql -tA -U reservas_app -d IMT_Reservas -c "SELECT count(*) FROM usuarios;")
+          until docker exec rls-db pg_isready -U postgres -d UCB_Hold; do sleep 1; done
+          docker exec rls-db psql -q -U postgres -d UCB_Hold -v ON_ERROR_STOP=1 -f /sql/schema.sql
+          docker exec rls-db psql -q -U postgres -d UCB_Hold -c "ALTER ROLE reservas_app WITH LOGIN;"
+          visible=$(docker exec rls-db psql -tA -U reservas_app -d UCB_Hold -c "SELECT count(*) FROM usuarios;")
           test "$visible" = "0"
           docker rm -f rls-db
 
@@ -107,11 +107,11 @@ jobs:
             /d:sonar.coverage.exclusions="code/tests/**"
 
       - name: Build backend
-        run: dotnet build code/IMT_Reservas.sln --no-restore --configuration $BUILD_CONFIGURATION
+        run: dotnet build code/UCB_Hold.sln --no-restore --configuration $BUILD_CONFIGURATION
 
       - name: Test backend with coverage
         run: |
-          dotnet test code/tests/IMT_Reservas.Tests.csproj \
+          dotnet test code/tests/UCB_Hold.Tests.csproj \
             --no-build \
             --configuration $BUILD_CONFIGURATION \
             --settings code/tests/coverage.runsettings \
