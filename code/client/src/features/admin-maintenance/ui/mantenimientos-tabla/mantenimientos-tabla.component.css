@@ -1,0 +1,107 @@
+.mantenimientos-container {
+  padding: 1.5rem 1.5rem 1.5rem 0;
+  background-color: var(--color-background);
+  min-height: 100dvh;
+  color: var(--ink);
+  font-family: var(--font);
+}
+
+.maintenance-date-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  flex-wrap: wrap;
+}
+
+.maintenance-equipment-cell {
+  max-width: 15rem;
+  white-space: nowrap;
+}
+
+.maintenance-equipment-name {
+  display: inline-block;
+  max-width: 11rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: middle;
+}
+
+.maintenance-equipment-count {
+  display: inline-flex;
+  margin-left: 0.375rem;
+  padding: 0.125rem 0.4rem;
+  border-radius: var(--radius-full);
+  background: var(--sidebar);
+  color: var(--ink-secondary);
+  font: 700 0.7rem var(--font);
+}
+
+.btn-view {
+  color: var(--ink-muted);
+}
+
+.btn-view:hover {
+  color: var(--interactive-text);
+  background: var(--interactive-subtle);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.button {
+  background-color: var(--brand-hover);
+  color: white;
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--t-base);
+}
+
+.button:hover {
+  background-color: var(--brand);
+}
+
+.table-responsive {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  background-color: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+  border: 1px solid var(--border);
+}
+
+.actions-column {
+  width: 80px;
+  min-width: 80px;
+  text-align: right;
+}
+
+.precio-column {
+  text-align: right;
+}
+
+@media (max-width: 768px) {
+  .maintenance-date-filters {
+    width: 100%;
+  }
+  .maintenance-date-filters .admin-date-filter {
+    flex: 1 1 10rem;
+    width: auto;
+  }
+}
+
+td.actions-column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}

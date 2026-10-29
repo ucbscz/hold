@@ -1,0 +1,198 @@
+.botoncrear:hover {
+  background-color: var(--brand-hover);
+  color: var(--brand-text);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--brand) 40%, transparent);
+}
+
+.botoncrear:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 123, 255, 0.2);
+}
+
+.header-title h1 {
+  margin: 0;
+  font-size: 1.75rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.subtitle {
+  margin: 0.25rem 0 0 0;
+  color: var(--ink-secondary);
+  font-size: 0.875rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.data-table th,
+.data-table td {
+  padding: 1rem;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.data-table th {
+  font-weight: 600;
+  cursor: pointer;
+  user-select: none;
+  transition: var(--t-base);
+}
+
+.data-table th i {
+  margin-left: 0.25rem;
+}
+
+.data-table tbody tr {
+  transition: var(--t-base);
+}
+
+.data-table tbody tr:hover {
+  background-color: color-mix(in srgb, var(--brand) 6%, transparent);
+}
+
+.btn {
+  padding: 0.625rem 1.25rem;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--t-base);
+}
+
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  transition: var(--t-base);
+}
+
+.btn-delete {
+  color: var(--error);
+}
+
+.btn-delete:hover {
+  background-color: rgba(239, 68, 68, 0.1);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  color: var(--ink-secondary);
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: scale(0.8);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.table-responsive::-webkit-scrollbar {
+  height: 6px;
+}
+
+.table-responsive::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.05);
+  border-radius: 10px;
+  margin: 0 10px;
+}
+
+.empty-table {
+  padding: 3rem !important;
+}
+
+.table-responsive::-webkit-scrollbar {
+  display: none;
+}
+
+.botoncrear {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  background-color: var(--brand);
+  color: var(--brand-text);
+  padding: 6px 12px;
+  border: none;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    color var(--t-base),
+    background-color var(--t-base),
+    border-color var(--t-base),
+    box-shadow var(--t-base);
+  box-shadow: none;
+  white-space: nowrap;
+  height: 32px;
+}
+
+.botoncrear i {
+  font-size: 12px;
+}
+
+@media (max-width: 768px) {
+  .table-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .botoncrear {
+    padding: 6px 10px;
+    font-size: 0.75rem;
+    height: 30px;
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 360px) {
+  .table-header {
+    gap: 0.75rem;
+  }
+  .header-title h1 {
+    font-size: 1.2rem;
+  }
+  .subtitle {
+    font-size: 0.75rem;
+  }
+  .data-table th,
+  .data-table td {
+    padding: 0.6rem;
+    font-size: 0.75rem;
+  }
+  .btn {
+    padding: 0.5rem 0.9rem;
+    font-size: 0.75rem;
+  }
+  .btn-icon {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+}

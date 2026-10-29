@@ -1,0 +1,194 @@
+import { HttpClient } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { PrestamoDto } from '../model/prestamo';
+import type { Carrito } from '@entities/cart/@x/loan';
+import { environment } from '@environments/environment';
+import { ApiResponse, extractApiValue, getApiList } from '@shared/api';
+import { map, Observable } from 'rxjs';
+import { PrestamoInlineItem } from '../model/prestamo-inline-item';
+import { PrestamoApiItem } from './prestamo-api-item';
+@Injectable({
+  providedIn: 'root',
+})
+export class PrestamosAPIService {
+  private readonly url = environment.apiUrl + '/api/prestamos';
+  constructor(private readonly http: HttpClient) {}
+
+  private mapearPrestamo(item: PrestamoApiItem): PrestamoDto {
+    return {
+      Id: item.Id,
+      CarnetUsuario: item.CarnetUsuario,
+      NombreUsuario: item.NombreUsuario,
+      ApellidoPaternoUsuario: item.ApellidoPaternoUsuario,
+      TelefonoUsuario: item.TelefonoUsuario,
+      NombreGrupoEquipo: item.NombreGrupoEquipo,
+      CodigoImt: item.CodigoImt,
+      CodigoUcb: item.CodigoUcb ?? null,
+      NumeroSerial: item.NumeroSerial ?? null,
+      FechaSolicitud: item.FechaSolicitud
+        ? new Date(item.FechaSolicitud)
+        : null,
+      FechaPrestamoEsperada: item.FechaPrestamoEsperada
+        ? new Date(item.FechaPrestamoEsperada)
+        : null,
+      FechaPrestamo: item.FechaPrestamo ? new Date(item.FechaPrestamo) : null,
+      FechaDevolucionEsperada: item.FechaDevolucionEsperada
+        ? new Date(item.FechaDevolucionEsperada)
+        : null,
+      FechaDevolucion: item.FechaDevolucion
+        ? new Date(item.FechaDevolucion)
+        : null,
+      Observacion: item.Observacion,
+      MotivoRechazo: item.MotivoRechazo,
+      AutorizadoPor: item.AutorizadoPor,
+      EntregadoPor: item.EntregadoPor,
+      EstadoPrestamo: item.EstadoPrestamo,
+      IdContrato: item.IdContrato,
+      UbicacionEquipo: item.UbicacionEquipo ?? null,
+      NombreGavetero: item.NombreGavetero ?? null,
+      NombreMueble: item.NombreMueble ?? null,
+      UbicacionMueble: item.UbicacionMueble ?? null,
+      AdministradorAmbiente: item.AdministradorAmbiente ?? null,
+      TipoUsuario: item.TipoUsuario ?? null,
+      DestinoPrestamo: item.DestinoPrestamo,
+      IdCarrera: item.IdCarrera ?? null,
+      NombreMateria: item.NombreMateria ?? null,
+      GrupoEquipoId: item.GrupoEquipoId ?? [],
+      Guardado: item.Guardado ?? false,
+    };
+  }
+
+  obtenerPrestamos() {
+    return this.http
+      .get<ApiResponse<PrestamoApiItem[]> | PrestamoApiItem[]>(this.url)
+      .pipe(
+        map((data) => {
+          const arrayData = Array.isArray(data)
+            ? data
+            : extractApiValue(data, []);
+          return arrayData.map((item) => this.mapearPrestamo(item));
+        }),
+      );
+  }
+
+  crearPrestamo(
+    carrito: Carrito,
+    carnet: string,
+    contrato?: string,
+    destinoPrestamo: string = 'Universidad',
+    idCarrera?: number,
+    nombreMateria?: string,
+  ) {
+    const grupoid: number[] = [];
+    for (const [key, item] of Object.entries(carrito)) {
+      if (item.cantidad > 0) {
+        for (let i = 0; i < item.cantidad; i++) {
+          grupoid.push(Number(key));
+        }
+      }
+    }
+
+    const fechas = Object.values(carrito)[0];
+    const body = {
+      GrupoEquipoId: grupoid,
+      FechaPrestamoEsperada: fechas?.fecha_inicio || null,
+      FechaDevolucionEsperada: fechas?.fecha_final || null,
+      CarnetUsuario: carnet,
+      Observacion: '',
+      Contrato: contrato || null,
+      DestinoPrestamo: destinoPrestamo,
+      IdCarrera: idCarrera ?? null,
+      NombreMateria: nombreMateria ?? null,
+    };
+
+    return this.http.post(this.url, body);
+  }
+
+  eliminarPrestamo(id: number) {
+    return this.http.delete(`${this.url}/${id}`);
+  }
+
+  estadoReserva() {
+    return this.http
+      .get<ApiResponse<{ PuedeReservar: boolean; Motivo: string | null }>>(
+        `${this.url}/elegibilidad`,
+      )
+      .pipe(
+        map((data) => {
+          const valor = extractApiValue(data, {
+            PuedeReservar: true,
+            Motivo: null,
+          });
+          return {
+            puedeReservar: valor.PuedeReservar,
+            motivo: valor.Motivo,
+          };
+        }),
+      );
+  }
+
+  cambiarEstadoPrestamo(
+    Id: number,
+    estado: string,
+    observacion?: string,
+    equiposRetorno?: { CodigoImt: string; EstadoEquipo: string }[],
+  ) {
+    const body = {
+      EstadoPrestamo: estado,
+      Observacion: observacion || null,
+      EquiposRetorno: equiposRetorno ?? [],
+    };
+    return this.http.patch(`${this.url}/${Id}/estado`, body);
+  }
+
+  editarObservacion(id: number, observacion: string) {
+    return this.http.patch(`${this.url}/${id}/observacion`, {
+      Observacion: observacion,
+    });
+  }
+
+  actualizarGuardado(id: number, guardado: boolean) {
+    return this.http.patch(`${this.url}/${id}/guardado`, {
+      Guardado: guardado,
+    });
+  }
+
+  obtenerPrestamosPorUsuario(
+    carnet: string,
+    estadoPrestamo: string,
+    guardado?: boolean,
+  ) {
+    const params = new URLSearchParams({
+      carnet,
+      estado: estadoPrestamo,
+    });
+    if (guardado !== undefined) params.set('guardado', String(guardado));
+    const APIurl = `${this.url}?${params.toString()}`;
+    return this.http
+      .get<ApiResponse<PrestamoApiItem[]> | PrestamoApiItem[]>(APIurl)
+      .pipe(
+        map((data) => {
+          const arrayData = Array.isArray(data)
+            ? data
+            : extractApiValue(data, []);
+          if (!Array.isArray(arrayData)) {
+            return [];
+          }
+          return arrayData.map((item) => this.mapearPrestamo(item));
+        }),
+      );
+  }
+
+  obtenerPrestamosPorCarnet(carnet: string): Observable<PrestamoInlineItem[]> {
+    return getApiList(this.http, this.url, { carnet });
+  }
+
+  obtenercontratoPrestamo(id: number) {
+    const APIurl = `${environment.apiUrl}/api/contratos/${id}`;
+    return this.http
+      .get<ApiResponse<{ ContratoHtml?: string }>>(APIurl)
+      .pipe(
+        map((response) => extractApiValue(response, {}).ContratoHtml ?? ''),
+      );
+  }
+}

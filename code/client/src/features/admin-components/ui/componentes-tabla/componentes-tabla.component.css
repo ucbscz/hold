@@ -1,0 +1,64 @@
+.table-responsive {
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  border: 1px solid #e2e8f0;
+}
+
+.table-responsive > * {
+}
+
+.componentes-container {
+  padding: 1.5rem 0 1.5rem 0;
+  background-color: var(--color-background);
+  min-height: 100dvh;
+  color: var(--ink);
+  font-family: var(--font);
+}
+
+.table-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.table-responsive {
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  background-color: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+}
+
+.actions-column {
+  width: 120px;
+  min-width: 120px;
+  text-align: right;
+}
+
+.precio-column {
+  text-align: right;
+}
+
+td.actions-column {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+}
+
+.data-table th:nth-child(1),
+.data-table td:nth-child(1) {
+  min-width: 160px;
+}
+
+.data-table th:nth-child(4),
+.data-table td:nth-child(4) {
+  min-width: 140px;
+}

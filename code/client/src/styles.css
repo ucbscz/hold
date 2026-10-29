@@ -540,7 +540,7 @@ body {
 @media (hover: hover) and (pointer: fine) {
   .botoncrear:hover {
     background: var(--brand-hover) !important;
-    box-shadow: 0 4px 12px rgba(255, 216, 20, 0.4) !important;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--brand) 40%, transparent) !important;
     transform: translateY(-1px) !important;
   }
 }
@@ -1533,15 +1533,6 @@ td.actions-column > * {
   }
 }
 
-.form-container h2,
-.modal-content h2,
-.modal-header h2,
-.modal h2,
-h1.title,
-h2.title {
-  color: var(--ink);
-}
-
 @media (max-width: 480px) {
   .form-container {
     max-width: calc(100vw - 1rem) !important;
@@ -1964,15 +1955,6 @@ td.actions-column .btn-icon {
 }
 .filter-chip button {
   color: var(--ink-muted) !important;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    transition-duration: 0.01ms !important;
-  }
 }
 
 .empty-state,
