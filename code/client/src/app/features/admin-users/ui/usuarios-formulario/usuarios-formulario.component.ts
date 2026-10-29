@@ -6,7 +6,7 @@ import {
   UsuarioServiceAPI,
 } from '@entities/user';
 import { FormularioAdminComponent } from '@shared/lib/admin-form';
-import { ValidatedFormsModule } from '@shared/lib/forms';
+import { ValidatedFormsModule, INSTITUTIONAL_EMAIL } from '@shared/lib/forms';
 import {
   Aviso,
   CustomSelectComponent,
@@ -27,6 +27,7 @@ import {
   styleUrl: '../../../../shared/lib/admin-form/formulario-admin.css',
 })
 export class UsuariosFormularioComponent extends FormularioAdminComponent<Usuario> {
+  protected readonly correoInstitucional = INSTITUTIONAL_EMAIL;
   private readonly usuarioApi = inject(UsuarioServiceAPI);
   protected readonly entidad = { nombre: 'usuario' };
   @Input() carreras: string[] = [];

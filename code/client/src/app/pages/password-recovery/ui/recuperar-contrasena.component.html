@@ -23,9 +23,9 @@
           [(ngModel)]="email"
           required
           email
-          pattern="^[a-zA-Z0-9._%+\-]+@ucb\.edu\.bo$"
+          [pattern]="correoInstitucional.pattern"
           autocomplete="email"
-          placeholder="nombre.apellido@ucb.edu.bo"
+          [placeholder]="correoInstitucional.placeholder"
           #emailInput="ngModel"
         />
         @if (emailInput.invalid && (emailInput.dirty || emailInput.touched)) {

@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, signal, WritableSignal } from '@angular/core';
-import { ValidatedFormsModule } from '@shared/lib/forms';
+import { ValidatedFormsModule, INSTITUTIONAL_EMAIL } from '@shared/lib/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { UsuarioService, UsuarioServiceAPI } from '@entities/user';
 import { AuthService } from '@features/auth-session';
@@ -18,6 +18,7 @@ const UNAUTHORIZED_STATUS = 401;
   styleUrls: ['./iniciar-sesion.component.css'],
 })
 export class IniciarSesionComponent implements OnInit {
+  protected readonly correoInstitucional = INSTITUTIONAL_EMAIL;
   email: string = '';
   contrasena: string = '';
   loading: boolean = false;

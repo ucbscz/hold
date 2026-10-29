@@ -70,8 +70,8 @@
           [(ngModel)]="modelo.correo"
           required
           maxlength="50"
-          pattern="^[a-zA-Z0-9._%\+\-]+@ucb\.edu\.bo$"
-          placeholder="ejemplo@ucb.edu.bo"
+          [pattern]="correoInstitucional.pattern"
+          [placeholder]="correoInstitucional.placeholder"
           class="form-input"
         />
       </div>

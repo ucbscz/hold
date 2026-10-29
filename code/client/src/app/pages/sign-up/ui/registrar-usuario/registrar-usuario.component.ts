@@ -1,3 +1,4 @@
+import { INSTITUTIONAL_EMAIL } from '@shared/lib/forms';
 import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
@@ -25,6 +26,7 @@ import { FirmaComponent } from '@features/signature';
   styleUrl: './registrar-usuario.component.css',
 })
 export class RegistrarUsuarioComponent {
+  protected readonly correoInstitucional = INSTITUTIONAL_EMAIL;
   nuevoUsuario: Usuario = new Usuario();
   password: string = '';
   confirmPassword: string = '';

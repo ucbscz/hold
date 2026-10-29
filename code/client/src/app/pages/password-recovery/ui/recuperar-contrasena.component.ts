@@ -1,3 +1,4 @@
+import { INSTITUTIONAL_EMAIL } from '@shared/lib/forms';
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -14,6 +15,7 @@ import { ToastService } from '@shared/ui';
   styleUrl: './recuperar-contrasena.component.css',
 })
 export class RecuperarContrasenaComponent {
+  protected readonly correoInstitucional = INSTITUTIONAL_EMAIL;
   email = '';
   codigo = '';
   contrasena = '';

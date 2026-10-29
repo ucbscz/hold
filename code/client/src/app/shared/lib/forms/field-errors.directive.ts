@@ -1,3 +1,4 @@
+import { INSTITUTIONAL_EMAIL } from './institutional-email';
 import {
   AfterViewInit,
   Directive,
@@ -126,8 +127,8 @@ export class FieldErrorsDirective implements AfterViewInit, OnDestroy {
           : `Usa incrementos de ${errors[key].step}.`;
       case 'pattern': {
         const pattern = String(errors[key].requiredPattern);
-        if (pattern.includes('ucb'))
-          return 'Usa un correo institucional @ucb.edu.bo.';
+        if (pattern === INSTITUTIONAL_EMAIL.pattern)
+          return `Usa un correo institucional ${INSTITUTIONAL_EMAIL.suffix}.`;
         if (pattern.includes('{8,10}')) return 'Ingresa entre 8 y 10 dígitos.';
         if (pattern === '^[0-9]+$') return 'Usa solo números.';
         return 'Revisa el formato de este campo.';

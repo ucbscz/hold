@@ -15,8 +15,8 @@
           (ngModelChange)="incorrecto = false"
           required
           email
-          pattern="^[a-zA-Z0-9._%\+\-]+@ucb\.edu\.bo$"
-          placeholder="tu@ucb.edu.bo"
+          [pattern]="correoInstitucional.pattern"
+          [placeholder]="correoInstitucional.placeholder"
           class="form-input"
           #emailInput="ngModel"
         />

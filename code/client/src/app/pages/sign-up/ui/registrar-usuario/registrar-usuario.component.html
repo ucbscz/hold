@@ -32,7 +32,8 @@
           Verificar correo con Google
         </button>
         <p class="google-help">
-          Debes utilizar una cuenta institucional &#64;ucb.edu.bo.
+          Debes utilizar una cuenta institucional
+          {{ correoInstitucional.suffix }}.
         </p>
         <p class="login-link">
           ¿Ya tienes cuenta? <a (click)="irALogin()">Inicia sesión aquí</a>
@@ -146,8 +147,8 @@
               required
               email
               maxlength="255"
-              placeholder="tu@ucb.edu.bo"
-              pattern="^[a-zA-Z0-9._%\+\-]+@ucb\.edu\.bo$"
+              [placeholder]="correoInstitucional.placeholder"
+              [pattern]="correoInstitucional.pattern"
               required
               class="form-input"
               #correoInput="ngModel"
@@ -161,7 +162,10 @@
                   <div>El correo electrónico es requerido</div>
                 }
                 @if (correoInput.errors?.["pattern"]) {
-                  <div>Debe usar un correo institucional &#64;ucb.edu.bo</div>
+                  <div>
+                    Debe usar un correo institucional
+                    {{ correoInstitucional.suffix }}
+                  </div>
                 }
               </div>
             }
