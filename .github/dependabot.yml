@@ -4,15 +4,41 @@ updates:
     directory: /code/server
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: Elastic.Clients.Elasticsearch
+        update-types: ["version-update:semver-major"]
+      - dependency-name: Microsoft.*
+        update-types: ["version-update:semver-major"]
+      - dependency-name: Npgsql*
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: nuget
     directory: /code/tests
     schedule:
       interval: weekly
+    ignore:
+      - dependency-name: FluentAssertions
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: npm
     directory: /code/client
     schedule:
       interval: weekly
+    groups:
+      angular:
+        patterns: ["@angular/*", "@angular-devkit/*"]
+    ignore:
+      - dependency-name: "@angular/*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: typescript
+        update-types: ["version-update:semver-major"]
   - package-ecosystem: github-actions
     directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /code/server
+    schedule:
+      interval: weekly
+  - package-ecosystem: docker
+    directory: /code/client
     schedule:
       interval: weekly
