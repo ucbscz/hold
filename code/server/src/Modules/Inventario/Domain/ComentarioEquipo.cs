@@ -1,7 +1,8 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using IMT_Reservas.Server.Core.Abstraction;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Core.Entities;
+namespace IMT_Reservas.Server.Modules.Inventario.Domain;
 
 public class ComentarioEquipo : Entity
 {

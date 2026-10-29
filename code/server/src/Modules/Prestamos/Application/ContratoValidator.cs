@@ -1,6 +1,6 @@
 using FluentValidation;
 
-namespace IMT_Reservas.Server.Application.Features.Contrato;
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
 
 public class ContratoValidator : AbstractValidator<ContratoDto>
 {

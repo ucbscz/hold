@@ -1,17 +1,16 @@
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.Mueble;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
+using IMT_Reservas.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
-using MuebleEntity = IMT_Reservas.Server.Core.Entities.Mueble;
+using MuebleEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Mueble;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Inventario.Api;
 
 [Authorize]
 [Route("api/muebles")]
-public class MuebleController : Controller
+public class MuebleController : ApiController
 {
     private readonly Service<MuebleEntity, Repository<MuebleEntity, MuebleDto>, MuebleDto> _service;
 

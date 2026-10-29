@@ -1,11 +1,9 @@
 using System.Globalization;
 using Ardalis.Result;
 using FluentValidation;
-using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Core.Abstraction;
-using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
 
-namespace IMT_Reservas.Server.Application.Abstraction;
+namespace IMT_Reservas.Server.Shared.Kernel;
 
 public class Service<TEntity, TRepository, TDto>
     where TEntity : Entity

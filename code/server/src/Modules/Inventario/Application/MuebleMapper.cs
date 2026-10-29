@@ -1,8 +1,8 @@
-using IMT_Reservas.Server.Application.Abstraction;
 using Riok.Mapperly.Abstractions;
-using MuebleEntity = IMT_Reservas.Server.Core.Entities.Mueble;
+using MuebleEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Mueble;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Mueble;
+namespace IMT_Reservas.Server.Modules.Inventario.Application;
 
 [Mapper]
 public partial class MuebleMapper : IMapper<MuebleEntity, MuebleDto>

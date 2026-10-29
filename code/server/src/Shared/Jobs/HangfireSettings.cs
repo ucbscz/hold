@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Infrastructure.Jobs;
+namespace IMT_Reservas.Server.Shared.Jobs;
 
 public sealed class HangfireSettings
 {

@@ -1,11 +1,9 @@
 using System.Linq.Expressions;
 using Ardalis.Result;
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Core.Abstraction;
-using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
+namespace IMT_Reservas.Server.Shared.Kernel;
 
 public class Repository<TEntity, TDto>
     where TEntity : Entity

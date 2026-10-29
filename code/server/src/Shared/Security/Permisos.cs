@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace IMT_Reservas.Server.Core.Entities;
+namespace IMT_Reservas.Server.Shared.Security;
 
 public static class Permisos
 {

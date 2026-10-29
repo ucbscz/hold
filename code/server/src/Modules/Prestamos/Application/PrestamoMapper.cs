@@ -1,10 +1,10 @@
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.Prestamo.State;
-using IMT_Reservas.Server.Core.Entities;
 using Riok.Mapperly.Abstractions;
-using PrestamoEntity = IMT_Reservas.Server.Core.Entities.Prestamo;
+using PrestamoEntity = IMT_Reservas.Server.Modules.Prestamos.Domain.Prestamo;
+using IMT_Reservas.Server.Modules.Prestamos.Application.State;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Prestamo;
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
 
 [Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName, EnumMappingIgnoreCase = true)]
 public partial class PrestamoMapper : IMapper<PrestamoEntity, PrestamoDto>

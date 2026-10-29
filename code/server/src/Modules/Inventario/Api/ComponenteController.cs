@@ -1,17 +1,17 @@
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.Componente;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+using IMT_Reservas.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
-using ComponenteEntity = IMT_Reservas.Server.Core.Entities.Componente;
+using ComponenteEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Componente;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Modules.Inventario.Infrastructure;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Inventario.Api;
 
 [Authorize]
 [Route("api/componentes")]
-public class ComponenteController : Controller
+public class ComponenteController : ApiController
 {
     private readonly Service<ComponenteEntity, ComponenteRepository, ComponenteDto> _service;
 

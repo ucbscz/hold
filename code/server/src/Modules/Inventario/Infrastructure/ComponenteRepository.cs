@@ -1,12 +1,12 @@
 using System.Globalization;
 using Ardalis.Result;
-using IMT_Reservas.Server.Application.Features.Componente;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 using Microsoft.EntityFrameworkCore;
-using ComponenteEntity = IMT_Reservas.Server.Core.Entities.Componente;
+using ComponenteEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Componente;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+namespace IMT_Reservas.Server.Modules.Inventario.Infrastructure;
 
 public class ComponenteRepository : Repository<ComponenteEntity, ComponenteDto>
 {

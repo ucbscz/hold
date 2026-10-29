@@ -1,8 +1,8 @@
 using Ardalis.Result;
-using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
+using IMT_Reservas.Server.Modules.Inventario.Infrastructure;
 
-namespace IMT_Reservas.Server.Application.Features.GrupoEquipo;
+namespace IMT_Reservas.Server.Modules.Inventario.Application;
 
 public class ComentarioEquipoService
 {

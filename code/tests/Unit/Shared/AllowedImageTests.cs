@@ -1,7 +1,7 @@
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Security;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Tests.Unit;
+namespace IMT_Reservas.Tests.Unit.Shared;
 
 [TestFixture]
 public class AllowedImageTests

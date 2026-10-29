@@ -1,9 +1,15 @@
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config.RowLevelSecurity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using IMT_Reservas.Server.Modules.Auditoria.Domain;
+using IMT_Reservas.Server.Modules.Configuracion.Domain;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Modules.Mantenimientos.Domain;
+using IMT_Reservas.Server.Modules.Notificaciones.Domain;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Shared.Persistence.RowLevelSecurity;
 
-namespace IMT_Reservas.Server.Infrastructure.Config;
+namespace IMT_Reservas.Server.Shared.Persistence;
 
 public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : DbContext(options)
 {

@@ -1,8 +1,8 @@
-using IMT_Reservas.Server.Application.Abstraction;
 using Riok.Mapperly.Abstractions;
-using ContratoEntity = IMT_Reservas.Server.Core.Entities.Contrato;
+using ContratoEntity = IMT_Reservas.Server.Modules.Prestamos.Domain.Contrato;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Contrato;
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
 
 [Mapper]
 public partial class ContratoMapper : IMapper<ContratoEntity, ContratoDto>

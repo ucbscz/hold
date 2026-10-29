@@ -1,6 +1,8 @@
-using IMT_Reservas.Server.Core.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using IMT_Reservas.Server.Shared.Persistence;
 
 namespace IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
 
@@ -30,7 +32,7 @@ internal sealed class PrestamoConfiguration : IEntityTypeConfiguration<Prestamo>
         entity.ToTable("prestamos");
         entity.HasKey(e => e.Id);
         entity.Property(e => e.Id).HasColumnName("id_prestamo");
-        entity.Property(e => e.FechaSolicitud).HasDefaultValueSql("now() AT TIME ZONE 'America/La_Paz'").HasColumnName("fecha_solicitud");
+        entity.Property(e => e.FechaSolicitud).ValueGeneratedOnAdd().HasColumnName("fecha_solicitud");
         entity.Property(e => e.FechaPrestamo).HasColumnName("fecha_prestamo");
         entity.Property(e => e.FechaPrestamoEsperada).IsRequired().HasColumnName("fecha_prestamo_esperada");
         entity.Property(e => e.FechaDevolucion).HasColumnName("fecha_devolucion");

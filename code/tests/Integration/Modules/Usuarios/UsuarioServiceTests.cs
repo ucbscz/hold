@@ -1,18 +1,6 @@
 using BCryptLib = BCrypt.Net.BCrypt;
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Application.Features.Notificacion;
 using Microsoft.AspNetCore.Http;
-using IMT_Reservas.Server.Application.Features.Jwt;
-using IMT_Reservas.Server.Application.Features.Prestamo;
-using IMT_Reservas.Server.Application.Features.Usuario;
-using IMT_Reservas.Server.Application.Features.Contrato;
-using IMT_Reservas.Server.Application.Security;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Email;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using IMT_Reservas.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
@@ -20,10 +8,20 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.AspNetCore.DataProtection;
-using Microsoft.Extensions.Configuration;
 using Moq;
-using CarreraEntity = IMT_Reservas.Server.Core.Entities.Carrera;
-namespace IMT_Reservas.Tests.Integration;
+using CarreraEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Carrera;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
+using IMT_Reservas.Server.Modules.Auditoria.Infrastructure;
+using IMT_Reservas.Server.Modules.Notificaciones.Application;
+using IMT_Reservas.Server.Modules.Notificaciones.Infrastructure;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+using IMT_Reservas.Server.Shared.Caching;
+using IMT_Reservas.Server.Shared.Email;
+using IMT_Reservas.Server.Shared.Persistence;
+using IMT_Reservas.Server.Shared.Security;
+namespace IMT_Reservas.Tests.Integration.Modules.Usuarios;
 
 [TestFixture]
 internal class UsuarioServiceTests : ServiceTest<UsuarioService>
@@ -751,6 +749,25 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         user.EmailVerificado = true;
         await Db.SaveChangesAsync();
         Db.ChangeTracker.Clear();
+    }
+
+    [Test]
+    public async Task Registrar_WithoutGoogleCodeForSelfSignUp_IsUnauthorized()
+    {
+        var result = await Sut.Registrar(BuildValidUsuario("U001", "u001@ucb.edu.bo"), false, false, default);
+
+        result.Status.Should().Be(Ardalis.Result.ResultStatus.Unauthorized);
+        Db.Usuarios.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task GetVisible_OtherUserWithoutManagement_IsForbidden()
+    {
+        await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
+
+        var result = await Sut.GetVisible("U001", "U002", false);
+
+        result.Status.Should().Be(Ardalis.Result.ResultStatus.Forbidden);
     }
 
     private static UsuarioDto BuildValidUsuario(

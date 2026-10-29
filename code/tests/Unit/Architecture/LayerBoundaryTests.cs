@@ -1,10 +1,10 @@
 using System.Reflection;
 using System.Text.Json;
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Features.Usuario;
-using IMT_Reservas.Server.Core.Entities;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
 
-namespace IMT_Reservas.Tests.Unit;
+namespace IMT_Reservas.Tests.Unit.Architecture;
 
 [TestFixture]
 internal class LayerBoundaryTests
@@ -12,11 +12,11 @@ internal class LayerBoundaryTests
     private static readonly Assembly ServerAssembly = typeof(Usuario).Assembly;
 
     [Test]
-    public void Core_DoesNotReferenceOuterLayers()
+    public void Domain_DoesNotReferenceOuterLayers()
     {
-        var forbidden = new[] { ".Application", ".Infrastructure", ".Presentation" };
+        var forbidden = new[] { ".Application", ".Infrastructure", ".Api" };
         var dependencies = ServerAssembly.GetTypes()
-            .Where(type => type.Namespace?.StartsWith("IMT_Reservas.Server.Core", StringComparison.Ordinal) == true)
+            .Where(type => type.Namespace?.EndsWith(".Domain", StringComparison.Ordinal) == true)
             .SelectMany(GetDeclaredDependencies)
             .Where(type => type.Namespace != null)
             .Where(type => forbidden.Any(segment => type.Namespace!.Contains(segment, StringComparison.Ordinal)))
@@ -31,11 +31,11 @@ internal class LayerBoundaryTests
     public void ApiDtos_DoNotExposeDomainEntities()
     {
         var leakedTypes = ServerAssembly.GetTypes()
-            .Where(type => type.Namespace?.StartsWith("IMT_Reservas.Server.Application.Features", StringComparison.Ordinal) == true)
+            .Where(type => type.Namespace?.EndsWith(".Application", StringComparison.Ordinal) == true)
             .Where(type => type.Name.EndsWith("Dto", StringComparison.Ordinal))
             .SelectMany(type => type.GetProperties(BindingFlags.Instance | BindingFlags.Public))
             .SelectMany(property => Expand(property.PropertyType))
-            .Where(type => type.Namespace?.StartsWith("IMT_Reservas.Server.Core.Entities", StringComparison.Ordinal) == true)
+            .Where(type => type.Namespace?.EndsWith(".Domain", StringComparison.Ordinal) == true)
             .Select(type => type.FullName)
             .Distinct()
             .ToList();
@@ -44,12 +44,12 @@ internal class LayerBoundaryTests
     }
 
     [Test]
-    public void ApplicationAbstractions_HaveMultipleImplementations()
+    public void SharedAbstractions_HaveMultipleImplementations()
     {
         var types = ServerAssembly.GetTypes();
         var abstractions = types
             .Where(type => type.IsInterface)
-            .Where(type => type.Namespace == "IMT_Reservas.Server.Application.Abstraction")
+            .Where(type => type.Namespace?.StartsWith("IMT_Reservas.Server.Shared", StringComparison.Ordinal) == true)
             .ToList();
 
         var singleUseAbstractions = abstractions

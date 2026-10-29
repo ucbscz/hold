@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Presentation.Security;
+namespace IMT_Reservas.Server.Modules.Usuarios.Api;
 
 public static class AuthSchemes
 {

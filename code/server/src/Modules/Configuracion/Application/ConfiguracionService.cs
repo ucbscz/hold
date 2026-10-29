@@ -1,15 +1,17 @@
 using Ardalis.Result;
 using ValidationError = Ardalis.Result.ValidationError;
 using FluentValidation;
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Application.Security;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Application.Features.Configuracion;
+namespace IMT_Reservas.Server.Modules.Configuracion.Application;
 
 public class ConfiguracionService
 {
+    private const int MaxBusquedaResponsables = 100;
+
     private readonly ConfiguracionRepository _repository;
     private readonly IValidator<ConfiguracionDto> _validator;
     private readonly ConfiguracionMapper _mapper;
@@ -80,14 +82,23 @@ public class ConfiguracionService
         return Result<ConfiguracionDto>.Success(result);
     }
 
-    public async Task<IReadOnlyList<ResponsableConfiguracionDto>> BuscarResponsables(
+    public async Task<Result<List<ResponsableConfiguracionDto>>> BuscarResponsables(
         string? buscar, CancellationToken cancellationToken)
     {
+        if (buscar?.Length > MaxBusquedaResponsables)
+            return Result<List<ResponsableConfiguracionDto>>.Invalid(
+                new ValidationError
+                {
+                    Identifier = nameof(buscar),
+                    ErrorMessage = $"La búsqueda no puede superar {MaxBusquedaResponsables} caracteres.",
+                }
+            );
+
         var usuarios = await _repository.BuscarResponsables(buscar, cancellationToken);
         return usuarios.Select(u => new ResponsableConfiguracionDto(u.Carnet, NombreCompleto(u))).ToList();
     }
 
-    private static string NombreCompleto(Core.Entities.Usuario usuario) =>
+    private static string NombreCompleto(Usuario usuario) =>
         string.Join(" ", new[] { usuario.Nombre, usuario.ApellidoPaterno, usuario.ApellidoMaterno }
             .Where(nombre => !string.IsNullOrWhiteSpace(nombre)).Select(nombre => nombre.Trim()));
 }

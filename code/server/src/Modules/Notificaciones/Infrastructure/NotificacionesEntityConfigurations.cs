@@ -1,6 +1,7 @@
-using IMT_Reservas.Server.Core.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using IMT_Reservas.Server.Modules.Notificaciones.Domain;
+using IMT_Reservas.Server.Shared.Persistence;
 
 namespace IMT_Reservas.Server.Modules.Notificaciones.Infrastructure;
 

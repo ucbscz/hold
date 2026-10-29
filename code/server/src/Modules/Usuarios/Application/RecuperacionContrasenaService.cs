@@ -1,9 +1,9 @@
 using Ardalis.Result;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using BCryptLib = BCrypt.Net.BCrypt;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
 
-namespace IMT_Reservas.Server.Application.Features.Usuario;
+namespace IMT_Reservas.Server.Modules.Usuarios.Application;
 
 public sealed class RecuperacionContrasenaService
 {

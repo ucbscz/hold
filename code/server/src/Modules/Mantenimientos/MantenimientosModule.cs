@@ -14,7 +14,7 @@ public static class MantenimientosModule
         services.AddScoped<EmpresaMantenimientoRepository>();
         services.AddScoped<MantenimientoService>();
         services.AddScoped<Service<EmpresaMantenimiento, EmpresaMantenimientoRepository, EmpresaMantenimientoDto>>();
-        services.AddScoped<EstadoMantenimientoJob>();
+        services.AddScoped<EstadoMantenimientoService>();
 
         services.AddMapper<Mantenimiento, MantenimientoDto, MantenimientoMapper>();
         services.AddMapper<EmpresaMantenimiento, EmpresaMantenimientoDto, EmpresaMantenimientoMapper>();

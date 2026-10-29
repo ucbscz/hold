@@ -1,6 +1,8 @@
-using IMT_Reservas.Server.Core.Entities;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Microsoft.EntityFrameworkCore;
+using IMT_Reservas.Server.Modules.Configuracion.Domain;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Shared.Persistence;
 
 namespace IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
 

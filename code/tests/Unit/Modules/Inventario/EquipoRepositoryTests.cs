@@ -1,12 +1,13 @@
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Features.Equipo;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Modules.Inventario.Infrastructure;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Tests.Unit.Repositories;
+namespace IMT_Reservas.Tests.Unit.Modules.Inventario;
 
 [TestFixture]
 public class EquipoRepositoryTests

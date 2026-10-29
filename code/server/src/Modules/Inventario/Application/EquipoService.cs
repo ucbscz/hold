@@ -1,12 +1,12 @@
 using System.Globalization;
 using Ardalis.Result;
 using FluentValidation;
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
-using EquipoEntity = IMT_Reservas.Server.Core.Entities.Equipo;
+using EquipoEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Equipo;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
+using IMT_Reservas.Server.Modules.Inventario.Infrastructure;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Equipo;
+namespace IMT_Reservas.Server.Modules.Inventario.Application;
 
 public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
 {

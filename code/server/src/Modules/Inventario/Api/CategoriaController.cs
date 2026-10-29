@@ -1,17 +1,16 @@
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.Categoria;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
+using IMT_Reservas.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using CategoriaEntity = IMT_Reservas.Server.Core.Entities.Categoria;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
+using CategoriaEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Categoria;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Inventario.Api;
 
 [Authorize]
 [Route("api/categorias")]
-public class CategoriaController : Controller
+public class CategoriaController : ApiController
 {
     private readonly Service<
         CategoriaEntity,

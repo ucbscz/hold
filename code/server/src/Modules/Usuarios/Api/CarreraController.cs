@@ -1,17 +1,16 @@
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.Carrera;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
+using IMT_Reservas.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using CarreraEntity = IMT_Reservas.Server.Core.Entities.Carrera;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
+using CarreraEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Carrera;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Usuarios.Api;
 
 [Authorize]
 [Route("api/carreras")]
-public class CarreraController : Controller
+public class CarreraController : ApiController
 {
     private readonly Service<
         CarreraEntity,

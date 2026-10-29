@@ -1,10 +1,10 @@
-using IMT_Reservas.Server.Application.Features.Gavetero;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 using Microsoft.EntityFrameworkCore;
-using GaveteroEntity = IMT_Reservas.Server.Core.Entities.Gavetero;
+using GaveteroEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Gavetero;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+namespace IMT_Reservas.Server.Modules.Inventario.Infrastructure;
 
 public class GaveteroRepository : Repository<GaveteroEntity, GaveteroDto>
 {

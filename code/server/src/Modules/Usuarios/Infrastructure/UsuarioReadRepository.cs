@@ -1,10 +1,10 @@
 using Ardalis.Result;
-using IMT_Reservas.Server.Application.Features.Usuario;
-using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
-using UsuarioEntity = IMT_Reservas.Server.Core.Entities.Usuario;
+using UsuarioEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Usuario;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+namespace IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
 
 public sealed class UsuarioReadRepository
 {

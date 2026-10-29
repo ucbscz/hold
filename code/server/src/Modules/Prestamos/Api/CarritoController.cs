@@ -1,13 +1,13 @@
-using IMT_Reservas.Server.Application.Features.Carrito;
+using IMT_Reservas.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
+using IMT_Reservas.Server.Modules.Prestamos.Application;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Prestamos.Api;
 
 [Authorize]
 [Route("api/carrito")]
-public class CarritoController : Controller
+public class CarritoController : ApiController
 {
     private readonly CarritoService _service;
 

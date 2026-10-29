@@ -1,10 +1,10 @@
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using IMT_Reservas.Server.Shared.Caching;
+using IMT_Reservas.Server.Shared.Persistence;
 
 namespace IMT_Reservas.Tests.Helpers;
 

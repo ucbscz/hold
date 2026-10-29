@@ -1,7 +1,7 @@
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Core.Entities;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Inventario;
+namespace IMT_Reservas.Server.Modules.Inventario.Application;
 
 public sealed class AmbienteMapper : IMapper<Ambiente, CatalogoInventarioDto>
 {

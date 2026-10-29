@@ -1,7 +1,6 @@
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using StackExchange.Redis;
 
-namespace IMT_Reservas.Server.Infrastructure.Config;
+namespace IMT_Reservas.Server.Shared.Caching;
 
 public static class CacheServiceRegistration
 {

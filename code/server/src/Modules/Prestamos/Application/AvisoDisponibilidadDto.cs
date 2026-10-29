@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Application.Features.AvisoDisponibilidad;
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
 
 public class AvisoDisponibilidadDto
 {

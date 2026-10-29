@@ -1,10 +1,9 @@
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Features.Usuario;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
-using IMT_Reservas.Server.Application.Features.Jwt;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
 
-namespace IMT_Reservas.Tests.Unit;
+namespace IMT_Reservas.Tests.Unit.Modules.Usuarios;
 
 [TestFixture]
 internal class JwtServiceTests

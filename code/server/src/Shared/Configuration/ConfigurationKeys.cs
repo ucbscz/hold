@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Infrastructure.Config;
+namespace IMT_Reservas.Server.Shared.Configuration;
 
 public static class ConfigurationKeys
 {

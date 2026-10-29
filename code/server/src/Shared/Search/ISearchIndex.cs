@@ -1,6 +1,6 @@
 using Ardalis.Result;
 
-namespace IMT_Reservas.Server.Application.Abstraction;
+namespace IMT_Reservas.Server.Shared.Search;
 
 public interface ISearchIndex<TDocument>
     where TDocument : class

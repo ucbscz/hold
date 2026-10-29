@@ -1,6 +1,6 @@
-using IMT_Reservas.Server.Core.Entities;
+using IMT_Reservas.Server.Modules.Configuracion.Domain;
 
-namespace IMT_Reservas.Server.Infrastructure.Config;
+namespace IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
 
 public static class ConfiguracionSeed
 {

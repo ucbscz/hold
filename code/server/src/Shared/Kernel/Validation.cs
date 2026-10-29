@@ -2,7 +2,7 @@ using Ardalis.Result;
 using FluentValidation.Results;
 using ResultValidationError = Ardalis.Result.ValidationError;
 
-namespace IMT_Reservas.Server.Application.Abstraction;
+namespace IMT_Reservas.Server.Shared.Kernel;
 
 public static class Validation
 {

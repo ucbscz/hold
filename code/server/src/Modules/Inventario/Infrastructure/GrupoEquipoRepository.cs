@@ -1,13 +1,12 @@
 using System.Diagnostics.CodeAnalysis;
-using IMT_Reservas.Server.Application.Features.GrupoEquipo;
-using IMT_Reservas.Server.Application.Features.Componente;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 using Microsoft.EntityFrameworkCore;
-using GrupoEquipoEntity = IMT_Reservas.Server.Core.Entities.GrupoEquipo;
+using GrupoEquipoEntity = IMT_Reservas.Server.Modules.Inventario.Domain.GrupoEquipo;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+namespace IMT_Reservas.Server.Modules.Inventario.Infrastructure;
 
 public class GrupoEquipoRepository : Repository<GrupoEquipoEntity, GrupoEquipoDto>
 {

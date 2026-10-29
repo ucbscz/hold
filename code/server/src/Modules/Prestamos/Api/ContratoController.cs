@@ -1,15 +1,14 @@
-using Ardalis.Result;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Application.Features.Contrato;
+using IMT_Reservas.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
+using IMT_Reservas.Server.Modules.Prestamos.Application;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Prestamos.Api;
 
 [Authorize]
 [Route("api/contratos")]
-public class ContratoController : Controller
+public class ContratoController : ApiController
 {
     private readonly ContratoService _contratoService;
 
@@ -26,32 +25,17 @@ public class ContratoController : Controller
         CancellationToken cancellationToken
     )
     {
-        if (archivo == null || archivo.Length == 0)
-            return InvalidUpload("Archivo HTML requerido");
-
-        if (archivo.Length > ContractHtmlProcessor.MaxHtmlLength)
-            return InvalidUpload("El contrato supera el tamaño máximo permitido");
-
-        if (
-            !string.Equals(archivo.ContentType, "text/html", StringComparison.OrdinalIgnoreCase)
-            || !string.Equals(
-                Path.GetExtension(archivo.FileName),
-                ".html",
-                StringComparison.OrdinalIgnoreCase
+        await using var content = archivo?.OpenReadStream() ?? Stream.Null;
+        return ToResponse(
+            await _contratoService.CreateFromFile(
+                prestamoId ?? 0,
+                archivo?.FileName,
+                archivo?.ContentType,
+                archivo?.Length ?? 0,
+                content,
+                cancellationToken
             )
-        )
-            return InvalidUpload("El contrato debe ser un archivo HTML");
-
-        using var reader = new StreamReader(archivo.OpenReadStream());
-        var htmlContent = await reader.ReadToEndAsync(cancellationToken);
-
-        var result = await _contratoService.CreateForPrestamo(
-            prestamoId ?? 0,
-            htmlContent,
-            cancellationToken
         );
-
-        return ToResponse(result);
     }
 
     [HttpGet("{prestamoId:int}")]
@@ -72,11 +56,4 @@ public class ContratoController : Controller
     [HttpDelete("{prestamoId:int}")]
     public async Task<IActionResult> Delete(int prestamoId) =>
         ToDeleteResponse(await _contratoService.Delete(prestamoId));
-
-    private IActionResult InvalidUpload(string message) =>
-        ToResponse(
-            Result<ContratoDto>.Invalid(
-                new ValidationError { Identifier = "archivo", ErrorMessage = message }
-            )
-        );
 }

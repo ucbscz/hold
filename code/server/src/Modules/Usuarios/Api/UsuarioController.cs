@@ -1,18 +1,16 @@
-using IMT_Reservas.Server.Application.Features.Usuario;
-using Ardalis.Result;
-using IMT_Reservas.Server.Core.Entities;
 using Microsoft.AspNetCore.RateLimiting;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using IMT_Reservas.Server.Infrastructure.Config;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
+using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+using IMT_Reservas.Server.Shared.Security;
+using IMT_Reservas.Server.Shared.Web;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Usuarios.Api;
 
 [Authorize]
 [Route("api/usuarios")]
-public class UsuarioController : Controller
+public class UsuarioController : ApiController
 {
     private readonly UsuarioService _service;
 
@@ -54,10 +52,9 @@ public class UsuarioController : Controller
     [HttpGet("{carnet}")]
     public async Task<IActionResult> Get(string carnet, CancellationToken cancellationToken)
     {
-        if (!User.PuedeGestionar() && CurrentCarnet != carnet)
-            return Forbid();
-
-        return ToResponse(await _service.Get(carnet, cancellationToken));
+        return ToResponse(
+            await _service.GetVisible(carnet, CurrentCarnet, User.PuedeGestionar(), cancellationToken)
+        );
     }
 
     [AllowAnonymous]
@@ -68,14 +65,7 @@ public class UsuarioController : Controller
         CancellationToken cancellationToken
     )
     {
-        if (!User.PuedeGestionar() && string.IsNullOrWhiteSpace(dto.CodigoGoogle))
-            return ToResponse(
-                Result<UsuarioDto>.Unauthorized(
-                    "Verifica tu correo institucional con Google para crear tu cuenta"
-                )
-            );
-
-        var result = await _service.Create(
+        var result = await _service.Registrar(
             dto,
             User.PuedeGestionar(),
             User.IsInRole(Permisos.AdministradorLaboratorio),

@@ -1,7 +1,4 @@
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.Usuario;
-
-namespace IMT_Reservas.Server.Infrastructure.Email;
+namespace IMT_Reservas.Server.Shared.Email;
 
 public static class EmailServiceRegistration
 {
@@ -16,7 +13,6 @@ public static class EmailServiceRegistration
         var section = configuration.GetSection(EmailSettings.SectionName);
         var settings = section.Get<EmailSettings>() ?? new EmailSettings();
         services.Configure<EmailSettings>(section);
-        services.AddScoped<EmailDeliveryService>();
 
         if (!settings.Enabled)
             return services.AddSingleton<IEmailSender, DisabledEmailSender>();

@@ -1,12 +1,12 @@
-using Ardalis.Result;
-using IMT_Reservas.Server.Application.Features.Equipo;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 using Microsoft.EntityFrameworkCore;
-using EquipoEntity = IMT_Reservas.Server.Core.Entities.Equipo;
+using EquipoEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Equipo;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Modules.Mantenimientos.Domain;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+namespace IMT_Reservas.Server.Modules.Inventario.Infrastructure;
 
 public class EquipoRepository : Repository<EquipoEntity, EquipoDto>
 {

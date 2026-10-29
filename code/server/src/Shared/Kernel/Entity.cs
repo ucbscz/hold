@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Core.Abstraction;
+namespace IMT_Reservas.Server.Shared.Kernel;
 
 public abstract class Entity
 {

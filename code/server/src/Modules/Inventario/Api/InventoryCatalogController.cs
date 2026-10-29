@@ -1,16 +1,15 @@
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.Inventario;
-using IMT_Reservas.Server.Core.Abstraction;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Security;
+using IMT_Reservas.Server.Shared.Web;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Abstraction;
+namespace IMT_Reservas.Server.Modules.Inventario.Api;
 
 public abstract class InventoryCatalogController<TEntity>(
     Service<TEntity, Repository<TEntity, CatalogoInventarioDto>, CatalogoInventarioDto> service
-) : Controller
+) : ApiController
     where TEntity : Entity
 {
     [HttpGet]

@@ -1,8 +1,8 @@
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Core.Entities;
 using Riok.Mapperly.Abstractions;
+using IMT_Reservas.Server.Modules.Configuracion.Domain;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Configuracion;
+namespace IMT_Reservas.Server.Modules.Configuracion.Application;
 
 [Mapper]
 public partial class ConfiguracionMapper : IMapper<ConfiguracionSistema, ConfiguracionDto>

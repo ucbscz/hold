@@ -1,12 +1,12 @@
 using Ardalis.Result;
-using IMT_Reservas.Server.Application.Abstraction;
 using Microsoft.AspNetCore.Mvc;
-using AppValidationError = IMT_Reservas.Server.Application.Abstraction.ValidationError;
+using AppValidationError = IMT_Reservas.Server.Shared.Kernel.ValidationError;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Abstraction;
+namespace IMT_Reservas.Server.Shared.Web;
 
 [ApiController]
-public abstract class Controller : ControllerBase
+public abstract class ApiController : ControllerBase
 {
     protected string CurrentCarnet => User.Identity?.Name ?? string.Empty;
 

@@ -1,8 +1,8 @@
-using IMT_Reservas.Server.Application.Abstraction;
 using Riok.Mapperly.Abstractions;
-using AccesorioEntity = IMT_Reservas.Server.Core.Entities.Accesorio;
+using AccesorioEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Accesorio;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Accesorio;
+namespace IMT_Reservas.Server.Modules.Inventario.Application;
 
 [Mapper]
 public partial class AccesorioMapper : IMapper<AccesorioEntity, AccesorioDto>

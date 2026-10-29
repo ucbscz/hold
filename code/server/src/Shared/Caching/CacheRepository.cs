@@ -1,9 +1,9 @@
 using System.Text.Json;
 using Ardalis.Result;
 using Microsoft.Extensions.Caching.Distributed;
-using IMT_Reservas.Server.Application.Abstraction;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+namespace IMT_Reservas.Server.Shared.Caching;
 
 public class CacheRepository
 {

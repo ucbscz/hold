@@ -1,8 +1,8 @@
 using System.Text.Json;
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Features.Usuario;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
 
-namespace IMT_Reservas.Tests.Unit;
+namespace IMT_Reservas.Tests.Unit.Modules.Usuarios;
 
 [TestFixture]
 internal sealed class AuthResponseSecurityTests

@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Mail;
-using IMT_Reservas.Server.Application.Abstraction;
 using Microsoft.Extensions.Options;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Infrastructure.Email;
+namespace IMT_Reservas.Server.Shared.Email;
 
 public sealed class SmtpEmailSender : IEmailSender
 {

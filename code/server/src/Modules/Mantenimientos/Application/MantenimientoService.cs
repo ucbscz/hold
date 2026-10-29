@@ -1,19 +1,18 @@
 using System.Globalization;
 using Ardalis.Result;
 using FluentValidation;
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
-using IMT_Reservas.Server.Infrastructure.Jobs;
-using MantenimientoEntity = IMT_Reservas.Server.Core.Entities.Mantenimiento;
+using MantenimientoEntity = IMT_Reservas.Server.Modules.Mantenimientos.Domain.Mantenimiento;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
+using IMT_Reservas.Server.Modules.Mantenimientos.Infrastructure;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Mantenimiento;
+namespace IMT_Reservas.Server.Modules.Mantenimientos.Application;
 
 public class MantenimientoService
     : Service<MantenimientoEntity, MantenimientoRepository, MantenimientoDto>
 {
     private readonly EmpresaMantenimientoRepository _empresaRepository;
-    private readonly EstadoMantenimientoJob _estadoJob;
+    private readonly EstadoMantenimientoService _estadoJob;
 
     public MantenimientoService(
         MantenimientoRepository repository,
@@ -21,7 +20,7 @@ public class MantenimientoService
         MantenimientoMapper mapper,
         IValidator<MantenimientoDto> validator,
         AuditLogService audit,
-        EstadoMantenimientoJob estadoJob
+        EstadoMantenimientoService estadoJob
     )
         : base(repository, validator, mapper, audit)
     {

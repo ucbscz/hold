@@ -1,9 +1,9 @@
 using FluentValidation;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Application.Features.Equipo;
+namespace IMT_Reservas.Server.Modules.Inventario.Application;
 
 public class EquipoValidator : AbstractValidator<EquipoDto>
 {

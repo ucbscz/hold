@@ -1,16 +1,19 @@
 using Ardalis.Result;
 using FluentValidation;
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Application.Features.Configuracion;
-using IMT_Reservas.Server.Application.Security;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
-using ContratoEntity = IMT_Reservas.Server.Core.Entities.Contrato;
+using ContratoEntity = IMT_Reservas.Server.Modules.Prestamos.Domain.Contrato;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
+using IMT_Reservas.Server.Modules.Configuracion.Application;
+using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Application.Features.Contrato;
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
 
 public class ContratoService : Service<ContratoEntity, ContratoRepository, ContratoDto>
 {
+    private const string HtmlContentType = "text/html";
+    private const string HtmlExtension = ".html";
+
     private readonly PrestamoReadRepository _prestamos;
     private readonly ContractHtmlProcessor _contractHtml;
     private readonly AuditLogService _audit;
@@ -35,6 +38,35 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
         _configuracion = configuracion;
         _sensitiveData = sensitiveData;
     }
+
+    public async Task<Result<ContratoDto>> CreateFromFile(
+        int prestamoId,
+        string? fileName,
+        string? contentType,
+        long length,
+        Stream content,
+        CancellationToken cancellationToken = default
+    )
+    {
+        if (length == 0)
+            return InvalidFile("Archivo HTML requerido");
+
+        if (length > ContractHtmlProcessor.MaxHtmlLength)
+            return InvalidFile("El contrato supera el tamaño máximo permitido");
+
+        if (
+            !string.Equals(contentType, HtmlContentType, StringComparison.OrdinalIgnoreCase)
+            || !string.Equals(Path.GetExtension(fileName), HtmlExtension, StringComparison.OrdinalIgnoreCase)
+        )
+            return InvalidFile("El contrato debe ser un archivo HTML");
+
+        using var reader = new StreamReader(content);
+        var htmlContent = await reader.ReadToEndAsync(cancellationToken);
+        return await CreateForPrestamo(prestamoId, htmlContent, cancellationToken);
+    }
+
+    private static Result<ContratoDto> InvalidFile(string message) =>
+        Result<ContratoDto>.Invalid(new Ardalis.Result.ValidationError { Identifier = "archivo", ErrorMessage = message });
 
     public async Task<Result<ContratoDto>> CreateForPrestamo(
         int prestamoId,

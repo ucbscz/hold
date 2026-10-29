@@ -1,13 +1,17 @@
 using System.Diagnostics.CodeAnalysis;
-using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
-using IMT_Reservas.Server.Application.Features.Equipo;
-using AuditLogEntity = IMT_Reservas.Server.Core.Entities.AuditLog;
+using AuditLogEntity = IMT_Reservas.Server.Modules.Auditoria.Domain.AuditLog;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
+using IMT_Reservas.Server.Modules.Configuracion.Domain;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Modules.Mantenimientos.Domain;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+namespace IMT_Reservas.Server.Modules.Auditoria.Infrastructure;
 
 public class AuditLogRepository
 {

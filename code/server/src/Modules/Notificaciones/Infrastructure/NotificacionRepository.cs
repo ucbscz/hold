@@ -1,9 +1,10 @@
-using IMT_Reservas.Server.Application.Features.Notificacion;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
+using IMT_Reservas.Server.Modules.Notificaciones.Application;
+using IMT_Reservas.Server.Modules.Notificaciones.Domain;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+namespace IMT_Reservas.Server.Modules.Notificaciones.Infrastructure;
 
 public class NotificacionRepository
 {

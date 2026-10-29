@@ -1,11 +1,13 @@
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Features.Carrito;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.Extensions.Logging.Abstractions;
 using IMT_Reservas.Tests.Helpers;
-namespace IMT_Reservas.Tests.Integration;
+using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Modules.Prestamos.Application;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
+using IMT_Reservas.Server.Shared.Persistence;
+namespace IMT_Reservas.Tests.Integration.Modules.Prestamos;
 
 [TestFixture]
 internal class CarritoServiceTests : ServiceTest<CarritoService>
@@ -28,7 +30,7 @@ internal class CarritoServiceTests : ServiceTest<CarritoService>
         var repo = new CarritoRepository(db);
         var configRepo = new ConfiguracionRepository(db, Cache);
 
-        return new CarritoService(repo, NullLogger<CarritoService>.Instance, configRepo);
+        return new CarritoService(repo, NullLogger<CarritoService>.Instance, TestBranding.Horario, configRepo);
     }
 
     [SetUp]

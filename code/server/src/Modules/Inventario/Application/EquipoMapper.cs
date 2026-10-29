@@ -1,9 +1,9 @@
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Core.Entities;
 using Riok.Mapperly.Abstractions;
-using EquipoEntity = IMT_Reservas.Server.Core.Entities.Equipo;
+using EquipoEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Equipo;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Equipo;
+namespace IMT_Reservas.Server.Modules.Inventario.Application;
 
 [Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName, EnumMappingIgnoreCase = true)]
 public partial class EquipoMapper : IMapper<EquipoEntity, EquipoDto>

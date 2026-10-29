@@ -1,13 +1,12 @@
 using Ardalis.Result;
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.GrupoEquipo;
-using IMT_Reservas.Server.Presentation.Controllers.Implementations;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using NUnit.Framework;
+using IMT_Reservas.Server.Modules.Inventario.Api;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Tests.Unit.Controllers;
+namespace IMT_Reservas.Tests.Unit.Modules.Inventario;
 
 [TestFixture]
 public class GrupoEquipoControllerTests

@@ -1,13 +1,13 @@
-using IMT_Reservas.Server.Application.Features.Notificacion;
+using IMT_Reservas.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
+using IMT_Reservas.Server.Modules.Notificaciones.Application;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Notificaciones.Api;
 
 [Authorize]
 [Route("api/notificaciones")]
-public class NotificacionController : Controller
+public class NotificacionController : ApiController
 {
     private readonly NotificacionService _service;
 

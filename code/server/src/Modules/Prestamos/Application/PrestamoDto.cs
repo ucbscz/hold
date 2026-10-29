@@ -1,6 +1,6 @@
-using IMT_Reservas.Server.Core.Entities;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
 
-namespace IMT_Reservas.Server.Application.Features.Prestamo;
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
 
 public class PrestamoDto
 {

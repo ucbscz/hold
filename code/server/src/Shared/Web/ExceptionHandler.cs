@@ -1,10 +1,10 @@
 using System.Text.Json;
-using IMT_Reservas.Server.Application.Abstraction;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Presentation.Errors;
+namespace IMT_Reservas.Server.Shared.Web;
 
 public sealed class ExceptionHandler : IExceptionHandler
 {

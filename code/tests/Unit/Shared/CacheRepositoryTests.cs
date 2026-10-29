@@ -1,11 +1,11 @@
 using Ardalis.Result;
 using FluentAssertions;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using IMT_Reservas.Server.Shared.Caching;
 
-namespace IMT_Reservas.Tests.Unit;
+namespace IMT_Reservas.Tests.Unit.Shared;
 
 [TestFixture]
 internal class CacheRepositoryTests

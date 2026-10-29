@@ -1,7 +1,7 @@
 using Hangfire.Dashboard;
-using IMT_Reservas.Server.Core.Entities;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Infrastructure.Jobs;
+namespace IMT_Reservas.Server.Shared.Jobs;
 
 public sealed class HangfireDashboardAccessPolicy : IDashboardAuthorizationFilter
 {

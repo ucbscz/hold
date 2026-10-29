@@ -1,18 +1,17 @@
 using Ardalis.Result;
 using FluentValidation;
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Application.Features.Cache;
-using IMT_Reservas.Server.Application.Features.Jwt;
-using IMT_Reservas.Server.Application.Features.Notificacion;
-using IMT_Reservas.Server.Application.Security;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.Extensions.Options;
 using BCryptLib = BCrypt.Net.BCrypt;
-using UsuarioEntity = IMT_Reservas.Server.Core.Entities.Usuario;
+using UsuarioEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Usuario;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
+using IMT_Reservas.Server.Modules.Notificaciones.Application;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+using IMT_Reservas.Server.Shared.Caching;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Application.Features.Usuario;
+namespace IMT_Reservas.Server.Modules.Usuarios.Application;
 
 public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioDto>
 {
@@ -143,6 +142,21 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
     public override async Task<Result<UsuarioDto>> Create(UsuarioDto dto) =>
         await Create(dto, isAdmin: false);
+
+    public async Task<Result<UsuarioDto>> Registrar(
+        UsuarioDto dto,
+        bool puedeGestionar,
+        bool isLabAdmin,
+        CancellationToken cancellationToken
+    )
+    {
+        if (!puedeGestionar && string.IsNullOrWhiteSpace(dto.CodigoGoogle))
+            return Result<UsuarioDto>.Unauthorized(
+                "Verifica tu correo institucional con Google para crear tu cuenta"
+            );
+
+        return await Create(dto, puedeGestionar, isLabAdmin, cancellationToken);
+    }
 
     public async Task<Result<UsuarioDto>> Create(
         UsuarioDto dto,
@@ -371,6 +385,16 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             ? await GetProfile(carnet, cancellationToken)
             : result;
     }
+
+    public async Task<Result<UsuarioDto>> GetVisible(
+        string carnet,
+        string carnetActual,
+        bool puedeGestionar,
+        CancellationToken cancellationToken = default
+    ) =>
+        puedeGestionar || carnetActual == carnet
+            ? await Get(carnet, cancellationToken)
+            : Result<UsuarioDto>.Forbidden();
 
     public async Task<Result<UsuarioDto>> Get(
         string carnet,

@@ -1,17 +1,17 @@
 using System.Globalization;
 using System.Text.Json;
-using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Application.Features.AvisoDisponibilidad;
-using IMT_Reservas.Server.Application.Features.Notificacion;
-using IMT_Reservas.Server.Application.Features.Prestamo;
-using IMT_Reservas.Server.Application.Features.Usuario;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
-using PrestamoEntity = IMT_Reservas.Server.Core.Entities.Prestamo;
-using UsuarioEntity = IMT_Reservas.Server.Core.Entities.Usuario;
+using PrestamoEntity = IMT_Reservas.Server.Modules.Prestamos.Domain.Prestamo;
+using UsuarioEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Usuario;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
+using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
+using IMT_Reservas.Server.Modules.Notificaciones.Application;
+using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
+using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
 
-namespace IMT_Reservas.Server.Infrastructure.Jobs;
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
 
-public class EstadoPrestamoJob
+public class EstadoPrestamoService
 {
     private readonly NotificacionService _notifications;
     private readonly AuditLogService _audit;
@@ -21,7 +21,7 @@ public class EstadoPrestamoJob
     private readonly AvisoDisponibilidadService _availabilityWatches;
     private readonly ConfiguracionRepository _configuracionRepository;
 
-    public EstadoPrestamoJob(
+    public EstadoPrestamoService(
         NotificacionService notifications,
         AuditLogService audit,
         PrestamoEstadoRepository prestamoRepository,

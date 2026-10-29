@@ -1,8 +1,8 @@
 using System.Globalization;
-using IMT_Reservas.Server.Application.Abstraction;
 using Microsoft.Extensions.Options;
+using IMT_Reservas.Server.Shared.Email;
 
-namespace IMT_Reservas.Server.Application.Features.Usuario;
+namespace IMT_Reservas.Server.Modules.Usuarios.Application;
 
 public sealed class EmailDeliveryService
 {

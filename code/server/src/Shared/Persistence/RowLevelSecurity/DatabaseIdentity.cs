@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 
-namespace IMT_Reservas.Server.Infrastructure.Config.RowLevelSecurity;
+namespace IMT_Reservas.Server.Shared.Persistence.RowLevelSecurity;
 
 public sealed record DatabaseIdentity(string Carnet, string Rol)
 {

@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Application.Features.Cache;
+namespace IMT_Reservas.Server.Shared.Caching;
 
 public static class CacheKeys
 {

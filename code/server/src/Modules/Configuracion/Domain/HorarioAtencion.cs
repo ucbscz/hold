@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Core.Entities;
+namespace IMT_Reservas.Server.Modules.Configuracion.Domain;
 
 public sealed record HorarioAtencion
 {

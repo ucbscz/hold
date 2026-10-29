@@ -1,8 +1,8 @@
-using IMT_Reservas.Server.Application.Abstraction;
 using Riok.Mapperly.Abstractions;
-using GrupoEquipoEntity = IMT_Reservas.Server.Core.Entities.GrupoEquipo;
+using GrupoEquipoEntity = IMT_Reservas.Server.Modules.Inventario.Domain.GrupoEquipo;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.GrupoEquipo;
+namespace IMT_Reservas.Server.Modules.Inventario.Application;
 
 [Mapper]
 public partial class GrupoEquipoMapper : IMapper<GrupoEquipoEntity, GrupoEquipoDto>

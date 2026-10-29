@@ -1,6 +1,6 @@
-using IMT_Reservas.Server.Core.Abstraction;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Core.Entities;
+namespace IMT_Reservas.Server.Modules.Mantenimientos.Domain;
 
 public class DetalleMantenimiento : Entity
 {

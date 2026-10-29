@@ -1,9 +1,8 @@
 using Ardalis.Result;
 using Elastic.Clients.Elasticsearch;
 using Elastic.Clients.Elasticsearch.QueryDsl;
-using IMT_Reservas.Server.Application.Abstraction;
 
-namespace IMT_Reservas.Server.Infrastructure.Config;
+namespace IMT_Reservas.Server.Shared.Search;
 
 public sealed class ElasticSearchIndex<TDocument> : ISearchIndex<TDocument>
     where TDocument : class

@@ -1,9 +1,13 @@
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config.RowLevelSecurity;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Shared.Configuration;
+using IMT_Reservas.Server.Shared.Persistence;
+using IMT_Reservas.Server.Shared.Persistence.RowLevelSecurity;
 
-namespace IMT_Reservas.Server.Infrastructure.Config;
+namespace IMT_Reservas.Server.Bootstrap;
 
 public static class DatabaseServiceRegistration
 {

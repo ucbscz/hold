@@ -1,14 +1,14 @@
-using IMT_Reservas.Server.Application.Features.Equipo;
-using IMT_Reservas.Server.Core.Entities;
+using IMT_Reservas.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Inventario.Api;
 
 [Authorize]
 [Route("api/equipos")]
-public class EquipoController : Controller
+public class EquipoController : ApiController
 {
     private readonly EquipoService _service;
 

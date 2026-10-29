@@ -1,12 +1,15 @@
 using Ardalis.Result;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
-using IMT_Reservas.Server.Application.Abstraction;
 using System.IdentityModel.Tokens.Jwt;
+using IMT_Reservas.Server.Modules.Auditoria.Infrastructure;
+using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.AuditLog;
+namespace IMT_Reservas.Server.Modules.Auditoria.Application;
 
 public class AuditLogService
 {
+    private static readonly string[] EntidadesVisiblesParaGestion = ["Prestamo", "Usuario"];
+
     private readonly AuditLogRepository _repository;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly UsuarioReadRepository _users;
@@ -66,6 +69,7 @@ public class AuditLogService
     );
 
     public async Task<Result<List<AuditLogDto>>> GetFiltered(
+        bool esAdministrador,
         string? entidad,
         string? actor,
         string? accion,
@@ -74,6 +78,9 @@ public class AuditLogService
         string? buscar = null
     )
     {
+        if (!esAdministrador && !EntidadesVisiblesParaGestion.Contains(entidad))
+            return Result<List<AuditLogDto>>.Forbidden();
+
         var logs = await _repository.GetFiltered(entidad, actor, accion, desde, hasta, buscar);
 
         return Result<List<AuditLogDto>>.Success(logs);

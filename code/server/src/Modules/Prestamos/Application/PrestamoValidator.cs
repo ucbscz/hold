@@ -1,24 +1,26 @@
 using FluentValidation;
-using IMT_Reservas.Server.Application.Features.Contrato;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
-using IMT_Reservas.Server.Core.Entities;
+using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Application.Features.Prestamo;
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
 
 public class PrestamoValidator : AbstractValidator<PrestamoDto>
 {
+    private readonly HorarioReserva _horario;
     public PrestamoValidator(
         ApplicationDbContext dbContext,
+        HorarioReserva horario,
         ConfiguracionRepository configRepository
     )
     {
+        _horario = horario;
         RuleFor(p => p.DestinoPrestamo).Must(DestinoUso.EsValido)
             .WithMessage("Selecciona uso interno o externo");
         RuleFor(p => p).Must(p => p.DestinoPrestamo == DestinoUso.Casa
             || !p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue
-            || HorarioReserva.MismoDia(p.FechaPrestamoEsperada.Value, p.FechaDevolucionEsperada.Value))
+            || _horario.MismoDia(p.FechaPrestamoEsperada.Value, p.FechaDevolucionEsperada.Value))
             .WithMessage("El uso interno en clases o laboratorio requiere devolución el mismo día");
         RuleFor(p => p.CarnetUsuario)
             .Cascade(CascadeMode.Stop)
@@ -88,12 +90,12 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
                 if (!p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue) return true;
 
                 var config = await configRepository.GetConfiguracion(cancellationToken);
-                return HorarioReserva.EsValido(
+                return _horario.EsValido(
                     p.FechaPrestamoEsperada.Value,
                     p.FechaDevolucionEsperada.Value,
                     config
                 );
             })
-            .WithMessage(HorarioReserva.Mensaje);
+            .WithMessage(_horario.Mensaje);
     }
 }

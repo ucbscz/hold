@@ -19,10 +19,12 @@ public static class PrestamosModule
         services.AddScoped<AvisoDisponibilidadRepository>();
 
         services.AddSingleton<ContractHtmlProcessor>();
+        services.AddSingleton<HorarioReserva>();
         services.AddScoped<CarritoService>();
         services.AddScoped<PrestamoService>();
         services.AddScoped<ContratoService>();
         services.AddScoped<AvisoDisponibilidadService>();
+        services.AddScoped<EstadoPrestamoService>();
 
         services.AddMapper<Prestamo, PrestamoDto, PrestamoMapper>();
         services.AddMapper<Contrato, ContratoDto, ContratoMapper>();

@@ -1,15 +1,14 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.Jwt;
-using IMT_Reservas.Server.Application.Features.Usuario;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.IdentityModel.Tokens;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
+using IMT_Reservas.Server.Shared.Web;
 
-namespace IMT_Reservas.Server.Presentation.Security;
+namespace IMT_Reservas.Server.Modules.Usuarios.Api;
 
 public static class AuthenticationRegistration
 {

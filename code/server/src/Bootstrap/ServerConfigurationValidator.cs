@@ -1,6 +1,7 @@
-using IMT_Reservas.Server.Application.Features.Jwt;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
+using IMT_Reservas.Server.Shared.Configuration;
 
-namespace IMT_Reservas.Server.Infrastructure.Config;
+namespace IMT_Reservas.Server.Bootstrap;
 
 public static class ServerConfigurationValidator
 {

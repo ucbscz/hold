@@ -1,8 +1,8 @@
-using IMT_Reservas.Server.Application.Abstraction;
 using Riok.Mapperly.Abstractions;
-using GaveteroEntity = IMT_Reservas.Server.Core.Entities.Gavetero;
+using GaveteroEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Gavetero;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Gavetero;
+namespace IMT_Reservas.Server.Modules.Inventario.Application;
 
 [Mapper]
 public partial class GaveteroMapper : IMapper<GaveteroEntity, GaveteroDto>

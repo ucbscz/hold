@@ -1,10 +1,10 @@
 using System.Security.Claims;
 using FluentAssertions;
-using IMT_Reservas.Server.Infrastructure.Config.RowLevelSecurity;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using IMT_Reservas.Server.Shared.Persistence.RowLevelSecurity;
 
-namespace IMT_Reservas.Tests.Unit;
+namespace IMT_Reservas.Tests.Unit.Shared;
 
 [TestFixture]
 public class DatabaseIdentityTests

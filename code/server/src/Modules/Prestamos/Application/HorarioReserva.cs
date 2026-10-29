@@ -1,26 +1,31 @@
-namespace IMT_Reservas.Server.Application.Features.Prestamo;
+using IMT_Reservas.Server.Modules.Configuracion.Domain;
+using IMT_Reservas.Server.Shared.Configuration;
 
-public static class HorarioReserva
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
+
+public sealed class HorarioReserva
 {
-    public const string Mensaje =
-        "Selecciona una fecha y hora dentro del horario de atención autorizado (hora de Bolivia)";
+    private readonly RegionClock _clock;
 
-    private static readonly TimeZoneInfo BoliviaTimeZone = ResolveBoliviaTimeZone();
+    public HorarioReserva(RegionClock clock) => _clock = clock;
 
-    public static bool EsValido(DateTime inicio, DateTime fin, Core.Entities.ConfiguracionSistema config)
+    public string Mensaje =>
+        $"Selecciona una fecha y hora dentro del horario de atención autorizado (hora de {_clock.Name})";
+
+    public bool EsValido(DateTime inicio, DateTime fin, ConfiguracionSistema config)
     {
-        var inicioBolivia = EnBolivia(inicio);
-        var finBolivia = EnBolivia(fin);
-        var mismoDia = inicioBolivia.Date == finBolivia.Date;
+        var inicioLocal = _clock.ToLocal(inicio);
+        var finLocal = _clock.ToLocal(fin);
+        var mismoDia = inicioLocal.Date == finLocal.Date;
 
         return fin > inicio
-            && DentroHorario(inicioBolivia, config, false, mismoDia)
-            && DentroHorario(finBolivia, config, true, mismoDia);
+            && DentroHorario(inicioLocal, config, false, mismoDia)
+            && DentroHorario(finLocal, config, true, mismoDia);
     }
 
     private static bool DentroHorario(
         DateTime fecha,
-        Core.Entities.ConfiguracionSistema config,
+        ConfiguracionSistema config,
         bool devolucion,
         bool mismoDia
     )
@@ -37,40 +42,6 @@ public static class HorarioReserva
             && (devolucion ? minutos <= fin : mismoDia ? minutos <= limiteInicio : minutos < limiteInicio);
     }
 
-    public static bool MismoDia(DateTime inicio, DateTime fin) => EnBolivia(inicio).Date == EnBolivia(fin).Date;
-
-    private static DateTime EnBolivia(DateTime value)
-    {
-        if (value.Kind == DateTimeKind.Unspecified)
-            return value;
-
-        var utc = value.Kind switch
-        {
-            DateTimeKind.Utc => value,
-            DateTimeKind.Local => value.ToUniversalTime(),
-            _ => value,
-        };
-
-        return TimeZoneInfo.ConvertTimeFromUtc(utc, BoliviaTimeZone);
-    }
-
-    private static TimeZoneInfo ResolveBoliviaTimeZone()
-    {
-        foreach (var id in new[] { "America/La_Paz", "SA Western Standard Time" })
-        {
-            try
-            {
-                return TimeZoneInfo.FindSystemTimeZoneById(id);
-            }
-            catch (TimeZoneNotFoundException) { }
-            catch (InvalidTimeZoneException) { }
-        }
-
-        return TimeZoneInfo.CreateCustomTimeZone(
-            "Bolivia",
-            TimeSpan.FromHours(-4),
-            "Bolivia",
-            "Bolivia"
-        );
-    }
+    public bool MismoDia(DateTime inicio, DateTime fin) =>
+        _clock.ToLocal(inicio).Date == _clock.ToLocal(fin).Date;
 }

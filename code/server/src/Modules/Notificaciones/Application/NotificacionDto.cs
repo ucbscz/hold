@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Application.Features.Notificacion;
+namespace IMT_Reservas.Server.Modules.Notificaciones.Application;
 
 public class NotificacionDto
 {

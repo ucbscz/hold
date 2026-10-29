@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Application.Features.Contrato;
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
 
 public sealed record ContractEquipmentData(
     int IdGrupoEquipo,

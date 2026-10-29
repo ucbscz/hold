@@ -1,16 +1,15 @@
-using IMT_Reservas.Server.Application.Features.Prestamo;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+using IMT_Reservas.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using IMT_Reservas.Server.Application.Features.Prestamo.State;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
+using IMT_Reservas.Server.Modules.Prestamos.Application;
+using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Prestamos.Api;
 
 [Authorize]
 [Route("api/prestamos")]
-public class PrestamoController : Controller
+public class PrestamoController : ApiController
 {
     private readonly PrestamoService _service;
 
@@ -91,19 +90,12 @@ public class PrestamoController : Controller
         CancellationToken cancellationToken
     )
     {
-        if (!User.PuedeGestionar())
-        {
-            if (PrestamoState.Parse(request.EstadoPrestamo) != EstadoPrestamo.Cancelado)
-                return Forbid();
-            return ToResponse(await _service.CancelForUser(id, CurrentCarnet, cancellationToken));
-        }
         return ToResponse(
-            await _service.UpdateStatus(
+            await _service.ChangeStatus(
                 id,
-                request.EstadoPrestamo ?? string.Empty,
-                request.Observacion,
                 request,
                 CurrentCarnet,
+                User.PuedeGestionar(),
                 cancellationToken
             )
         );

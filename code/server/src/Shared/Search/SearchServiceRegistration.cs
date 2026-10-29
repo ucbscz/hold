@@ -1,7 +1,6 @@
 using Elastic.Clients.Elasticsearch;
-using IMT_Reservas.Server.Application.Abstraction;
 
-namespace IMT_Reservas.Server.Infrastructure.Config;
+namespace IMT_Reservas.Server.Shared.Search;
 
 public static class SearchServiceRegistration
 {
@@ -10,18 +9,13 @@ public static class SearchServiceRegistration
         IConfiguration configuration
     )
     {
-        var settings =
-            configuration.GetSection(ElasticsearchSettings.SectionName).Get<ElasticsearchSettings>()
-            ?? new ElasticsearchSettings();
-
-        if (string.IsNullOrWhiteSpace(settings.Uri))
+        if (!ElasticsearchSettings.IsConfigured(configuration))
             return services.AddSingleton(typeof(ISearchIndex<>), typeof(NullSearchIndex<>));
 
         var clientSettings = new ElasticsearchClientSettings(
-            new Uri(settings.Uri)
+            new Uri(ElasticsearchSettings.Read(configuration).Uri)
         ).DefaultFieldNameInferrer(name => name);
         services.AddSingleton(new ElasticsearchClient(clientSettings));
-        services.AddSingleton(typeof(ISearchIndex<>), typeof(ElasticSearchIndex<>));
-        return services.AddHostedService<SearchReindexer>();
+        return services.AddSingleton(typeof(ISearchIndex<>), typeof(ElasticSearchIndex<>));
     }
 }

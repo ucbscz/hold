@@ -1,8 +1,8 @@
 using System.Globalization;
-using IMT_Reservas.Server.Application.Abstraction;
 using Microsoft.Extensions.Options;
+using IMT_Reservas.Server.Shared.Configuration;
 
-namespace IMT_Reservas.Server.Application.Features.Equipo;
+namespace IMT_Reservas.Server.Modules.Inventario.Application;
 
 public sealed class EquipmentLabels
 {

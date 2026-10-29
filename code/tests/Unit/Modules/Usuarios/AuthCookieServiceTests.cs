@@ -1,14 +1,13 @@
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Features.Jwt;
-using IMT_Reservas.Server.Application.Features.Usuario;
-using IMT_Reservas.Server.Presentation.Security;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Moq;
+using IMT_Reservas.Server.Modules.Usuarios.Api;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
 
-namespace IMT_Reservas.Tests.Unit;
+namespace IMT_Reservas.Tests.Unit.Modules.Usuarios;
 
 [TestFixture]
 internal sealed class AuthCookieServiceTests

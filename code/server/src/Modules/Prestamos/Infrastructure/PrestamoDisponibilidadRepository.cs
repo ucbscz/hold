@@ -1,11 +1,12 @@
 using System.Data;
-using IMT_Reservas.Server.Application.Features.Prestamo;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Modules.Prestamos.Application;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+namespace IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
 
 public sealed class PrestamoDisponibilidadRepository
 {

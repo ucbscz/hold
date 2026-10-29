@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Presentation.Security;
+namespace IMT_Reservas.Server.Shared.Web;
 
 public static class ApiPaths
 {

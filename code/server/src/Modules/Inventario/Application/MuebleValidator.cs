@@ -1,8 +1,8 @@
 using FluentValidation;
-using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Application.Features.Mueble;
+namespace IMT_Reservas.Server.Modules.Inventario.Application;
 
 public class MuebleValidator : AbstractValidator<MuebleDto>
 {

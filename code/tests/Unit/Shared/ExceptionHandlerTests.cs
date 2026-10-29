@@ -1,15 +1,14 @@
 using System.Text.Json;
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Presentation.Errors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Npgsql;
-using NUnit.Framework;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Web;
 
-namespace IMT_Reservas.Tests.Unit;
+namespace IMT_Reservas.Tests.Unit.Shared;
 
 [TestFixture]
 public class ExceptionHandlerTests

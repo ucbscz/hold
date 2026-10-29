@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using IMT_Reservas.Server.Core.Abstraction;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Core.Entities;
+namespace IMT_Reservas.Server.Modules.Inventario.Domain;
 
 public class GrupoEquipo : Entity
 {

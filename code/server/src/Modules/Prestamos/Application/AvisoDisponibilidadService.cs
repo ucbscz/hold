@@ -1,15 +1,17 @@
 using System.Globalization;
 using System.Text.Json;
 using Ardalis.Result;
-using IMT_Reservas.Server.Application.Features.Notificacion;
-using IMT_Reservas.Server.Application.Features.Prestamo;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+using IMT_Reservas.Server.Modules.Configuracion.Domain;
+using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
+using IMT_Reservas.Server.Modules.Notificaciones.Application;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
 
-namespace IMT_Reservas.Server.Application.Features.AvisoDisponibilidad;
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
 
 public class AvisoDisponibilidadService
 {
+    private readonly HorarioReserva _horario;
     private readonly AvisoDisponibilidadRepository _repository;
     private readonly ConfiguracionRepository _configRepo;
     private readonly PrestamoDisponibilidadRepository _availability;
@@ -18,10 +20,12 @@ public class AvisoDisponibilidadService
     public AvisoDisponibilidadService(
         AvisoDisponibilidadRepository repository,
         ConfiguracionRepository configRepo,
+        HorarioReserva horario,
         PrestamoDisponibilidadRepository availability,
         NotificacionService notifications
     )
     {
+        _horario = horario;
         _repository = repository;
         _configRepo = configRepo;
         _availability = availability;
@@ -37,8 +41,8 @@ public class AvisoDisponibilidadService
             return Result<object>.Error("La fecha y hora del aviso debe ser futura");
 
         var config = await _configRepo.GetConfiguracion();
-        if (!HorarioReserva.EsValido(dto.Fecha.Value, MinimumEnd(dto.Fecha.Value, config), config))
-            return Result<object>.Error(HorarioReserva.Mensaje);
+        if (!_horario.EsValido(dto.Fecha.Value, MinimumEnd(dto.Fecha.Value, config), config))
+            return Result<object>.Error(_horario.Mensaje);
 
         await _repository.Add(carnet, dto);
 
@@ -51,13 +55,13 @@ public class AvisoDisponibilidadService
     )
     {
         var pending = await _repository.GetPending();
-        var available = new List<Core.Entities.AvisoDisponibilidad>();
+        var available = new List<AvisoDisponibilidad>();
         var checkedSlots = new Dictionary<(int Grupo, DateTime Fecha), bool>();
 
         foreach (var watch in pending)
         {
             var end = MinimumEnd(watch.Fecha, config);
-            if (!HorarioReserva.EsValido(watch.Fecha, end, config))
+            if (!_horario.EsValido(watch.Fecha, end, config))
                 continue;
 
             var slot = (watch.IdGrupoEquipo, watch.Fecha);
@@ -86,7 +90,7 @@ public class AvisoDisponibilidadService
     private static DateTime MinimumEnd(DateTime start, ConfiguracionSistema config) =>
         start.AddMinutes(config.TiempoMinimoReservaMinutos);
 
-    private static NotificacionDto BuildNotification(Core.Entities.AvisoDisponibilidad watch) =>
+    private static NotificacionDto BuildNotification(AvisoDisponibilidad watch) =>
         new()
         {
             CarnetUsuario = watch.CarnetUsuario,

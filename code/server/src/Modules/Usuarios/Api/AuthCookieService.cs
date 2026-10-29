@@ -1,8 +1,8 @@
-using IMT_Reservas.Server.Application.Features.Jwt;
-using IMT_Reservas.Server.Application.Features.Usuario;
 using Microsoft.Extensions.Options;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
+using IMT_Reservas.Server.Shared.Web;
 
-namespace IMT_Reservas.Server.Presentation.Security;
+namespace IMT_Reservas.Server.Modules.Usuarios.Api;
 
 public sealed class AuthCookieService
 {

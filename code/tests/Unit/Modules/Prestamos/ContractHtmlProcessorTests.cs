@@ -1,7 +1,7 @@
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Features.Contrato;
+using IMT_Reservas.Server.Modules.Prestamos.Application;
 
-namespace IMT_Reservas.Tests.Unit;
+namespace IMT_Reservas.Tests.Unit.Modules.Prestamos;
 
 [TestFixture]
 internal class ContractHtmlProcessorTests

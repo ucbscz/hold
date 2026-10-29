@@ -1,6 +1,6 @@
 using Npgsql;
 
-namespace IMT_Reservas.Server.Infrastructure.Config.RowLevelSecurity;
+namespace IMT_Reservas.Server.Shared.Persistence.RowLevelSecurity;
 
 public static class RowLevelSecurityGuard
 {

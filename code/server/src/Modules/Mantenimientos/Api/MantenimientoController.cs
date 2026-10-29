@@ -1,14 +1,14 @@
-using IMT_Reservas.Server.Application.Features.Mantenimiento;
-using IMT_Reservas.Server.Core.Entities;
+using IMT_Reservas.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
+using IMT_Reservas.Server.Modules.Mantenimientos.Application;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Mantenimientos.Api;
 
 [Authorize(Roles = Permisos.Administrador)]
 [Route("api/mantenimientos")]
-public class MantenimientoController : Controller
+public class MantenimientoController : ApiController
 {
     private readonly MantenimientoService _service;
 

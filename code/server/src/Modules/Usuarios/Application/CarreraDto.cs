@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Application.Features.Carrera;
+namespace IMT_Reservas.Server.Modules.Usuarios.Application;
 
 public class CarreraDto
 {

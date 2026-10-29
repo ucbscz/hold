@@ -1,11 +1,11 @@
-using IMT_Reservas.Server.Application.Features.EmpresaMantenimiento;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 using Microsoft.EntityFrameworkCore;
-using EmpresaMantenimientoEntity = IMT_Reservas.Server.Core.Entities.EmpresaMantenimiento;
+using EmpresaMantenimientoEntity = IMT_Reservas.Server.Modules.Mantenimientos.Domain.EmpresaMantenimiento;
+using IMT_Reservas.Server.Modules.Mantenimientos.Application;
+using IMT_Reservas.Server.Modules.Mantenimientos.Domain;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+namespace IMT_Reservas.Server.Modules.Mantenimientos.Infrastructure;
 
 public class EmpresaMantenimientoRepository
     : Repository<EmpresaMantenimientoEntity, EmpresaMantenimientoDto>

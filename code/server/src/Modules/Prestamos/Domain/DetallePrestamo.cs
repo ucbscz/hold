@@ -1,6 +1,7 @@
-using IMT_Reservas.Server.Core.Abstraction;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Core.Entities;
+namespace IMT_Reservas.Server.Modules.Prestamos.Domain;
 
 public class DetallePrestamo : Entity
 {

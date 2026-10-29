@@ -1,13 +1,16 @@
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using IMT_Reservas.Tests.Helpers;
 using Microsoft.AspNetCore.Http;
 using System.Security.Claims;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
+using IMT_Reservas.Server.Modules.Auditoria.Domain;
+using IMT_Reservas.Server.Modules.Auditoria.Infrastructure;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Tests.Integration;
+namespace IMT_Reservas.Tests.Integration.Modules.Auditoria;
 
 [TestFixture]
 internal class AuditLogRepositoryTests : ServiceTest<AuditLogRepository>

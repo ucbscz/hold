@@ -1,15 +1,14 @@
-using Ardalis.Result;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Application.Features.AuditLog;
+using IMT_Reservas.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Auditoria.Api;
 
 [Authorize(Roles = Permisos.Gestion)]
 [Route("api/auditoria")]
-public class AuditLogController : Controller
+public class AuditLogController : ApiController
 {
     private readonly AuditLogService _service;
 
@@ -25,8 +24,16 @@ public class AuditLogController : Controller
         [FromQuery] string? buscar
     )
     {
-        if (!User.IsInRole(Permisos.Administrador) && entidad is not ("Prestamo" or "Usuario"))
-            return Forbid();
-        return ToResponse(await _service.GetFiltered(entidad, actor, accion, desde, hasta, buscar));
+        return ToResponse(
+            await _service.GetFiltered(
+                User.IsInRole(Permisos.Administrador),
+                entidad,
+                actor,
+                accion,
+                desde,
+                hasta,
+                buscar
+            )
+        );
     }
 }

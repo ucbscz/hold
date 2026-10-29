@@ -1,4 +1,5 @@
-namespace IMT_Reservas.Server.Presentation.Security;
+using IMT_Reservas.Server.Shared.Web;
+namespace IMT_Reservas.Server.Shared.Security;
 
 public static class SecurityHeaders
 {

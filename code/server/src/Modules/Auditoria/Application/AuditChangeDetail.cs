@@ -3,7 +3,7 @@ using System.Globalization;
 using System.Reflection;
 using System.Text.Json;
 
-namespace IMT_Reservas.Server.Application.Features.AuditLog;
+namespace IMT_Reservas.Server.Modules.Auditoria.Application;
 
 public static class AuditChangeDetail
 {

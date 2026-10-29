@@ -1,13 +1,14 @@
 using Ardalis.Result;
-using IMT_Reservas.Server.Application.Features.Prestamo;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
-using IMT_Reservas.Server.Application.Abstraction;
+using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
+using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Carrito;
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
 
 public class CarritoService
 {
     private const int MaxGroupsPerRequest = 100;
+    private readonly HorarioReserva _horario;
     private readonly CarritoRepository _repository;
     private readonly ILogger<CarritoService> _logger;
     private readonly ConfiguracionRepository _configuracionRepository;
@@ -15,9 +16,11 @@ public class CarritoService
     public CarritoService(
         CarritoRepository repository,
         ILogger<CarritoService> logger,
+        HorarioReserva horario,
         ConfiguracionRepository configuracionRepository
     )
     {
+        _horario = horario;
         _repository = repository;
         _logger = logger;
         _configuracionRepository = configuracionRepository;
@@ -64,22 +67,15 @@ public class CarritoService
                 $"La duracion minima de un prestamo es de {config.TiempoMinimoReservaMinutos} minutos"
             );
 
-        if (!HorarioReserva.EsValido(fechaInicio, fechaFin, config))
+        if (!_horario.EsValido(fechaInicio, fechaFin, config))
             return Result<List<CarritoDto>>.Error(
-                HorarioReserva.Mensaje
+                _horario.Mensaje
             );
 
         var limits = await _repository.GetLoanLimitsByGroups(groupIds, cancellationToken);
-        var duration = fechaFin - fechaInicio;
-        var exceeded = limits.Values
-            .Where(limit => duration > TimeSpan.FromDays(limit.MaximoDias))
-            .OrderBy(limit => limit.MaximoDias)
-            .FirstOrDefault();
-
-        if (exceeded != default)
-            return Result<List<CarritoDto>>.Error(
-                $"El grupo '{exceeded.Nombre}' permite préstamos de hasta {exceeded.MaximoDias} día(s)"
-            );
+        var durationViolation = LimiteDuracionPrestamo.Validar(limits.Values, fechaFin - fechaInicio);
+        if (durationViolation != null)
+            return Result<List<CarritoDto>>.Error(durationViolation);
 
         var cantidades = await _repository.GetCantidadesByGrupos(groupIds, cancellationToken);
         var ocupadosEnRango = await _repository.GetEquiposOcupadosEnRango(

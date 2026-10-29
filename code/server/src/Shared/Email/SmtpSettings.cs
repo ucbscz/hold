@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Infrastructure.Email;
+namespace IMT_Reservas.Server.Shared.Email;
 
 public sealed class SmtpSettings
 {

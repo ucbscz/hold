@@ -1,6 +1,6 @@
-using IMT_Reservas.Server.Application.Features.Usuario;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Usuarios.Api;
 
 public sealed class AuthSessionResponseDto
 {

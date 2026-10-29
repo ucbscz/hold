@@ -1,10 +1,10 @@
 using FluentValidation;
-using IMT_Reservas.Server.Application.Security;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Shared.Persistence;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Application.Features.Usuario;
+namespace IMT_Reservas.Server.Modules.Usuarios.Application;
 
 public class UsuarioValidator : AbstractValidator<UsuarioDto>
 {

@@ -1,10 +1,10 @@
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.DataProtection;
-using IMT_Reservas.Server.Application.Abstraction;
 using Microsoft.Extensions.Options;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Security;
+namespace IMT_Reservas.Server.Shared.Security;
 
 public sealed class SensitiveDataProtector
 {

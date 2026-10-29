@@ -1,23 +1,25 @@
+using Ardalis.Result;
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Features.Configuracion;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Presentation.Controllers.Implementations;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.DataProtection;
-using IMT_Reservas.Server.Application.Security;
 using System.Text.Json;
 using IMT_Reservas.Tests.Helpers;
+using IMT_Reservas.Server.Modules.Configuracion.Api;
+using IMT_Reservas.Server.Modules.Configuracion.Application;
+using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Shared.Caching;
+using IMT_Reservas.Server.Shared.Persistence;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Tests.Integration;
+namespace IMT_Reservas.Tests.Integration.Modules.Configuracion;
 
 [TestFixture]
 internal class ConfiguracionServiceTests
@@ -127,11 +129,19 @@ internal class ConfiguracionServiceTests
         for (var i = 0; i < 40; i++)
             _db.Usuarios.Add(new Usuario { Carnet = $"user{i}", Nombre = "Ana", ApellidoPaterno = "Perez" });
         await _db.SaveChangesAsync();
-        var users = await _service.BuscarResponsables("PEREZ ana", CancellationToken.None);
+        var users = (await _service.BuscarResponsables("PEREZ ana", CancellationToken.None)).Value;
         users.Should().HaveCount(30);
         users.Should().OnlyContain(u => u.Nombre == "Ana Perez");
-        (await _service.BuscarResponsables("Bloqueado", CancellationToken.None)).Should().BeEmpty();
-        (await _service.BuscarResponsables("Eliminado", CancellationToken.None)).Should().BeEmpty();
+        (await _service.BuscarResponsables("Bloqueado", CancellationToken.None)).Value.Should().BeEmpty();
+        (await _service.BuscarResponsables("Eliminado", CancellationToken.None)).Value.Should().BeEmpty();
+    }
+
+    [Test]
+    public async Task Search_RejectsTooLongQuery()
+    {
+        var result = await _service.BuscarResponsables(new string('a', 101), CancellationToken.None);
+
+        result.Status.Should().Be(ResultStatus.Invalid);
     }
 
     [Test]

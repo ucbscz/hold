@@ -1,13 +1,11 @@
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Features.EmpresaMantenimiento;
-using IMT_Reservas.Server.Application.Features.Mantenimiento;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.EntityFrameworkCore;
-using NUnit.Framework;
+using IMT_Reservas.Server.Modules.Mantenimientos.Application;
+using IMT_Reservas.Server.Modules.Mantenimientos.Domain;
+using IMT_Reservas.Server.Modules.Mantenimientos.Infrastructure;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Tests.Unit.Repositories;
+namespace IMT_Reservas.Tests.Unit.Modules.Mantenimientos;
 
 [TestFixture]
 public class EmpresaMantenimientoRepositoryTests

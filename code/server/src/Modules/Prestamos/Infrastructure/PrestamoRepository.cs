@@ -1,17 +1,16 @@
 using System.Data;
 using Ardalis.Result;
-using IMT_Reservas.Server.Application.Features.Contrato;
-using IMT_Reservas.Server.Application.Features.Prestamo;
-using IMT_Reservas.Server.Application.Security;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 using Npgsql;
-using PrestamoEntity = IMT_Reservas.Server.Core.Entities.Prestamo;
+using PrestamoEntity = IMT_Reservas.Server.Modules.Prestamos.Domain.Prestamo;
+using IMT_Reservas.Server.Modules.Prestamos.Application;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Persistence;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+namespace IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
 
 public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
 {
@@ -190,15 +189,10 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
         if (groups.Count != requestedIds.Length)
             return "Uno o más grupos de equipos no existen o no están disponibles";
 
-        var duration = endDate - startDate;
-        var exceeded = groups
-            .Where(group => duration > TimeSpan.FromDays(group.TiempoMaximoPrestamoDias))
-            .OrderBy(group => group.TiempoMaximoPrestamoDias)
-            .FirstOrDefault();
-
-        return exceeded == null
-            ? null
-            : $"El grupo '{exceeded.Nombre}' permite préstamos de hasta {exceeded.TiempoMaximoPrestamoDias} día(s)";
+        return LimiteDuracionPrestamo.Validar(
+            groups.Select(group => (group.Nombre, group.TiempoMaximoPrestamoDias)),
+            endDate - startDate
+        );
     }
 
     private async Task SaveContractAsSystem(

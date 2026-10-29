@@ -3,11 +3,10 @@ using System.Globalization;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
-using IMT_Reservas.Server.Application.Features.Usuario;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 
-namespace IMT_Reservas.Server.Application.Features.Jwt;
+namespace IMT_Reservas.Server.Modules.Usuarios.Application;
 
 public class JwtService
 {

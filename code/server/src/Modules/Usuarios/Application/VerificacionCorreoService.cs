@@ -1,10 +1,9 @@
 using Ardalis.Result;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.Extensions.Options;
-using AuthenticationSettings = IMT_Reservas.Server.Application.Abstraction.AuthenticationSettings;
-using UsuarioEntity = IMT_Reservas.Server.Core.Entities.Usuario;
+using UsuarioEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Usuario;
+using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
 
-namespace IMT_Reservas.Server.Application.Features.Usuario;
+namespace IMT_Reservas.Server.Modules.Usuarios.Application;
 
 public sealed class VerificacionCorreoService
 {

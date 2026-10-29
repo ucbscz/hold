@@ -1,8 +1,11 @@
 using Hangfire;
 using Hangfire.PostgreSql;
-using IMT_Reservas.Server.Infrastructure.Config;
+using IMT_Reservas.Server.Modules.Mantenimientos.Application;
+using IMT_Reservas.Server.Modules.Prestamos.Application;
+using IMT_Reservas.Server.Shared.Configuration;
+using IMT_Reservas.Server.Shared.Jobs;
 
-namespace IMT_Reservas.Server.Infrastructure.Jobs;
+namespace IMT_Reservas.Server.Bootstrap;
 
 public static class BackgroundJobsRegistration
 {
@@ -15,7 +18,6 @@ public static class BackgroundJobsRegistration
         IHostEnvironment environment
     )
     {
-        services.AddScoped<EstadoMantenimientoJob>();
         if (!IsEnabled(configuration, environment))
             return services;
 
@@ -35,12 +37,12 @@ public static class BackgroundJobsRegistration
             GetSettings(app.Configuration).DashboardPath,
             new DashboardOptions { Authorization = [new HangfireDashboardAccessPolicy()] }
         );
-        RecurringJob.AddOrUpdate<EstadoPrestamoJob>(
+        RecurringJob.AddOrUpdate<EstadoPrestamoService>(
             LoanStatusJobId,
             job => job.Execute(CancellationToken.None),
             Cron.Minutely()
         );
-        RecurringJob.AddOrUpdate<EstadoMantenimientoJob>(
+        RecurringJob.AddOrUpdate<EstadoMantenimientoService>(
             MaintenanceStatusJobId,
             job => job.Execute(CancellationToken.None),
             Cron.Minutely()

@@ -1,10 +1,10 @@
 using System.Globalization;
 using Ardalis.Result;
 using System.Text.Json;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
-using IMT_Reservas.Server.Application.Abstraction;
+using IMT_Reservas.Server.Modules.Notificaciones.Infrastructure;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Notificacion;
+namespace IMT_Reservas.Server.Modules.Notificaciones.Application;
 
 public class NotificacionService
 {

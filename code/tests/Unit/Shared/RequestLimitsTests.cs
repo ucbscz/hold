@@ -1,11 +1,11 @@
 using System.Net;
 using System.Security.Claims;
 using FluentAssertions;
-using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.RateLimiting;
+using IMT_Reservas.Server.Shared.Web;
 
-namespace IMT_Reservas.Tests.Unit;
+namespace IMT_Reservas.Tests.Unit.Shared;
 
 [TestFixture]
 public class RequestLimitsTests

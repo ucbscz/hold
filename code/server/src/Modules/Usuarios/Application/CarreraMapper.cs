@@ -1,8 +1,8 @@
-using IMT_Reservas.Server.Application.Abstraction;
 using Riok.Mapperly.Abstractions;
-using CarreraEntity = IMT_Reservas.Server.Core.Entities.Carrera;
+using CarreraEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Carrera;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Carrera;
+namespace IMT_Reservas.Server.Modules.Usuarios.Application;
 
 [Mapper]
 public partial class CarreraMapper : IMapper<CarreraEntity, CarreraDto>

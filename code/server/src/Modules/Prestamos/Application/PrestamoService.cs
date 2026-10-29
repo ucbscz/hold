@@ -2,20 +2,21 @@ using System.Text.Json;
 using System.Globalization;
 using Ardalis.Result;
 using FluentValidation;
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Application.Features.AvisoDisponibilidad;
-using IMT_Reservas.Server.Application.Features.Configuracion;
-using IMT_Reservas.Server.Application.Features.Contrato;
-using IMT_Reservas.Server.Application.Features.Notificacion;
-using IMT_Reservas.Server.Application.Features.Prestamo.State;
-using IMT_Reservas.Server.Application.Features.Usuario;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
-using IMT_Reservas.Server.Application.Features.Equipo;
-using PrestamoEntity = IMT_Reservas.Server.Core.Entities.Prestamo;
+using PrestamoEntity = IMT_Reservas.Server.Modules.Prestamos.Domain.Prestamo;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
+using IMT_Reservas.Server.Modules.Configuracion.Application;
+using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Modules.Notificaciones.Application;
+using IMT_Reservas.Server.Modules.Prestamos.Application.State;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
+using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Prestamo;
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
 
 public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, PrestamoDto>
 {
@@ -82,8 +83,8 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
 
         entity.FechaSolicitud = dto.FechaSolicitud ?? DateTime.UtcNow;
         entity.FechaPrestamo = dto.FechaPrestamo ?? dto.FechaPrestamoEsperada;
-        entity.FechaPrestamoEsperada = dto.FechaPrestamoEsperada ?? DateTime.UtcNow;
-        entity.FechaDevolucionEsperada = dto.FechaDevolucionEsperada ?? DateTime.UtcNow.AddMinutes(30);
+        entity.FechaPrestamoEsperada = dto.FechaPrestamoEsperada!.Value;
+        entity.FechaDevolucionEsperada = dto.FechaDevolucionEsperada!.Value;
         entity.EstadoPrestamo = EstadoPrestamo.Pendiente;
 
         var contract = dto.Contrato;
@@ -177,6 +178,29 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         dto.EntregadoPor = null;
         dto.MotivoRechazo = null;
         return Create(dto, cancellationToken);
+    }
+
+    public async Task<Result<PrestamoDto>> ChangeStatus(
+        int id,
+        PrestamoDto request,
+        string carnet,
+        bool puedeGestionar,
+        CancellationToken cancellationToken
+    )
+    {
+        if (puedeGestionar)
+            return await UpdateStatus(
+                id,
+                request.EstadoPrestamo ?? string.Empty,
+                request.Observacion,
+                request,
+                carnet,
+                cancellationToken
+            );
+
+        return PrestamoState.Parse(request.EstadoPrestamo) == EstadoPrestamo.Cancelado
+            ? await CancelForUser(id, carnet, cancellationToken)
+            : Result<PrestamoDto>.Forbidden();
     }
 
     public async Task<Result<PrestamoDto>> CancelForUser(int id, string carnet, CancellationToken cancellationToken)

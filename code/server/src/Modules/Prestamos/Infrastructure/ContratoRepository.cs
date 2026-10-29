@@ -1,12 +1,12 @@
 using Ardalis.Result;
-using IMT_Reservas.Server.Application.Features.Contrato;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 using Microsoft.EntityFrameworkCore;
-using ContratoEntity = IMT_Reservas.Server.Core.Entities.Contrato;
-using PrestamoEntity = IMT_Reservas.Server.Core.Entities.Prestamo;
+using ContratoEntity = IMT_Reservas.Server.Modules.Prestamos.Domain.Contrato;
+using PrestamoEntity = IMT_Reservas.Server.Modules.Prestamos.Domain.Prestamo;
+using IMT_Reservas.Server.Modules.Prestamos.Application;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Persistence;
 
-namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+namespace IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
 
 public class ContratoRepository : Repository<ContratoEntity, ContratoDto>
 {

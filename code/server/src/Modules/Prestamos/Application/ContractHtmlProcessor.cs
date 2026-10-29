@@ -4,7 +4,7 @@ using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using Ganss.Xss;
 
-namespace IMT_Reservas.Server.Application.Features.Contrato;
+namespace IMT_Reservas.Server.Modules.Prestamos.Application;
 
 public sealed partial class ContractHtmlProcessor
 {

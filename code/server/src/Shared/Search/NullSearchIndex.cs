@@ -1,7 +1,6 @@
 using Ardalis.Result;
-using IMT_Reservas.Server.Application.Abstraction;
 
-namespace IMT_Reservas.Server.Infrastructure.Config;
+namespace IMT_Reservas.Server.Shared.Search;
 
 public sealed class NullSearchIndex<TDocument> : ISearchIndex<TDocument>
     where TDocument : class

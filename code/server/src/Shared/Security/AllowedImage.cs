@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace IMT_Reservas.Server.Application.Security;
+namespace IMT_Reservas.Server.Shared.Security;
 
 public static partial class AllowedImage
 {

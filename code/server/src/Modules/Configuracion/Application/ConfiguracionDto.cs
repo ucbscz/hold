@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Application.Features.Configuracion;
+namespace IMT_Reservas.Server.Modules.Configuracion.Application;
 
 public class ConfiguracionDto
 {

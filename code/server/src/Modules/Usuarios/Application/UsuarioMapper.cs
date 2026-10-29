@@ -1,9 +1,9 @@
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Core.Entities;
 using Riok.Mapperly.Abstractions;
-using UsuarioEntity = IMT_Reservas.Server.Core.Entities.Usuario;
+using UsuarioEntity = IMT_Reservas.Server.Modules.Usuarios.Domain.Usuario;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Shared.Kernel;
 
-namespace IMT_Reservas.Server.Application.Features.Usuario;
+namespace IMT_Reservas.Server.Modules.Usuarios.Application;
 
 [Mapper(EnumMappingStrategy = EnumMappingStrategy.ByName, EnumMappingIgnoreCase = true)]
 public partial class UsuarioMapper : IMapper<UsuarioEntity, UsuarioDto>

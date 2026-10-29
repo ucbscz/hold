@@ -1,7 +1,4 @@
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.Equipo;
-
-namespace IMT_Reservas.Server.Infrastructure.Config;
+namespace IMT_Reservas.Server.Shared.Configuration;
 
 public static class BrandingRegistration
 {
@@ -16,8 +13,7 @@ public static class BrandingRegistration
         Require(settings.InternalCodeLabel, nameof(BrandingSettings.InternalCodeLabel));
         Require(settings.OrganizationCodeLabel, nameof(BrandingSettings.OrganizationCodeLabel));
 
-        services.Configure<BrandingSettings>(section);
-        return services.AddSingleton<EquipmentLabels>();
+        return services.Configure<BrandingSettings>(section);
     }
 
     private static void Require(string value, string key)

@@ -1,17 +1,17 @@
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.Accesorio;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+using IMT_Reservas.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
-using AccesorioEntity = IMT_Reservas.Server.Core.Entities.Accesorio;
+using AccesorioEntity = IMT_Reservas.Server.Modules.Inventario.Domain.Accesorio;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Modules.Inventario.Infrastructure;
+using IMT_Reservas.Server.Shared.Kernel;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Inventario.Api;
 
 [Authorize]
 [Route("api/accesorios")]
-public class AccesorioController : Controller
+public class AccesorioController : ApiController
 {
     private readonly Service<AccesorioEntity, AccesorioRepository, AccesorioDto> _service;
 

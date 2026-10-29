@@ -1,14 +1,14 @@
-using IMT_Reservas.Server.Application.Features.Gavetero;
-using IMT_Reservas.Server.Core.Entities;
+using IMT_Reservas.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Shared.Security;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Inventario.Api;
 
 [Authorize]
 [Route("api/gaveteros")]
-public class GaveteroController : Controller
+public class GaveteroController : ApiController
 {
     private readonly GaveteroService _service;
 

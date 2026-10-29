@@ -1,7 +1,6 @@
-using IMT_Reservas.Server.Application.Abstraction;
 using Microsoft.Extensions.Options;
 
-namespace IMT_Reservas.Server.Application.Features.Usuario;
+namespace IMT_Reservas.Server.Modules.Usuarios.Application;
 
 public sealed class InstitutionalEmailPolicy
 {

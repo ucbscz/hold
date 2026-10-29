@@ -1,22 +1,26 @@
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Application.Features.AvisoDisponibilidad;
-using IMT_Reservas.Server.Application.Features.Notificacion;
-using IMT_Reservas.Server.Application.Features.Usuario;
 using Microsoft.AspNetCore.Http;
-using IMT_Reservas.Server.Application.Features.Prestamo;
-using IMT_Reservas.Server.Application.Features.Contrato;
-using IMT_Reservas.Server.Application.Features.Configuracion;
-using IMT_Reservas.Server.Application.Security;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using IMT_Reservas.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.Extensions.Logging.Abstractions;
-namespace IMT_Reservas.Tests.Integration;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
+using IMT_Reservas.Server.Modules.Auditoria.Infrastructure;
+using IMT_Reservas.Server.Modules.Configuracion.Application;
+using IMT_Reservas.Server.Modules.Configuracion.Infrastructure;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Modules.Notificaciones.Application;
+using IMT_Reservas.Server.Modules.Notificaciones.Infrastructure;
+using IMT_Reservas.Server.Modules.Prestamos.Application;
+using IMT_Reservas.Server.Modules.Prestamos.Domain;
+using IMT_Reservas.Server.Modules.Prestamos.Infrastructure;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
+using IMT_Reservas.Server.Modules.Usuarios.Domain;
+using IMT_Reservas.Server.Modules.Usuarios.Infrastructure;
+using IMT_Reservas.Server.Shared.Persistence;
+using IMT_Reservas.Server.Shared.Security;
+namespace IMT_Reservas.Tests.Integration.Modules.Prestamos;
 
 [TestFixture]
 internal class PrestamoServiceTests : ServiceTest<PrestamoService>
@@ -45,7 +49,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
             availability,
             _sensitiveData
         );
-        var validator = new PrestamoValidator(db, configRepo);
+        var validator = new PrestamoValidator(db, TestBranding.Horario, configRepo);
 
         var audit = new AuditLogService(
             new AuditLogRepository(db, TestBranding.Labels),
@@ -58,6 +62,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var availabilityRepository = new AvisoDisponibilidadService(
             new AvisoDisponibilidadRepository(db),
             configRepo,
+            TestBranding.Horario,
             availability,
             notifications
         );
@@ -1072,6 +1077,21 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         dto.DestinoPrestamo = "Universidad";
         var result = await Sut.Create(dto);
         result.IsSuccess.Should().BeTrue();
+    }
+
+    [Test]
+    public async Task ChangeStatus_WithoutManagement_OnlyAllowsCancellation()
+    {
+        var created = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.UtcNow.AddDays(4), DateTime.UtcNow.AddDays(5)));
+        var result = await Sut.ChangeStatus(
+            created.Value.Id!.Value,
+            new PrestamoDto { EstadoPrestamo = "aprobado" },
+            Carnet,
+            false,
+            default
+        );
+        result.Status.Should().Be(Ardalis.Result.ResultStatus.Forbidden);
+        Db.Prestamos.Single().EstadoPrestamo.Should().Be(EstadoPrestamo.Pendiente);
     }
 
     [Test]

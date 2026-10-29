@@ -1,18 +1,18 @@
 using System.Globalization;
-using IMT_Reservas.Server.Application.Features.AuditLog;
-using IMT_Reservas.Server.Core.Entities;
-using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
-using IMT_Reservas.Server.Application.Features.Equipo;
+using IMT_Reservas.Server.Modules.Auditoria.Application;
+using IMT_Reservas.Server.Modules.Inventario.Application;
+using IMT_Reservas.Server.Modules.Inventario.Domain;
+using IMT_Reservas.Server.Modules.Mantenimientos.Infrastructure;
 
-namespace IMT_Reservas.Server.Infrastructure.Jobs;
+namespace IMT_Reservas.Server.Modules.Mantenimientos.Application;
 
-public sealed class EstadoMantenimientoJob
+public sealed class EstadoMantenimientoService
 {
     private readonly MantenimientoRepository _repository;
     private readonly AuditLogService _audit;
     private readonly EquipmentLabels _labels;
 
-    public EstadoMantenimientoJob(
+    public EstadoMantenimientoService(
         MantenimientoRepository repository,
         AuditLogService audit,
         EquipmentLabels labels

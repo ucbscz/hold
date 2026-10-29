@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Infrastructure.Config;
+namespace IMT_Reservas.Server.Shared.Persistence;
 
 public static class PostgresEnumNames
 {

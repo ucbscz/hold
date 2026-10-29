@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Application.Abstraction;
+namespace IMT_Reservas.Server.Modules.Usuarios.Application;
 
 public sealed class AuthenticationSettings
 {

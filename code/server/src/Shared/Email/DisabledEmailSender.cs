@@ -1,6 +1,4 @@
-using IMT_Reservas.Server.Application.Abstraction;
-
-namespace IMT_Reservas.Server.Infrastructure.Email;
+namespace IMT_Reservas.Server.Shared.Email;
 
 public sealed class DisabledEmailSender : IEmailSender
 {

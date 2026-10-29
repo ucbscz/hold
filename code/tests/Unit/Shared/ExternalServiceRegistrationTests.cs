@@ -1,16 +1,15 @@
 using FluentAssertions;
-using IMT_Reservas.Server.Application.Abstraction;
-using IMT_Reservas.Server.Application.Features.Jwt;
-using IMT_Reservas.Server.Application.Features.Usuario;
-using IMT_Reservas.Server.Infrastructure.Email;
-using IMT_Reservas.Server.Presentation.Security;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
+using IMT_Reservas.Server.Modules.Usuarios.Api;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
+using IMT_Reservas.Server.Shared.Email;
+using IMT_Reservas.Server.Shared.Web;
 
-namespace IMT_Reservas.Tests.Unit;
+namespace IMT_Reservas.Tests.Unit.Shared;
 
 [TestFixture]
 internal sealed class ExternalServiceRegistrationTests

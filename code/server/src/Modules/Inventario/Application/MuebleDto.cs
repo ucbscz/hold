@@ -1,4 +1,4 @@
-namespace IMT_Reservas.Server.Application.Features.Mueble;
+namespace IMT_Reservas.Server.Modules.Inventario.Application;
 
 public class MuebleDto
 {

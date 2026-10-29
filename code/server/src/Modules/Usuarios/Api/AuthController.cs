@@ -1,23 +1,19 @@
 using Ardalis.Result;
-using IMT_Reservas.Server.Application.Features.Jwt;
-using IMT_Reservas.Server.Application.Features.Usuario;
-using IMT_Reservas.Server.Presentation.Security;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
-using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.Net.Http.Headers;
-using IMT_Reservas.Server.Application.Abstraction;
 using Microsoft.Extensions.Options;
-using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
+using IMT_Reservas.Server.Modules.Usuarios.Application;
+using IMT_Reservas.Server.Shared.Web;
 
-namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
+namespace IMT_Reservas.Server.Modules.Usuarios.Api;
 
 [AllowAnonymous]
 [EnableRateLimiting(RequestLimits.AuthPolicy)]
 [Route("api/auth")]
-public class AuthController : Controller
+public class AuthController : ApiController
 {
     private readonly UsuarioService _service;
     private readonly VerificacionCorreoService _verification;
