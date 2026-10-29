@@ -1,79 +1,52 @@
-using System.Net;
-using System.Net.Mail;
-using Microsoft.Extensions.Options;
+using System.Globalization;
 using IMT_Reservas.Server.Application.Abstraction;
+using Microsoft.Extensions.Options;
 
 namespace IMT_Reservas.Server.Application.Features.Usuario;
 
 public sealed class EmailDeliveryService
 {
-    private readonly EmailSettings _settings;
-    private readonly ILogger<EmailDeliveryService> _logger;
+    private readonly IEmailSender _sender;
+    private readonly string _senderName;
 
-    public EmailDeliveryService(
-        IOptions<EmailSettings> settings,
-        ILogger<EmailDeliveryService> logger
-    )
+    public EmailDeliveryService(IEmailSender sender, IOptions<EmailSettings> settings)
     {
-        _settings = settings.Value;
-        _logger = logger;
+        _sender = sender;
+        _senderName = settings.Value.SenderName;
     }
 
-    public bool IsEnabled => _settings.Enabled;
+    public bool IsEnabled => _sender.IsEnabled;
 
-    public async Task<bool> SendVerification(
+    public Task<bool> SendVerification(
         string recipient,
         string verificationUrl,
+        TimeSpan lifetime,
         CancellationToken cancellationToken
-    ) => await Send(
-        recipient,
-        "Verifica tu cuenta de UCB Hold",
-        $"Confirma tu correo institucional desde este enlace, válido durante 24 horas:\n\n{verificationUrl}",
-        cancellationToken
-    );
+    ) =>
+        _sender.Send(
+            new EmailMessage(
+                recipient,
+                Format(EmailTemplates.VerificationSubject, _senderName),
+                Format(EmailTemplates.VerificationBody, lifetime.TotalHours, verificationUrl)
+            ),
+            cancellationToken
+        );
 
-    public async Task<bool> SendPasswordReset(
+    public Task<bool> SendPasswordReset(
         string recipient,
         string resetCode,
+        TimeSpan lifetime,
         CancellationToken cancellationToken
-    ) => await Send(
-        recipient,
-        "Restablece tu contraseña de UCB Hold",
-        $"Tu código para restablecer la contraseña es:\n\n{resetCode}\n\nEl código es válido durante 30 minutos y solo puede utilizarse una vez. Si no realizaste esta solicitud, puedes ignorar este correo.",
-        cancellationToken
-    );
+    ) =>
+        _sender.Send(
+            new EmailMessage(
+                recipient,
+                Format(EmailTemplates.PasswordResetSubject, _senderName),
+                Format(EmailTemplates.PasswordResetBody, resetCode, lifetime.TotalMinutes)
+            ),
+            cancellationToken
+        );
 
-    private async Task<bool> Send(
-        string recipient,
-        string subject,
-        string body,
-        CancellationToken cancellationToken
-    )
-    {
-        if (!_settings.Enabled)
-            return false;
-
-        try
-        {
-            using var message = new MailMessage(_settings.From, recipient)
-            {
-                Subject = subject,
-                Body = body,
-                IsBodyHtml = false,
-            };
-            using var client = new SmtpClient(_settings.Host, _settings.Port)
-            {
-                EnableSsl = _settings.EnableSsl,
-                Credentials = new NetworkCredential(_settings.Username, _settings.Password),
-                Timeout = 15000,
-            };
-            await client.SendMailAsync(message, cancellationToken);
-            return true;
-        }
-        catch (Exception exception)
-        {
-            _logger.EmailDeliveryFailed(exception);
-            return false;
-        }
-    }
+    private static string Format(string template, params object[] values) =>
+        string.Format(CultureInfo.InvariantCulture, template, values);
 }

@@ -10,27 +10,6 @@ public static class ServerConfigurationValidator
     {
         ValidateConnectionString(configuration.GetConnectionString(ConfigurationKeys.PostgreSql));
         ValidateJwtSettings(configuration.GetSection(ConfigurationKeys.Jwt).Get<JwtSettings>());
-        ValidateAuthentication(configuration);
-    }
-
-    private static void ValidateAuthentication(IConfiguration configuration)
-    {
-        var clientId = configuration[ConfigurationKeys.GoogleClientId];
-        var clientSecret = configuration[ConfigurationKeys.GoogleClientSecret];
-        if (string.IsNullOrWhiteSpace(clientId) != string.IsNullOrWhiteSpace(clientSecret))
-            throw new InvalidOperationException(
-                "Authentication:Google:ClientId and ClientSecret must be configured together."
-            );
-
-        if (!configuration.GetValue<bool>("Email:Enabled"))
-            return;
-
-        if (string.IsNullOrWhiteSpace(configuration["Email:Host"]))
-            throw new InvalidOperationException("Email:Host is required when email is enabled.");
-        if (string.IsNullOrWhiteSpace(configuration["Email:From"]))
-            throw new InvalidOperationException("Email:From is required when email is enabled.");
-        if (configuration.GetValue<int>("Email:Port") is < 1 or > 65535)
-            throw new InvalidOperationException("Email:Port must be between 1 and 65535.");
     }
 
     private static void ValidateConnectionString(string? connectionString)

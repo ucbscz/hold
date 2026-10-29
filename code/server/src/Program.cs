@@ -1,9 +1,4 @@
-using System.Text;
-using Elastic.Clients.Elasticsearch;
 using FluentValidation;
-using Hangfire;
-using Hangfire.Dashboard;
-using Hangfire.PostgreSql;
 using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Application.Features.Accesorio;
 using IMT_Reservas.Server.Application.Features.AuditLog;
@@ -27,22 +22,16 @@ using IMT_Reservas.Server.Application.Features.Inventario;
 using IMT_Reservas.Server.Application.Security;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
-using IMT_Reservas.Server.Infrastructure.Config.RowLevelSecurity;
+using IMT_Reservas.Server.Infrastructure.Email;
 using IMT_Reservas.Server.Infrastructure.Jobs;
 using IMT_Reservas.Server.Infrastructure.Repositories.Abstraction;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using IMT_Reservas.Server.Presentation.Errors;
 using IMT_Reservas.Server.Presentation.Security;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Npgsql;
-using StackExchange.Redis;
-using Microsoft.AspNetCore.Authentication.Google;
-using System.IdentityModel.Tokens.Jwt;
+using IMT_Reservas.Server.Infrastructure.Config.RowLevelSecurity;
 using CarreraEntity = IMT_Reservas.Server.Core.Entities.Carrera;
 using CategoriaEntity = IMT_Reservas.Server.Core.Entities.Categoria;
 using EmpresaMantenimientoEntity = IMT_Reservas.Server.Core.Entities.EmpresaMantenimiento;
@@ -57,22 +46,7 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 var builder = WebApplication.CreateBuilder(args);
 ServerConfigurationValidator.Validate(builder.Configuration);
 
-var connectionString = builder.Configuration.GetConnectionString(ConfigurationKeys.PostgreSql);
-
-var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
-dataSourceBuilder.MapEnum<EstadoPrestamo>(PostgresEnumNames.EstadoPrestamo);
-dataSourceBuilder.MapEnum<TipoUsuario>(PostgresEnumNames.TipoUsuario);
-dataSourceBuilder.MapEnum<EstadoEquipo>(PostgresEnumNames.EstadoEquipo);
-var dataSource = dataSourceBuilder.Build();
-
-builder.Services.AddDbContext<ApplicationDbContext>(
-    (services, options) =>
-        options
-            .UseNpgsql(dataSource)
-            .AddInterceptors(
-                new RowLevelSecurityInterceptor(services.GetRequiredService<IHttpContextAccessor>())
-            )
-);
+builder.Services.AddDatabase(builder.Configuration);
 
 builder
     .Services.AddControllers()
@@ -138,55 +112,7 @@ builder.Services.AddSingleton<AuthCookieService>();
 
 var jwtSettings = builder.Configuration.GetSection(ConfigurationKeys.Jwt).Get<JwtSettings>()!;
 
-builder
-    .Services.AddAuthentication(options =>
-    {
-        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-    })
-    .AddJwtBearer(options =>
-    {
-        options.MapInboundClaims = false;
-        options.Events = new JwtBearerEvents
-        {
-            OnMessageReceived = context =>
-            {
-                context.Token = context.Request.Cookies[AuthCookieService.AccessTokenName];
-                return Task.CompletedTask;
-            },
-        };
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings.Issuer,
-            ValidAudience = jwtSettings.Audience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings.Key)),
-            RoleClaimType = JwtSvc.RoleClaim,
-            NameClaimType = JwtRegisteredClaimNames.Sub,
-            ClockSkew = TimeSpan.Zero,
-        };
-    })
-    .AddCookie(AuthSchemes.GoogleExternal, options =>
-    {
-        options.Cookie.Name = AuthSchemes.GoogleExternalCookie;
-        options.Cookie.HttpOnly = true;
-        options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
-        options.Cookie.SameSite = SameSiteMode.None;
-        options.ExpireTimeSpan = TimeSpan.FromMinutes(10);
-    })
-    .AddGoogle(GoogleDefaults.AuthenticationScheme, options =>
-    {
-        options.SignInScheme = AuthSchemes.GoogleExternal;
-        options.ClientId = builder.Configuration[ConfigurationKeys.GoogleClientId] ?? string.Empty;
-        options.ClientSecret = builder.Configuration[ConfigurationKeys.GoogleClientSecret] ?? string.Empty;
-        options.CallbackPath = ApiPaths.GoogleCallback;
-        options.SaveTokens = false;
-    });
-builder.Services.AddAuthorizationBuilder()
-    .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+builder.Services.AddPlatformAuthentication(builder.Configuration, jwtSettings);
 
 builder.Services.AddScoped<UsuarioRepository>();
 builder.Services.AddScoped<UsuarioAuthRepository>();
@@ -211,8 +137,7 @@ builder.Services.AddSingleton<ContractHtmlProcessor>();
 builder.Services.AddScoped<ComponenteRepository>();
 builder.Services.AddScoped<CarritoRepository>();
 builder.Services.AddScoped<UsuarioService>();
-builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection(ConfigurationKeys.Email));
-builder.Services.AddScoped<EmailDeliveryService>();
+builder.Services.AddEmailDelivery(builder.Configuration);
 builder.Services.AddScoped<VerificacionCorreoService>();
 builder.Services.AddScoped<RecuperacionContrasenaService>();
 builder.Services.AddScoped<CodigoGoogleService>();
@@ -317,39 +242,9 @@ builder.Services.AddScoped<IValidator<MuebleDto>, MuebleValidator>();
 builder.Services.AddScoped<IValidator<PrestamoDto>, PrestamoValidator>();
 builder.Services.AddScoped<IValidator<UsuarioDto>, UsuarioValidator>();
 
-var redisConnectionString = builder.Configuration["Redis:ConnectionString"];
-var redisEnabled =
-    builder.Configuration.GetValue<bool?>("Redis:Enabled")
-    ?? !builder.Environment.IsDevelopment();
-if (redisEnabled && !string.IsNullOrWhiteSpace(redisConnectionString))
-{
-    var redisConfig = ConfigurationOptions.Parse(redisConnectionString);
-    redisConfig.ConnectTimeout = 5000;
-    redisConfig.SyncTimeout = 1000;
-    redisConfig.AbortOnConnectFail = false;
-    redisConfig.ConnectRetry = 3;
-    builder.Services.AddStackExchangeRedisCache(options =>
-    {
-        options.ConfigurationOptions = redisConfig;
-        options.InstanceName = builder.Configuration["Redis:InstanceName"];
-    });
-}
-else
-    builder.Services.AddDistributedMemoryCache();
-builder.Services.AddSingleton<CacheRepository>();
+builder.Services.AddDistributedCaching(builder.Configuration, builder.Environment);
 
-var elasticUri = builder.Configuration["Elasticsearch:Uri"];
-if (!string.IsNullOrWhiteSpace(elasticUri))
-{
-    var elasticSettings = new ElasticsearchClientSettings(
-        new Uri(elasticUri)
-    ).DefaultFieldNameInferrer(name => name);
-    builder.Services.AddSingleton(new ElasticsearchClient(elasticSettings));
-    builder.Services.AddSingleton(typeof(ISearchIndex<>), typeof(ElasticSearchIndex<>));
-    builder.Services.AddHostedService<SearchReindexer>();
-}
-else
-    builder.Services.AddSingleton(typeof(ISearchIndex<>), typeof(NullSearchIndex<>));
+builder.Services.AddSearch(builder.Configuration);
 
 builder.Services.Configure<CookiePolicyOptions>(options =>
 {
@@ -365,22 +260,12 @@ builder.Services.AddScoped<AuditLogRepository>();
 builder.Services.AddScoped<AuditLogService>();
 builder.Services.AddScoped<NotificacionRepository>();
 builder.Services.AddScoped<NotificacionService>();
-builder.Services.AddScoped<EstadoMantenimientoJob>();
 builder.Services.AddScoped<AvisoDisponibilidadRepository>();
 builder.Services.AddScoped<AvisoDisponibilidadService>();
 builder.Services.AddScoped<ComentarioEquipoRepository>();
 builder.Services.AddScoped<ComentarioEquipoService>();
 
-var hangfireEnabled =
-    builder.Configuration.GetValue<bool?>("Hangfire:Enabled")
-    ?? !builder.Environment.IsDevelopment();
-if (hangfireEnabled)
-{
-    builder.Services.AddHangfire(config =>
-        config.UsePostgreSqlStorage(options => options.UseNpgsqlConnection(connectionString))
-    );
-    builder.Services.AddHangfireServer();
-}
+builder.Services.AddBackgroundJobs(builder.Configuration, builder.Environment);
 
 builder.Services.AddRateLimiter(RequestLimits.Configure);
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -395,7 +280,7 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 var app = builder.Build();
 if (!app.Environment.IsDevelopment())
-    await RowLevelSecurityGuard.EnsureEnforcedAsync(dataSource);
+    await RowLevelSecurityGuard.EnsureEnforcedAsync(app.Services.GetRequiredService<NpgsqlDataSource>());
 var useHttpsRedirection = builder.Configuration.GetValue("HttpsRedirection:Enabled", true);
 
 app.UseForwardedHeaders();
@@ -423,22 +308,6 @@ app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
 app.MapHealthChecks(ApiPaths.Health).AllowAnonymous();
-if (hangfireEnabled)
-{
-    app.UseHangfireDashboard(
-        "/hangfire",
-        new DashboardOptions { Authorization = [new HangfireDashboardAccessPolicy()] }
-    );
-    RecurringJob.AddOrUpdate<EstadoPrestamoJob>(
-        "estado-prestamo",
-        job => job.Execute(CancellationToken.None),
-        "* * * * *"
-    );
-    RecurringJob.AddOrUpdate<EstadoMantenimientoJob>(
-        "estado-mantenimiento",
-        job => job.Execute(CancellationToken.None),
-        "* * * * *"
-    );
-}
+app.UseBackgroundJobs();
 
 await app.RunAsync();

@@ -1,7 +1,7 @@
 using Ardalis.Result;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using Microsoft.Extensions.Options;
-using IMT_Reservas.Server.Infrastructure.Config;
+using AuthenticationSettings = IMT_Reservas.Server.Application.Abstraction.AuthenticationSettings;
 using UsuarioEntity = IMT_Reservas.Server.Core.Entities.Usuario;
 
 namespace IMT_Reservas.Server.Application.Features.Usuario;
@@ -16,12 +16,12 @@ public sealed class VerificacionCorreoService
     public VerificacionCorreoService(
         UsuarioAuthRepository repository,
         EmailDeliveryService email,
-        IConfiguration configuration
+        IOptions<AuthenticationSettings> authentication
     )
     {
         _repository = repository;
         _email = email;
-        _frontendUrl = ConfigurationKeys.GetFrontendUrl(configuration);
+        _frontendUrl = authentication.Value.FrontendBaseUrl;
     }
 
     public async Task<bool> Issue(UsuarioEntity user, CancellationToken cancellationToken)
@@ -31,7 +31,7 @@ public sealed class VerificacionCorreoService
         user.TokenVerificacionExpira = DateTime.UtcNow.Add(TokenLifetime);
         await _repository.SaveVerification(user, cancellationToken);
         var url = $"{_frontendUrl}/verificar?token={Uri.EscapeDataString(token)}";
-        return await _email.SendVerification(user.Email, url, cancellationToken);
+        return await _email.SendVerification(user.Email, url, TokenLifetime, cancellationToken);
     }
 
     public async Task<Result<object>> Confirm(string token, CancellationToken cancellationToken)

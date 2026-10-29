@@ -15,7 +15,7 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
         .Select(rol => rol.ToLowerInvariant())
         .ToArray();
 
-    public UsuarioValidator(ApplicationDbContext dbContext)
+    public UsuarioValidator(ApplicationDbContext dbContext, InstitutionalEmailPolicy institutionalEmail)
     {
         RuleFor(usuario => usuario.Rol)
             .Must(rol => string.IsNullOrWhiteSpace(rol) || Roles.Contains(rol))
@@ -42,8 +42,8 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
             .NotEmpty()
             .EmailAddress()
             .WithMessage("Email inválido")
-            .Must(CorreoInstitucional.Es)
-            .WithMessage($"Debes usar un correo institucional {CorreoInstitucional.Dominio}")
+            .Must(institutionalEmail.Accepts)
+            .WithMessage($"Debes usar un correo institucional {institutionalEmail.Suffix}")
             .MaximumLength(255)
             .WithMessage("Email no puede superar 255 caracteres");
         RuleFor(usuario => usuario.Contrasena)

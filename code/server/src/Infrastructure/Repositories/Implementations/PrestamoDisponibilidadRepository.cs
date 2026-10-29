@@ -20,33 +20,36 @@ public sealed class PrestamoDisponibilidadRepository
         DateTime endDate,
         CancellationToken cancellationToken = default
     ) => HasAvailableEquipos(
-        grupoEquipoId,
-        1,
+        new Dictionary<int, int> { [grupoEquipoId] = 1 },
         startDate,
         endDate,
         cancellationToken
     );
 
     public async Task<bool> HasAvailableEquipos(
-        int grupoEquipoId,
-        int requiredQuantity,
+        IReadOnlyDictionary<int, int> requiredByGroup,
         DateTime startDate,
         DateTime endDate,
         CancellationToken cancellationToken = default
     )
     {
-        if (requiredQuantity <= 0 || endDate <= startDate)
+        if (requiredByGroup.Values.Any(quantity => quantity <= 0) || endDate <= startDate)
             return false;
+        if (requiredByGroup.Count == 0)
+            return true;
 
-        var availableQuantity = await AvailableEquipos(
-                grupoEquipoId,
+        var availableByGroup = await AvailableEquipos(
+                requiredByGroup.Keys.ToArray(),
                 startDate,
                 endDate
             )
-            .Take(requiredQuantity)
-            .CountAsync(cancellationToken);
+            .GroupBy(equipment => equipment.IdGrupoEquipo)
+            .Select(group => new { group.Key, Count = group.Count() })
+            .ToDictionaryAsync(group => group.Key, group => group.Count, cancellationToken);
 
-        return availableQuantity >= requiredQuantity;
+        return requiredByGroup.All(required =>
+            availableByGroup.GetValueOrDefault(required.Key) >= required.Value
+        );
     }
 
     public async Task<bool> AssignEquiposOnApproval(
@@ -89,7 +92,7 @@ public sealed class PrestamoDisponibilidadRepository
             foreach (var required in requiredByGroup)
             {
                 var candidateIds = await AvailableEquipos(
-                        required.Key,
+                        [required.Key],
                         loan.FechaPrestamoEsperada,
                         loan.FechaDevolucionEsperada
                     )
@@ -144,11 +147,11 @@ public sealed class PrestamoDisponibilidadRepository
     }
 
     private IQueryable<Equipo> AvailableEquipos(
-        int grupoEquipoId,
+        int[] grupoEquipoIds,
         DateTime startDate,
         DateTime endDate
     ) => _dbContext.Equipos.Where(equipment =>
-        equipment.IdGrupoEquipo == grupoEquipoId
+        grupoEquipoIds.Contains(equipment.IdGrupoEquipo)
         && !equipment.EstadoEliminado
         && equipment.EstadoEquipo == EstadoEquipo.Operativo
         && !_dbContext

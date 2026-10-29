@@ -340,6 +340,20 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     }
 
     [Test]
+    public async Task Create_WhenRequestedUnitsExceedAvailableUnits_ReturnsErrorWithoutPersistingLoan()
+    {
+        var start = DateTime.UtcNow.AddDays(1);
+        var dto = BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(1));
+        dto.GrupoEquipoId = [GrupoId, GrupoId];
+
+        var result = await Sut.Create(dto);
+
+        result.IsSuccess.Should().BeFalse();
+        Db.Prestamos.Should().BeEmpty();
+        Db.DetallesPrestamos.Should().BeEmpty();
+    }
+
+    [Test]
     public async Task Create_ContractUsesProtectedInstitutionalSignatureFromServer()
     {
         const string adminCarnet = "ADMIN";

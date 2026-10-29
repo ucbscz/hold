@@ -82,25 +82,24 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                 return Result<PrestamoEntity>.Error(durationViolation);
             }
 
-            foreach (var request in groupIds.GroupBy(id => id))
-            {
-                if (
-                    !await _availability.HasAvailableEquipos(
-                        request.Key,
-                        request.Count(),
-                        entity.FechaPrestamoEsperada,
-                        entity.FechaDevolucionEsperada,
-                        cancellationToken
-                    )
+            var requiredByGroup = groupIds
+                .GroupBy(id => id)
+                .ToDictionary(group => group.Key, group => group.Count());
+            if (
+                !await _availability.HasAvailableEquipos(
+                    requiredByGroup,
+                    entity.FechaPrestamoEsperada,
+                    entity.FechaDevolucionEsperada,
+                    cancellationToken
                 )
-                {
-                    if (transaction != null)
-                        await transaction.RollbackAsync(cancellationToken);
+            )
+            {
+                if (transaction != null)
+                    await transaction.RollbackAsync(cancellationToken);
 
-                    return Result<PrestamoEntity>.Error(
-                        "No hay suficientes unidades disponibles en el horario seleccionado"
-                    );
-                }
+                return Result<PrestamoEntity>.Error(
+                    "No hay suficientes unidades disponibles en el horario seleccionado"
+                );
             }
 
             DbContext.Prestamos.Add(entity);

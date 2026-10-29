@@ -13,13 +13,15 @@ public sealed class AutenticacionGoogleService
     private readonly UsuarioMapper _mapper;
     private readonly JwtService _jwt;
     private readonly JwtSettings _jwtSettings;
+    private readonly InstitutionalEmailPolicy _institutionalEmail;
 
     public AutenticacionGoogleService(
         CodigoGoogleService codes,
         UsuarioAuthRepository users,
         UsuarioMapper mapper,
         JwtService jwt,
-        IOptions<JwtSettings> jwtSettings
+        IOptions<JwtSettings> jwtSettings,
+        InstitutionalEmailPolicy institutionalEmail
     )
     {
         _codes = codes;
@@ -27,6 +29,7 @@ public sealed class AutenticacionGoogleService
         _mapper = mapper;
         _jwt = jwt;
         _jwtSettings = jwtSettings.Value;
+        _institutionalEmail = institutionalEmail;
     }
 
     public async Task<Result<string>> Begin(
@@ -36,8 +39,8 @@ public sealed class AutenticacionGoogleService
     {
         var googleId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
         var email = principal.FindFirstValue(ClaimTypes.Email)?.Trim().ToLowerInvariant();
-        if (string.IsNullOrWhiteSpace(googleId) || !CorreoInstitucional.Es(email))
-            return Result<string>.Unauthorized($"Debes usar una cuenta institucional {CorreoInstitucional.Dominio}");
+        if (string.IsNullOrWhiteSpace(googleId) || !_institutionalEmail.Accepts(email))
+            return Result<string>.Unauthorized($"Debes usar una cuenta institucional {_institutionalEmail.Suffix}");
 
         var (user, _) = await _users.GetByEmailWithCarrera(email!, cancellationToken);
         var type = user == null ? TipoCodigoGoogle.Registro : TipoCodigoGoogle.Login;

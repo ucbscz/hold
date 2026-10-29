@@ -1,5 +1,6 @@
 using BCryptLib = BCrypt.Net.BCrypt;
 using FluentAssertions;
+using IMT_Reservas.Server.Application.Abstraction;
 using IMT_Reservas.Server.Application.Features.AuditLog;
 using IMT_Reservas.Server.Application.Features.Notificacion;
 using Microsoft.AspNetCore.Http;
@@ -10,6 +11,7 @@ using IMT_Reservas.Server.Application.Features.Contrato;
 using IMT_Reservas.Server.Application.Security;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
+using IMT_Reservas.Server.Infrastructure.Email;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 using IMT_Reservas.Tests.Helpers;
 using Microsoft.EntityFrameworkCore;
@@ -35,6 +37,11 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         RefreshTokenExpiryDays = 7
     };
 
+    private static readonly AuthenticationSettings TestAuthenticationSettings = new()
+    {
+        InstitutionalDomain = "ucb.edu.bo",
+    };
+
     protected override UsuarioService CreateService(ApplicationDbContext db)
     {
         var memoryCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
@@ -52,7 +59,10 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         var queries = new UsuarioReadRepository(db);
         var repo = new UsuarioRepository(db, mapper, queries);
         var authRepository = new UsuarioAuthRepository(db);
-        var validator = new UsuarioValidator(db);
+        var validator = new UsuarioValidator(
+            db,
+            new InstitutionalEmailPolicy(Options.Create(TestAuthenticationSettings))
+        );
         var jwt = new JwtService(jwtOptions);
         var cacheService = new CacheRepository(
             distributedCache,
@@ -66,13 +76,13 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         );
         var notifications = new NotificacionService(new NotificacionRepository(db));
         var emailDelivery = new EmailDeliveryService(
-            Options.Create(new EmailSettings()),
-            NullLogger<EmailDeliveryService>.Instance
+            new DisabledEmailSender(),
+            Options.Create(new EmailSettings())
         );
         var verification = new VerificacionCorreoService(
             authRepository,
             emailDelivery,
-            new ConfigurationBuilder().AddInMemoryCollection().Build()
+            Options.Create(TestAuthenticationSettings)
         );
         var googleCodes = new CodigoGoogleService(new CodigoAutenticacionRepository(db));
 
@@ -345,10 +355,10 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         var verification = new VerificacionCorreoService(
             authRepository,
             new EmailDeliveryService(
-                Options.Create(new EmailSettings()),
-                NullLogger<EmailDeliveryService>.Instance
+                new DisabledEmailSender(),
+                Options.Create(new EmailSettings())
             ),
-            new ConfigurationBuilder().AddInMemoryCollection().Build()
+            Options.Create(TestAuthenticationSettings)
         );
 
         var first = await verification.Confirm("valid-token", CancellationToken.None);

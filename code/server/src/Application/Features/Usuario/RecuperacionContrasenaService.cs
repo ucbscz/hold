@@ -55,7 +55,7 @@ public sealed class RecuperacionContrasenaService
             },
             cancellationToken
         );
-        if (!await _email.SendPasswordReset(user.Email, token, cancellationToken))
+        if (!await _email.SendPasswordReset(user.Email, token, TokenLifetime, cancellationToken))
             return Result<object>.Error("No se pudo enviar el correo de recuperación");
 
         return Result<object>.Success(null!);

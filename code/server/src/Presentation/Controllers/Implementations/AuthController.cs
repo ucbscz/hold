@@ -7,8 +7,9 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using IMT_Reservas.Server.Infrastructure.Config;
-using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.Net.Http.Headers;
+using IMT_Reservas.Server.Application.Abstraction;
+using Microsoft.Extensions.Options;
 using Controller = IMT_Reservas.Server.Presentation.Controllers.Abstraction.Controller;
 
 namespace IMT_Reservas.Server.Presentation.Controllers.Implementations;
@@ -22,7 +23,8 @@ public class AuthController : Controller
     private readonly VerificacionCorreoService _verification;
     private readonly RecuperacionContrasenaService _passwordRecovery;
     private readonly AutenticacionGoogleService _google;
-    private readonly IConfiguration _configuration;
+    private readonly AuthenticationSettings _authentication;
+    private readonly ExternalIdentityScheme _externalScheme;
     private readonly AuthCookieService _cookies;
 
     public AuthController(
@@ -30,7 +32,8 @@ public class AuthController : Controller
         VerificacionCorreoService verification,
         RecuperacionContrasenaService passwordRecovery,
         AutenticacionGoogleService google,
-        IConfiguration configuration,
+        IOptions<AuthenticationSettings> authentication,
+        ExternalIdentityScheme externalScheme,
         AuthCookieService cookies
     )
     {
@@ -38,7 +41,8 @@ public class AuthController : Controller
         _verification = verification;
         _passwordRecovery = passwordRecovery;
         _google = google;
-        _configuration = configuration;
+        _authentication = authentication.Value;
+        _externalScheme = externalScheme;
         _cookies = cookies;
     }
 
@@ -116,12 +120,12 @@ public class AuthController : Controller
     {
         var frontend = FrontendUrl;
         var ruta = GoogleRoute(origen);
-        if (string.IsNullOrWhiteSpace(_configuration[ConfigurationKeys.GoogleClientId]))
+        if (!_externalScheme.IsConfigured)
             return Redirect($"{frontend}/{ruta}?googleError=configuracion");
 
         return Challenge(
             new AuthenticationProperties { RedirectUri = $"/api/auth/google/resultado?origen={ruta}" },
-            GoogleDefaults.AuthenticationScheme
+            _externalScheme.Name
         );
     }
 
@@ -131,14 +135,14 @@ public class AuthController : Controller
         CancellationToken cancellationToken
     )
     {
-        var authentication = await HttpContext.AuthenticateAsync(AuthSchemes.GoogleExternal);
+        var authentication = await HttpContext.AuthenticateAsync(AuthSchemes.External);
         var frontend = FrontendUrl;
         var ruta = GoogleRoute(origen);
         if (!authentication.Succeeded || authentication.Principal == null)
             return Redirect($"{frontend}/{ruta}?googleError=cancelado");
 
         var result = await _google.Begin(authentication.Principal, cancellationToken);
-        await HttpContext.SignOutAsync(AuthSchemes.GoogleExternal);
+        await HttpContext.SignOutAsync(AuthSchemes.External);
         if (!result.IsSuccess)
             return Redirect($"{frontend}/{ruta}?googleError=cuenta");
 
@@ -180,8 +184,7 @@ public class AuthController : Controller
         );
     }
 
-    private string FrontendUrl =>
-        ConfigurationKeys.GetFrontendUrl(_configuration);
+    private string FrontendUrl => _authentication.FrontendBaseUrl;
 
     private static string GoogleRoute(string? origen) =>
         origen == TipoCodigoGoogle.Registro ? TipoCodigoGoogle.Registro : TipoCodigoGoogle.Login;
