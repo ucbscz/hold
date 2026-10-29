@@ -146,10 +146,10 @@ ALTER ROLE :"app_user" WITH LOGIN PASSWORD :'app_password';
 SQL
 ```
 
-`schema.sql` creates the application role without login and applies the policies; `APP_DB_USER` must match it. On a database that already has data, apply only its idempotent RLS section:
+`schema.sql` creates the application role without login, grants it the `public` tables and makes it owner of the `hangfire` schema, then applies the policies. The role name is the psql variable `app_role` (default `reservas_app`); `APP_DB_USER` must match it. On a database that already has data, apply only its idempotent RLS section with the role used by the server:
 
 ```bash
-sed -n '/^-- Row Level Security/,$p' code/database/schema.sql | psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1
+sed -n '/^-- Row Level Security/,$p' code/database/schema.sql | psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -v ON_ERROR_STOP=1 -v app_role="$APP_DB_USER"
 ```
 
 Then set `ConnectionStrings__PostgreSQL` to use the application role (`APP_DB_USER`).

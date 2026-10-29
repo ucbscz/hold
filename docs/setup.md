@@ -106,6 +106,23 @@ dotnet user-secrets set "Email:Password" "$SMTP_PASSWORD" --project "$PROJECT"
 unset SMTP_HOST SMTP_EMAIL SMTP_PASSWORD
 ```
 
+#### Branding and organization
+
+Every organization-specific value lives outside the application code:
+
+| Concern                                                                                                               | Location                                                                                               |
+| --------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| Product name, organization, campus, unit, inventory code labels, institutional email domain, site URL and asset paths | `code/client/src/brand/brand.json`                                                                     |
+| Brand colors and font                                                                                                 | `code/client/src/brand/brand.css`                                                                      |
+| Logo, favicon, social cover and loan contract template                                                                | `code/client/public/brand/`                                                                            |
+| Social cover source                                                                                                   | `code/client/src/brand/social-cover.html`                                                              |
+| Page title and social metadata                                                                                        | `code/client/src/index.template.html`, rendered by `npm run brand` before `start`, `build` and `watch` |
+| Product name and inventory code labels used by the API                                                                | `Branding:*` in `code/server/appsettings.json`                                                         |
+| Email sender name and domain restriction                                                                              | `Email:SenderName`, `Authentication:InstitutionalDomain`                                               |
+| Data Protection identity                                                                                              | `DataProtection:ApplicationName`, `PayloadMarker`, `TextMarker`                                        |
+
+`DataProtection` identity values encrypt identity documents, signatures and contracts already stored in the database. Keep them unchanged for an existing deployment; change them only for a new organization with an empty database.
+
 #### Replacing an external service
 
 Each external dependency is registered by its own module, selected only through configuration:

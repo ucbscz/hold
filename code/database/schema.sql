@@ -5694,9 +5694,15 @@ ALTER TABLE ONLY public.notificaciones
 
 SET client_min_messages = warning;
 
+\if :{?app_role}
+\else
+\set app_role reservas_app
+\endif
+SET app.migration_role TO :'app_role';
+
 DO $$
 DECLARE
-    app_role text := 'ucbhold_app';
+    app_role text := current_setting('app.migration_role');
     table_name text;
 BEGIN
     IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = app_role) THEN

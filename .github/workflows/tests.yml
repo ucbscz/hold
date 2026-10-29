@@ -77,8 +77,8 @@ jobs:
           until docker logs rls-db 2>&1 | grep -q "PostgreSQL init process complete"; do sleep 1; done
           until docker exec rls-db pg_isready -U postgres -d IMT_Reservas; do sleep 1; done
           docker exec rls-db psql -q -U postgres -d IMT_Reservas -v ON_ERROR_STOP=1 -f /sql/schema.sql
-          docker exec rls-db psql -q -U postgres -d IMT_Reservas -c "ALTER ROLE ucbhold_app WITH LOGIN;"
-          visible=$(docker exec rls-db psql -tA -U ucbhold_app -d IMT_Reservas -c "SELECT count(*) FROM usuarios;")
+          docker exec rls-db psql -q -U postgres -d IMT_Reservas -c "ALTER ROLE reservas_app WITH LOGIN;"
+          visible=$(docker exec rls-db psql -tA -U reservas_app -d IMT_Reservas -c "SELECT count(*) FROM usuarios;")
           test "$visible" = "0"
           docker rm -f rls-db
 
