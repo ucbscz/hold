@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DOTNET_VERSION: 8.0.x
-      NODE_VERSION: 20.x
+      NODE_VERSION: 22.x
       BUILD_CONFIGURATION: Release
       SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL || 'https://sonarcloud.io' }}
       SONAR_ORGANIZATION: ${{ vars.SONAR_ORGANIZATION }}
@@ -73,7 +73,7 @@ jobs:
       - name: Validate row level security policies
         shell: bash
         run: |
-          docker run -d --name rls-db -e POSTGRES_PASSWORD=ci -e POSTGRES_DB=IMT_Reservas -v "$PWD/code/database:/sql:ro" postgres:17-alpine
+          docker run -d --name rls-db -e POSTGRES_PASSWORD=ci -e POSTGRES_DB=IMT_Reservas -v "$PWD/code/database:/sql:ro" postgres:16-alpine
           until docker logs rls-db 2>&1 | grep -q "PostgreSQL init process complete"; do sleep 1; done
           until docker exec rls-db pg_isready -U postgres -d IMT_Reservas; do sleep 1; done
           docker exec rls-db psql -q -U postgres -d IMT_Reservas -v ON_ERROR_STOP=1 -f /sql/schema.sql

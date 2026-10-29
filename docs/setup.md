@@ -125,6 +125,12 @@ cd code
 docker compose --env-file server.env up --build
 ```
 
+On the first start with an empty volume, PostgreSQL applies `code/database/schema.sql` automatically, including Row Level Security. Enable the application role once the database is healthy:
+
+```bash
+docker exec ucb_db psql -U postgres -d IMT_Reservas -c "ALTER ROLE ucbhold_app WITH LOGIN PASSWORD '<app-role-password>';"
+```
+
 Docker Compose mounts the persistent Data Protection key ring and its external protection material with read-only access where applicable. Production validates this configuration at startup. Key lifecycle, backup and recovery are restricted operational responsibilities because the protected carnet images, signatures and contracts depend on them.
 
 | Service     | URL                   |

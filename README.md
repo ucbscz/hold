@@ -23,7 +23,7 @@ Plataforma full-stack para gestionar reservas, préstamos, mantenimiento y traza
 [![Tests](https://github.com/alejandroramirezvallejos/UCB_Hold/actions/workflows/tests.yml/badge.svg)](https://github.com/alejandroramirezvallejos/UCB_Hold/actions/workflows/tests.yml)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
 [![Angular](https://img.shields.io/badge/Angular-21.2-DD0031?style=flat-square&logo=angular)](https://angular.dev/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-14+-4169E1?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-4169E1?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
 [![Redis](https://img.shields.io/badge/Redis-7-DC382D?style=flat-square&logo=redis&logoColor=white)](https://redis.io/)
 [![Docker](https://img.shields.io/badge/Docker-Compose-2496ED?style=flat-square&logo=docker&logoColor=white)](https://www.docker.com/)
 
@@ -54,7 +54,7 @@ UCB Hold centraliza el ciclo operativo de los equipos de laboratorio: consulta d
 | -------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------ |
 | Frontend       | Angular 21.2, TypeScript, RxJS                             | Application shell, screens, widgets, forms, guards and HTTP integration. |
 | Backend        | ASP.NET Core 8, Ardalis.Result, FluentValidation, Mapperly | REST API, business rules, validation and normalized responses.           |
-| Data           | PostgreSQL 14+, EF Core 8, Npgsql                          | Persistence, native enums, triggers, indexes and projections.            |
+| Data           | PostgreSQL 16+, EF Core 8, Npgsql                          | Persistence, native enums, triggers, indexes and projections.            |
 | Infrastructure | Redis 7, Docker Compose, Nginx                             | Local services, cache support and containerized delivery.                |
 | Quality        | NUnit, Jasmine/Karma, GitHub Actions, SonarQube            | Automated tests, coverage, static analysis and CI verification.          |
 
@@ -102,7 +102,7 @@ POSTGRES_USER=postgres
 POSTGRES_PASSWORD=<database-password>
 POSTGRES_DB=IMT_Reservas
 ASPNETCORE_ENVIRONMENT=Production
-ConnectionStrings__PostgreSQL=Host=ucb_db;Port=5432;Database=IMT_Reservas;Username=postgres;Password=<database-password>;Pooling=true;MinPoolSize=2;MaxPoolSize=20
+ConnectionStrings__PostgreSQL=Host=ucb_db;Port=5432;Database=IMT_Reservas;Username=ucbhold_app;Password=<app-role-password>;Pooling=true;MinPoolSize=2;MaxPoolSize=20
 Jwt__Key=<local-secret-with-at-least-32-characters>
 Redis__ConnectionString=ucb_redis:6379
 Redis__Enabled=true
@@ -111,11 +111,17 @@ Hangfire__Enabled=true
 
 Production Docker requires Data Protection material provisioned at runtime through the team's private operations process. These files are ignored by Git and must never be included in source code, CI artifacts or releases.
 
-Start the stack:
+Start the stack. The first start applies `code/database/schema.sql` (including Row Level Security) to the empty database volume:
 
 ```bash
 cd code
 docker compose --env-file server.env up --build
+```
+
+Enable the application role once the database is healthy:
+
+```bash
+docker exec ucb_db psql -U postgres -d IMT_Reservas -c "ALTER ROLE ucbhold_app WITH LOGIN PASSWORD '<app-role-password>';"
 ```
 
 | Service     | URL                   |

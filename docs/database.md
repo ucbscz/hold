@@ -1,6 +1,6 @@
 # Database Guide
 
-UCB Hold uses PostgreSQL 14+ with Entity Framework Core 8. The database name used by the project is `IMT_Reservas`. Repository source and releases contain only the data-free schema reference in [`code/database/schema.sql`](../code/database/schema.sql). Production backups remain in private infrastructure.
+UCB Hold uses PostgreSQL 16+ with Entity Framework Core 8. The database name used by the project is `IMT_Reservas`. Repository source and releases contain only the data-free schema reference in [`code/database/schema.sql`](../code/database/schema.sql). Production backups remain in private infrastructure.
 
 ## Entity Relationship Diagram
 
@@ -34,7 +34,7 @@ UCB Hold uses PostgreSQL 14+ with Entity Framework Core 8. The database name use
 
 | Enum                 | Values                                                                                  | Used by                   |
 | -------------------- | --------------------------------------------------------------------------------------- | ------------------------- |
-| `estado_prestamo`    | `pendiente`, `aprobado`, `activo`, `finalizado`, `rechazado`, `cancelado`               | `prestamos`               |
+| `estado_prestamo`    | `pendiente`, `aprobado`, `activo`, `atrasado`, `finalizado`, `rechazado`, `cancelado`     | `prestamos`               |
 | `estado_equipo`      | `operativo`, `parcialmente_operativo`, `inoperativo`                                    | `equipos`                 |
 | `tipo_usuario`       | `docente`, `administrativo`, `administrador`, `administrador_laboratorio`, `estudiante` | `usuarios`                |
 | `tipo_mantenimiento` | `correctivo`, `preventivo`                                                              | `detalles_mantenimientos` |
@@ -63,7 +63,7 @@ Derived values exist to speed up administrative screens. Business logic should s
 
 ## Availability and Duration Rules
 
-An equipment unit is unavailable when an overlapping loan is `pendiente`, `aprobado`, `activo`, or `atrasado`, or when an overlapping maintenance record includes that unit. Availability is checked again inside a serializable transaction when a reservation is created.
+An equipment unit is unavailable when an overlapping loan is `aprobado`, `activo`, or `atrasado`, or when an overlapping maintenance record includes that unit. Availability is checked again inside a serializable transaction when a reservation is created.
 
 `grupos_equipos.tiempo_max_prestamo_dias` is the single source of truth for maximum loan duration. The allowed interval is 1 to 365 days. A request containing multiple groups uses the most restrictive maximum, and both availability queries and reservation creation validate the exact timestamp duration rather than calendar-day boundaries.
 
@@ -101,7 +101,7 @@ cd code
 docker compose --env-file server.env up -d ucb_db
 ```
 
-Docker starts PostgreSQL with an empty persistent volume. Apply `schema.sql` to initialize structure without copying user data.
+Docker Compose mounts `schema.sql` into the PostgreSQL init directory, so an empty persistent volume is initialized with structure and Row Level Security on its first start, without copying user data. An existing volume is never re-initialized.
 
 ## Generate and Publish the Empty Schema
 
@@ -131,7 +131,6 @@ Initialize an empty database:
 ```bash
 psql -U postgres -d IMT_Reservas -f code/database/schema.sql
 ```
-
 
 ## Row Level Security
 

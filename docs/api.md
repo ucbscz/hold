@@ -28,7 +28,9 @@ The Angular application uses lowercase Spanish paths with one-word segments and 
 | `/historial`      | Review the user's loans.        |
 | `/administracion` | Open the administration panel.  |
 | `/terminos`       | Read the terms and conditions.  |
+| `/privacidad`     | Read the privacy policy.        |
 | `/verificar`      | Confirm a local account email.  |
+| `/recuperar`      | Reset a forgotten password.     |
 
 ## Response Contract
 
@@ -216,7 +218,7 @@ The global limit is 180 requests/minute per authenticated identity or anonymous 
 | Passwords          | Minimum 8 characters, at least one uppercase letter, one number, and one special character.                                                        |
 | Equipment          | `CodigoImt` is assigned when the unit is created and cannot be changed later.                                                                      |
 | Loans              | Users, equipment groups, start date, and return date are required.                                                                                 |
-| Availability       | Only loans in `aprobado` or `activo` state block capacity.                                                                                         |
+| Availability       | Only loans in `aprobado`, `activo` or `atrasado` state block capacity.                                                                            |
 | Approval           | Availability is revalidated before a pending loan can be approved.                                                                                 |
 | Blocking           | A blocked user cannot create a loan because the reservation validation reads the current PostgreSQL state.                                         |
 | Audit              | Administrative and loan workflow mutations record actor, action, entity, timestamp, and relevant detail. Automatic actions use `Sistema` as actor. |
@@ -224,7 +226,8 @@ The global limit is 180 requests/minute per authenticated identity or anonymous 
 
 ```text
 pendiente -> aprobado -> activo -> finalizado
-    |             |
+    |             |          |
+    |             |          +-> atrasado -> finalizado
     |             +-> cancelado
     +-> rechazado
 ```
