@@ -104,6 +104,7 @@ builder.Services.AddSwaggerGen(options =>
     );
 });
 builder.Services.AddHealthChecks();
+builder.Services.AddBranding(builder.Configuration);
 DataProtectionConfiguration.Configure(builder.Services, builder.Configuration, builder.Environment);
 
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection(ConfigurationKeys.Jwt));

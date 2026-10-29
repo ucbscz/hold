@@ -10,13 +10,16 @@ namespace IMT_Reservas.Server.Application.Features.Equipo;
 
 public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
 {
+    private readonly EquipmentLabels _labels;
+
     public EquipoService(
         EquipoRepository repository,
         EquipoMapper mapper,
         IValidator<EquipoDto> validator,
-        AuditLogService audit
+        AuditLogService audit,
+        EquipmentLabels labels
     )
-        : base(repository, validator, mapper, audit) { }
+        : base(repository, validator, mapper, audit) => _labels = labels;
 
     public override async Task<Result<EquipoDto>> Create(EquipoDto dto)
     {
@@ -31,10 +34,10 @@ public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
 
         entity.CodigoUcb = string.IsNullOrWhiteSpace(entity.CodigoUcb) ? null : entity.CodigoUcb.Trim().ToUpperInvariant();
         if (entity.CodigoUcb != null && await Repository.ExistsByCodigoUcb(entity.CodigoUcb))
-            return Result<EquipoDto>.Error("Código UCB ya registrado");
+            return Result<EquipoDto>.Error(_labels.DuplicateOrganizationCode);
 
         if (await Repository.ExistsByCodigoImt(entity.CodigoImt))
-            return Result<EquipoDto>.Error("Código IMT ya registrado");
+            return Result<EquipoDto>.Error(_labels.DuplicateInternalCode);
 
         var result = await CreateEntity(entity);
 
@@ -74,7 +77,7 @@ public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
 
         entity.CodigoUcb = string.IsNullOrWhiteSpace(entity.CodigoUcb) ? null : entity.CodigoUcb.Trim().ToUpperInvariant();
         if (entity.CodigoUcb != null && await Repository.ExistsByCodigoUcb(entity.CodigoUcb, id))
-            return Result<EquipoDto>.Error("Código UCB ya registrado");
+            return Result<EquipoDto>.Error(_labels.DuplicateOrganizationCode);
 
         var result = await UpdateEntity(entity);
 

@@ -26,6 +26,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     private const int EquipoId = 1;
     private readonly SensitiveDataProtector _sensitiveData = new(
         new EphemeralDataProtectionProvider(),
+        TestBranding.DataProtectionOptions,
         NullLogger<SensitiveDataProtector>.Instance
     );
 
@@ -47,7 +48,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var validator = new PrestamoValidator(db, configRepo);
 
         var audit = new AuditLogService(
-            new AuditLogRepository(db),
+            new AuditLogRepository(db, TestBranding.Labels),
             new HttpContextAccessor(),
             new UsuarioReadRepository(db)
         );
@@ -81,7 +82,8 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
             states,
             availability,
             configuration,
-            contractHtml
+            contractHtml,
+            TestBranding.Labels
         );
     }
 

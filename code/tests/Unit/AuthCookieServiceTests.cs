@@ -36,8 +36,8 @@ internal sealed class AuthCookieServiceTests
             && header.Contains("secure", StringComparison.OrdinalIgnoreCase)
             && header.Contains("samesite=strict", StringComparison.OrdinalIgnoreCase)
         );
-        headers.Should().Contain(header => header!.StartsWith("ucbhold_access=", StringComparison.Ordinal));
-        headers.Should().Contain(header => header!.StartsWith("ucbhold_refresh=", StringComparison.Ordinal));
+        headers.Should().Contain(header => header!.StartsWith($"{AuthCookieService.AccessTokenName}=", StringComparison.Ordinal));
+        headers.Should().Contain(header => header!.StartsWith($"{AuthCookieService.RefreshTokenName}=", StringComparison.Ordinal));
     }
 
     [Test]

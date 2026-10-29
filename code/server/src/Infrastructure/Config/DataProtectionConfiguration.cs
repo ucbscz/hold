@@ -1,5 +1,6 @@
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.DataProtection;
+using IMT_Reservas.Server.Application.Security;
 
 namespace IMT_Reservas.Server.Infrastructure.Config;
 
@@ -11,15 +12,20 @@ public static class DataProtectionConfiguration
         IWebHostEnvironment environment
     )
     {
-        var builder = services.AddDataProtection().SetApplicationName("UCBHold");
-        var keysPath = configuration["DataProtection:KeysPath"];
+        var section = configuration.GetSection(DataProtectionSettings.SectionName);
+        var settings = section.Get<DataProtectionSettings>() ?? new DataProtectionSettings();
+        RequireIdentity(settings);
+        services.Configure<DataProtectionSettings>(section);
+
+        var builder = services.AddDataProtection().SetApplicationName(settings.ApplicationName);
+        var keysPath = settings.KeysPath;
         if (string.IsNullOrWhiteSpace(keysPath))
             return;
 
         builder.PersistKeysToFileSystem(new DirectoryInfo(keysPath));
 
-        var certificatePath = configuration["DataProtection:CertificatePath"];
-        var passwordFile = configuration["DataProtection:CertificatePasswordFile"];
+        var certificatePath = settings.CertificatePath;
+        var passwordFile = settings.CertificatePasswordFile;
         if (string.IsNullOrWhiteSpace(certificatePath) || string.IsNullOrWhiteSpace(passwordFile))
         {
             if (environment.IsProduction())
@@ -45,5 +51,17 @@ public static class DataProtectionConfiguration
             throw new InvalidOperationException("The Data Protection certificate has no private key.");
 
         builder.ProtectKeysWithCertificate(certificate);
+    }
+
+    private static void RequireIdentity(DataProtectionSettings settings)
+    {
+        if (
+            string.IsNullOrWhiteSpace(settings.ApplicationName)
+            || string.IsNullOrWhiteSpace(settings.PayloadMarker)
+            || string.IsNullOrWhiteSpace(settings.TextMarker)
+        )
+            throw new InvalidOperationException(
+                $"{DataProtectionSettings.SectionName}:{nameof(DataProtectionSettings.ApplicationName)}, {nameof(DataProtectionSettings.PayloadMarker)} and {nameof(DataProtectionSettings.TextMarker)} are required."
+            );
     }
 }

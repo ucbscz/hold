@@ -19,6 +19,7 @@ public sealed class GrupoEquipoImportacionDto
 
 public sealed class GrupoEquipoImportacionService
 {
+    private const string UserAgent = "MetadataPreview/1.0";
     private const int MaxResponseBytes = 1024 * 1024;
     private const int MaxRedirects = 3;
 
@@ -41,7 +42,7 @@ public sealed class GrupoEquipoImportacionService
             {
                 using var client = CreateSecureClient();
                 using var request = new HttpRequestMessage(HttpMethod.Get, currentUri);
-                request.Headers.UserAgent.ParseAdd("UCBHold-MetadataPreview/1.0");
+                request.Headers.UserAgent.ParseAdd(UserAgent);
                 request.Headers.Accept.ParseAdd("text/html,application/xhtml+xml");
                 using var response = await client.SendAsync(
                     request,

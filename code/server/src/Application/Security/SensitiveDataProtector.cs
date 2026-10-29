@@ -2,22 +2,26 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.DataProtection;
 using IMT_Reservas.Server.Application.Abstraction;
+using Microsoft.Extensions.Options;
 
 namespace IMT_Reservas.Server.Application.Security;
 
 public sealed class SensitiveDataProtector
 {
-    private static readonly byte[] Prefix = "UCBH1"u8.ToArray();
-    private const string TextPrefix = "ucbhold:v1:";
+    private readonly byte[] _payloadMarker;
+    private readonly string _textMarker;
     private readonly IDataProtector _protector;
     private readonly ILogger<SensitiveDataProtector> _logger;
 
     public SensitiveDataProtector(
         IDataProtectionProvider provider,
+        IOptions<DataProtectionSettings> settings,
         ILogger<SensitiveDataProtector> logger
     )
     {
-        _protector = provider.CreateProtector("UCBHold.SensitiveData.v1");
+        _protector = provider.CreateProtector(settings.Value.Purpose);
+        _payloadMarker = Encoding.UTF8.GetBytes(settings.Value.PayloadMarker);
+        _textMarker = settings.Value.TextMarker;
         _logger = logger;
     }
 
@@ -27,9 +31,9 @@ public sealed class SensitiveDataProtector
             return value;
 
         var protectedValue = _protector.Protect(value);
-        var result = new byte[Prefix.Length + protectedValue.Length];
-        Prefix.CopyTo(result, 0);
-        protectedValue.CopyTo(result, Prefix.Length);
+        var result = new byte[_payloadMarker.Length + protectedValue.Length];
+        _payloadMarker.CopyTo(result, 0);
+        protectedValue.CopyTo(result, _payloadMarker.Length);
         return result;
     }
 
@@ -40,7 +44,7 @@ public sealed class SensitiveDataProtector
 
         try
         {
-            return _protector.Unprotect(value.AsSpan(Prefix.Length).ToArray());
+            return _protector.Unprotect(value.AsSpan(_payloadMarker.Length).ToArray());
         }
         catch (CryptographicException exception)
         {
@@ -51,21 +55,21 @@ public sealed class SensitiveDataProtector
 
     public string Protect(string value)
     {
-        if (string.IsNullOrEmpty(value) || value.StartsWith(TextPrefix, StringComparison.Ordinal))
+        if (string.IsNullOrEmpty(value) || value.StartsWith(_textMarker, StringComparison.Ordinal))
             return value;
 
         var protectedValue = _protector.Protect(Encoding.UTF8.GetBytes(value));
-        return TextPrefix + Convert.ToBase64String(protectedValue);
+        return _textMarker + Convert.ToBase64String(protectedValue);
     }
 
     public string Unprotect(string value)
     {
-        if (string.IsNullOrEmpty(value) || !value.StartsWith(TextPrefix, StringComparison.Ordinal))
+        if (string.IsNullOrEmpty(value) || !value.StartsWith(_textMarker, StringComparison.Ordinal))
             return value;
 
         try
         {
-            var payload = Convert.FromBase64String(value[TextPrefix.Length..]);
+            var payload = Convert.FromBase64String(value[_textMarker.Length..]);
             return Encoding.UTF8.GetString(_protector.Unprotect(payload));
         }
         catch (Exception exception) when (
@@ -77,6 +81,7 @@ public sealed class SensitiveDataProtector
         }
     }
 
-    private static bool HasPrefix(byte[] value) =>
-        value.Length > Prefix.Length && value.AsSpan(0, Prefix.Length).SequenceEqual(Prefix);
+    private bool HasPrefix(byte[] value) =>
+        value.Length > _payloadMarker.Length
+        && value.AsSpan(0, _payloadMarker.Length).SequenceEqual(_payloadMarker);
 }

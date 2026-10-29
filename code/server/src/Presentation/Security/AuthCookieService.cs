@@ -6,8 +6,8 @@ namespace IMT_Reservas.Server.Presentation.Security;
 
 public sealed class AuthCookieService
 {
-    public const string AccessTokenName = "ucbhold_access";
-    public const string RefreshTokenName = "ucbhold_refresh";
+    public const string AccessTokenName = "session_access";
+    public const string RefreshTokenName = "session_refresh";
 
     private readonly JwtSettings _settings;
     private readonly bool _secure;

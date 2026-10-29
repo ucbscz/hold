@@ -8,19 +8,27 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
+using IMT_Reservas.Tests.Helpers;
 
 namespace IMT_Reservas.Tests.Unit;
 
 [TestFixture]
 internal sealed class DataProtectionConfigurationTests
 {
+    private static readonly Dictionary<string, string?> IdentitySettings = new()
+    {
+        ["DataProtection:ApplicationName"] = TestBranding.DataProtection.ApplicationName,
+        ["DataProtection:PayloadMarker"] = TestBranding.DataProtection.PayloadMarker,
+        ["DataProtection:TextMarker"] = TestBranding.DataProtection.TextMarker,
+    };
+
     [Test]
     public void Configure_ProductionPersistentKeysWithoutCertificate_Throws()
     {
         var services = new ServiceCollection();
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(
-                new Dictionary<string, string?>
+                new Dictionary<string, string?>(IdentitySettings)
                 {
                     ["DataProtection:KeysPath"] = Path.GetTempPath(),
                 }
@@ -39,7 +47,7 @@ internal sealed class DataProtectionConfigurationTests
     public void Configure_WithoutPersistentPath_UsesFrameworkDefaults()
     {
         var services = new ServiceCollection();
-        var configuration = new ConfigurationBuilder().Build();
+        var configuration = new ConfigurationBuilder().AddInMemoryCollection(IdentitySettings).Build();
         var environment = new Mock<IWebHostEnvironment>();
         environment.SetupGet(item => item.EnvironmentName).Returns(Environments.Production);
 
@@ -50,9 +58,25 @@ internal sealed class DataProtectionConfigurationTests
     }
 
     [Test]
+    public void Configure_WithoutIdentity_Throws()
+    {
+        var environment = new Mock<IWebHostEnvironment>();
+        environment.SetupGet(item => item.EnvironmentName).Returns(Environments.Production);
+
+        var action = () =>
+            DataProtectionConfiguration.Configure(
+                new ServiceCollection(),
+                new ConfigurationBuilder().Build(),
+                environment.Object
+            );
+
+        action.Should().Throw<InvalidOperationException>();
+    }
+
+    [Test]
     public void Configure_WithCertificate_EncryptsPersistedKeyMaterial()
     {
-        var directory = Directory.CreateTempSubdirectory("ucbhold-dp-");
+        var directory = Directory.CreateTempSubdirectory("data-protection-");
         try
         {
             const string password = "test-certificate-password";
@@ -74,7 +98,7 @@ internal sealed class DataProtectionConfigurationTests
 
             var configuration = new ConfigurationBuilder()
                 .AddInMemoryCollection(
-                    new Dictionary<string, string?>
+                    new Dictionary<string, string?>(IdentitySettings)
                     {
                         ["DataProtection:KeysPath"] = directory.FullName,
                         ["DataProtection:CertificatePath"] = certificatePath,

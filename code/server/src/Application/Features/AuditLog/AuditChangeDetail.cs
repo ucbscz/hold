@@ -32,8 +32,8 @@ public static class AuditChangeDetail
 
     private static readonly Dictionary<string, string> Labels = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["CodigoImt"] = "Código IMT",
-        ["CodigoUcb"] = "Código UCB",
+        ["CodigoImt"] = "Código interno",
+        ["CodigoUcb"] = "Código institucional",
         ["NumeroSerial"] = "Número de serie",
         ["EstadoEquipo"] = "Estado del equipo",
         ["IdAmbiente"] = "Ambiente",

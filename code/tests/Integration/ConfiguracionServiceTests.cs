@@ -15,6 +15,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.DataProtection;
 using IMT_Reservas.Server.Application.Security;
 using System.Text.Json;
+using IMT_Reservas.Tests.Helpers;
 
 namespace IMT_Reservas.Tests.Integration;
 
@@ -53,6 +54,7 @@ internal class ConfiguracionServiceTests
         var mapper = new ConfiguracionMapper();
         var sensitiveData = new SensitiveDataProtector(
             new EphemeralDataProtectionProvider(),
+            TestBranding.DataProtectionOptions,
             NullLogger<SensitiveDataProtector>.Instance
         );
         _service = new ConfiguracionService(
@@ -86,7 +88,7 @@ internal class ConfiguracionServiceTests
         reloaded.CarnetJefeCarrera.Should().Be("2222222");
         reloaded.FirmaJefeCarreraBase64.Should().Be(OtraFirma);
         _db.ConfiguracionesSistema.Single().FirmaJefeCarreraBase64
-            .Should().StartWith("ucbhold:v1:");
+            .Should().StartWith(TestBranding.DataProtection.TextMarker);
     }
 
     [Test]

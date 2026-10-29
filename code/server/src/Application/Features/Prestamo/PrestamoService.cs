@@ -12,6 +12,7 @@ using IMT_Reservas.Server.Application.Features.Prestamo.State;
 using IMT_Reservas.Server.Application.Features.Usuario;
 using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
+using IMT_Reservas.Server.Application.Features.Equipo;
 using PrestamoEntity = IMT_Reservas.Server.Core.Entities.Prestamo;
 
 namespace IMT_Reservas.Server.Application.Features.Prestamo;
@@ -27,6 +28,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
     private readonly PrestamoDisponibilidadRepository _availability;
     private readonly ConfiguracionService _configuracion;
     private readonly ContractHtmlProcessor _contractHtml;
+    private readonly EquipmentLabels _labels;
 
     public PrestamoService(
         PrestamoRepository repository,
@@ -41,10 +43,12 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         PrestamoEstadoRepository states,
         PrestamoDisponibilidadRepository availability,
         ConfiguracionService configuracion,
-        ContractHtmlProcessor contractHtml
+        ContractHtmlProcessor contractHtml,
+        EquipmentLabels labels
     )
         : base(repository, validator, mapper, audit)
     {
+        _labels = labels;
         _notifications = notifications;
         _usuarioRepository = usuarioRepository;
         _availabilityWatches = availabilityWatches;
@@ -544,7 +548,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         var equipmentNames = string.Join(
             ", ",
             selectedEquipment.Select(equipment =>
-                $"{equipment.NombreGrupoEquipo ?? "Equipo"} IMT {equipment.CodigoImt}"
+                $"{equipment.NombreGrupoEquipo ?? "Equipo"} {_labels.InternalCode(equipment.CodigoImt)}"
             )
         );
         var stateText = inoperableEquipment.Count > 0

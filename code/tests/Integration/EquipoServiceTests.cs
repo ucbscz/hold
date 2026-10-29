@@ -21,12 +21,12 @@ internal class EquipoServiceTests : ServiceTest<EquipoService>
         var repo = new EquipoRepository(db, mapper);
         var validator = new EquipoValidator(db);
         var audit = new AuditLogService(
-            new AuditLogRepository(db),
+            new AuditLogRepository(db, TestBranding.Labels),
             new HttpContextAccessor(),
             new UsuarioReadRepository(db)
         );
 
-        return new EquipoService(repo, mapper, validator, audit);
+        return new EquipoService(repo, mapper, validator, audit, TestBranding.Labels);
     }
 
     [SetUp]
@@ -152,7 +152,7 @@ internal class EquipoServiceTests : ServiceTest<EquipoService>
         var result = await Sut.Create(duplicate);
 
         result.IsSuccess.Should().BeFalse();
-        result.Errors.Should().Contain("Código UCB ya registrado");
+        result.Errors.Should().Contain(TestBranding.Labels.DuplicateOrganizationCode);
         Db.Equipos.Should().ContainSingle();
     }
 

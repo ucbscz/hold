@@ -4,6 +4,7 @@ using IMT_Reservas.Server.Core.Entities;
 using IMT_Reservas.Server.Infrastructure.Config;
 using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using IMT_Reservas.Server.Application.Features.Equipo;
 using AuditLogEntity = IMT_Reservas.Server.Core.Entities.AuditLog;
 
 namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
@@ -11,8 +12,13 @@ namespace IMT_Reservas.Server.Infrastructure.Repositories.Implementations;
 public class AuditLogRepository
 {
     private readonly ApplicationDbContext _db;
+    private readonly EquipmentLabels _labels;
 
-    public AuditLogRepository(ApplicationDbContext db) => _db = db;
+    public AuditLogRepository(ApplicationDbContext db, EquipmentLabels labels)
+    {
+        _db = db;
+        _labels = labels;
+    }
 
     public async Task WriteLog(
         AuditAccion accion,
@@ -183,6 +189,7 @@ public class AuditLogRepository
         if (ids.Count == 0)
             return [];
 
+        var codePrefix = _labels.InternalCodePrefix;
         var labels = entity switch
         {
             nameof(Ambiente) => await _db.Ambientes.AsNoTracking()
@@ -240,7 +247,7 @@ public class AuditLogRepository
                 .Where(item => ids.Contains(item.Id))
                 .Select(item => new EntityLabel(
                     item.Id,
-                    "IMT " + item.CodigoImt + " · " + (item.GrupoEquipo != null ? item.GrupoEquipo.Nombre : "Equipo")
+                    codePrefix + item.CodigoImt + " · " + (item.GrupoEquipo != null ? item.GrupoEquipo.Nombre : "Equipo")
                 ))
                 .ToListAsync(),
             nameof(Prestamo) => await _db.Prestamos.AsNoTracking()

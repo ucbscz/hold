@@ -12,7 +12,8 @@ namespace IMT_Reservas.Tests.Integration;
 [TestFixture]
 internal class AuditLogRepositoryTests : ServiceTest<AuditLogRepository>
 {
-    protected override AuditLogRepository CreateService(ApplicationDbContext db) => new(db);
+    protected override AuditLogRepository CreateService(ApplicationDbContext db) =>
+        new(db, TestBranding.Labels);
 
     [Test]
     public async Task GetFiltered_FiltersByActorActionAndDateBeforeLimitingResults()
@@ -95,7 +96,7 @@ internal class AuditLogRepositoryTests : ServiceTest<AuditLogRepository>
         var result = await Sut.GetFiltered("Equipo", null, null, null, null);
 
         result.Should().ContainSingle();
-        result.Single().EntidadNombre.Should().Be("IMT 240000015 · Osciloscopio");
+        result.Single().EntidadNombre.Should().Be($"{TestBranding.InternalCodeLabel} 240000015 · Osciloscopio");
     }
 
     [Test]

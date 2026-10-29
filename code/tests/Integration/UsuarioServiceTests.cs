@@ -70,7 +70,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         );
 
         var audit = new AuditLogService(
-            new AuditLogRepository(db),
+            new AuditLogRepository(db, TestBranding.Labels),
             new HttpContextAccessor(),
             queries
         );
@@ -99,6 +99,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
             queries,
             new SensitiveDataProtector(
                 new EphemeralDataProtectionProvider(),
+                TestBranding.DataProtectionOptions,
                 NullLogger<SensitiveDataProtector>.Instance
             ),
             verification,

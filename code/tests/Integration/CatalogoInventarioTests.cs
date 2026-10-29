@@ -42,6 +42,7 @@ internal class CatalogoInventarioTests : ServiceTest<CatalogoInventarioRepositor
         var services = new ServiceCollection();
         services.AddSingleton(Db);
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
+        services.AddSingleton(TestBranding.Labels);
         services.AddScoped<AuditLogRepository>();
         services.AddScoped<UsuarioReadRepository>();
         services.AddScoped<AuditLogService>();
