@@ -32,7 +32,7 @@
     "signature_pad": "^5.0.7",
     "ts-results-es": "^7.0.0",
     "tslib": "^2.8.1",
-    "zone.js": "~0.15.0"
+    "zone.js": "~0.16.3"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "21.2.29",
