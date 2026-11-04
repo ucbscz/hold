@@ -1,3 +1,4 @@
+# Operating system
 .DS_Store
 .AppleDouble
 .LSOverride
@@ -7,16 +8,13 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 *.lnk
-code/.sonarqube
-code/coveragereport
-code/server/.sonarqube
-code/tests/coveragereport
-code/tests/TestResults/
-code/tools/quality-reports/
+
+# Editors and local tools
 .vs/
 .vscode/
-.agents
 .idea/
+.history/
+.agents
 .claude/
 *.code-workspace
 *.user
@@ -30,10 +28,17 @@ code/tools/quality-reports/
 .settings/
 *.sublime-workspace
 *.iml
+
+# Quality reports
+.sonarqube/
+coveragereport/
+TestResults/
+coverage/
 frontend_issues.json
 reporte_sonarqube.json
 sonarqube_summary.json
 
+# .NET
 [Bb]in/
 [Oo]bj/
 [Dd]ebug/
@@ -48,7 +53,6 @@ x86/
 *.cache
 *.lscache
 *.dbmdl
-
 *.nupkg
 *.snupkg
 project.lock.json
@@ -56,7 +60,10 @@ project.fragment.lock.json
 artifacts/
 .nuget/
 packages/
+code/server/publish/
+mono_crash.*
 
+# Node and Angular
 node_modules/
 dist/
 /out-tsc
@@ -66,37 +73,39 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 yarn.lock
-coverage/
-.angular/cache/
+.angular/
 .sass-cache/
 /connect.lock
 testem.log
 /typings
-.angular/
 *.tsbuildinfo
 
-.vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history/*
+# Generated from templates by npm run brand
+code/client/src/index.html
+code/client/nginx.conf
 
+# Logs and temporary files
+logs/
+*.log
+*.tlog
+*.tmp
+*.temp
 *.bak
+*.orig
+*.rej
+*.swp
+*.swo
+/libpeerconnection.log
+
+# Databases and backups
 *.db
 *.sqlite
 *.sqlite3
 *.mdf
 *.ldf
-logs/
-/libpeerconnection.log
-
-code/database/*.backup
-code/database/*.dump
-code/database/backups/
-!code/database/schema.sql
 *.backup
 *.dump
+*.sql
 *.sql.gz
 *.sql.gpg
 *.sql.age
@@ -104,59 +113,27 @@ code/database/backups/
 *.backup.age
 *.tar.gz.gpg
 *.tar.gz.age
+code/database/backups/
+!code/database/schema.sql
 
-*.log
-*.tlog
-*.tmp
-*.temp
-*.orig
-*.rej
-*.swp
-*.swo
-mono_crash.*
-
+# Secrets
+.env
+.env.*
+!.env.example
+server.env
+secrets/
 **/secrets.json
 **/*.local.json
+**/data-protection-keys/
 *.pem
 *.key
 *.pfx
 *.p12
 *.crt
 *.cer
-.env
-.env.*
-!.env.example
-server.env
-secrets/
-code/secrets/
-**/https/*.pem
-**/https/*.key
-**/data-protection-keys/
-client_secret*.json
-credentials*.json
-service-account*.json
 *.jks
 *.keystore
 *.kdbx
-*.sql
-!code/database/schema.sql
-
-code/server/publish/
-
-Code/Client/dist/
-code/tests/coveragereport
-code/tests/TestResults/
-.vscode/
-.idea/
-*.log
-*.tmp
-*.bak
-
-/Library/
-/Code/Server/Library/
-/DataBase/
-/package-lock.json
-/Code/base64_firma.txt
-
-code/client/src/index.html
-code/client/nginx.conf
+client_secret*.json
+credentials*.json
+service-account*.json
