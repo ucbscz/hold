@@ -35,21 +35,7 @@ public class AccesorioRepository : Repository<AccesorioEntity, AccesorioDto>
 
     public override async Task<Result<List<AccesorioDto>>> GetAll()
     {
-        var rows = await DbContext
-            .Accesorios.AsNoTracking()
-            .Join(
-                DbContext.Equipos,
-                accesorio => accesorio.IdEquipo,
-                equipo => equipo.Id,
-                (accesorio, equipo) =>
-                    new
-                    {
-                        Accesorio = accesorio,
-                        equipo.CodigoImt,
-                        NombreEquipo = equipo.Descripcion,
-                    }
-            )
-            .ToListAsync();
+        var rows = await WithEquipo(DbContext.Accesorios.AsNoTracking()).ToListAsync();
 
         var dtos = rows
             .Select(row => ToDto(row.Accesorio, row.CodigoImt, row.NombreEquipo))
@@ -60,20 +46,8 @@ public class AccesorioRepository : Repository<AccesorioEntity, AccesorioDto>
 
     public override async Task<Result<AccesorioDto>> Get(int id)
     {
-        var row = await DbContext
-            .Accesorios.AsNoTracking()
-            .Where(accesorio => accesorio.Id == id)
-            .Join(
-                DbContext.Equipos,
-                accesorio => accesorio.IdEquipo,
-                equipo => equipo.Id,
-                (accesorio, equipo) =>
-                    new
-                    {
-                        Accesorio = accesorio,
-                        equipo.CodigoImt,
-                        NombreEquipo = equipo.Descripcion,
-                    }
+        var row = await WithEquipo(
+                DbContext.Accesorios.AsNoTracking().Where(accesorio => accesorio.Id == id)
             )
             .FirstOrDefaultAsync();
 
@@ -81,6 +55,16 @@ public class AccesorioRepository : Repository<AccesorioEntity, AccesorioDto>
 
         return dto == null ? Result<AccesorioDto>.NotFound() : Result<AccesorioDto>.Success(dto);
     }
+
+    private sealed record AccesorioRow(AccesorioEntity Accesorio, int CodigoImt, string? NombreEquipo);
+
+    private IQueryable<AccesorioRow> WithEquipo(IQueryable<AccesorioEntity> accesorios) =>
+        accesorios.Join(
+            DbContext.Equipos,
+            accesorio => accesorio.IdEquipo,
+            equipo => equipo.Id,
+            (accesorio, equipo) => new AccesorioRow(accesorio, equipo.CodigoImt, equipo.Descripcion)
+        );
 
     private static AccesorioDto ToDto(
         AccesorioEntity accesorio,

@@ -1,6 +1,8 @@
+using UCB_Hold.Server.Shared.Kernel;
+
 namespace UCB_Hold.Server.Modules.Inventario.Application;
 
-public class AccesorioDto
+public class AccesorioDto : IIdentifiedDto
 {
     public int? Id { get; set; }
     public string? Nombre { get; set; }

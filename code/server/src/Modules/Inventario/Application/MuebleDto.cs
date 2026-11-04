@@ -1,6 +1,8 @@
+using UCB_Hold.Server.Shared.Kernel;
+
 namespace UCB_Hold.Server.Modules.Inventario.Application;
 
-public class MuebleDto
+public class MuebleDto : IIdentifiedDto
 {
     public int? Id { get; set; }
     public string? Nombre { get; set; }
