@@ -22,6 +22,10 @@ public static class PrestamosModule
         services.AddSingleton<HorarioReserva>();
         services.AddScoped<CarritoService>();
         services.AddScoped<PrestamoService>();
+        services.AddScoped<PrestamoConsultaService>();
+        services.AddScoped<CambioEstadoPrestamoService>();
+        services.AddScoped<RetornoEquiposService>();
+        services.AddScoped<NotificacionPrestamoService>();
         services.AddScoped<ContratoService>();
         services.AddScoped<AvisoDisponibilidadService>();
         services.AddScoped<EstadoPrestamoService>();

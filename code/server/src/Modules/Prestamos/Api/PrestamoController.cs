@@ -12,8 +12,19 @@ namespace UCB_Hold.Server.Modules.Prestamos.Api;
 public class PrestamoController : ApiController
 {
     private readonly PrestamoService _service;
+    private readonly CambioEstadoPrestamoService _estados;
+    private readonly PrestamoConsultaService _consultas;
 
-    public PrestamoController(PrestamoService service) => _service = service;
+    public PrestamoController(
+        PrestamoService service,
+        CambioEstadoPrestamoService estados,
+        PrestamoConsultaService consultas
+    )
+    {
+        _service = service;
+        _estados = estados;
+        _consultas = consultas;
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetAll(
@@ -27,7 +38,7 @@ public class PrestamoController : ApiController
     {
         if (User.PuedeGestionar())
             return ToResponse(
-                await _service.GetFiltered(
+                await _consultas.GetFiltered(
                     string.IsNullOrWhiteSpace(carnet) ? null : carnet,
                     string.IsNullOrWhiteSpace(estado) ? string.Empty : estado,
                     pagina,
@@ -38,7 +49,7 @@ public class PrestamoController : ApiController
             );
 
         return ToResponse(
-            await _service.GetHistory(
+            await _consultas.GetHistory(
                 CurrentCarnet,
                 estado ?? string.Empty,
                 pagina,
@@ -52,7 +63,7 @@ public class PrestamoController : ApiController
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id, CancellationToken cancellationToken) =>
         ToResponse(
-            await _service.GetAuthorized(
+            await _consultas.GetAuthorized(
                 id,
                 CurrentCarnet,
                 User.PuedeGestionar(),
@@ -91,7 +102,7 @@ public class PrestamoController : ApiController
     )
     {
         return ToResponse(
-            await _service.ChangeStatus(
+            await _estados.ChangeStatus(
                 id,
                 request,
                 CurrentCarnet,

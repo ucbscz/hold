@@ -34,6 +34,9 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         NullLogger<SensitiveDataProtector>.Instance
     );
 
+    private CambioEstadoPrestamoService Estados { get; set; } = null!;
+    private PrestamoConsultaService Consultas { get; set; } = null!;
+
     protected override PrestamoService CreateService(ApplicationDbContext db)
     {
         var configRepo = new ConfiguracionRepository(db, Cache);
@@ -74,21 +77,28 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
             _sensitiveData
         );
 
+        Consultas = new PrestamoConsultaService(queries);
+        Estados = new CambioEstadoPrestamoService(
+            repo,
+            queries,
+            availability,
+            audit,
+            userRepository,
+            availabilityRepository,
+            configRepo,
+            new RetornoEquiposService(states, TestBranding.Labels),
+            new NotificacionPrestamoService(notifications)
+        );
+
         return new PrestamoService(
             repo,
             mapper,
             validator,
             audit,
             notifications,
-            userRepository,
-            availabilityRepository,
-            configRepo,
             queries,
-            states,
-            availability,
             configuration,
-            contractHtml,
-            TestBranding.Labels
+            contractHtml
         );
     }
 
@@ -555,7 +565,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var createResult = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
         var prestamoId = createResult.Value.Id!.Value;
 
-        var result = await Sut.UpdateStatus(prestamoId, "rechazado", "Equipo requerido para una clase");
+        var result = await Estados.UpdateStatus(prestamoId, "rechazado", "Equipo requerido para una clase");
 
         result.IsSuccess.Should().BeTrue();
         result.Value.EstadoPrestamo.Should().Be("rechazado");
@@ -568,7 +578,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var createResult = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
         var prestamoId = createResult.Value.Id!.Value;
 
-        var result = await Sut.UpdateStatus(prestamoId, "activo");
+        var result = await Estados.UpdateStatus(prestamoId, "activo");
 
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().Contain(e => e.Contains("no permitida"));
@@ -581,7 +591,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var createResult = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
         var prestamoId = createResult.Value.Id!.Value;
 
-        var result = await Sut.UpdateStatus(prestamoId, "estado_inventado");
+        var result = await Estados.UpdateStatus(prestamoId, "estado_inventado");
 
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().Contain(e => e.Contains("no reconocido"));
@@ -590,7 +600,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     [Test]
     public async Task UpdateStatus_NonExistentPrestamo_ReturnsNotFound()
     {
-        var result = await Sut.UpdateStatus(99, "aprobado");
+        var result = await Estados.UpdateStatus(99, "aprobado");
 
         result.IsSuccess.Should().BeFalse();
         result.Status.Should().Be(Ardalis.Result.ResultStatus.NotFound);
@@ -621,7 +631,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
 
         await SeedActiveLoanForEquipo(EquipoId, EstadoPrestamo.Aprobado, fechaInicio, fechaFin);
 
-        var result = await Sut.UpdateStatus(loan.Id, "aprobado");
+        var result = await Estados.UpdateStatus(loan.Id, "aprobado");
 
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().Contain(e => e.Contains("no hay equipos disponibles"));
@@ -638,7 +648,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         ));
         var prestamoId = createResult.Value.Id!.Value;
 
-        var result = await Sut.UpdateStatus(prestamoId, "aprobado");
+        var result = await Estados.UpdateStatus(prestamoId, "aprobado");
 
         result.IsSuccess.Should().BeTrue();
         result.Value.EstadoPrestamo.Should().Be("aprobado");
@@ -657,7 +667,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         );
         var prestamoId = createResult.Value.Id!.Value;
 
-        var result = await Sut.UpdateStatus(
+        var result = await Estados.UpdateStatus(
             prestamoId,
             "aprobado",
             "Autorizado para la práctica de laboratorio",
@@ -690,7 +700,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         Db.Prestamos.Add(loan);
         await Db.SaveChangesAsync();
 
-        var result = await Sut.UpdateStatus(loan.Id, "aprobado");
+        var result = await Estados.UpdateStatus(loan.Id, "aprobado");
 
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().Contain(error => error.Contains("ya venció"));
@@ -702,7 +712,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         const string manualReason = "Bloqueo administrativo vigente";
         var loanId = await SeedOverdueLoan(manualReason);
 
-        var result = await Sut.UpdateStatus(loanId, "finalizado");
+        var result = await Estados.UpdateStatus(loanId, "finalizado");
 
         result.IsSuccess.Should().BeTrue();
         var user = await Db.Usuarios.AsNoTracking().SingleAsync(u => u.Carnet == Carnet);
@@ -718,7 +728,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     {
         var loanId = await SeedOverdueLoan(AutomaticBlockReasons.OverdueLoan);
 
-        var result = await Sut.UpdateStatus(loanId, "finalizado");
+        var result = await Estados.UpdateStatus(loanId, "finalizado");
 
         result.IsSuccess.Should().BeTrue();
         var user = await Db.Usuarios.AsNoTracking().SingleAsync(u => u.Carnet == Carnet);
@@ -750,7 +760,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         );
         dto.Contrato = contract;
         var createResult = await Sut.Create(dto);
-        var approvalResult = await Sut.UpdateStatus(createResult.Value.Id!.Value, "aprobado");
+        var approvalResult = await Estados.UpdateStatus(createResult.Value.Id!.Value, "aprobado");
 
         createResult.IsSuccess.Should().BeTrue();
         approvalResult.IsSuccess.Should().BeTrue();
@@ -800,7 +810,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         dto.Contrato = contract;
 
         var result = await Sut.Create(dto);
-        var approvalResult = await Sut.UpdateStatus(result.Value.Id!.Value, "aprobado");
+        var approvalResult = await Estados.UpdateStatus(result.Value.Id!.Value, "aprobado");
 
         result.IsSuccess.Should().BeTrue();
         approvalResult.IsSuccess.Should().BeTrue();
@@ -877,8 +887,8 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         );
         var id = createResult.Value.Id!.Value;
 
-        var unauthorized = await Sut.GetAuthorized(id, "U002", false);
-        var admin = await Sut.GetAuthorized(id, "U002", true);
+        var unauthorized = await Consultas.GetAuthorized(id, "U002", false);
+        var admin = await Consultas.GetAuthorized(id, "U002", true);
 
         unauthorized.Status.Should().Be(Ardalis.Result.ResultStatus.NotFound);
         admin.IsSuccess.Should().BeTrue();
@@ -921,7 +931,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var start = DateTime.UtcNow.AddDays(1);
         await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
 
-        var result = await Sut.GetHistory(Carnet, "todos");
+        var result = await Consultas.GetHistory(Carnet, "todos");
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().AllSatisfy(p => p.CarnetUsuario.Should().Be(Carnet));
@@ -933,7 +943,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var start = DateTime.UtcNow.AddDays(1);
         await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
 
-        var result = await Sut.GetHistory(Carnet, "pendiente");
+        var result = await Consultas.GetHistory(Carnet, "pendiente");
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().AllSatisfy(p => p.EstadoPrestamo.Should().Be("pendiente"));
@@ -948,13 +958,13 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         );
         await Sut.SetSaved(created.Value.Id!.Value, Carnet, true, CancellationToken.None);
 
-        var saved = await Sut.GetHistory(
+        var saved = await Consultas.GetHistory(
             Carnet,
             "todos",
             cancellationToken: CancellationToken.None,
             guardado: true
         );
-        var notSaved = await Sut.GetHistory(
+        var notSaved = await Consultas.GetHistory(
             Carnet,
             "todos",
             cancellationToken: CancellationToken.None,
@@ -972,7 +982,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var start = DateTime.UtcNow.AddDays(1);
         await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, start, start.AddDays(3)));
 
-        var result = await Sut.GetFiltered(null, "pendiente");
+        var result = await Consultas.GetFiltered(null, "pendiente");
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Should().ContainSingle();
@@ -982,7 +992,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     [Test]
     public async Task GetHistory_EmptyCarnet_ReturnsError()
     {
-        var result = await Sut.GetHistory("", "todos");
+        var result = await Consultas.GetHistory("", "todos");
 
         result.IsSuccess.Should().BeFalse();
         result.Errors.Should().Contain("Carnet requerido");
@@ -1083,7 +1093,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     public async Task ChangeStatus_WithoutManagement_OnlyAllowsCancellation()
     {
         var created = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.UtcNow.AddDays(4), DateTime.UtcNow.AddDays(5)));
-        var result = await Sut.ChangeStatus(
+        var result = await Estados.ChangeStatus(
             created.Value.Id!.Value,
             new PrestamoDto { EstadoPrestamo = "aprobado" },
             Carnet,
@@ -1098,7 +1108,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     public async Task CancelForUser_DoesNotCancelSomeoneElsesLoan()
     {
         var created = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.UtcNow.AddDays(4), DateTime.UtcNow.AddDays(5)));
-        var result = await Sut.CancelForUser(created.Value.Id!.Value, "another-user", default);
+        var result = await Estados.CancelForUser(created.Value.Id!.Value, "another-user", default);
         result.Status.Should().Be(Ardalis.Result.ResultStatus.NotFound);
         Db.Prestamos.Single().EstadoPrestamo.Should().Be(EstadoPrestamo.Pendiente);
     }
@@ -1107,7 +1117,7 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
     public async Task Rejection_RequiresReasonAndDoesNotChangeStateWhenMissing()
     {
         var created = await Sut.Create(BuildValidPrestamo(Carnet, GrupoId, DateTime.UtcNow.AddDays(4), DateTime.UtcNow.AddDays(5)));
-        var result = await Sut.UpdateStatus(created.Value.Id!.Value, "rechazado");
+        var result = await Estados.UpdateStatus(created.Value.Id!.Value, "rechazado");
         result.IsSuccess.Should().BeFalse();
         Db.Prestamos.Single().EstadoPrestamo.Should().Be(EstadoPrestamo.Pendiente);
     }
