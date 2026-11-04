@@ -255,7 +255,7 @@ Email__From=<sender-address>
 Email__EnableSsl=true
 ```
 
-Replace the bracketed values with the production configuration on Oracle. TLS must terminate at the public reverse proxy, which must preserve `Host` and `X-Forwarded-Proto`. The configured frontend URL must use `https`, must not contain a path and should not end in `/`.
+Replace the bracketed values with the production configuration on Oracle. TLS must terminate at the public reverse proxy, which must preserve `Host`, `X-Forwarded-Proto` and the real client address in `X-Forwarded-For`; behind a CDN, restore that address first (for Cloudflare, `real_ip_header CF-Connecting-IP` with its published ranges in `set_real_ip_from`) or authentication rate limits are shared by every user. The API trusts forwarded headers, so it must listen only on the loopback interface or a private network. The configured frontend URL must use `https`, must not contain a path and should not end in `/`.
 
 Never commit `code/server.env`, `.env`, `client_secret.json`, database passwords, `Jwt__Key`, `Authentication__Google__ClientSecret`, `Email__Password`, private keys or production backups. The repository ignores these files; `code/server.env.example` is intentionally tracked and must contain placeholders only. The Google client ID is not a password, but keeping all environment-specific values together avoids accidental production configuration in source control.
 
@@ -295,7 +295,8 @@ The release never contains production data or full backups. Keep operational bac
 | PostgreSQL or Redis refuses connection | Run `cd code && docker compose --env-file server.env up -d ucb_db ucb_redis`.                      |
 | Backend cannot read secrets            | Run the `dotnet user-secrets` commands from `code/server`.                                         |
 | Database schema is outdated            | Review and apply the required `ALTER` statements, or recreate an empty database from `schema.sql`. |
-| Port `4200` is already in use          | Run Angular with another port, for example `ng serve --port 4300`.                                 |
+| Port `4200` is already in use          | Run `npm run brand`, then Angular with another port, for example `npx ng serve --port 4300`.       |
+| `Failed to read index HTML file`       | Run `npm run brand`, or use `npm start`/`npm run build` instead of calling `ng` directly.          |
 | Frontend dependencies are missing      | Run `npm install` from `code/client`.                                                              |
 | Docker backend restarts                | Inspect logs with `docker logs -f ucb_server`.                                                     |
 | Data Protection material missing       | Provision the required runtime secrets through the private operational process.                    |

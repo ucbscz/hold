@@ -70,11 +70,11 @@ Validation and domain failures preserve the same structure:
 
 ## Authentication
 
-Successful local and Google authentication writes an access cookie and a rotating refresh cookie. Both are `HttpOnly`, `SameSite=Strict`, scoped to API paths and marked `Secure` outside Development. Authentication responses contain the safe user projection and never expose either token to JavaScript. API clients must preserve cookies between requests.
+Successful local and external-provider authentication writes an access cookie and a rotating refresh cookie. Both are `HttpOnly`, `SameSite=Strict`, scoped to API paths and marked `Secure` outside Development. Authentication responses contain the safe user projection and never expose either token to JavaScript. API clients must preserve cookies between requests.
 
 | Method | Route                            | Purpose                                                         |
 | ------ | -------------------------------- | --------------------------------------------------------------- |
-| `POST` | `/api/usuarios`                  | Register a local user or complete a Google registration.        |
+| `POST` | `/api/usuarios`                  | Register a local user or complete an external registration.     |
 | `POST` | `/api/auth/login`                | Authenticate a verified local account and create a session.     |
 | `POST` | `/api/auth/refresh`              | Rotate the access and refresh tokens.                           |
 | `POST` | `/api/auth/logout`               | Revoke the refresh token and clear both session cookies.        |
@@ -94,6 +94,8 @@ Local accounts are created with `EmailVerificado = false`. Verification links ex
 | Method   | Route                              | Purpose                                        |
 | -------- | ---------------------------------- | ---------------------------------------------- |
 | `GET`    | `/api/usuarios`                    | List users. Administrator only.                |
+| `GET`    | `/api/usuarios/perfil`             | Get the authenticated user's profile.          |
+| `PUT`    | `/api/usuarios/perfil`             | Update the authenticated user's profile.       |
 | `GET`    | `/api/usuarios/{carnet}`           | Get a user by carnet.                          |
 | `PUT`    | `/api/usuarios/{carnet}`           | Update a user.                                 |
 | `PATCH`  | `/api/usuarios/{carnet}/bloqueo`   | Block or unblock a user. Administrator only.   |
@@ -143,7 +145,7 @@ Equipment group payloads expose `TiempoMaximoPrestamoDias` (1 to 365). This grou
 
 `POST /api/grupos/importar` accepts `{ "Url": "https://..." }` and never persists data. It extracts JSON-LD Product or OpenGraph metadata into a preview that the administrator must review and submit through the regular group endpoint. Requests reject credentials, non-HTTPS URLs, nonstandard ports, local/private/reserved addresses and unsafe redirects; DNS is revalidated at connection time, redirects are limited to three, the timeout is eight seconds, and the response is limited to one megabyte of HTML.
 
-Room and origin payloads are `{ "Id": 1, "Nombre": "Sala principal" }`. Equipment writes use nullable `IdAmbiente` and `IdProcedencia`; read DTOs retain `Ubicacion`/`Procedencia` as resolved names. Catalog deletion fails with 409 when equipment references the entry. `CodigoUcb` is optional and unique when provided; serial numbers are never generated. `CostoReferencia` is expressed in Bolivianos.
+Room and origin payloads are `{ "Id": 1, "Nombre": "Sala principal" }`. Equipment writes use nullable `IdAmbiente` and `IdProcedencia`; read DTOs retain `Ubicacion`/`Procedencia` as resolved names. Catalog deletion fails with 409 when equipment references the entry. `CodigoUcb` is optional and unique when provided; serial numbers are never generated. `CostoReferencia` is expressed in the local currency.
 
 ## Comments
 
@@ -171,11 +173,12 @@ Room and origin payloads are `{ "Id": 1, "Nombre": "Sala principal" }`. Equipmen
 | `GET`    | `/api/contratos/{prestamoId}`              | Get a contract by loan id.                                                  |
 | `DELETE` | `/api/contratos/{prestamoId}`              | Delete a contract.                                                          |
 | `POST`   | `/api/carrito/disponibilidad`              | Calculate availability after validating each group's maximum duration.      |
+| `POST`   | `/api/carrito/disponibilidad/calendario`   | Calculate daily availability for the reservation calendar.                  |
 | `POST`   | `/api/avisos`                              | Create an availability watch for the authenticated user.                    |
 
 Rejection requires a nonempty `Observacion` (max 1024), stored as `MotivoRechazo`. `AutorizadoPor` records the approving actor and `EntregadoPor` the delivery actor; clients cannot supply these identities when creating loans. Pending loans precede other states; within a priority, teachers precede administrative borrowers, then students, newest request first. Priority never overrides availability.
 
-Visible uses are internal (`Universidad`, or `Clase` for class details) and external (`Casa`). Internal start/end must fall on the same date in Bolivia and within the configured opening hours. External use respects the equipment group's maximum duration.
+Visible uses are internal (`Universidad`, or `Clase` for class details) and external (`Casa`). Internal start/end must fall on the same date in the configured region time zone (`Region:TimeZoneId`) and within the configured opening hours. External use respects the equipment group's maximum duration.
 
 Contract retrieval uses the **loan ID**, not the contract ID, and is restricted to its owner or either management role. New contract HTML includes `img[data-carnet="frente"]`, `img[data-carnet="atras"]` and the user signature; only sanitized inline raster images are retained. The institutional signature is never sent to the browser while drafting: the server replaces institutional identity fields and inserts its protected signature before persisting the final contract. The client offers HTML download and isolated contract/identity-card printing, also usable as browser PDF export. These documents contain personal data and are not public assets.
 
@@ -189,7 +192,7 @@ The root role is displayed as **Administrador general**; its API/authorization v
 
 ## Weekly and Special Opening Hours
 
-`GET /api/configuracion` remains public; `PUT /api/configuracion` remains root-only. The existing payload adds `Horarios`, an array of `{ DiaSemana, Fecha, Abierto, InicioMinutos, FinMinutos }`. `Fecha` is nullable ISO `YYYY-MM-DD`; `DiaSemana` is 0 (Sunday) through 6. A date exception takes precedence over a weekday rule. Without either, the global hours apply Monday through Saturday. Minimum duration is at least 30 minutes. All reservation enforcement uses Bolivia time.
+`GET /api/configuracion` remains public; `PUT /api/configuracion` remains root-only. The existing payload adds `Horarios`, an array of `{ DiaSemana, Fecha, Abierto, InicioMinutos, FinMinutos }`. `Fecha` is nullable ISO `YYYY-MM-DD`; `DiaSemana` is 0 (Sunday) through 6. A date exception takes precedence over a weekday rule. Without either, the global hours apply Monday through Saturday. Minimum duration is at least 30 minutes. All reservation enforcement uses the configured region time zone.
 
 The contract responsible is linked to an active user through `CarnetJefeCarrera`. When not assigned, the first available general administrator ordered by carnet is proposed. `NombreJefeCarrera` is derived from that user's full name, never trusted from the client. Changing the responsible requires their signature. Public configuration uses a dedicated response DTO without the responsible's name, identifier, or signature; only root can read or change them. The signature is protected at rest with the persistent Data Protection key ring. Configuration responses use `Cache-Control: no-store`.
 

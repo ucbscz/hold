@@ -11,7 +11,7 @@ UCB Hold uses PostgreSQL 16+ with Entity Framework Core 8. The database name, ad
 | Table                     | Purpose                                                                                                      | Soft delete |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------ | ----------- |
 | `usuarios`                | User identity, contact data and role.                                                                        | Yes         |
-| `codigos_autenticacion`   | Hashed, expiring, single-use Google exchange codes.                                                          | No          |
+| `codigos_autenticacion`   | Hashed, expiring, single-use external identity exchange codes.                                               | No          |
 | `prestamos`               | Loan lifecycle, user ownership and date range.                                                               | Yes         |
 | `detalles_prestamos`      | Equipment groups requested in each loan.                                                                     | Yes         |
 | `grupos_equipos`          | Catalog-level grouping, including the maximum loan duration shared by equivalent units.                      | Yes         |
@@ -20,6 +20,7 @@ UCB Hold uses PostgreSQL 16+ with Entity Framework Core 8. The database name, ad
 | `procedencias`            | Acquisition origins referenced by `equipos.id_procedencia`.                                                  | Yes         |
 | `configuraciones_sistema` | Global opening hours and weekly/date exceptions in `horarios` JSONB.                                         | No          |
 | `categorias`              | Equipment classification.                                                                                    | Yes         |
+| `comentarios_equipos`     | Comments, replies and likes on equipment groups.                                                             | Yes         |
 | `carreras`                | Academic programs associated with users.                                                                     | Yes         |
 | `muebles`                 | Storage furniture.                                                                                           | Yes         |
 | `gaveteros`               | Storage lockers inside furniture.                                                                            | Yes         |
@@ -59,7 +60,7 @@ Derived values exist to speed up administrative screens. Business logic should s
 
 `usuarios.imagen_perfil`, `usuarios.imagen_frente_carnet`, `usuarios.imagen_atras_carnet`, `usuarios.imagen_firma`, `configuraciones_sistema.firma_jefe_carrera_base64`, and final contract HTML use ASP.NET Core Data Protection payloads rather than raw sensitive content. The key ring persists across deployments in restricted infrastructure. Final contracts retain their own immutable protected copy so later profile or institutional-signature changes do not alter historical records.
 
-`usuarios.email_verificado` blocks local authentication until ownership is confirmed. `token_verificacion_hash` stores SHA-256 output rather than the emailed token and is cleared atomically after confirmation. `google_id` uniquely links an institutional Google identity. `codigos_autenticacion` stores only hashes of ten-minute OAuth exchange codes and removes consumed or expired rows as new codes are issued.
+`usuarios.email_verificado` blocks local authentication until ownership is confirmed. `token_verificacion_hash` stores SHA-256 output rather than the emailed token and is cleared atomically after confirmation. `google_id` keeps its historical name and uniquely links the external identity provider subject. `codigos_autenticacion` stores only hashes of ten-minute OAuth exchange codes and removes consumed or expired rows as new codes are issued.
 
 ## Availability and Duration Rules
 

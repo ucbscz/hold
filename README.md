@@ -20,7 +20,7 @@ Plataforma full-stack para gestionar reservas, préstamos, mantenimiento y traza
   <a href="CONTRIBUTING.md">Contributing</a>
 </p>
 
-[![Tests](https://github.com/alejandroramirezvallejos/UCB_Hold/actions/workflows/tests.yml/badge.svg)](https://github.com/alejandroramirezvallejos/UCB_Hold/actions/workflows/tests.yml)
+[![Tests](https://github.com/ucbscz/hold/actions/workflows/tests.yml/badge.svg)](https://github.com/ucbscz/hold/actions/workflows/tests.yml)
 [![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=flat-square&logo=dotnet)](https://dotnet.microsoft.com/)
 [![Angular](https://img.shields.io/badge/Angular-21.2-DD0031?style=flat-square&logo=angular)](https://angular.dev/)
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16+-4169E1?style=flat-square&logo=postgresql)](https://www.postgresql.org/)
@@ -55,7 +55,7 @@ UCB Hold centraliza el ciclo operativo de los equipos de laboratorio: consulta d
 | Frontend       | Angular 21.2, TypeScript, RxJS                             | Application shell, screens, widgets, forms, guards and HTTP integration. |
 | Backend        | ASP.NET Core 8, Ardalis.Result, FluentValidation, Mapperly | REST API, business rules, validation and normalized responses.           |
 | Data           | PostgreSQL 16+, EF Core 8, Npgsql                          | Persistence, native enums, triggers, indexes and projections.            |
-| Infrastructure | Redis 7, Docker Compose, Nginx                             | Local services, cache support and containerized delivery.                |
+| Infrastructure | Redis 7, Elasticsearch 8, Hangfire, Docker Compose, Nginx  | Cache, equipment search, background jobs and containerized delivery.     |
 | Quality        | NUnit, Jasmine/Karma, GitHub Actions, SonarQube            | Automated tests, coverage, static analysis and CI verification.          |
 
 ---
@@ -87,7 +87,8 @@ The frontend follows Feature-Sliced Design with its layers directly under `code/
 | `features` | User actions and business flows.                                 |
 | `entities` | Domain models, API services and entity-specific UI.              |
 | `shared`   | Cross-cutting utilities, directives, primitives and reusable UI. |
-| `brand`    | Organization name, labels, colors, fonts and asset paths.        |
+
+Deployment-specific configuration lives beside the layers and contains no logic: `brand` (organization name, labels, colors, fonts and asset paths), `region` (locale and time zone) and `external-services` (identity provider, network provider and blocked image origins).
 
 The backend is a modular monolith. Each business module owns its domain, use cases, persistence and HTTP endpoints, and registers its services through a single `Add<Module>Module` extension:
 
@@ -200,7 +201,7 @@ Generated coverage and quality outputs must stay out of source control. CI publi
 | Database schema   | `code/database/schema.sql` documents the database structure maintained by the application.                |
 | Database releases | Releases publish source code only; `schema.sql` lives in the repository and backups stay private.         |
 | Generated reports | Coverage, SonarQube exports and HTML reports are ignored and uploaded by CI when needed.                  |
-| Releases          | Each release should include source changes, migration notes and operational artifacts only when required. |
+| Releases          | Each release publishes source code only; SQL for existing databases goes in the release notes.            |
 
 ---
 
