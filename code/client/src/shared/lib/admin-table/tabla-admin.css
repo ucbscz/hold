@@ -196,3 +196,7 @@
     height: 1.75rem;
   }
 }
+
+.precio-column {
+  text-align: right;
+}

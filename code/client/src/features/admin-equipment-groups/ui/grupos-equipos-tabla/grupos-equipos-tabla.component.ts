@@ -1,11 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  inject,
-  OnInit,
-  signal,
-  WritableSignal,
-} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Categorias, CategoriaService } from '@entities/category';
 import { GrupoEquipo, GrupoequipoService } from '@entities/equipment-group';
@@ -13,9 +7,8 @@ import {
   AvisoEliminarComponent,
   BuscadorComponent,
   MostrarerrorComponent,
-  ToastService,
 } from '@shared/ui';
-import { AdminTabsComponent, Tabla } from '@shared/lib/admin-table';
+import { AdminTabsComponent, TablaGestion } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import { EquiposInlineComponent } from '@entities/equipment';
@@ -43,17 +36,10 @@ import { GruposEquiposFormularioComponent } from '../grupos-equipos-formulario/g
     './grupos-equipos-tabla.component.css',
   ],
 })
-export class GruposEquiposTablaComponent extends Tabla implements OnInit {
-  private readonly toast = inject(ToastService);
-  expandedRowId: number | null = null;
-  auditRefresh = 0;
-
-  toggleExpand(id: number) {
-    this.expandedRowId = this.expandedRowId === id ? null : id;
-  }
-  botoncrear: WritableSignal<boolean> = signal(false);
-  botoneditar: WritableSignal<boolean> = signal(false);
-  alertaeliminar: boolean = false;
+export class GruposEquiposTablaComponent
+  extends TablaGestion
+  implements OnInit
+{
   gruposEquipos: GrupoEquipo[] = [];
   gruposEquiposFiltrados: GrupoEquipo[] = [];
   categorias: string[] = [];

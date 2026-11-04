@@ -1,22 +1,15 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  inject,
-  OnInit,
-  signal,
-  WritableSignal,
-} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Muebles, MuebleService } from '@entities/furniture';
 import {
   AvisoEliminarComponent,
   BuscadorComponent,
   MostrarerrorComponent,
-  ToastService,
 } from '@shared/ui';
 import {
   AdminTabsComponent,
-  Tabla,
+  TablaGestion,
   TablePaginationComponent,
 } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
@@ -47,17 +40,7 @@ import { MueblesFormularioComponent } from '../muebles-formulario/muebles-formul
     './muebles-tabla.component.css',
   ],
 })
-export class MueblesTablaComponent extends Tabla implements OnInit {
-  private readonly toast = inject(ToastService);
-  expandedRowId: number | null = null;
-  auditRefresh = 0;
-
-  toggleExpand(id: number) {
-    this.expandedRowId = this.expandedRowId === id ? null : id;
-  }
-  botoncrear: WritableSignal<boolean> = signal(false);
-  botoneditar: WritableSignal<boolean> = signal(false);
-  alertaeliminar: boolean = false;
+export class MueblesTablaComponent extends TablaGestion implements OnInit {
   muebles: Muebles[] = [];
   mueblesFiltrados: Muebles[] = [];
   muebleSeleccionado: Muebles = new Muebles();

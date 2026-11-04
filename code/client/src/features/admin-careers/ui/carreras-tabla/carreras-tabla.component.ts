@@ -1,14 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal, WritableSignal } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Carrera, CarreraService } from '@entities/career';
 import {
   AvisoEliminarComponent,
   BuscadorComponent,
   MostrarerrorComponent,
-  ToastService,
 } from '@shared/ui';
-import { AdminTabsComponent, Tabla } from '@shared/lib/admin-table';
+import { AdminTabsComponent, TablaGestion } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import { AuditPanelComponent } from '@entities/audit-log';
@@ -33,18 +32,7 @@ import { CarrerasFormularioComponent } from '../carreras-formulario/carreras-for
     './carreras-tabla.component.css',
   ],
 })
-export class CarrerasTablaComponent extends Tabla {
-  private readonly toast = inject(ToastService);
-  expandedRowId: number | null = null;
-  auditRefresh = 0;
-
-  toggleExpand(id: number): void {
-    this.expandedRowId = this.expandedRowId === id ? null : id;
-  }
-
-  botoncrear: WritableSignal<boolean> = signal(false);
-  botoneditar: WritableSignal<boolean> = signal(false);
-  alertaeliminar: boolean = false;
+export class CarrerasTablaComponent extends TablaGestion {
   carreras: Carrera[] = [];
   carrerascopia: Carrera[] = [];
   carreraSeleccionada: Carrera = new Carrera();

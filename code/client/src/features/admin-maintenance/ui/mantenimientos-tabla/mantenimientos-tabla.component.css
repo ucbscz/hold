@@ -85,10 +85,6 @@
   text-align: right;
 }
 
-.precio-column {
-  text-align: right;
-}
-
 @media (max-width: 768px) {
   .maintenance-date-filters {
     width: 100%;

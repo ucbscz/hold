@@ -1,21 +1,14 @@
 import { INVENTORY_LABELS } from '@brand/brand';
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  inject,
-  OnInit,
-  signal,
-  WritableSignal,
-} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Componente, ComponenteService } from '@entities/component';
 import {
   AvisoEliminarComponent,
   BuscadorComponent,
   MostrarerrorComponent,
-  ToastService,
 } from '@shared/ui';
-import { AdminTabsComponent, Tabla } from '@shared/lib/admin-table';
+import { AdminTabsComponent, TablaGestion } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import { AuditPanelComponent } from '@entities/audit-log';
@@ -40,18 +33,7 @@ import { ComponentesFormularioComponent } from '../componentes-formulario/compon
     './componentes-tabla.component.css',
   ],
 })
-export class ComponentesTablaComponent extends Tabla implements OnInit {
-  private readonly toast = inject(ToastService);
-  expandedRowId: number | null = null;
-  auditRefresh = 0;
-
-  toggleExpand(id: number) {
-    this.expandedRowId = this.expandedRowId === id ? null : id;
-  }
-
-  botoncrear: WritableSignal<boolean> = signal(false);
-  botoneditar: WritableSignal<boolean> = signal(false);
-  alertaeliminar: boolean = false;
+export class ComponentesTablaComponent extends TablaGestion implements OnInit {
   componentes: Componente[] = [];
   componentescopia: Componente[] = [];
   componenteSeleccionado: Componente = new Componente();

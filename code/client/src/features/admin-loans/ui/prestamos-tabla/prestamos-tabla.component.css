@@ -121,10 +121,6 @@ td.actions-column {
   padding-right: 3rem;
 }
 
-.precio-column {
-  text-align: right;
-}
-
 .empty-state--viewport {
   position: absolute;
   top: 3.75rem;

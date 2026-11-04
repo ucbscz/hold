@@ -45,10 +45,6 @@
   text-align: right;
 }
 
-.precio-column {
-  text-align: right;
-}
-
 td.actions-column {
   display: flex;
   align-items: center;

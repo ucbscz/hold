@@ -1,6 +1,6 @@
 import { INVENTORY_LABELS } from '@brand/brand';
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal, WritableSignal } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import {
   Equipos,
@@ -14,11 +14,10 @@ import {
   CustomSelectComponent,
   MostrarerrorComponent,
   OpcionSelect,
-  ToastService,
 } from '@shared/ui';
 import {
   AdminTabsComponent,
-  Tabla,
+  TablaGestion,
   TablePaginationComponent,
 } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
@@ -50,15 +49,7 @@ import { EquiposFormularioComponent } from '../equipos-formulario/equipos-formul
     './equipos-tabla.component.css',
   ],
 })
-export class EquiposTablaComponent extends Tabla {
-  private readonly toast = inject(ToastService);
-  expandedRowId: number | null = null;
-  auditRefresh = 0;
-
-  toggleExpand(id: number) {
-    this.expandedRowId = this.expandedRowId === id ? null : id;
-  }
-
+export class EquiposTablaComponent extends TablaGestion {
   obsHistorial: string | null = null;
   abrirObsHistorial(obs: string) {
     this.obsHistorial = obs;
@@ -67,9 +58,6 @@ export class EquiposTablaComponent extends Tabla {
     this.obsHistorial = null;
   }
 
-  botoncrear: WritableSignal<boolean> = signal(false);
-  botoneditar: WritableSignal<boolean> = signal(false);
-  alertaeliminar: boolean = false;
   equipos: Equipos[] = [];
   equiposcopia: Equipos[] = [];
   equipoSeleccionado: Equipos = new Equipos();

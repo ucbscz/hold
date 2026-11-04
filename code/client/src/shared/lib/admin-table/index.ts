@@ -5,3 +5,4 @@ export * from './tabla';
 export * from './table-pagination.component';
 export * from './print-table';
 export * from './admin-tabs.component';
+export * from './tabla-gestion';

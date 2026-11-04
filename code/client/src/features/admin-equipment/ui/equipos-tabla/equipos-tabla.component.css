@@ -163,10 +163,6 @@
   background-color: var(--interactive-subtle);
 }
 
-.precio-column {
-  text-align: right;
-}
-
 .btn-edit {
   color: var(--ink);
 }

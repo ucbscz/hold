@@ -1,6 +1,6 @@
 import { INVENTORY_LABELS } from '@brand/brand';
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal, WritableSignal } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Accesorio, AccesoriosService } from '@entities/accessory';
 import {
@@ -8,9 +8,8 @@ import {
   AvisoEliminarComponent,
   BuscadorComponent,
   MostrarerrorComponent,
-  ToastService,
 } from '@shared/ui';
-import { AdminTabsComponent, Tabla } from '@shared/lib/admin-table';
+import { AdminTabsComponent, TablaGestion } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import { AuditPanelComponent } from '@entities/audit-log';
@@ -37,18 +36,7 @@ import { AccesoriosFormularioComponent } from '../accesorios-formulario/accesori
     './accesorios-tabla.component.css',
   ],
 })
-export class AccesoriosTablaComponent extends Tabla {
-  private readonly toast = inject(ToastService);
-  expandedRowId: number | null = null;
-  auditRefresh = 0;
-
-  toggleExpand(id: number) {
-    this.expandedRowId = this.expandedRowId === id ? null : id;
-  }
-
-  botoncrear: WritableSignal<boolean> = signal(false);
-  botoneditar: WritableSignal<boolean> = signal(false);
-  alertaeliminar: boolean = false;
+export class AccesoriosTablaComponent extends TablaGestion {
   accesorios: Accesorio[] = [];
   accesorioscopia: Accesorio[] = [];
   accesorioSeleccionado: Accesorio = new Accesorio();

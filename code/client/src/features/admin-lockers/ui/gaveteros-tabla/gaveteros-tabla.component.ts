@@ -1,14 +1,13 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal, WritableSignal } from '@angular/core';
+import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Gaveteros, GaveteroService } from '@entities/locker';
 import {
   AvisoEliminarComponent,
   BuscadorComponent,
   MostrarerrorComponent,
-  ToastService,
 } from '@shared/ui';
-import { AdminTabsComponent, Tabla } from '@shared/lib/admin-table';
+import { AdminTabsComponent, TablaGestion } from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import { EquiposInlineComponent } from '@entities/equipment';
@@ -36,18 +35,7 @@ import { GaveterosFormularioComponent } from '../gaveteros-formulario/gaveteros-
     './gaveteros-tabla.component.css',
   ],
 })
-export class GaveterosTablaComponent extends Tabla {
-  private readonly toast = inject(ToastService);
-  expandedRowId: number | null = null;
-  auditRefresh = 0;
-
-  toggleExpand(id: number) {
-    this.expandedRowId = this.expandedRowId === id ? null : id;
-  }
-
-  botoncrear: WritableSignal<boolean> = signal(false);
-  botoneditar: WritableSignal<boolean> = signal(false);
-  alertaeliminar: boolean = false;
+export class GaveterosTablaComponent extends TablaGestion {
   gaveteros: Gaveteros[] = [];
   gaveteroscopia: Gaveteros[] = [];
   gaveteroSeleccionado: Gaveteros = new Gaveteros();
