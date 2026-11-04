@@ -13,8 +13,13 @@ namespace UCB_Hold.Server.Modules.Usuarios.Api;
 public class UsuarioController : ApiController
 {
     private readonly UsuarioService _service;
+    private readonly BloqueoUsuarioService _bloqueos;
 
-    public UsuarioController(UsuarioService service) => _service = service;
+    public UsuarioController(UsuarioService service, BloqueoUsuarioService bloqueos)
+    {
+        _service = service;
+        _bloqueos = bloqueos;
+    }
 
     [HttpGet("perfil")]
     public async Task<IActionResult> GetProfile(CancellationToken cancellationToken) =>
@@ -104,7 +109,7 @@ public class UsuarioController : ApiController
         CancellationToken cancellationToken
     ) =>
         ToResponse(
-            await _service.SetBlocked(
+            await _bloqueos.SetBlocked(
                 carnet,
                 request.Bloqueado ?? false,
                 request.MotivoBloqueo,

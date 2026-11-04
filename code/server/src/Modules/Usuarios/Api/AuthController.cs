@@ -15,7 +15,7 @@ namespace UCB_Hold.Server.Modules.Usuarios.Api;
 [Route("api/auth")]
 public class AuthController : ApiController
 {
-    private readonly UsuarioService _service;
+    private readonly SesionService _sesiones;
     private readonly VerificacionCorreoService _verification;
     private readonly RecuperacionContrasenaService _passwordRecovery;
     private readonly AutenticacionExternaService _external;
@@ -24,7 +24,7 @@ public class AuthController : ApiController
     private readonly AuthCookieService _cookies;
 
     public AuthController(
-        UsuarioService service,
+        SesionService sesiones,
         VerificacionCorreoService verification,
         RecuperacionContrasenaService passwordRecovery,
         AutenticacionExternaService external,
@@ -33,7 +33,7 @@ public class AuthController : ApiController
         AuthCookieService cookies
     )
     {
-        _service = service;
+        _sesiones = sesiones;
         _verification = verification;
         _passwordRecovery = passwordRecovery;
         _external = external;
@@ -48,7 +48,7 @@ public class AuthController : ApiController
         CancellationToken cancellationToken
     )
     {
-        var result = await _service.Login(request.Email, request.Contrasena, cancellationToken);
+        var result = await _sesiones.Login(request.Email, request.Contrasena, cancellationToken);
         return SessionResponse(result);
     }
 
@@ -56,7 +56,7 @@ public class AuthController : ApiController
     public async Task<IActionResult> Refresh(CancellationToken cancellationToken)
     {
         var refreshToken = Request.Cookies[AuthCookieService.RefreshTokenName] ?? string.Empty;
-        var result = await _service.Refresh(refreshToken, cancellationToken);
+        var result = await _sesiones.Refresh(refreshToken, cancellationToken);
         if (!result.IsSuccess)
             _cookies.Clear(Response.Cookies);
         return SessionResponse(result);
@@ -66,7 +66,7 @@ public class AuthController : ApiController
     public async Task<IActionResult> Logout(CancellationToken cancellationToken)
     {
         var refreshToken = Request.Cookies[AuthCookieService.RefreshTokenName] ?? string.Empty;
-        await _service.Logout(refreshToken, cancellationToken);
+        await _sesiones.Logout(refreshToken, cancellationToken);
         _cookies.Clear(Response.Cookies);
         return NoContent();
     }

@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using Ardalis.Result;
-using Microsoft.Extensions.Options;
 using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
 namespace UCB_Hold.Server.Modules.Usuarios.Application;
@@ -9,25 +8,19 @@ public sealed class AutenticacionExternaService
 {
     private readonly CodigoExternoService _codes;
     private readonly UsuarioAuthRepository _users;
-    private readonly UsuarioMapper _mapper;
-    private readonly JwtService _jwt;
-    private readonly JwtSettings _jwtSettings;
+    private readonly SesionService _sesiones;
     private readonly InstitutionalEmailPolicy _institutionalEmail;
 
     public AutenticacionExternaService(
         CodigoExternoService codes,
         UsuarioAuthRepository users,
-        UsuarioMapper mapper,
-        JwtService jwt,
-        IOptions<JwtSettings> jwtSettings,
+        SesionService sesiones,
         InstitutionalEmailPolicy institutionalEmail
     )
     {
         _codes = codes;
         _users = users;
-        _mapper = mapper;
-        _jwt = jwt;
-        _jwtSettings = jwtSettings.Value;
+        _sesiones = sesiones;
         _institutionalEmail = institutionalEmail;
     }
 
@@ -96,29 +89,9 @@ public sealed class AutenticacionExternaService
         if (user == null || user.IdentidadExternaId != code.IdentidadExternaId)
             return Result<ExternalAuthDto>.Unauthorized("No se pudo vincular la cuenta institucional");
 
-        var dto = _mapper.ToDto(user);
-        dto.CarreraNombre = careerName;
-        dto.ImagenPerfil = null;
-        dto.ImagenFrenteCarnet = null;
-        dto.ImagenAtrasCarnet = null;
-        dto.ImagenFirma = null;
-        var accessToken = _jwt.GenerateAccessToken(dto);
-        var refreshToken = JwtService.GenerateRefreshToken();
-        await _users.UpdateRefreshToken(
-            user.Carnet,
-            JwtService.HashRefreshToken(refreshToken),
-            DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
-            cancellationToken
-        );
-
         return Result<ExternalAuthDto>.Success(new ExternalAuthDto
         {
-            Sesion = new LoginDto
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken,
-                Usuario = dto,
-            },
+            Sesion = await _sesiones.Issue(user, careerName, cancellationToken),
         });
     }
 }

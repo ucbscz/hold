@@ -40,14 +40,26 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         InstitutionalDomain = "ucb.edu.bo",
     };
 
+    private sealed record UsuarioServices(
+        UsuarioService Usuarios,
+        SesionService Sesiones,
+        BloqueoUsuarioService Bloqueos
+    );
+
+    private SesionService Sesiones { get; set; } = null!;
+    private BloqueoUsuarioService Bloqueos { get; set; } = null!;
+
     protected override UsuarioService CreateService(ApplicationDbContext db)
     {
         var memoryCache = new MemoryDistributedCache(Options.Create(new MemoryDistributedCacheOptions()));
+        var services = CreateServices(db, memoryCache);
+        Sesiones = services.Sesiones;
+        Bloqueos = services.Bloqueos;
 
-        return CreateService(db, memoryCache);
+        return services.Usuarios;
     }
 
-    private static UsuarioService CreateService(
+    private static UsuarioServices CreateServices(
         ApplicationDbContext db,
         IDistributedCache distributedCache
     )
@@ -84,15 +96,12 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         );
         var codigosExternos = new CodigoExternoService(new CodigoAutenticacionRepository(db));
 
-        return new UsuarioService(
+        var usuarios = new UsuarioService(
             repo,
             mapper,
             validator,
-            jwt,
-            jwtOptions,
             cacheService,
             audit,
-            notifications,
             authRepository,
             queries,
             new SensitiveDataProtector(
@@ -102,6 +111,12 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
             ),
             verification,
             codigosExternos
+        );
+
+        return new UsuarioServices(
+            usuarios,
+            new SesionService(authRepository, mapper, jwt, jwtOptions),
+            new BloqueoUsuarioService(repo, queries, audit, notifications, cacheService)
         );
     }
 
@@ -150,7 +165,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         Db.Usuarios.Add(entity);
         await Db.SaveChangesAsync();
 
-        var result = await Sut.Login("deleted@ucb.edu.bo", "Test@1234");
+        var result = await Sesiones.Login("deleted@ucb.edu.bo", "Test@1234");
 
         result.IsSuccess.Should().BeFalse();
         result.Status.Should().Be(Ardalis.Result.ResultStatus.Unauthorized);
@@ -300,7 +315,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
         await VerifyEmail("U001");
 
-        var result = await Sut.Login("u001@ucb.edu.bo", "Test@1234");
+        var result = await Sesiones.Login("u001@ucb.edu.bo", "Test@1234");
 
         result.IsSuccess.Should().BeTrue();
         result.Value.AccessToken.Should().NotBeNullOrEmpty();
@@ -318,16 +333,16 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     {
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
         await VerifyEmail("U001");
-        var loginResult = await Sut.Login("u001@ucb.edu.bo", "Test@1234");
+        var loginResult = await Sesiones.Login("u001@ucb.edu.bo", "Test@1234");
 
-        var result = await Sut.Refresh(loginResult.Value.RefreshToken);
+        var result = await Sesiones.Refresh(loginResult.Value.RefreshToken);
 
         result.IsSuccess.Should().BeTrue();
         result.Value.AccessToken.Should().NotBeNullOrEmpty();
         result.Value.RefreshToken.Should().NotBeNullOrEmpty();
         result.Value.RefreshToken.Should().NotBe(loginResult.Value.RefreshToken);
 
-        var replayResult = await Sut.Refresh(loginResult.Value.RefreshToken);
+        var replayResult = await Sesiones.Refresh(loginResult.Value.RefreshToken);
         replayResult.Status.Should().Be(Ardalis.Result.ResultStatus.Unauthorized);
     }
 
@@ -336,7 +351,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     {
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
 
-        var result = await Sut.Login("u001@ucb.edu.bo", "Test@1234");
+        var result = await Sesiones.Login("u001@ucb.edu.bo", "Test@1234");
 
         result.Status.Should().Be(Ardalis.Result.ResultStatus.Unauthorized);
         result.Errors.Should().Contain("Debes verificar tu correo antes de iniciar sesión");
@@ -392,7 +407,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     [Test]
     public async Task Refresh_InvalidToken_ReturnsUnauthorized()
     {
-        var result = await Sut.Refresh("this-token-does-not-exist");
+        var result = await Sesiones.Refresh("this-token-does-not-exist");
 
         result.IsSuccess.Should().BeFalse();
         result.Status.Should().Be(Ardalis.Result.ResultStatus.Unauthorized);
@@ -408,7 +423,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         usuario.RefreshTokenExpiry = DateTime.UtcNow.AddDays(-1);
         await Db.SaveChangesAsync();
 
-        var result = await Sut.Refresh("expired-token");
+        var result = await Sesiones.Refresh("expired-token");
 
         result.IsSuccess.Should().BeFalse();
         result.Status.Should().Be(Ardalis.Result.ResultStatus.Unauthorized);
@@ -419,9 +434,9 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     {
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
         await VerifyEmail("U001");
-        var login = await Sut.Login("u001@ucb.edu.bo", "Test@1234");
+        var login = await Sesiones.Login("u001@ucb.edu.bo", "Test@1234");
 
-        await Sut.Logout(login.Value.RefreshToken);
+        await Sesiones.Logout(login.Value.RefreshToken);
 
         Db.ChangeTracker.Clear();
         var user = Db.Usuarios.Single(item => item.Carnet == "U001");
@@ -434,7 +449,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     {
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"));
 
-        var result = await Sut.Login("u001@ucb.edu.bo", "WrongPass@1");
+        var result = await Sesiones.Login("u001@ucb.edu.bo", "WrongPass@1");
 
         result.IsSuccess.Should().BeFalse();
         result.Status.Should().Be(Ardalis.Result.ResultStatus.Unauthorized);
@@ -443,7 +458,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     [Test]
     public async Task Login_NonExistentEmail_ReturnsUnauthorized()
     {
-        var result = await Sut.Login("nobody@ucb.edu.bo", "Test@1234");
+        var result = await Sesiones.Login("nobody@ucb.edu.bo", "Test@1234");
 
         result.IsSuccess.Should().BeFalse();
         result.Status.Should().Be(Ardalis.Result.ResultStatus.Unauthorized);
@@ -452,7 +467,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     [Test]
     public async Task Login_EmptyCredentials_ReturnsUnauthorized()
     {
-        var result = await Sut.Login("", "");
+        var result = await Sesiones.Login("", "");
 
         result.IsSuccess.Should().BeFalse();
         result.Status.Should().Be(Ardalis.Result.ResultStatus.Unauthorized);
@@ -647,7 +662,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     {
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"), isAdmin: true);
 
-        var result = await Sut.SetBlocked("U001", true, "Rompió un equipo", isAdmin: true);
+        var result = await Bloqueos.SetBlocked("U001", true, "Rompió un equipo", isAdmin: true);
 
         result.IsSuccess.Should().BeTrue();
         Db.ChangeTracker.Clear();
@@ -665,9 +680,9 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     public async Task SetBlocked_Desbloquea_LimpiaMotivo()
     {
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"), isAdmin: true);
-        await Sut.SetBlocked("U001", true, "motivo", isAdmin: true);
+        await Bloqueos.SetBlocked("U001", true, "motivo", isAdmin: true);
 
-        var result = await Sut.SetBlocked("U001", false, null, isAdmin: true);
+        var result = await Bloqueos.SetBlocked("U001", false, null, isAdmin: true);
 
         result.IsSuccess.Should().BeTrue();
         var stored = Db.Usuarios.Single(u => u.Carnet == "U001");
@@ -684,7 +699,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
     {
         await Sut.Create(BuildValidUsuario("U001", "u001@ucb.edu.bo"), isAdmin: true);
 
-        var result = await Sut.SetBlocked("U001", true, "x", isAdmin: false);
+        var result = await Bloqueos.SetBlocked("U001", true, "x", isAdmin: false);
 
         result.Status.Should().Be(Ardalis.Result.ResultStatus.Forbidden);
     }
@@ -698,7 +713,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         cache
             .Setup(instance => instance.RemoveAsync("usuario:U001", It.IsAny<CancellationToken>()))
             .Returns(cacheRelease.Task);
-        var service = CreateService(Db, cache.Object);
+        var service = CreateServices(Db, cache.Object).Bloqueos;
 
         var result = await service.SetBlocked("U001", true, "motivo", isAdmin: true);
 
@@ -738,7 +753,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         var dto = BuildValidUsuario("ROOT", "root@ucb.edu.bo");
         dto.Rol = "administrador";
         await Sut.Create(dto, isAdmin: true);
-        var result = await Sut.SetBlocked("ROOT", true, "motivo", isAdmin: true, isLabAdmin: true);
+        var result = await Bloqueos.SetBlocked("ROOT", true, "motivo", isAdmin: true, isLabAdmin: true);
         result.Status.Should().Be(Ardalis.Result.ResultStatus.Forbidden);
         Db.Usuarios.Single(u => u.Carnet == "ROOT").Bloqueado.Should().BeFalse();
     }

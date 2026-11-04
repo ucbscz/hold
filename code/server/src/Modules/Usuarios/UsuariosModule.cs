@@ -30,6 +30,8 @@ public static class UsuariosModule
         services.AddScoped<Repository<Carrera, CarreraDto>>();
 
         services.AddScoped<UsuarioService>();
+        services.AddScoped<SesionService>();
+        services.AddScoped<BloqueoUsuarioService>();
         services.AddScoped<EmailDeliveryService>();
         services.AddScoped<VerificacionCorreoService>();
         services.AddScoped<RecuperacionContrasenaService>();

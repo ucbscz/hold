@@ -1,11 +1,8 @@
 using Ardalis.Result;
 using FluentValidation;
-using Microsoft.Extensions.Options;
 using BCryptLib = BCrypt.Net.BCrypt;
 using UsuarioEntity = UCB_Hold.Server.Modules.Usuarios.Domain.Usuario;
 using UCB_Hold.Server.Modules.Auditoria.Application;
-using UCB_Hold.Server.Modules.Notificaciones.Application;
-using UCB_Hold.Server.Modules.Usuarios.Domain;
 using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 using UCB_Hold.Server.Shared.Caching;
 using UCB_Hold.Server.Shared.Kernel;
@@ -16,15 +13,8 @@ namespace UCB_Hold.Server.Modules.Usuarios.Application;
 public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioDto>
 {
     private static readonly TimeSpan UsuarioCacheTtl = TimeSpan.FromMinutes(30);
-    private static readonly string UnknownUserPasswordHash = BCryptLib.HashPassword(
-        AuthTokenGenerator.Create(),
-        workFactor: 12
-    );
     private readonly UsuarioMapper _mapper;
-    private readonly JwtService _jwtService;
-    private readonly JwtSettings _jwtSettings;
     private readonly CacheRepository _cacheRepository;
-    private readonly NotificacionService _notifications;
     private readonly UsuarioAuthRepository _authRepository;
     private readonly UsuarioReadRepository _queries;
     private readonly SensitiveDataProtector _sensitiveData;
@@ -35,11 +25,8 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         UsuarioRepository repository,
         UsuarioMapper mapper,
         IValidator<UsuarioDto> validator,
-        JwtService jwtService,
-        IOptions<JwtSettings> jwtSettings,
         CacheRepository cacheRepository,
         AuditLogService audit,
-        NotificacionService notifications,
         UsuarioAuthRepository authRepository,
         UsuarioReadRepository queries,
         SensitiveDataProtector sensitiveData,
@@ -49,89 +36,12 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         : base(repository, validator, mapper, audit)
     {
         _mapper = mapper;
-        _jwtService = jwtService;
-        _jwtSettings = jwtSettings.Value;
         _cacheRepository = cacheRepository;
-        _notifications = notifications;
         _authRepository = authRepository;
         _queries = queries;
         _sensitiveData = sensitiveData;
         _emailVerification = emailVerification;
         _codigosExternos = codigosExternos;
-    }
-
-    public async Task<Result<object>> SetBlocked(
-        string carnet,
-        bool isBlocked,
-        string? blockReason,
-        bool isAdmin,
-        string? actorCarnet = null,
-        bool isLabAdmin = false,
-        CancellationToken cancellationToken = default
-    )
-    {
-        if (!isAdmin)
-            return Result<object>.Forbidden();
-
-        var user = await Repository.GetTrackedByCarnet(carnet, cancellationToken);
-
-        if (user == null)
-            return Result<object>.NotFound();
-
-        if (isLabAdmin && IsManagementRole(user.Rol))
-            return Result<object>.Forbidden();
-
-        var previousAuditState = new { user.Bloqueado, user.MotivoBloqueo };
-        user.Bloqueado = isBlocked;
-        user.MotivoBloqueo = isBlocked ? blockReason : null;
-        await Repository.UpdateEntity(
-            user,
-            saveChanges: false,
-            cancellationToken: cancellationToken
-        );
-
-        await Audit!.Log(
-            isBlocked ? AuditAccion.Bloquear : AuditAccion.Desbloquear,
-            typeof(UsuarioEntity).Name,
-            carnet,
-            AuditChangeDetail.Build(
-                previousAuditState,
-                new { user.Bloqueado, user.MotivoBloqueo }
-            ),
-            saveChanges: false
-        );
-
-        var actorName = string.IsNullOrWhiteSpace(actorCarnet)
-            ? null
-            : await _queries.GetDisplayName(actorCarnet, cancellationToken);
-        var notificationType = isBlocked
-            ? TipoNotificacion.UsuarioBloqueado
-            : TipoNotificacion.UsuarioDesbloqueado;
-        var notificationTitle = isBlocked
-            ? "Cuenta bloqueada para reservas"
-            : "Cuenta desbloqueada para reservas";
-        var notificationReason = isBlocked
-            ? blockReason ?? "Bloqueo administrativo para nuevas reservas."
-            : "Desbloqueo administrativo de la cuenta.";
-        var notificationContent = isBlocked
-            ? string.IsNullOrWhiteSpace(blockReason)
-                ? "Tu cuenta fue bloqueada para nuevas reservas. Contacta con un administrador para revisar tu caso."
-                : $"{blockReason}. Contacta con un administrador para revisar tu caso."
-            : "Tu cuenta fue desbloqueada. Ya puedes realizar nuevas reservas.";
-
-        await _notifications.Create(
-            carnet,
-            notificationType,
-            notificationTitle,
-            notificationContent,
-            NotificacionService.BuildEmitterDetail(actorName ?? NotificacionService.SystemEmitter, notificationReason),
-            saveChanges: false
-        );
-
-        await Repository.SaveChanges(cancellationToken);
-        _ = _cacheRepository.Remove(CacheKeys.Usuario(carnet), CancellationToken.None);
-
-        return Result<object>.Success(null!);
     }
 
     public Task<Result<List<UsuarioDto>>> GetAll(
@@ -195,7 +105,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
                 "Debes aceptar los términos y condiciones para crear tu cuenta"
             );
 
-        if (isLabAdmin && IsManagementRole(dto.Rol))
+        if (isLabAdmin && ManagementRoles.Includes(dto.Rol))
             return Result<UsuarioDto>.Forbidden();
         dto.Bloqueado = false;
         dto.MotivoBloqueo = null;
@@ -280,7 +190,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             }
             result.Value.CarreraNombre = await _queries.GetCarreraName(entity.IdCarrera, CancellationToken.None);
             var auditDetail = AuditChangeDetail.BuildCreated(result.Value);
-            ClearProfileDocuments(result.Value);
+            ProfileDocuments.Clear(result.Value);
             await Audit!.Log(
                 AuditAccion.Crear,
                 typeof(UsuarioEntity).Name,
@@ -325,7 +235,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (!validation.IsValid)
             return validation.ToResult<UsuarioDto>();
 
-        if (isLabAdmin && (IsManagementRole(existing.Rol) || IsManagementRole(dto.Rol)))
+        if (isLabAdmin && (ManagementRoles.Includes(existing.Rol) || ManagementRoles.Includes(dto.Rol)))
             return Result<UsuarioDto>.Forbidden();
         dto.Bloqueado = existing.Bloqueado;
         dto.MotivoBloqueo = existing.MotivoBloqueo;
@@ -355,7 +265,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             cancellationToken
         );
         var auditDetail = AuditChangeDetail.Build(previous, resultDto);
-        ClearProfileDocuments(resultDto);
+        ProfileDocuments.Clear(resultDto);
 
         _ = await _cacheRepository.Remove(CacheKeys.Usuario(carnet), cancellationToken);
         await Audit!.Log(
@@ -414,7 +324,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         var dto = _mapper.ToDto(user);
         dto.CarreraNombre = await _queries.GetCarreraName(user.IdCarrera, cancellationToken);
-        ClearProfileDocuments(dto);
+        ProfileDocuments.Clear(dto);
 
         _ = await _cacheRepository.Set(cacheKey, dto, UsuarioCacheTtl, cancellationToken);
 
@@ -438,107 +348,6 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         );
         SetProfileDocuments(dto, user);
         return Result<UsuarioDto>.Success(dto);
-    }
-
-    public async Task<Result<LoginDto>> Login(
-        string email,
-        string password,
-        CancellationToken cancellationToken = default
-    )
-    {
-        email = email.Trim().ToLowerInvariant();
-        if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(password))
-            return Result<LoginDto>.Unauthorized("Credenciales requeridas");
-
-        if (email.Length > 255 || password.Length > 72)
-            return Result<LoginDto>.Unauthorized("Credenciales inválidas");
-
-        var (user, carreraNombre) = await _authRepository.GetByEmailWithCarrera(
-            email,
-            cancellationToken
-        );
-
-        var storedHash = string.IsNullOrWhiteSpace(user?.Contrasena)
-            ? UnknownUserPasswordHash
-            : user.Contrasena;
-        var passwordValid = BCryptLib.Verify(password, storedHash);
-
-        if (user == null || !passwordValid)
-            return Result<LoginDto>.Unauthorized("Credenciales inválidas");
-
-        if (!user.EmailVerificado)
-            return Result<LoginDto>.Unauthorized("Debes verificar tu correo antes de iniciar sesión");
-
-        var dto = _mapper.ToDto(user);
-        dto.CarreraNombre = carreraNombre;
-        ClearProfileDocuments(dto);
-
-        var accessToken = _jwtService.GenerateAccessToken(dto);
-        var refreshToken = JwtService.GenerateRefreshToken();
-
-        await _authRepository.UpdateRefreshToken(
-            user.Carnet!,
-            JwtService.HashRefreshToken(refreshToken),
-            DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
-            cancellationToken
-        );
-
-        return Result<LoginDto>.Success(
-            new LoginDto
-            {
-                AccessToken = accessToken,
-                RefreshToken = refreshToken,
-                Usuario = dto,
-            }
-        );
-    }
-
-    public async Task<Result<LoginDto>> Refresh(
-        string refreshToken,
-        CancellationToken cancellationToken = default
-    )
-    {
-        if (string.IsNullOrWhiteSpace(refreshToken))
-            return Result<LoginDto>.Unauthorized("Refresh token requerido");
-
-        if (refreshToken.Length > 256)
-            return Result<LoginDto>.Unauthorized("Refresh token inválido");
-
-        var refreshTokenHash = JwtService.HashRefreshToken(refreshToken);
-        var (user, carreraNombre) = await _authRepository.GetByRefreshTokenWithCarrera(
-            refreshTokenHash,
-            cancellationToken
-        );
-
-        if (user == null || user.RefreshTokenExpiry < DateTime.UtcNow)
-            return Result<LoginDto>.Unauthorized("Refresh token inválido o expirado");
-
-        var dto = _mapper.ToDto(user);
-        dto.CarreraNombre = carreraNombre;
-        ClearProfileDocuments(dto);
-
-        var newAccessToken = _jwtService.GenerateAccessToken(dto);
-        var newRefreshToken = JwtService.GenerateRefreshToken();
-
-        var rotated = await _authRepository.RotateRefreshToken(
-            user.Carnet!,
-            refreshTokenHash,
-            JwtService.HashRefreshToken(newRefreshToken),
-            DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryDays),
-            cancellationToken
-        );
-
-        if (!rotated)
-            return Result<LoginDto>.Unauthorized("Refresh token inválido o ya utilizado");
-
-        return Result<LoginDto>.Success(
-            new LoginDto
-            {
-                AccessToken = newAccessToken,
-                RefreshToken = newRefreshToken,
-                Usuario = dto,
-            }
-        );
     }
 
     public async Task<Result<object>> Delete(
@@ -581,20 +390,6 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         );
     }
 
-    public async Task Logout(
-        string refreshToken,
-        CancellationToken cancellationToken = default
-    )
-    {
-        if (string.IsNullOrWhiteSpace(refreshToken) || refreshToken.Length > 256)
-            return;
-
-        await _authRepository.RevokeRefreshToken(
-            JwtService.HashRefreshToken(refreshToken),
-            cancellationToken
-        );
-    }
-
     private static void PreserveTraceableFields(UsuarioDto dto, UsuarioEntity existing)
     {
         dto.Carnet = existing.Carnet;
@@ -605,12 +400,6 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         dto.IdCarrera = existing.IdCarrera;
         dto.Rol = existing.Rol.ToString().ToLowerInvariant();
     }
-
-    private static bool IsManagementRole(TipoUsuario rol) =>
-        rol is TipoUsuario.Administrador or TipoUsuario.Administrador_Laboratorio;
-
-    private static bool IsManagementRole(string? rol) =>
-        rol is Permisos.Administrador or Permisos.AdministradorLaboratorio;
 
     private void ProtectProfileDocuments(UsuarioDto dto, UsuarioEntity? existing)
     {
@@ -629,13 +418,5 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         dto.ImagenFrenteCarnet = _sensitiveData.Unprotect(user.ImagenFrenteCarnet);
         dto.ImagenAtrasCarnet = _sensitiveData.Unprotect(user.ImagenAtrasCarnet);
         dto.ImagenFirma = _sensitiveData.Unprotect(user.ImagenFirma);
-    }
-
-    private static void ClearProfileDocuments(UsuarioDto dto)
-    {
-        dto.ImagenPerfil = null;
-        dto.ImagenFrenteCarnet = null;
-        dto.ImagenAtrasCarnet = null;
-        dto.ImagenFirma = null;
     }
 }
