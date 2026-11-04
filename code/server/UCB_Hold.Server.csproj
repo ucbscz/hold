@@ -20,7 +20,6 @@
     <PackageReference Include="Npgsql" Version="8.0.4" />
     <PackageReference Include="Riok.Mapperly" Version="3.6.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="6.6.2" />
     <PackageReference Include="Ardalis.Result" Version="10.1.0" />
     <PackageReference Include="Ardalis.Result.AspNetCore" Version="10.1.0" />
     <PackageReference Include="AngleSharp" Version="1.7.1" />

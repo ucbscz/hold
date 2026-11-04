@@ -6,16 +6,17 @@ public static class PrestamoState
 {
     public const string TodosFiltro = "todos";
 
-    private static readonly Dictionary<EstadoPrestamo, EstadoPrestamoBase> States = new()
-    {
-        [EstadoPrestamo.Pendiente] = new EstadoPendiente(),
-        [EstadoPrestamo.Aprobado] = new EstadoAprobado(),
-        [EstadoPrestamo.Activo] = new EstadoActivo(),
-        [EstadoPrestamo.Rechazado] = new EstadoRechazado(),
-        [EstadoPrestamo.Finalizado] = new EstadoFinalizado(),
-        [EstadoPrestamo.Cancelado] = new EstadoCancelado(),
-        [EstadoPrestamo.Atrasado] = new EstadoAtrasado(),
-    };
+    private static readonly Dictionary<EstadoPrestamo, EstadoPrestamoBase> States =
+        new EstadoPrestamoBase[]
+        {
+            new EstadoPendiente(),
+            new EstadoAprobado(),
+            new EstadoActivo(),
+            new EstadoRechazado(),
+            new EstadoFinalizado(),
+            new EstadoCancelado(),
+            new EstadoAtrasado(),
+        }.ToDictionary(state => state.Valor);
 
     private static readonly Dictionary<string, EstadoPrestamo> ParseMap = States.ToDictionary(
         kv => kv.Value.Nombre,
