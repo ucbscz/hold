@@ -208,6 +208,7 @@ Generated coverage and quality outputs must stay out of source control. CI publi
 
 | Document                                 | Purpose                                                               |
 | ---------------------------------------- | --------------------------------------------------------------------- |
+| [docs/product.md](docs/product.md)       | Audience, problem, core workflows and design principles.              |
 | [docs/setup.md](docs/setup.md)           | Local environment, Docker, secrets, verification and troubleshooting. |
 | [docs/api.md](docs/api.md)               | REST contracts, response format, endpoints and validation rules.      |
 | [docs/database.md](docs/database.md)     | Schema overview, enums, indexes, business rules and restore commands. |
