@@ -1,4 +1,8 @@
 using FluentValidation;
+using UCB_Hold.Server.Modules.Mantenimientos.Application;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Modules.Auditoria.Application;
 using UCB_Hold.Server.Modules.Prestamos.Application;
 using UCB_Hold.Server.Modules.Prestamos.Domain;
 using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
@@ -10,6 +14,10 @@ public static class PrestamosModule
 {
     public static IServiceCollection AddPrestamosModule(this IServiceCollection services)
     {
+        services.AddScoped<IAuditEntityNames, PrestamosAuditNames>();
+        services.AddScoped<IUsuarioEliminacion, PrestamosDeUsuarioEliminado>();
+        services.AddScoped<IHistorialPrestamosEquipo, HistorialPrestamosEquipo>();
+        services.AddScoped<IOcupacionPorPrestamos, OcupacionPorPrestamos>();
         services.AddScoped<PrestamoRepository>();
         services.AddScoped<PrestamoReadRepository>();
         services.AddScoped<PrestamoEstadoRepository>();

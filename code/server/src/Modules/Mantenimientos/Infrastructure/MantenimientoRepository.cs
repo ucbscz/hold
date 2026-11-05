@@ -5,7 +5,6 @@ using MantenimientoEntity = UCB_Hold.Server.Modules.Mantenimientos.Domain.Manten
 using UCB_Hold.Server.Modules.Inventario.Domain;
 using UCB_Hold.Server.Modules.Mantenimientos.Application;
 using UCB_Hold.Server.Modules.Mantenimientos.Domain;
-using UCB_Hold.Server.Modules.Prestamos.Application;
 using UCB_Hold.Server.Shared.Kernel;
 using UCB_Hold.Server.Shared.Persistence;
 
@@ -13,8 +12,14 @@ namespace UCB_Hold.Server.Modules.Mantenimientos.Infrastructure;
 
 public class MantenimientoRepository : Repository<MantenimientoEntity, MantenimientoDto>
 {
-    public MantenimientoRepository(ApplicationDbContext dbContext, MantenimientoMapper mapper)
-        : base(dbContext, mapper) { }
+    private readonly IOcupacionPorPrestamos _prestamos;
+
+    public MantenimientoRepository(
+        ApplicationDbContext dbContext,
+        MantenimientoMapper mapper,
+        IOcupacionPorPrestamos prestamos
+    )
+        : base(dbContext, mapper) => _prestamos = prestamos;
 
     public override async Task<Result<List<MantenimientoDto>>> GetAll()
     {
@@ -112,24 +117,7 @@ public class MantenimientoRepository : Repository<MantenimientoEntity, Mantenimi
             )
             .Select(equipment => equipment.Id);
 
-        var conflictsWithLoans = await DbContext
-            .DetallesPrestamos.Join(
-                DbContext.Prestamos,
-                detail => detail.IdPrestamo,
-                loan => loan.Id,
-                (detail, loan) => new { Detail = detail, Loan = loan }
-            )
-            .AnyAsync(item =>
-                item.Detail.IdEquipo != null
-                && equipmentIds.Contains(item.Detail.IdEquipo.Value)
-                && PrestamoAvailabilityPolicy.BlockingStates.Contains(
-                    item.Loan.EstadoPrestamo
-                )
-                && item.Loan.FechaPrestamoEsperada < end
-                && item.Loan.FechaDevolucionEsperada > start
-            );
-
-        if (conflictsWithLoans)
+        if (await _prestamos.HayPrestamoEnRango(codigosImt, start, end))
             return true;
 
         return await DbContext

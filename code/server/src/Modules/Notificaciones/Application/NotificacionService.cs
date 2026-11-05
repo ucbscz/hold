@@ -12,8 +12,16 @@ public class NotificacionService
     public const string DateFormat = "dd/MM/yyyy HH:mm";
 
     private readonly NotificacionRepository _repository;
+    private readonly IDestinatariosAdministradores _admins;
 
-    public NotificacionService(NotificacionRepository repository) => _repository = repository;
+    public NotificacionService(
+        NotificacionRepository repository,
+        IDestinatariosAdministradores admins
+    )
+    {
+        _repository = repository;
+        _admins = admins;
+    }
 
     public async Task Create(
         string carnet,
@@ -50,7 +58,7 @@ public class NotificacionService
         string emitter = SystemEmitter
     )
     {
-        var adminCarnets = await _repository.GetAdminCarnets();
+        var adminCarnets = await _admins.GetAdminCarnets();
         var notifications = adminCarnets
             .Select(carnet => new NotificacionDto
             {

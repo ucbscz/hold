@@ -1,4 +1,6 @@
 using FluentValidation;
+using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Modules.Auditoria.Application;
 using UCB_Hold.Server.Modules.Mantenimientos.Application;
 using UCB_Hold.Server.Modules.Mantenimientos.Domain;
 using UCB_Hold.Server.Modules.Mantenimientos.Infrastructure;
@@ -10,6 +12,8 @@ public static class MantenimientosModule
 {
     public static IServiceCollection AddMantenimientosModule(this IServiceCollection services)
     {
+        services.AddScoped<IAuditEntityNames, MantenimientosAuditNames>();
+        services.AddScoped<IEquipoEliminacion, MantenimientosDeEquipoEliminado>();
         services.AddScoped<MantenimientoRepository>();
         services.AddScoped<EmpresaMantenimientoRepository>();
         services.AddScoped<MantenimientoService>();

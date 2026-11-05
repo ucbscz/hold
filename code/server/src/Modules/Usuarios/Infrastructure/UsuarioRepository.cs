@@ -1,7 +1,6 @@
 using Ardalis.Result;
 using Microsoft.EntityFrameworkCore;
 using UsuarioEntity = UCB_Hold.Server.Modules.Usuarios.Domain.Usuario;
-using UCB_Hold.Server.Modules.Prestamos.Domain;
 using UCB_Hold.Server.Modules.Usuarios.Application;
 using UCB_Hold.Server.Shared.Kernel;
 using UCB_Hold.Server.Shared.Persistence;
@@ -11,13 +10,19 @@ namespace UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>, IUsuarioBloqueo
 {
     private readonly UsuarioReadRepository _queries;
+    private readonly IReadOnlyList<IUsuarioEliminacion> _eliminaciones;
 
     public UsuarioRepository(
         ApplicationDbContext dbContext,
         UsuarioMapper mapper,
-        UsuarioReadRepository queries
+        UsuarioReadRepository queries,
+        IEnumerable<IUsuarioEliminacion> eliminaciones
     )
-        : base(dbContext, mapper) => _queries = queries;
+        : base(dbContext, mapper)
+    {
+        _queries = queries;
+        _eliminaciones = eliminaciones.ToList();
+    }
 
     public override Task<Result<List<UsuarioDto>>> GetAll() => _queries.GetAll();
 
@@ -111,21 +116,7 @@ public class UsuarioRepository : Repository<UsuarioEntity, UsuarioDto>, IUsuario
 
     protected override async Task CascadeDelete(UsuarioEntity user)
     {
-        var loans = await DbContext
-            .Prestamos.Where(loan => loan.Carnet == user.Carnet)
-            .ToListAsync();
-        var loanIds = loans.Select(loan => loan.Id).ToArray();
-        var details = await DbContext
-            .DetallesPrestamos.Where(detail => loanIds.Contains(detail.IdPrestamo))
-            .ToListAsync();
-
-        foreach (var loan in loans)
-        {
-            loan.EstadoPrestamo = EstadoPrestamo.Cancelado;
-            loan.EstadoEliminado = true;
-        }
-
-        foreach (var detail in details)
-            detail.EstadoEliminado = true;
+        foreach (var eliminacion in _eliminaciones)
+            await eliminacion.AlEliminarUsuario(user.Carnet);
     }
 }

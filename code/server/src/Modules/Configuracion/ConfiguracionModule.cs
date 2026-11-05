@@ -1,4 +1,5 @@
 using FluentValidation;
+using UCB_Hold.Server.Modules.Auditoria.Application;
 using UCB_Hold.Server.Modules.Configuracion.Application;
 using UCB_Hold.Server.Modules.Configuracion.Domain;
 using UCB_Hold.Server.Modules.Configuracion.Infrastructure;
@@ -10,6 +11,7 @@ public static class ConfiguracionModule
 {
     public static IServiceCollection AddConfiguracionModule(this IServiceCollection services)
     {
+        services.AddSingleton<IAuditEntityNames, ConfiguracionAuditNames>();
         services.AddScoped<ConfiguracionRepository>();
         services.AddScoped<IConfiguracionProvider>(sp =>
             sp.GetRequiredService<ConfiguracionRepository>()

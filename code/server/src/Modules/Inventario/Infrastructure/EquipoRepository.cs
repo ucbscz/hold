@@ -2,7 +2,6 @@ using Microsoft.EntityFrameworkCore;
 using EquipoEntity = UCB_Hold.Server.Modules.Inventario.Domain.Equipo;
 using UCB_Hold.Server.Modules.Inventario.Application;
 using UCB_Hold.Server.Modules.Inventario.Domain;
-using UCB_Hold.Server.Modules.Mantenimientos.Domain;
 using UCB_Hold.Server.Shared.Kernel;
 using UCB_Hold.Server.Shared.Persistence;
 
@@ -10,8 +9,14 @@ namespace UCB_Hold.Server.Modules.Inventario.Infrastructure;
 
 public class EquipoRepository : Repository<EquipoEntity, EquipoDto>
 {
-    public EquipoRepository(ApplicationDbContext dbContext, EquipoMapper mapper)
-        : base(dbContext, mapper) { }
+    private readonly IReadOnlyList<IEquipoEliminacion> _eliminaciones;
+
+    public EquipoRepository(
+        ApplicationDbContext dbContext,
+        EquipoMapper mapper,
+        IEnumerable<IEquipoEliminacion> eliminaciones
+    )
+        : base(dbContext, mapper) => _eliminaciones = eliminaciones.ToList();
 
     public async Task<int> GetMaxCodigoImt() =>
         await DbContext.Equipos.MaxAsync(e => (int?)e.CodigoImt) ?? 0;
@@ -71,65 +76,11 @@ public class EquipoRepository : Repository<EquipoEntity, EquipoDto>
             )
             .ToListAsync();
 
-    public async Task<List<HistorialEquipoDto>> GetHistorial(int equipoId)
-    {
-        var rows = await DbContext
-            .DetallesPrestamos.AsNoTracking()
-            .IgnoreQueryFilters()
-            .Where(d => d.IdEquipo == equipoId)
-            .Join(
-                DbContext.Prestamos.IgnoreQueryFilters(),
-                d => d.IdPrestamo,
-                p => p.Id,
-                (d, p) => new { d, p }
-            )
-            .Join(
-                DbContext.Usuarios.IgnoreQueryFilters(),
-                x => x.p.Carnet,
-                u => u.Carnet,
-                (x, u) =>
-                    new
-                    {
-                        IdPrestamo = x.p.Id,
-                        IdDetalle = x.d.Id,
-                        u.Carnet,
-                        u.Nombre,
-                        u.ApellidoPaterno,
-                        x.p.FechaPrestamo,
-                        x.p.FechaDevolucionEsperada,
-                        x.p.FechaDevolucion,
-                        x.p.EstadoPrestamo,
-                        x.d.EstadoEquipoRetorno,
-                        x.p.Observacion,
-                    }
-            )
-            .OrderByDescending(r => r.FechaPrestamo)
-            .ToListAsync();
-
-        return rows.GroupBy(r => r.IdPrestamo)
-            .Select(group => group.OrderByDescending(r => r.IdDetalle).First())
-            .Select(r => new HistorialEquipoDto
-            {
-                IdPrestamo = r.IdPrestamo,
-                Carnet = r.Carnet,
-                NombreUsuario = r.Nombre + " " + r.ApellidoPaterno,
-                FechaPrestamo = r.FechaPrestamo,
-                FechaDevolucionEsperada = r.FechaDevolucionEsperada,
-                FechaDevolucion = r.FechaDevolucion,
-                EstadoPrestamo = r.EstadoPrestamo.ToString().ToLowerInvariant(),
-                EstadoEquipo = r.EstadoEquipoRetorno.HasValue
-                        ? EstadoEquipoNombre.ToName(r.EstadoEquipoRetorno.Value)
-                        : null,
-                Observacion = r.Observacion,
-            })
-            .ToList();
-    }
-
-
     protected override async Task CascadeDelete(EquipoEntity equipment)
     {
         await CascadeLeaf<Accesorio>(accessory => accessory.IdEquipo == equipment.Id);
         await CascadeLeaf<Componente>(component => component.IdEquipo == equipment.Id);
-        await CascadeLeaf<DetalleMantenimiento>(detail => detail.IdEquipo == equipment.Id);
+        foreach (var eliminacion in _eliminaciones)
+            await eliminacion.AlEliminarEquipo(equipment.Id);
     }
 }

@@ -1,12 +1,18 @@
 using Ardalis.Result;
 using Microsoft.EntityFrameworkCore;
 using UsuarioEntity = UCB_Hold.Server.Modules.Usuarios.Domain.Usuario;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Notificaciones.Application;
 using UCB_Hold.Server.Modules.Usuarios.Application;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
 using UCB_Hold.Server.Shared.Persistence;
 
 namespace UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
-public sealed class UsuarioReadRepository : IUsuarioConsultas
+public sealed class UsuarioReadRepository
+    : IUsuarioConsultas,
+        IAuditActorDirectory,
+        IDestinatariosAdministradores
 {
     public const int MaxPageSize = 500;
     private readonly ApplicationDbContext _dbContext;
@@ -140,6 +146,16 @@ public sealed class UsuarioReadRepository : IUsuarioConsultas
         .Where(career => career.Id == idCarrera)
         .Select(career => career.Nombre)
         .FirstOrDefaultAsync(cancellationToken);
+
+    public Task<List<string>> GetAdminCarnets(CancellationToken cancellationToken = default) =>
+        _dbContext
+            .Usuarios.AsNoTracking()
+            .Where(user =>
+                user.Rol == TipoUsuario.Administrador
+                || user.Rol == TipoUsuario.Administrador_Laboratorio
+            )
+            .Select(user => user.Carnet)
+            .ToListAsync(cancellationToken);
 
     public Task<List<string>> GetUnblockedCarnets(
         IReadOnlyCollection<string> carnets,

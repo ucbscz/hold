@@ -4,6 +4,7 @@ using UCB_Hold.Server.Modules.Mantenimientos.Application;
 using UCB_Hold.Server.Modules.Mantenimientos.Domain;
 using UCB_Hold.Server.Modules.Mantenimientos.Infrastructure;
 using UCB_Hold.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
 
 namespace UCB_Hold.Tests.Unit.Modules.Mantenimientos;
 
@@ -24,7 +25,7 @@ public class EmpresaMantenimientoRepositoryTests
         _dbContext = new ApplicationDbContext(options);
         _mapper = new EmpresaMantenimientoMapper();
         var mantenimientoMapper = new MantenimientoMapper();
-        var mantenimientoRepository = new MantenimientoRepository(_dbContext, mantenimientoMapper);
+        var mantenimientoRepository = new MantenimientoRepository(_dbContext, mantenimientoMapper, new OcupacionPorPrestamos(_dbContext));
         _repository = new EmpresaMantenimientoRepository(_dbContext, _mapper, mantenimientoRepository);
     }
 

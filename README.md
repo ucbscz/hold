@@ -111,7 +111,9 @@ code/server/src/
 `-- Shared/             Kernel, persistence, caching, search, email, jobs, security and web building blocks
 ```
 
-API DTOs do not expose domain entities, credentials, protected identity documents, or stored signatures. Automated boundary tests keep every `Domain` namespace independent from outer layers and keep sensitive mapper defaults closed.
+Modules form an acyclic graph and depend only on modules below them: `Auditoria`, `Notificaciones`, `Usuarios`, `Configuracion`, `Inventario`, `Mantenimientos`, `Prestamos`. When a lower module needs data or reactions from a higher one, it declares an interface in its `Application` layer and the higher module implements it, as with audit entity names, administrator recipients, cascades on user or equipment deletion, equipment loan history and loan occupancy for maintenance.
+
+API DTOs do not expose domain entities, credentials, protected identity documents, or stored signatures. Automated boundary tests keep every `Domain` namespace independent from outer layers, enforce the module order and keep sensitive mapper defaults closed.
 
 ---
 

@@ -1,4 +1,5 @@
 using FluentValidation;
+using UCB_Hold.Server.Modules.Auditoria.Application;
 using UCB_Hold.Server.Modules.Inventario.Application;
 using UCB_Hold.Server.Modules.Inventario.Domain;
 using UCB_Hold.Server.Modules.Inventario.Infrastructure;
@@ -17,6 +18,7 @@ public static class InventarioModule
         services.AddSingleton<EquipmentLabels>();
         services.AddInventoryCatalogs();
 
+        services.AddScoped<IAuditEntityNames, InventarioAuditNames>();
         services.AddScoped<EquipoRepository>();
         services.AddScoped<AccesorioRepository>();
         services.AddScoped<GrupoEquipoRepository>();

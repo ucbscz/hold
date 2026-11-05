@@ -1,4 +1,6 @@
 using FluentValidation;
+using UCB_Hold.Server.Modules.Auditoria.Application;
+using UCB_Hold.Server.Modules.Notificaciones.Application;
 using UCB_Hold.Server.Modules.Usuarios.Api;
 using UCB_Hold.Server.Modules.Usuarios.Application;
 using UCB_Hold.Server.Modules.Usuarios.Domain;
@@ -26,6 +28,9 @@ public static class UsuariosModule
         services.AddScoped<UsuarioReadRepository>();
         services.AddScoped<IUsuarioBloqueo>(sp => sp.GetRequiredService<UsuarioRepository>());
         services.AddScoped<IUsuarioConsultas>(sp => sp.GetRequiredService<UsuarioReadRepository>());
+        services.AddScoped<IAuditActorDirectory>(sp => sp.GetRequiredService<UsuarioReadRepository>());
+        services.AddScoped<IAuditEntityNames, UsuariosAuditNames>();
+        services.AddScoped<IDestinatariosAdministradores>(sp => sp.GetRequiredService<UsuarioReadRepository>());
         services.AddScoped<CodigoAutenticacionRepository>();
         services.AddScoped<Repository<Carrera, CarreraDto>>();
 

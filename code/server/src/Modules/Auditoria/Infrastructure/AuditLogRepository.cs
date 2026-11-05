@@ -3,12 +3,6 @@ using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using AuditLogEntity = UCB_Hold.Server.Modules.Auditoria.Domain.AuditLog;
 using UCB_Hold.Server.Modules.Auditoria.Application;
-using UCB_Hold.Server.Modules.Configuracion.Domain;
-using UCB_Hold.Server.Modules.Inventario.Application;
-using UCB_Hold.Server.Modules.Inventario.Domain;
-using UCB_Hold.Server.Modules.Mantenimientos.Domain;
-using UCB_Hold.Server.Modules.Prestamos.Domain;
-using UCB_Hold.Server.Modules.Usuarios.Domain;
 using UCB_Hold.Server.Shared.Persistence;
 
 namespace UCB_Hold.Server.Modules.Auditoria.Infrastructure;
@@ -16,12 +10,12 @@ namespace UCB_Hold.Server.Modules.Auditoria.Infrastructure;
 public class AuditLogRepository
 {
     private readonly ApplicationDbContext _db;
-    private readonly EquipmentLabels _labels;
+    private readonly IReadOnlyList<IAuditEntityNames> _entityNames;
 
-    public AuditLogRepository(ApplicationDbContext db, EquipmentLabels labels)
+    public AuditLogRepository(ApplicationDbContext db, IEnumerable<IAuditEntityNames> entityNames)
     {
         _db = db;
-        _labels = labels;
+        _entityNames = entityNames.ToList();
     }
 
     public async Task WriteLog(
@@ -176,115 +170,15 @@ public class AuditLogRepository
         if (entityIds.Count == 0)
             return [];
 
-        if (entity == nameof(Usuario))
-            return await _db.Usuarios
-                .AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(item => entityIds.Contains(item.Carnet))
-                .ToDictionaryAsync(
-                    item => item.Carnet,
-                    item => (item.Nombre + " " + item.ApellidoPaterno + " " + item.ApellidoMaterno).Trim()
-                );
-
-        var ids = entityIds
-            .Select(value => int.TryParse(value, out var id) ? id : (int?)null)
-            .OfType<int>()
-            .ToHashSet();
-        if (ids.Count == 0)
-            return [];
-
-        var codePrefix = _labels.InternalCodePrefix;
-        var labels = entity switch
+        foreach (var provider in _entityNames)
         {
-            nameof(Ambiente) => await _db.Ambientes.AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(item => ids.Contains(item.Id))
-                .Select(item => new EntityLabel(item.Id, item.Nombre))
-                .ToListAsync(),
-            nameof(Procedencia) => await _db.Procedencias.AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(item => ids.Contains(item.Id))
-                .Select(item => new EntityLabel(item.Id, item.Nombre))
-                .ToListAsync(),
-            nameof(Carrera) => await _db.Carreras.AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(item => ids.Contains(item.Id))
-                .Select(item => new EntityLabel(item.Id, item.Nombre))
-                .ToListAsync(),
-            nameof(Categoria) => await _db.Categorias.AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(item => ids.Contains(item.Id))
-                .Select(item => new EntityLabel(item.Id, item.Nombre))
-                .ToListAsync(),
-            nameof(GrupoEquipo) => await _db.GruposEquipos.AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(item => ids.Contains(item.Id))
-                .Select(item => new EntityLabel(item.Id, item.Nombre))
-                .ToListAsync(),
-            nameof(Mueble) => await _db.Muebles.AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(item => ids.Contains(item.Id))
-                .Select(item => new EntityLabel(item.Id, item.Nombre))
-                .ToListAsync(),
-            nameof(Gavetero) => await _db.Gaveteros.AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(item => ids.Contains(item.Id))
-                .Select(item => new EntityLabel(item.Id, item.Nombre))
-                .ToListAsync(),
-            nameof(Accesorio) => await _db.Accesorios.AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(item => ids.Contains(item.Id))
-                .Select(item => new EntityLabel(item.Id, item.Nombre))
-                .ToListAsync(),
-            nameof(Componente) => await _db.Componentes.AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(item => ids.Contains(item.Id))
-                .Select(item => new EntityLabel(item.Id, item.Nombre))
-                .ToListAsync(),
-            nameof(EmpresaMantenimiento) => await _db.EmpresasMantenimiento.AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(item => ids.Contains(item.Id))
-                .Select(item => new EntityLabel(item.Id, item.Nombre))
-                .ToListAsync(),
-            nameof(Equipo) => await _db.Equipos.AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(item => ids.Contains(item.Id))
-                .Select(item => new EntityLabel(
-                    item.Id,
-                    codePrefix + item.CodigoImt + " · " + (item.GrupoEquipo != null ? item.GrupoEquipo.Nombre : "Equipo")
-                ))
-                .ToListAsync(),
-            nameof(Prestamo) => await _db.Prestamos.AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(item => ids.Contains(item.Id))
-                .Select(item => new EntityLabel(
-                    item.Id,
-                    item.Usuario != null
-                        ? "Préstamo de " + item.Usuario.Nombre + " " + item.Usuario.ApellidoPaterno
-                        : "Préstamo"
-                ))
-                .ToListAsync(),
-            nameof(Mantenimiento) => await (
-                from maintenance in _db.Mantenimientos.AsNoTracking()
-                    .IgnoreQueryFilters()
-                join company in _db.EmpresasMantenimiento.AsNoTracking().IgnoreQueryFilters()
-                    on maintenance.IdEmpresa equals company.Id
-                where ids.Contains(maintenance.Id)
-                select new EntityLabel(maintenance.Id, "Mantenimiento con " + company.Nombre)
-            ).ToListAsync(),
-            nameof(ConfiguracionSistema) => ids
-                .Select(id => new EntityLabel(id, "Configuración del sistema"))
-                .ToList(),
-            _ => [],
-        };
+            var names = await provider.FindNames(entity, entityIds);
+            if (names != null)
+                return names;
+        }
 
-        return labels.ToDictionary(
-            item => item.Id.ToString(CultureInfo.InvariantCulture),
-            item => item.Name
-        );
+        return [];
     }
-
-    private sealed record EntityLabel(int Id, string Name);
 
     private static AuditLogEntity BuildLog(
         AuditAccion accion,

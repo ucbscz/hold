@@ -9,6 +9,8 @@ using UCB_Hold.Server.Modules.Inventario.Domain;
 using UCB_Hold.Server.Modules.Inventario.Infrastructure;
 using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 using UCB_Hold.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Mantenimientos.Infrastructure;
+using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
 namespace UCB_Hold.Tests.Integration.Modules.Inventario;
 
 [TestFixture]
@@ -20,15 +22,15 @@ internal class EquipoServiceTests : ServiceTest<EquipoService>
     protected override EquipoService CreateService(ApplicationDbContext db)
     {
         var mapper = new EquipoMapper();
-        var repo = new EquipoRepository(db, mapper);
+        var repo = new EquipoRepository(db, mapper, [new MantenimientosDeEquipoEliminado(db)]);
         var validator = new EquipoValidator(db);
         var audit = new AuditLogService(
-            new AuditLogRepository(db, TestBranding.Labels),
+            new AuditLogRepository(db, []),
             new HttpContextAccessor(),
             new UsuarioReadRepository(db)
         );
 
-        return new EquipoService(repo, mapper, validator, audit, TestBranding.Labels);
+        return new EquipoService(repo, mapper, validator, audit, TestBranding.Labels, new HistorialPrestamosEquipo(db));
     }
 
     [SetUp]

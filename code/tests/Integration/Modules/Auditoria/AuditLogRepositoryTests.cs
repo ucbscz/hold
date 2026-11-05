@@ -9,6 +9,7 @@ using UCB_Hold.Server.Modules.Inventario.Domain;
 using UCB_Hold.Server.Modules.Usuarios.Domain;
 using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 using UCB_Hold.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Inventario.Infrastructure;
 
 namespace UCB_Hold.Tests.Integration.Modules.Auditoria;
 
@@ -16,7 +17,7 @@ namespace UCB_Hold.Tests.Integration.Modules.Auditoria;
 internal class AuditLogRepositoryTests : ServiceTest<AuditLogRepository>
 {
     protected override AuditLogRepository CreateService(ApplicationDbContext db) =>
-        new(db, TestBranding.Labels);
+        new(db, [new UsuariosAuditNames(db), new InventarioAuditNames(db, TestBranding.Labels)]);
 
     [Test]
     public async Task GetFiltered_FiltersByActorActionAndDateBeforeLimitingResults()

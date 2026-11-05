@@ -11,15 +11,21 @@ namespace UCB_Hold.Server.Modules.Inventario.Application;
 public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
 {
     private readonly EquipmentLabels _labels;
+    private readonly IHistorialPrestamosEquipo _historial;
 
     public EquipoService(
         EquipoRepository repository,
         EquipoMapper mapper,
         IValidator<EquipoDto> validator,
         AuditLogService audit,
-        EquipmentLabels labels
+        EquipmentLabels labels,
+        IHistorialPrestamosEquipo historial
     )
-        : base(repository, validator, mapper, audit) => _labels = labels;
+        : base(repository, validator, mapper, audit)
+    {
+        _labels = labels;
+        _historial = historial;
+    }
 
     public override async Task<Result<EquipoDto>> Create(EquipoDto dto)
     {
@@ -121,6 +127,6 @@ public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
         Result<List<EquipoDto>>.Success(await Repository.GetByGavetero(gaveteroId));
 
     public virtual async Task<Result<List<HistorialEquipoDto>>> GetHistorial(int equipoId) =>
-        Result<List<HistorialEquipoDto>>.Success(await Repository.GetHistorial(equipoId));
+        Result<List<HistorialEquipoDto>>.Success(await _historial.GetHistorial(equipoId));
 
 }

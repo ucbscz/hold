@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using UCB_Hold.Server.Modules.Notificaciones.Application;
 using UCB_Hold.Server.Modules.Notificaciones.Domain;
-using UCB_Hold.Server.Modules.Usuarios.Domain;
 using UCB_Hold.Server.Shared.Persistence;
 
 namespace UCB_Hold.Server.Modules.Notificaciones.Infrastructure;
@@ -51,13 +50,6 @@ public class NotificacionRepository
         await using var _ = await _db.RunAsSystemAsync();
         await _db.SaveChangesAsync();
     }
-
-    public async Task<List<string>> GetAdminCarnets() =>
-        await _db
-            .Usuarios.AsNoTracking()
-            .Where(u => u.Rol == TipoUsuario.Administrador || u.Rol == TipoUsuario.Administrador_Laboratorio)
-            .Select(u => u.Carnet)
-            .ToListAsync();
 
     public async Task<List<NotificacionDto>> GetByCarnet(string carnet) =>
         await _db

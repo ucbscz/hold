@@ -3,8 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using UCB_Hold.Server.Modules.Inventario.Application;
 using UCB_Hold.Server.Modules.Inventario.Domain;
 using UCB_Hold.Server.Modules.Inventario.Infrastructure;
-using UCB_Hold.Server.Modules.Prestamos.Domain;
-using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Modules.Mantenimientos.Infrastructure;
 using UCB_Hold.Server.Shared.Persistence;
 
 namespace UCB_Hold.Tests.Unit.Modules.Inventario;
@@ -25,7 +24,7 @@ public class EquipoRepositoryTests
 
         _dbContext = new ApplicationDbContext(options);
         _mapper = new EquipoMapper();
-        _repository = new EquipoRepository(_dbContext, _mapper);
+        _repository = new EquipoRepository(_dbContext, _mapper, [new MantenimientosDeEquipoEliminado(_dbContext)]);
     }
 
     [TearDown]
@@ -128,33 +127,5 @@ public class EquipoRepositoryTests
         var list = await _repository.GetByGavetero(10);
         list.Should().HaveCount(1);
         list.First().Id.Should().Be(1);
-    }
-
-    [Test]
-    public async Task GetHistorial_DuplicateDetails_ReturnsLoanOnce()
-    {
-        _dbContext.Usuarios.Add(
-            new Usuario { Carnet = "12890061", Nombre = "Fernando", ApellidoPaterno = "Terrazas" }
-        );
-        _dbContext.Prestamos.Add(
-            new Prestamo
-            {
-                Id = 264,
-                Carnet = "12890061",
-                FechaPrestamoEsperada = DateTime.UtcNow,
-                FechaDevolucionEsperada = DateTime.UtcNow.AddHours(1),
-                EstadoPrestamo = EstadoPrestamo.Activo,
-            }
-        );
-        _dbContext.DetallesPrestamos.AddRange(
-            new DetallePrestamo { Id = 1, IdPrestamo = 264, IdEquipo = 9, IdGrupoEquipo = 3 },
-            new DetallePrestamo { Id = 2, IdPrestamo = 264, IdEquipo = 9, IdGrupoEquipo = 3 }
-        );
-        await _dbContext.SaveChangesAsync();
-
-        var history = await _repository.GetHistorial(9);
-
-        history.Should().ContainSingle();
-        history.Single().IdPrestamo.Should().Be(264);
     }
 }

@@ -55,13 +55,13 @@ internal class PrestamoServiceTests : ServiceTest<PrestamoService>
         var validator = new PrestamoValidator(db, TestBranding.Horario, configRepo);
 
         var audit = new AuditLogService(
-            new AuditLogRepository(db, TestBranding.Labels),
+            new AuditLogRepository(db, []),
             new HttpContextAccessor(),
             new UsuarioReadRepository(db)
         );
-        var notifications = new NotificacionService(new NotificacionRepository(db));
+        var notifications = new NotificacionService(new NotificacionRepository(db), new UsuarioReadRepository(db));
         var userQueries = new UsuarioReadRepository(db);
-        var userRepository = new UsuarioRepository(db, new UsuarioMapper(), userQueries);
+        var userRepository = new UsuarioRepository(db, new UsuarioMapper(), userQueries, [new PrestamosDeUsuarioEliminado(db)]);
         var availabilityRepository = new AvisoDisponibilidadService(
             new AvisoDisponibilidadRepository(db),
             configRepo,

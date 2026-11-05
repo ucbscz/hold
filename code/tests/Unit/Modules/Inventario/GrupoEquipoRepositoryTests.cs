@@ -24,7 +24,7 @@ public class GrupoEquipoRepositoryTests
         _dbContext = new ApplicationDbContext(options);
         _mapper = new GrupoEquipoMapper();
         var equipoMapper = new EquipoMapper();
-        var equipoRepository = new EquipoRepository(_dbContext, equipoMapper);
+        var equipoRepository = new EquipoRepository(_dbContext, equipoMapper, []);
         _repository = new GrupoEquipoRepository(_dbContext, _mapper, equipoRepository);
     }
 

@@ -21,6 +21,7 @@ using UCB_Hold.Server.Shared.Caching;
 using UCB_Hold.Server.Shared.Email;
 using UCB_Hold.Server.Shared.Persistence;
 using UCB_Hold.Server.Shared.Security;
+using UCB_Hold.Server.Modules.Prestamos.Infrastructure;
 namespace UCB_Hold.Tests.Integration.Modules.Usuarios;
 
 [TestFixture]
@@ -67,7 +68,7 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         var jwtOptions = Options.Create(TestJwtSettings);
         var mapper = new UsuarioMapper();
         var queries = new UsuarioReadRepository(db);
-        var repo = new UsuarioRepository(db, mapper, queries);
+        var repo = new UsuarioRepository(db, mapper, queries, [new PrestamosDeUsuarioEliminado(db)]);
         var authRepository = new UsuarioAuthRepository(db);
         var validator = new UsuarioValidator(
             db,
@@ -80,11 +81,11 @@ internal class UsuarioServiceTests : ServiceTest<UsuarioService>
         );
 
         var audit = new AuditLogService(
-            new AuditLogRepository(db, TestBranding.Labels),
+            new AuditLogRepository(db, []),
             new HttpContextAccessor(),
             queries
         );
-        var notifications = new NotificacionService(new NotificacionRepository(db));
+        var notifications = new NotificacionService(new NotificacionRepository(db), queries);
         var emailDelivery = new EmailDeliveryService(
             new DisabledEmailSender(),
             Options.Create(new EmailSettings())

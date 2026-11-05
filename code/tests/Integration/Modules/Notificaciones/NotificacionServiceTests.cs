@@ -5,6 +5,7 @@ using UCB_Hold.Server.Modules.Notificaciones.Application;
 using UCB_Hold.Server.Modules.Notificaciones.Infrastructure;
 using UCB_Hold.Server.Modules.Usuarios.Domain;
 using UCB_Hold.Server.Shared.Persistence;
+using UCB_Hold.Server.Modules.Usuarios.Infrastructure;
 
 namespace UCB_Hold.Tests.Integration.Modules.Notificaciones;
 
@@ -12,7 +13,7 @@ namespace UCB_Hold.Tests.Integration.Modules.Notificaciones;
 internal class NotificacionServiceTests : ServiceTest<NotificacionService>
 {
     protected override NotificacionService CreateService(ApplicationDbContext db) =>
-        new(new NotificacionRepository(db));
+        new(new NotificacionRepository(db), new UsuarioReadRepository(db));
 
     [Test]
     public async Task Create_GuardaYListaPorCarnet()

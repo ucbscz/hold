@@ -47,7 +47,7 @@ internal class CatalogoInventarioTests : ServiceTest<CatalogoInventarioRepositor
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         services.AddSingleton(TestBranding.Labels);
         services.AddScoped<AuditLogRepository>();
-        services.AddScoped<IUsuarioConsultas, UsuarioReadRepository>();
+        services.AddScoped<IAuditActorDirectory, UsuarioReadRepository>();
         services.AddScoped<AuditLogService>();
         services.AddInventoryCatalogs();
         using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
@@ -122,7 +122,7 @@ internal class CatalogoInventarioTests : ServiceTest<CatalogoInventarioRepositor
         result.Value.NombreMueble.Should().Be("Mueble A");
         result.Value.NombreGavetero.Should().Be("Gavetero 2");
         result.Value.AdministradorAmbiente.Should().Be("Ana Perez Lopez");
-        var equipment = await new EquipoRepository(Db, new EquipoMapper()).Get(1);
+        var equipment = await new EquipoRepository(Db, new EquipoMapper(), []).Get(1);
         equipment.IsSuccess.Should().BeTrue();
         equipment.Value.Ubicacion.Should().Be("Laboratorio");
         var furniture = await new Repository<Mueble, MuebleDto>(Db, new MuebleMapper()).Get(1);
