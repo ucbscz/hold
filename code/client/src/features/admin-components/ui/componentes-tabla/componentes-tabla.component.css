@@ -8,9 +8,6 @@
   border: 1px solid #e2e8f0;
 }
 
-.table-responsive > * {
-}
-
 .componentes-container {
   padding: 1.5rem 0 1.5rem 0;
   background-color: var(--color-background);

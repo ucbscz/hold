@@ -189,28 +189,6 @@ input[type="checkbox"] {
   box-shadow: var(--shadow-sm);
 }
 
-.table-responsive::-webkit-scrollbar {
-  width: var(--scrollbar-size);
-  height: var(--scrollbar-size);
-}
-
-.table-responsive::-webkit-scrollbar-thumb {
-  background: var(--scrollbar-thumb);
-  border: 2px solid transparent;
-  border-radius: var(--radius-full);
-  background-clip: content-box;
-}
-
-.table-responsive::-webkit-scrollbar-thumb:hover {
-  background: var(--scrollbar-thumb-hover);
-  border: 2px solid transparent;
-  background-clip: content-box;
-}
-
-.table-responsive::-webkit-scrollbar-track {
-  background: var(--scrollbar-track);
-}
-
 .data-table {
   width: 100%;
   min-width: 700px;

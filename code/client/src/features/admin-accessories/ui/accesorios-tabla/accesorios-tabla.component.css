@@ -64,9 +64,6 @@
   border: 1px solid #e2e8f0;
 }
 
-.table-responsive > * {
-}
-
 .actions-column {
   width: 120px;
   min-width: 120px;

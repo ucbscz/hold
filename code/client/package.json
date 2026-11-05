@@ -5,7 +5,7 @@
     "ng": "ng",
     "brand": "node tools/render-templates.mjs",
     "prestart": "node aspnetcore-https && npm run brand",
-    "start": "run-script-os",
+    "start": "ng serve",
     "prebuild": "npm run brand",
     "build": "ng build",
     "prewatch": "npm run brand",
@@ -13,9 +13,7 @@
     "test": "ng test",
     "test:coverage": "ng test --code-coverage --watch=false --browsers=ChromeHeadlessNoSandbox",
     "format": "prettier --write \"**/*.{ts,html,css,json,js,mjs,cjs,scss,md,yml,yaml}\"",
-    "format:check": "prettier --check \"**/*.{ts,html,css,json,js,mjs,cjs,scss,md,yml,yaml}\"",
-    "start:windows": "ng serve",
-    "start:default": "ng serve"
+    "format:check": "prettier --check \"**/*.{ts,html,css,json,js,mjs,cjs,scss,md,yml,yaml}\""
   },
   "private": true,
   "dependencies": {
@@ -27,7 +25,6 @@
     "@angular/router": "21.2.25",
     "@fortawesome/fontawesome-free": "^7.2.0",
     "flatpickr": "^4.6.13",
-    "run-script-os": "*",
     "rxjs": "~7.8.0",
     "signature_pad": "^5.0.7",
     "ts-results-es": "^7.0.0",
