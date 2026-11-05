@@ -216,10 +216,6 @@
   .profile-header {
     padding: 1.25rem;
   }
-  .avatar {
-    width: 56px;
-    height: 56px;
-  }
   .data-grid {
     grid-template-columns: 1fr;
     gap: 0.75rem;

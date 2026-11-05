@@ -406,83 +406,6 @@ td.actions-column {
   letter-spacing: 0.025em;
 }
 
-.estado-pendiente {
-  background-color: #fef3c7;
-  color: #92400e;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-.estado-aprobado {
-  background-color: #d1fae5;
-  color: #065f46;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-.estado-rechazado {
-  background-color: #fee2e2;
-  color: #991b1b;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-.estado-activo {
-  background-color: #dbeafe;
-  color: var(--brand-hover);
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-.estado-finalizado {
-  background-color: #f3f4f6;
-  color: #374151;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-.estado-cancelado {
-  background-color: #fef2f2;
-  color: #7f1d1d;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
-.estado-atrasado {
-  background-color: #fff7ed;
-  color: #b45309;
-  padding: 0.25rem 0.75rem;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.025em;
-}
-
 .nombre-usuario {
   max-width: 180px;
 }
@@ -497,7 +420,7 @@ td.actions-column {
 
 .equipos-cell {
   width: 100%;
-  max-width: 100%;
+  max-width: 100px;
   overflow: hidden;
 }
 
@@ -519,26 +442,7 @@ td.actions-column {
   color: var(--ink);
 }
 
-.cantidad-equipos {
-  font-size: 0.75rem;
-  color: var(--ink-secondary);
-  font-weight: 600;
-}
-
 @media (max-width: 480px) {
-  .modal-content {
-    min-width: 90vw;
-    padding: 1.5rem;
-  }
-  .modal-content p {
-    font-size: 1rem;
-    margin-bottom: 1.25rem;
-  }
-  .modal-content .btn {
-    margin: 0.25rem;
-    width: auto;
-    min-width: 90px;
-  }
   .btn-action {
     width: 2.2rem !important;
     height: 2.2rem !important;
@@ -564,39 +468,6 @@ td.actions-column {
   .actions-column {
     width: 160px;
   }
-}
-
-@media (max-width: 360px) {
-  .modal-content {
-    padding: 1.2rem;
-    min-width: 92vw;
-  }
-  .modal-content p {
-    font-size: 0.9rem;
-  }
-  .modal-content .btn {
-    width: auto;
-    min-width: 80px;
-    margin: 0.25rem;
-  }
-}
-
-.equipos-cell {
-  max-width: 100px;
-}
-
-.equipos-info {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.nombre-equipo {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  font-weight: 500;
-  color: var(--ink);
 }
 
 .devuelto-bloqueo {

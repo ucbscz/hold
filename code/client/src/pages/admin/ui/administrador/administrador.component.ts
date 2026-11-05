@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { CatalogosInventarioComponent } from '../catalogos-inventario.component';
+import { CatalogosInventarioComponent } from '@features/admin-inventory-catalogs';
 import { Router } from '@angular/router';
 import {
   UsuarioService,
@@ -20,7 +20,7 @@ import { EmpresasMantenimientoTablaComponent } from '@features/admin-maintenance
 import { UsuariosTablaComponent } from '@features/admin-users';
 import { AdminNavigationGroup, SidebarComponent } from '@widgets/admin-sidebar';
 import { SidebarService } from '@shared/lib/sidebar';
-import { AdminConfiguracionesComponent } from '../admin-configuraciones/admin-configuraciones.component';
+import { AdminConfiguracionesComponent } from '@features/admin-settings';
 
 const GENERAL_ADMIN_NAVIGATION: AdminNavigationGroup[] = [
   {

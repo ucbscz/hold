@@ -97,91 +97,40 @@ public sealed class CambioEstadoPrestamoService
         if (!parsedState.HasValue)
             return Result<PrestamoDto>.Error($"Estado '{newStatus}' no reconocido");
 
-        if (parsedState == EstadoPrestamo.Rechazado && string.IsNullOrWhiteSpace(observacion))
-            return Result<PrestamoDto>.Error("Indica el motivo del rechazo");
-        if (observacion?.Length > 1024)
-            return Result<PrestamoDto>.Error("La observación no puede superar 1024 caracteres");
+        var state = parsedState.Value;
+        var rejection = RejectTransition(loan, state, newStatus, observacion);
+        if (rejection != null)
+            return rejection;
 
-        if (!PrestamoState.CanTransition(loan.EstadoPrestamo, parsedState.Value))
-            return Result<PrestamoDto>.Error(
-                $"Transición '{PrestamoState.ToText(loan.EstadoPrestamo)}' → '{newStatus}' no permitida"
-            );
-
-        if (
-            parsedState.Value == EstadoPrestamo.Aprobado
-            && loan.FechaPrestamoEsperada <= DateTime.UtcNow
-        )
-            return Result<PrestamoDto>.Error(
-                "No se puede aprobar una reserva cuyo horario de inicio ya venció"
-            );
-
-        var actor = string.IsNullOrWhiteSpace(actorCarnet) ? SystemActor.Nombre
+        var actor = string.IsNullOrWhiteSpace(actorCarnet)
+            ? SystemActor.Nombre
             : await _queries.GetUsuarioDisplayName(actorCarnet, cancellationToken);
 
-        if (parsedState.Value == EstadoPrestamo.Aprobado)
-        {
-            var assigned = await _availability.AssignEquiposOnApproval(
-                id,
-                actor,
-                cancellationToken
+        if (
+            state == EstadoPrestamo.Aprobado
+            && !await _availability.AssignEquiposOnApproval(id, actor, cancellationToken)
+        )
+            return Result<PrestamoDto>.Error(
+                "No se puede aprobar: no hay equipos disponibles para uno o más grupos en las fechas solicitadas"
             );
 
-            if (!assigned)
-                return Result<PrestamoDto>.Error(
-                    "No se puede aprobar: no hay equipos disponibles para uno o más grupos en las fechas solicitadas"
-                );
-        }
-
-        var previousAuditState = new
-        {
-            loan.EstadoPrestamo,
-            loan.Observacion,
-            loan.MotivoRechazo,
-            loan.AutorizadoPor,
-            loan.EntregadoPor,
-        };
-        loan.EstadoPrestamo = parsedState.Value;
-        if (parsedState == EstadoPrestamo.Aprobado) loan.AutorizadoPor = actor;
-        if (parsedState == EstadoPrestamo.Activo) loan.EntregadoPor = actor;
-        if (parsedState == EstadoPrestamo.Rechazado) loan.MotivoRechazo = observacion!.Trim();
-
-        if (observacion != null)
-            loan.Observacion = observacion;
-
-        if (parsedState.Value == EstadoPrestamo.Finalizado)
-            loan.FechaDevolucion = DateTime.UtcNow;
-
+        var previous = AuditSnapshot(loan);
+        ApplyState(loan, state, actor, observacion);
         await _repository.UpdateTracked(loan, cancellationToken);
 
         RetornoEquipos? retorno = null;
         string? auditDetail;
 
-        if (parsedState.Value == EstadoPrestamo.Finalizado)
+        if (state == EstadoPrestamo.Finalizado)
         {
-            retorno = await _retornos.Apply(
-                id,
-                observacion,
-                body,
-                previousAuditState.EstadoPrestamo,
-                cancellationToken
-            );
+            retorno = await _retornos.Apply(id, observacion, body, previous.EstadoPrestamo, cancellationToken);
             auditDetail = retorno.AuditDetail;
         }
         else
-            auditDetail = AuditChangeDetail.Build(
-                previousAuditState,
-                new
-                {
-                    loan.EstadoPrestamo,
-                    loan.Observacion,
-                    loan.MotivoRechazo,
-                    loan.AutorizadoPor,
-                    loan.EntregadoPor,
-                }
-            );
+            auditDetail = AuditChangeDetail.Build(previous, AuditSnapshot(loan));
 
         await _audit.Log(
-            ToAuditAction(parsedState.Value),
+            ToAuditAction(state),
             typeof(PrestamoEntity).Name,
             id.ToString(CultureInfo.InvariantCulture),
             auditDetail
@@ -190,23 +139,90 @@ public sealed class CambioEstadoPrestamoService
         await _notificaciones.NotifyStatusChange(
             id,
             loan.Carnet!,
-            parsedState.Value,
+            state,
             observacion,
             retorno,
             actor ?? SystemActor.Nombre
         );
 
-        if (parsedState.Value == EstadoPrestamo.Finalizado)
-            await UnblockIfNoOverdueLoans(loan.Carnet!, cancellationToken);
+        await AfterTransition(loan.Carnet!, state, cancellationToken);
 
-        if (ReleasesAvailability(parsedState.Value))
+        return await _queries.Get(id, cancellationToken);
+    }
+
+    private static Result<PrestamoDto>? RejectTransition(
+        PrestamoEntity loan,
+        EstadoPrestamo state,
+        string newStatus,
+        string? observacion
+    )
+    {
+        if (state == EstadoPrestamo.Rechazado && string.IsNullOrWhiteSpace(observacion))
+            return Result<PrestamoDto>.Error("Indica el motivo del rechazo");
+
+        if (observacion?.Length > 1024)
+            return Result<PrestamoDto>.Error("La observación no puede superar 1024 caracteres");
+
+        if (!PrestamoState.CanTransition(loan.EstadoPrestamo, state))
+            return Result<PrestamoDto>.Error(
+                $"Transición '{PrestamoState.ToText(loan.EstadoPrestamo)}' → '{newStatus}' no permitida"
+            );
+
+        if (state == EstadoPrestamo.Aprobado && loan.FechaPrestamoEsperada <= DateTime.UtcNow)
+            return Result<PrestamoDto>.Error(
+                "No se puede aprobar una reserva cuyo horario de inicio ya venció"
+            );
+
+        return null;
+    }
+
+    private static PrestamoAuditSnapshot AuditSnapshot(PrestamoEntity loan) =>
+        new(loan.EstadoPrestamo, loan.Observacion, loan.MotivoRechazo, loan.AutorizadoPor, loan.EntregadoPor);
+
+    private static void ApplyState(
+        PrestamoEntity loan,
+        EstadoPrestamo state,
+        string? actor,
+        string? observacion
+    )
+    {
+        loan.EstadoPrestamo = state;
+
+        if (state == EstadoPrestamo.Aprobado)
+            loan.AutorizadoPor = actor;
+        if (state == EstadoPrestamo.Activo)
+            loan.EntregadoPor = actor;
+        if (state == EstadoPrestamo.Rechazado)
+            loan.MotivoRechazo = observacion!.Trim();
+        if (observacion != null)
+            loan.Observacion = observacion;
+        if (state == EstadoPrestamo.Finalizado)
+            loan.FechaDevolucion = DateTime.UtcNow;
+    }
+
+    private async Task AfterTransition(
+        string carnet,
+        EstadoPrestamo state,
+        CancellationToken cancellationToken
+    )
+    {
+        if (state == EstadoPrestamo.Finalizado)
+            await UnblockIfNoOverdueLoans(carnet, cancellationToken);
+
+        if (ReleasesAvailability(state))
             await _availabilityWatches.NotifyAvailable(
                 await _configuracion.GetConfiguracion(cancellationToken),
                 cancellationToken
             );
-
-        return await _queries.Get(id, cancellationToken);
     }
+
+    private sealed record PrestamoAuditSnapshot(
+        EstadoPrestamo EstadoPrestamo,
+        string? Observacion,
+        string? MotivoRechazo,
+        string? AutorizadoPor,
+        string? EntregadoPor
+    );
 
     private static AuditAccion ToAuditAction(EstadoPrestamo estado) =>
         estado switch
