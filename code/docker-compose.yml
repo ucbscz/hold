@@ -1,13 +1,15 @@
+x-logging: &default-logging
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+
 services:
   ucb_db:
     container_name: ucb_db
     image: postgres:16-alpine
     restart: on-failure
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    logging: *default-logging
     environment:
       POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
@@ -28,11 +30,7 @@ services:
     container_name: ucb_redis
     image: redis:7-alpine
     restart: on-failure
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+    logging: *default-logging
     command: ["redis-server", "--appendonly", "yes"]
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
@@ -48,6 +46,7 @@ services:
     container_name: ucb_elastic
     image: docker.elastic.co/elasticsearch/elasticsearch:8.19.19
     restart: on-failure
+    logging: *default-logging
     environment:
       - discovery.type=single-node
       - xpack.security.enabled=false
@@ -67,6 +66,7 @@ services:
     container_name: ucb_server
     build: ./server
     restart: on-failure
+    logging: *default-logging
     init: true
     security_opt:
       - no-new-privileges:true
@@ -75,6 +75,9 @@ services:
     env_file:
       - server.env
     environment:
+      POSTGRES_USER: ""
+      POSTGRES_PASSWORD: ""
+      APP_DB_PASSWORD: ""
       ASPNETCORE_ENVIRONMENT: Production
       ASPNETCORE_HTTP_PORTS: 8080
       HttpsRedirection__Enabled: "false"
@@ -103,6 +106,7 @@ services:
     container_name: ucb_client
     build: ./client
     restart: on-failure
+    logging: *default-logging
     init: true
     security_opt:
       - no-new-privileges:true
