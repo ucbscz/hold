@@ -52,8 +52,15 @@
           <feGaussianBlur stdDeviation="10" />
         </filter>
         <filter id="grain">
-          <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" />
-          <feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0" />
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.85"
+            numOctaves="2"
+            stitchTiles="stitch"
+          />
+          <feColorMatrix
+            values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0"
+          />
         </filter>
       </defs>
       <g filter="url(#b1)">
@@ -80,7 +87,10 @@
           stroke-width="70"
           stroke-linecap="round"
         />
-        <path d="M-200 -200 L 380 -200 C 300 -30, 140 110, -200 250 Z" fill="#ffd700" />
+        <path
+          d="M-200 -200 L 380 -200 C 300 -30, 140 110, -200 250 Z"
+          fill="#ffd700"
+        />
         <ellipse cx="40" cy="20" rx="200" ry="120" fill="#ffe766" />
       </g>
       <g filter="url(#b3)" fill="none" stroke-linecap="round">
