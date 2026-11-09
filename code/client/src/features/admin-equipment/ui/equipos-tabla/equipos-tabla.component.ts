@@ -1,4 +1,4 @@
-import { INVENTORY_LABELS } from '@brand/brand';
+import { INVENTORY_LABELS } from '@shared/config';
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -17,6 +17,7 @@ import {
 } from '@shared/ui';
 import {
   AdminTabsComponent,
+  ColumnaOrdenableComponent,
   TablaGestion,
   TablePaginationComponent,
 } from '@shared/lib/admin-table';
@@ -29,6 +30,7 @@ import { EquiposFormularioComponent } from '../equipos-formulario/equipos-formul
   selector: 'app-equipos-tabla',
   standalone: true,
   imports: [
+    ColumnaOrdenableComponent,
     AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,

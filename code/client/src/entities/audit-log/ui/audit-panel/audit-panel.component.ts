@@ -1,4 +1,4 @@
-import { INVENTORY_LABELS } from '@brand/brand';
+import { INVENTORY_LABELS } from '@shared/config';
 import { CommonModule, DatePipe } from '@angular/common';
 import {
   Component,
@@ -18,7 +18,15 @@ import {
   FlatpickrDirective,
   StickyScrollDirective,
 } from '@shared/lib/directives';
-import { printTable, TablePaginationComponent } from '@shared/lib/admin-table';
+import {
+  AriaOrden,
+  ariaOrden,
+  ColumnaOrdenableComponent,
+  iconoOrden,
+  printTable,
+  siguienteDireccion,
+  TablePaginationComponent,
+} from '@shared/lib/admin-table';
 import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
 import { formatRegionDateTime } from '@shared/lib/date';
 import { AuditObservationDetail } from '../../model/audit-observation-detail';
@@ -40,6 +48,7 @@ const INTERVALO_ACTUALIZACION_MS = 30000;
   selector: 'app-audit-panel',
   standalone: true,
   imports: [
+    ColumnaOrdenableComponent,
     CommonModule,
     DatePipe,
     FormsModule,
@@ -201,10 +210,11 @@ export class AuditPanelComponent implements OnChanges, OnDestroy {
 
     if (!this.esColumnaOrdenable(columnaOrdenable)) return;
 
-    this.sortDirection =
-      this.sortColumn === columnaOrdenable && this.sortDirection === 'asc'
-        ? 'desc'
-        : 'asc';
+    this.sortDirection = siguienteDireccion(
+      this.sortColumn,
+      this.sortDirection,
+      columnaOrdenable,
+    );
     this.sortColumn = columnaOrdenable;
     this.aplicarOrdenActual();
     this.cambiarPagina(1);
@@ -218,10 +228,12 @@ export class AuditPanelComponent implements OnChanges, OnDestroy {
     return columna.trim() !== 'Acciones';
   }
 
-  iconoOrdenColumna(columna: string): string {
-    if (!this.esColumnaOrdenada(columna)) return 'fa-sort';
+  ariaOrdenColumna(columna: string): AriaOrden {
+    return ariaOrden(this.esColumnaOrdenada(columna), this.sortDirection);
+  }
 
-    return this.sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+  iconoOrdenColumna(columna: string): string {
+    return iconoOrden(this.esColumnaOrdenada(columna), this.sortDirection);
   }
 
   obsAbierta: AuditObservationDetail | null = null;

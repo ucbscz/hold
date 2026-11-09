@@ -5,7 +5,7 @@ using UCB_Hold.Server.Shared.Kernel;
 
 namespace UCB_Hold.Server.Modules.Auditoria.Application;
 
-public class AuditLogService
+public class AuditLogService : IAuditTrail
 {
     private static readonly string[] EntidadesVisiblesParaGestion = ["Prestamo", "Usuario"];
 
@@ -43,6 +43,25 @@ public class AuditLogService
             saveChanges
         );
     }
+
+    public Task Created<T>(string entity, string? id, T current) =>
+        Log(AuditAccion.Crear, entity, id, AuditChangeDetail.BuildCreated(current));
+
+    public Task Updated<T>(string entity, string id, T? previous, T current) =>
+        Log(
+            AuditAccion.Editar,
+            entity,
+            id,
+            previous is null ? null : AuditChangeDetail.Build(previous, current)
+        );
+
+    public Task Deleted<T>(string entity, string id, T? previous) =>
+        Log(
+            AuditAccion.Eliminar,
+            entity,
+            id,
+            previous is null ? null : AuditChangeDetail.BuildDeleted(previous)
+        );
 
     public async Task LogMany(IReadOnlyCollection<AuditEntry> entries)
     {

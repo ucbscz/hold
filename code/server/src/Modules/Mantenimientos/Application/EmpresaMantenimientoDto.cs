@@ -1,6 +1,8 @@
+using UCB_Hold.Server.Shared.Kernel;
+
 namespace UCB_Hold.Server.Modules.Mantenimientos.Application;
 
-public class EmpresaMantenimientoDto
+public class EmpresaMantenimientoDto : IIdentifiedDto
 {
     public int? Id { get; set; }
     public string? NombreEmpresa { get; set; }

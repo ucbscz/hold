@@ -7,7 +7,11 @@ import {
   BuscadorComponent,
   MostrarerrorComponent,
 } from '@shared/ui';
-import { AdminTabsComponent, TablaGestion } from '@shared/lib/admin-table';
+import {
+  AdminTabsComponent,
+  ColumnaOrdenableComponent,
+  TablaGestion,
+} from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import { EquiposInlineComponent } from '@entities/equipment';
@@ -17,6 +21,7 @@ import { GaveterosFormularioComponent } from '../gaveteros-formulario/gaveteros-
   selector: 'app-gaveteros-tabla',
   standalone: true,
   imports: [
+    ColumnaOrdenableComponent,
     AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,

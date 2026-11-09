@@ -54,10 +54,26 @@ internal class LayerBoundaryTests
 
         var singleUseAbstractions = abstractions
             .Where(abstraction => CountImplementations(abstraction, types) < 2)
+            .Where(abstraction => !IsPortImplementedByModules(abstraction, types))
             .Select(abstraction => abstraction.FullName)
             .ToList();
 
         singleUseAbstractions.Should().BeEmpty();
+    }
+
+    [Test]
+    public void Shared_DependsOnlyOnModuleDomainsThroughPersistence()
+    {
+        var dependencies = ServerAssembly.GetTypes()
+            .Where(type => type.Namespace?.StartsWith("UCB_Hold.Server.Shared", StringComparison.Ordinal) == true)
+            .Where(type => type.Namespace != "UCB_Hold.Server.Shared.Persistence")
+            .SelectMany(GetDeclaredDependencies)
+            .Where(type => type.Namespace?.StartsWith("UCB_Hold.Server.Modules", StringComparison.Ordinal) == true)
+            .Select(type => type.FullName)
+            .Distinct()
+            .ToList();
+
+        dependencies.Should().BeEmpty();
     }
 
     [Test]
@@ -106,6 +122,12 @@ internal class LayerBoundaryTests
             foreach (var nested in Expand(argument))
                 yield return nested;
     }
+
+    private static bool IsPortImplementedByModules(Type abstraction, IEnumerable<Type> types) =>
+        types
+            .Where(type => !type.IsAbstract && !type.IsInterface && abstraction.IsAssignableFrom(type))
+            .All(type => type.Namespace?.StartsWith("UCB_Hold.Server.Modules", StringComparison.Ordinal) == true)
+        && CountImplementations(abstraction, types) > 0;
 
     private static int CountImplementations(Type abstraction, IEnumerable<Type> types) =>
         types.Count(type =>

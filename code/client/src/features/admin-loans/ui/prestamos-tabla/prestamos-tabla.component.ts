@@ -33,6 +33,7 @@ import {
 } from '@shared/ui';
 import {
   AdminTabsComponent,
+  ColumnaOrdenableComponent,
   Tabla,
   TablePaginationComponent,
   printTable,
@@ -68,6 +69,7 @@ import {
   selector: 'app-prestamos-tabla',
   standalone: true,
   imports: [
+    ColumnaOrdenableComponent,
     AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,

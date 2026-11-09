@@ -1,4 +1,4 @@
-import { REGION } from '@region/region';
+import { REGION } from '@shared/config';
 
 const regionDateTimeFormatter = new Intl.DateTimeFormat(REGION.locale, {
   timeZone: REGION.timeZone,

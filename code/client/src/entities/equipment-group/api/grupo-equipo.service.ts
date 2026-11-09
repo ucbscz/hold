@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { environment } from '@environments/environment';
+import { environment } from '@shared/config';
 import { ApiResponse, extractApiValue } from '@shared/api';
 import { finalize, map, Observable, of, shareReplay, tap } from 'rxjs';
 import {

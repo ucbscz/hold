@@ -1,4 +1,4 @@
-import { BRAND } from '@brand/brand';
+import { BRAND } from '@shared/config';
 import { Component, EventEmitter, Input, Output, signal } from '@angular/core';
 import { VercontratoComponent } from '../contrato/vercontrato.component';
 import { PrestamoDto } from '../../model/prestamo';

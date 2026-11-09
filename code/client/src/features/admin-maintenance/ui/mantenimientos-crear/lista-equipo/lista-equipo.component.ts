@@ -1,9 +1,13 @@
-import { INVENTORY_LABELS } from '@brand/brand';
+import { INVENTORY_LABELS } from '@shared/config';
 import { CommonModule } from '@angular/common';
 import { Component, Input, signal, WritableSignal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Equipos, EquipoService } from '@entities/equipment';
-import { AdminTableSort, Tabla } from '@shared/lib/admin-table';
+import {
+  AdminTableSort,
+  ColumnaOrdenableComponent,
+  Tabla,
+} from '@shared/lib/admin-table';
 import { extractErrorMessage } from '@shared/lib/error';
 import {
   CustomSelectComponent,
@@ -15,6 +19,7 @@ import { MantenimientosServiceEquipos } from '../../../model/mantenimientos-equi
 @Component({
   selector: 'app-lista-equipo',
   imports: [
+    ColumnaOrdenableComponent,
     CommonModule,
     FormsModule,
     CustomSelectComponent,

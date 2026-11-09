@@ -8,7 +8,7 @@ services:
   ucb_db:
     container_name: ucb_db
     image: postgres:16-alpine
-    restart: on-failure
+    restart: unless-stopped
     logging: *default-logging
     environment:
       POSTGRES_USER: ${POSTGRES_USER:?POSTGRES_USER is required}
@@ -29,7 +29,7 @@ services:
   ucb_redis:
     container_name: ucb_redis
     image: redis:7-alpine
-    restart: on-failure
+    restart: unless-stopped
     logging: *default-logging
     command: ["redis-server", "--appendonly", "yes"]
     healthcheck:
@@ -45,7 +45,7 @@ services:
   ucb_elastic:
     container_name: ucb_elastic
     image: docker.elastic.co/elasticsearch/elasticsearch:8.19.19
-    restart: on-failure
+    restart: unless-stopped
     logging: *default-logging
     environment:
       - discovery.type=single-node
@@ -65,7 +65,7 @@ services:
   ucb_server:
     container_name: ucb_server
     build: ./server
-    restart: on-failure
+    restart: unless-stopped
     logging: *default-logging
     init: true
     security_opt:
@@ -105,7 +105,7 @@ services:
   ucb_client:
     container_name: ucb_client
     build: ./client
-    restart: on-failure
+    restart: unless-stopped
     logging: *default-logging
     init: true
     security_opt:

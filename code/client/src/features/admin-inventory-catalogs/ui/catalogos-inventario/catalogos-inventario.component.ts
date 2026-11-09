@@ -28,6 +28,7 @@ import {
   Tabla,
   TablePaginationComponent,
   printTable,
+  ColumnaOrdenableComponent,
 } from '@shared/lib/admin-table';
 import { AuditPanelComponent } from '@entities/audit-log';
 import { extractErrorMessage } from '@shared/lib/error';
@@ -37,6 +38,7 @@ import { Subscription, finalize } from 'rxjs';
   selector: 'app-catalogos-inventario',
   standalone: true,
   imports: [
+    ColumnaOrdenableComponent,
     AdminTabsComponent,
     CommonModule,
     ValidatedFormsModule,

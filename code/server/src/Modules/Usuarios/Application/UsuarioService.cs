@@ -13,6 +13,8 @@ namespace UCB_Hold.Server.Modules.Usuarios.Application;
 
 public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioDto>
 {
+    private readonly AuditLogService _audit;
+
     private static readonly TimeSpan UsuarioCacheTtl = TimeSpan.FromMinutes(30);
     private readonly UsuarioMapper _mapper;
     private readonly CacheRepository _cacheRepository;
@@ -36,6 +38,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
     )
         : base(repository, validator, mapper, audit)
     {
+        _audit = audit;
         _mapper = mapper;
         _cacheRepository = cacheRepository;
         _authRepository = authRepository;
@@ -250,7 +253,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         created.CarreraNombre = await _queries.GetCarreraName(entity.IdCarrera, CancellationToken.None);
         var auditDetail = AuditChangeDetail.BuildCreated(created);
         ProfileDocuments.Clear(created);
-        await Audit!.Log(AuditAccion.Crear, typeof(UsuarioEntity).Name, entity.Carnet, auditDetail);
+        await _audit.Log(AuditAccion.Crear, typeof(UsuarioEntity).Name, entity.Carnet, auditDetail);
 
         return result;
     }
@@ -334,7 +337,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         ProfileDocuments.Clear(resultDto);
 
         _ = await _cacheRepository.Remove(CacheKeys.Usuario(carnet), cancellationToken);
-        await Audit!.Log(
+        await _audit.Log(
             AuditAccion.Editar,
             typeof(UsuarioEntity).Name,
             carnet,
@@ -433,7 +436,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (deleteResult.IsSuccess)
         {
             _ = await _cacheRepository.Remove(CacheKeys.Usuario(carnet), CancellationToken.None);
-            await Audit!.Log(
+            await _audit.Log(
                 AuditAccion.Eliminar,
                 typeof(UsuarioEntity).Name,
                 carnet,

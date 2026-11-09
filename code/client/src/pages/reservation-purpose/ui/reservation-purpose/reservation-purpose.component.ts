@@ -1,4 +1,4 @@
-import { REGION } from '@region/region';
+import { REGION } from '@shared/config';
 import { Component, OnInit, signal } from '@angular/core';
 import { ValidatedFormsModule } from '@shared/lib/forms';
 import { Router } from '@angular/router';

@@ -35,10 +35,10 @@
               }
             ],
             "styles": [
-              "src/brand/brand.css",
-              "src/styles.css",
+              "src/shared/config/brand/brand.css",
+              "src/app/styles/styles.css",
               "node_modules/flatpickr/dist/flatpickr.min.css",
-              "src/styles-flatpickr.css",
+              "src/app/styles/styles-flatpickr.css",
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css"
             ],
             "allowedCommonJsDependencies": [
@@ -61,7 +61,12 @@
                   "maximumError": "40kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": {
+                "scripts": true,
+                "styles": { "minify": true, "inlineCritical": false },
+                "fonts": true
+              }
             },
             "development": {
               "optimization": false,
@@ -83,7 +88,7 @@
           },
           "defaultConfiguration": "development",
           "options": {
-            "proxyConfig": "src/proxy.conf.js",
+            "proxyConfig": "proxy.conf.js",
             "port": 4200
           }
         },
@@ -102,8 +107,8 @@
               }
             ],
             "styles": [
-              "src/brand/brand.css",
-              "src/styles.css",
+              "src/shared/config/brand/brand.css",
+              "src/app/styles/styles.css",
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css"
             ],
             "scripts": [],

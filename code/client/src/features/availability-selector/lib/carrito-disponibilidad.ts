@@ -1,4 +1,4 @@
-import { REGION } from '@region/region';
+import { REGION } from '@shared/config';
 import { Disponibilidad } from '@entities/availability';
 import { Carrito } from '@entities/cart';
 

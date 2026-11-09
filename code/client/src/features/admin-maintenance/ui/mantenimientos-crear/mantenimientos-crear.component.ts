@@ -1,4 +1,4 @@
-import { INVENTORY_LABELS } from '@brand/brand';
+import { INVENTORY_LABELS } from '@shared/config';
 import { CommonModule } from '@angular/common';
 import {
   Component,

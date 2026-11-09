@@ -91,35 +91,13 @@
         <thead>
           <tr>
             @for (columna of columnas; track columna) {
-              <th
-                scope="col"
-                [attr.aria-sort]="
-                  !esColumnaOrdenable(columna)
-                    ? null
-                    : esColumnaOrdenada(columna)
-                      ? sortDirection === 'asc'
-                        ? 'ascending'
-                        : 'descending'
-                      : 'none'
-                "
-              >
-                @if (esColumnaOrdenable(columna)) {
-                  <button
-                    type="button"
-                    class="table-sort-button"
-                    (click)="ordenarPorColumna(columna)"
-                  >
-                    {{ columna
-                    }}<i
-                      class="fas"
-                      [ngClass]="iconoOrdenColumna(columna)"
-                      aria-hidden="true"
-                    ></i>
-                  </button>
-                } @else {
+              @if (esColumnaOrdenable(columna)) {
+                <th [appColumnaOrdenable]="columna" [tabla]="this"></th>
+              } @else {
+                <th scope="col">
                   <span class="table-static-header">{{ columna }}</span>
-                }
-              </th>
+                </th>
+              }
             }
           </tr>
         </thead>

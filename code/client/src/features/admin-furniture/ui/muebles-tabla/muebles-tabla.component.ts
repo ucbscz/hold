@@ -9,6 +9,7 @@ import {
 } from '@shared/ui';
 import {
   AdminTabsComponent,
+  ColumnaOrdenableComponent,
   TablaGestion,
   TablePaginationComponent,
 } from '@shared/lib/admin-table';
@@ -21,6 +22,7 @@ import { MueblesFormularioComponent } from '../muebles-formulario/muebles-formul
   selector: 'app-muebles-tabla',
   standalone: true,
   imports: [
+    ColumnaOrdenableComponent,
     AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,

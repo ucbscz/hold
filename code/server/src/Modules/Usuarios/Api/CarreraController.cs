@@ -4,45 +4,18 @@ using Microsoft.AspNetCore.Mvc;
 using CarreraEntity = UCB_Hold.Server.Modules.Usuarios.Domain.Carrera;
 using UCB_Hold.Server.Modules.Usuarios.Application;
 using UCB_Hold.Server.Shared.Kernel;
-using UCB_Hold.Server.Shared.Security;
 
 namespace UCB_Hold.Server.Modules.Usuarios.Api;
 
-[Authorize]
 [Route("api/carreras")]
-public class CarreraController : ApiController
+public class CarreraController
+    : CrudController<CarreraEntity, Repository<CarreraEntity, CarreraDto>, CarreraDto>
 {
-    private readonly Service<
-        CarreraEntity,
-        Repository<CarreraEntity, CarreraDto>,
-        CarreraDto
-    > _service;
-
     public CarreraController(
         Service<CarreraEntity, Repository<CarreraEntity, CarreraDto>, CarreraDto> service
-    ) => _service = service;
+    )
+        : base(service) { }
 
     [AllowAnonymous]
-    [HttpGet]
-    public async Task<IActionResult> GetAll() => ToResponse(await _service.GetAll());
-
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> Get(int id) => ToResponse(await _service.Get(id));
-
-    [Authorize(Roles = Permisos.Administrador)]
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CarreraDto dto)
-    {
-        var result = await _service.Create(dto);
-        return ToCreatedResponse(result, nameof(Get), new { id = result.Value?.Id });
-    }
-
-    [Authorize(Roles = Permisos.Administrador)]
-    [HttpPut("{id:int}")]
-    public async Task<IActionResult> Update(int id, [FromBody] CarreraDto dto) =>
-        ToResponse(await _service.Update(id, dto));
-
-    [Authorize(Roles = Permisos.Administrador)]
-    [HttpDelete("{id:int}")]
-    public async Task<IActionResult> Delete(int id) => ToDeleteResponse(await _service.Delete(id));
+    public override Task<IActionResult> GetAll() => base.GetAll();
 }

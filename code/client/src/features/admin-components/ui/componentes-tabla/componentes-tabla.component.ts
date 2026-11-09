@@ -1,4 +1,4 @@
-import { INVENTORY_LABELS } from '@brand/brand';
+import { INVENTORY_LABELS } from '@shared/config';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -8,7 +8,11 @@ import {
   BuscadorComponent,
   MostrarerrorComponent,
 } from '@shared/ui';
-import { AdminTabsComponent, TablaGestion } from '@shared/lib/admin-table';
+import {
+  AdminTabsComponent,
+  ColumnaOrdenableComponent,
+  TablaGestion,
+} from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import { AuditPanelComponent } from '@entities/audit-log';
@@ -17,6 +21,7 @@ import { ComponentesFormularioComponent } from '../componentes-formulario/compon
   selector: 'app-componentes-tabla',
   standalone: true,
   imports: [
+    ColumnaOrdenableComponent,
     AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,

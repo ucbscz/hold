@@ -1,5 +1,4 @@
-import { EXTERNAL_SERVICES } from '@external-services/external-services';
-import { BRAND } from '@brand/brand';
+import { BRAND, EXTERNAL_SERVICES } from '@shared/config';
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
 

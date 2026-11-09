@@ -2,7 +2,7 @@ import { HttpBackend, HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Usuario } from '../usuario';
 import { esRolGestion } from '../rol';
-import { environment } from '@environments/environment';
+import { environment } from '@shared/config';
 import { parseJsonResult } from '@shared/lib/result';
 import {
   BrowserSessionStorageService,

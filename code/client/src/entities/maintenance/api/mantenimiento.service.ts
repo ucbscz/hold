@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Mantenimientos } from '../model/mantenimiento';
-import { environment } from '@environments/environment';
+import { environment } from '@shared/config';
 import { ApiResponse, extractApiValue } from '@shared/api';
 import { map, Observable } from 'rxjs';
 import { MantenimientoCreationForm } from '../model/mantenimiento-creation-form';

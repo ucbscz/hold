@@ -14,6 +14,7 @@ namespace UCB_Hold.Server.Modules.Prestamos.Application;
 
 public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, PrestamoDto>
 {
+    private readonly AuditLogService _audit;
     private readonly NotificacionService _notifications;
     private readonly PrestamoReadRepository _queries;
     private readonly ConfiguracionService _configuracion;
@@ -31,6 +32,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
     )
         : base(repository, validator, mapper, audit)
     {
+        _audit = audit;
         _notifications = notifications;
         _queries = queries;
         _configuracion = configuracion;
@@ -136,7 +138,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             entity.Observacion,
         });
 
-        await Audit!.Log(
+        await _audit.Log(
             AuditAccion.Crear,
             typeof(PrestamoEntity).Name,
             entity.Id.ToString(CultureInfo.InvariantCulture),
@@ -180,7 +182,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         var previous = loan.Observacion;
         loan.Observacion = observation?.Trim();
         await Repository.UpdateTracked(loan, token);
-        await Audit!.Log(AuditAccion.Editar, typeof(PrestamoEntity).Name, id.ToString(CultureInfo.InvariantCulture),
+        await _audit.Log(AuditAccion.Editar, typeof(PrestamoEntity).Name, id.ToString(CultureInfo.InvariantCulture),
             AuditChangeDetail.Build(
                 new { Observacion = previous },
                 new { Observacion = loan.Observacion }

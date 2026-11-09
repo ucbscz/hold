@@ -1,6 +1,12 @@
 import { AdminTableSort } from './admin-table-sort';
 import { AdminTableTab } from './admin-table-tab';
 import { BaseTablaComponent } from './base';
+import {
+  AriaOrden,
+  ariaOrden,
+  iconoOrden,
+  siguienteDireccion,
+} from './orden-columna';
 
 export abstract class Tabla extends BaseTablaComponent {
   public columnas: string[] = [];
@@ -40,10 +46,11 @@ export abstract class Tabla extends BaseTablaComponent {
 
     if (!columnaOrdenable) return;
 
-    this.sortDirection =
-      this.sortColumn === columnaOrdenable && this.sortDirection === 'asc'
-        ? 'desc'
-        : 'asc';
+    this.sortDirection = siguienteDireccion(
+      this.sortColumn,
+      this.sortDirection,
+      columnaOrdenable,
+    );
     this.sortColumn = columnaOrdenable;
     this.reiniciarPaginacion();
     this.sortTable({ col: columnaOrdenable, dir: this.sortDirection });
@@ -110,15 +117,11 @@ export abstract class Tabla extends BaseTablaComponent {
   }
 
   iconoOrdenColumna(columna: string): string {
-    if (!this.esColumnaOrdenada(columna)) return 'fa-sort';
-
-    return this.sortDirection === 'asc' ? 'fa-sort-up' : 'fa-sort-down';
+    return iconoOrden(this.esColumnaOrdenada(columna), this.sortDirection);
   }
 
-  ariaOrdenColumna(columna: string): 'none' | 'ascending' | 'descending' {
-    if (!this.esColumnaOrdenada(columna)) return 'none';
-
-    return this.sortDirection === 'asc' ? 'ascending' : 'descending';
+  ariaOrdenColumna(columna: string): AriaOrden {
+    return ariaOrden(this.esColumnaOrdenada(columna), this.sortDirection);
   }
 
   protected sortByAuto<T>(

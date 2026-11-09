@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Equipos } from '../model/equipo';
-import { environment } from '@environments/environment';
+import { environment } from '@shared/config';
 import {
   getApiList,
   obtenerTodasLasPaginas,

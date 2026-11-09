@@ -10,13 +10,15 @@ namespace UCB_Hold.Server.Modules.Inventario.Application;
 
 public class GaveteroService : Service<GaveteroEntity, GaveteroRepository, GaveteroDto>
 {
+    private readonly AuditLogService _audit;
+
     public GaveteroService(
         GaveteroRepository repository,
         GaveteroMapper mapper,
         IValidator<GaveteroDto> validator,
         AuditLogService audit
     )
-        : base(repository, validator, mapper, audit) { }
+        : base(repository, validator, mapper, audit) => _audit = audit;
 
     public override async Task<Result<GaveteroDto>> Create(GaveteroDto dto)
     {
@@ -33,7 +35,7 @@ public class GaveteroService : Service<GaveteroEntity, GaveteroRepository, Gavet
         if (result.IsSuccess)
         {
             await Repository.RecalcMuebleCount(muebleId);
-            await Audit!.Log(
+            await _audit.Log(
                 AuditAccion.Crear,
                 typeof(GaveteroEntity).Name,
                 result.Value?.Id?.ToString(CultureInfo.InvariantCulture),
@@ -70,7 +72,7 @@ public class GaveteroService : Service<GaveteroEntity, GaveteroRepository, Gavet
         if (previousMuebleId.HasValue && previousMuebleId.Value != muebleId)
             await Repository.RecalcMuebleCount(previousMuebleId.Value);
 
-        await Audit!.Log(
+        await _audit.Log(
             AuditAccion.Editar,
             typeof(GaveteroEntity).Name,
             id.ToString(CultureInfo.InvariantCulture),

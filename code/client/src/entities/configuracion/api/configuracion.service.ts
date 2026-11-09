@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, signal, WritableSignal } from '@angular/core';
 import { catchError, map, Observable, of, tap } from 'rxjs';
 import { ApiResponse, extractApiValue } from '@shared/api';
-import { environment } from '@environments/environment';
+import { environment } from '@shared/config';
 import {
   CONFIGURACION_PREDETERMINADA,
   ConfiguracionDto,

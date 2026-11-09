@@ -1,4 +1,4 @@
-import { BRAND } from '@brand/brand';
+import { BRAND } from '@shared/config';
 
 const domain = BRAND.institutionalEmailDomain;
 const escapedDomain = domain.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

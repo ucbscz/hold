@@ -1,4 +1,4 @@
-import { EXTERNAL_SERVICES } from '@external-services/external-services';
+import { EXTERNAL_SERVICES } from '@shared/config';
 import { INSTITUTIONAL_EMAIL } from '@shared/lib/forms';
 import { CommonModule } from '@angular/common';
 import { Component, signal } from '@angular/core';

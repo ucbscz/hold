@@ -1,4 +1,4 @@
-import { EXTERNAL_SERVICES } from '@external-services/external-services';
+import { EXTERNAL_SERVICES } from '@shared/config';
 import { Injectable } from '@angular/core';
 
 @Injectable({ providedIn: 'root' })

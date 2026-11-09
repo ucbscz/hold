@@ -46,29 +46,11 @@
       <thead>
         <tr>
           @for (columna of encabezados; track columna) {
-            <th
-              scope="col"
-              [attr.aria-sort]="
-                tipo === 'ambientes' ? ariaOrdenColumna(columna) : null
-              "
-            >
-              @if (tipo === "ambientes") {
-                <button
-                  type="button"
-                  class="table-sort-button"
-                  (click)="ordenarPorColumna(columna)"
-                >
-                  {{ columna
-                  }}<i
-                    class="fas"
-                    [ngClass]="iconoOrdenColumna(columna)"
-                    aria-hidden="true"
-                  ></i>
-                </button>
-              } @else {
-                {{ columna }}
-              }
-            </th>
+            @if (tipo === "ambientes") {
+              <th [appColumnaOrdenable]="columna" [tabla]="this"></th>
+            } @else {
+              <th scope="col">{{ columna }}</th>
+            }
           }
           <th scope="col" class="actions-column">Acciones</th>
         </tr>

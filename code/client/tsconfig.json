@@ -9,11 +9,7 @@
       "@widgets/*": ["./src/widgets/*"],
       "@features/*": ["./src/features/*"],
       "@entities/*": ["./src/entities/*"],
-      "@shared/*": ["./src/shared/*"],
-      "@environments/*": ["./src/environments/*"],
-      "@brand/*": ["./src/brand/*"],
-      "@region/*": ["./src/region/*"],
-      "@external-services/*": ["./src/external-services/*"]
+      "@shared/*": ["./src/shared/*"]
     },
     "strict": true,
     "noImplicitOverride": true,

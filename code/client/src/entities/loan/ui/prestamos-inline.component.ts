@@ -1,4 +1,4 @@
-import { BRAND } from '@brand/brand';
+import { BRAND } from '@shared/config';
 import { DatePipe } from '@angular/common';
 import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs';

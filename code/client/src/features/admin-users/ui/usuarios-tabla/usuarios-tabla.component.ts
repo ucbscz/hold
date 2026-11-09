@@ -28,6 +28,7 @@ import {
 } from '@shared/ui';
 import {
   AdminTabsComponent,
+  ColumnaOrdenableComponent,
   Tabla,
   TablePaginationComponent,
 } from '@shared/lib/admin-table';
@@ -40,6 +41,7 @@ import { UsuariosFormularioComponent } from '../usuarios-formulario/usuarios-for
   selector: 'app-usuarios-tabla',
   standalone: true,
   imports: [
+    ColumnaOrdenableComponent,
     AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,

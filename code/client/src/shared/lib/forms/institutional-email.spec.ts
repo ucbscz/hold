@@ -1,4 +1,4 @@
-import { BRAND } from '@brand/brand';
+import { BRAND } from '@shared/config';
 import { INSTITUTIONAL_EMAIL } from './institutional-email';
 
 describe('INSTITUTIONAL_EMAIL', () => {

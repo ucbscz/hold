@@ -3,8 +3,7 @@ WORKDIR /src
 COPY ["UCB_Hold.Server.csproj", "./"]
 RUN dotnet restore "./UCB_Hold.Server.csproj"
 COPY src/ ./src/
-COPY Properties/ ./Properties/
-COPY appsettings*.json ./
+COPY appsettings.json ./
 RUN dotnet publish "UCB_Hold.Server.csproj" -c Release -o /app/publish --no-restore /p:UseAppHost=false
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0

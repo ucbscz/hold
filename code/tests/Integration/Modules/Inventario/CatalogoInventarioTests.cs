@@ -3,6 +3,7 @@ using FluentAssertions;
 using UCB_Hold.Tests.Helpers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
+using UCB_Hold.Server.Modules.Auditoria;
 using UCB_Hold.Server.Modules.Auditoria.Application;
 using UCB_Hold.Server.Modules.Auditoria.Infrastructure;
 using UCB_Hold.Server.Modules.Inventario.Application;
@@ -46,9 +47,8 @@ internal class CatalogoInventarioTests : ServiceTest<CatalogoInventarioRepositor
         services.AddSingleton(Db);
         services.AddSingleton<IHttpContextAccessor, HttpContextAccessor>();
         services.AddSingleton(TestBranding.Labels);
-        services.AddScoped<AuditLogRepository>();
         services.AddScoped<IAuditActorDirectory, UsuarioReadRepository>();
-        services.AddScoped<AuditLogService>();
+        services.AddAuditoriaModule();
         services.AddInventoryCatalogs();
         using var provider = services.BuildServiceProvider(new ServiceProviderOptions { ValidateOnBuild = true, ValidateScopes = true });
         using var scope = provider.CreateScope();

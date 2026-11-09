@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Gaveteros } from '../model/gavetero';
-import { environment } from '@environments/environment';
+import { environment } from '@shared/config';
 import { ApiResponse, extractApiValue, getApiList } from '@shared/api';
 import { map, Observable } from 'rxjs';
 import { GaveteroInlineItem } from '../model/gavetero-inline-item';

@@ -16,7 +16,7 @@ public abstract class CrudController<TEntity, TRepository, TDto> : ApiController
     protected CrudController(Service<TEntity, TRepository, TDto> service) => _service = service;
 
     [HttpGet]
-    public async Task<IActionResult> GetAll() => ToResponse(await _service.GetAll());
+    public virtual async Task<IActionResult> GetAll() => ToResponse(await _service.GetAll());
 
     [HttpGet("{id:int}")]
     public async Task<IActionResult> Get(int id) => ToResponse(await _service.Get(id));

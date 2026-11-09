@@ -6,3 +6,5 @@ export * from './table-pagination.component';
 export * from './print-table';
 export * from './admin-tabs.component';
 export * from './tabla-gestion';
+export * from './columna-ordenable.component';
+export * from './orden-columna';

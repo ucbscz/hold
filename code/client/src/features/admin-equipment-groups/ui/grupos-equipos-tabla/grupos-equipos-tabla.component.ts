@@ -8,7 +8,11 @@ import {
   BuscadorComponent,
   MostrarerrorComponent,
 } from '@shared/ui';
-import { AdminTabsComponent, TablaGestion } from '@shared/lib/admin-table';
+import {
+  AdminTabsComponent,
+  ColumnaOrdenableComponent,
+  TablaGestion,
+} from '@shared/lib/admin-table';
 import { StickyScrollDirective } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
 import { EquiposInlineComponent } from '@entities/equipment';
@@ -18,6 +22,7 @@ import { GruposEquiposFormularioComponent } from '../grupos-equipos-formulario/g
   selector: 'app-grupos-equipos-tabla',
   standalone: true,
   imports: [
+    ColumnaOrdenableComponent,
     AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,

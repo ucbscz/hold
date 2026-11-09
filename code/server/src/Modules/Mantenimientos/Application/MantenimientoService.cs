@@ -11,6 +11,7 @@ namespace UCB_Hold.Server.Modules.Mantenimientos.Application;
 public class MantenimientoService
     : Service<MantenimientoEntity, MantenimientoRepository, MantenimientoDto>
 {
+    private readonly AuditLogService _audit;
     private readonly EmpresaMantenimientoRepository _empresaRepository;
     private readonly EstadoMantenimientoService _estadoJob;
 
@@ -24,6 +25,7 @@ public class MantenimientoService
     )
         : base(repository, validator, mapper, audit)
     {
+        _audit = audit;
         _empresaRepository = empresaRepository;
         _estadoJob = estadoJob;
     }
@@ -54,7 +56,7 @@ public class MantenimientoService
             dto.DescripcionesEquipo
         );
         await _estadoJob.Execute(CancellationToken.None);
-        await Audit!.Log(
+        await _audit.Log(
             AuditAccion.Crear,
             typeof(MantenimientoEntity).Name,
             result.Value?.Id?.ToString(CultureInfo.InvariantCulture),
@@ -100,7 +102,7 @@ public class MantenimientoService
     {
         var updated = await Repository.Get(id);
 
-        await Audit!.Log(
+        await _audit.Log(
             AuditAccion.Editar,
             typeof(MantenimientoEntity).Name,
             id.ToString(CultureInfo.InvariantCulture),

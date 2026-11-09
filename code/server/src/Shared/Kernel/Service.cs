@@ -1,7 +1,6 @@
 using System.Globalization;
 using Ardalis.Result;
 using FluentValidation;
-using UCB_Hold.Server.Modules.Auditoria.Application;
 
 namespace UCB_Hold.Server.Shared.Kernel;
 
@@ -11,22 +10,22 @@ public class Service<TEntity, TRepository, TDto>
     where TDto : class
 {
     private readonly IMapper<TEntity, TDto> _mapper;
+    private readonly IAuditTrail _audit;
 
     protected TRepository Repository { get; }
     protected IValidator<TDto> Validator { get; }
-    protected AuditLogService Audit { get; }
 
     public Service(
         TRepository repository,
         IValidator<TDto> validator,
         IMapper<TEntity, TDto> mapper,
-        AuditLogService audit
+        IAuditTrail audit
     )
     {
         Repository = repository;
         Validator = validator;
         _mapper = mapper;
-        Audit = audit;
+        _audit = audit;
     }
 
     protected TEntity MapToEntity(TDto dto) => _mapper.ToEntity(dto);
@@ -49,12 +48,7 @@ public class Service<TEntity, TRepository, TDto>
                 typeof(TDto).GetProperty("Id")?.GetValue(result.Value),
                 CultureInfo.InvariantCulture
             );
-            await Audit.Log(
-                AuditAccion.Crear,
-                typeof(TEntity).Name,
-                id,
-                AuditChangeDetail.BuildCreated(result.Value)
-            );
+            await _audit.Created(typeof(TEntity).Name, id, result.Value);
         }
 
         return result;
@@ -66,11 +60,11 @@ public class Service<TEntity, TRepository, TDto>
         var result = await ValidateAndUpdate(id, dto);
 
         if (result.IsSuccess)
-            await Audit.Log(
-                AuditAccion.Editar,
+            await _audit.Updated(
                 typeof(TEntity).Name,
                 id.ToString(CultureInfo.InvariantCulture),
-                previous.IsSuccess ? AuditChangeDetail.Build(previous.Value, result.Value) : null
+                previous.IsSuccess ? previous.Value : null,
+                result.Value
             );
 
         return result;
@@ -82,11 +76,10 @@ public class Service<TEntity, TRepository, TDto>
         var result = await Repository.Delete(id);
 
         if (result.IsSuccess)
-            await Audit.Log(
-                AuditAccion.Eliminar,
+            await _audit.Deleted(
                 typeof(TEntity).Name,
                 id.ToString(CultureInfo.InvariantCulture),
-                previous.IsSuccess ? AuditChangeDetail.BuildDeleted(previous.Value) : null
+                previous.IsSuccess ? previous.Value : null
             );
 
         return result;

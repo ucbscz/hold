@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { environment } from '@environments/environment';
+import { environment } from '@shared/config';
 import { ApiResponse, extractApiValue } from '@shared/api';
 import { map } from 'rxjs';
 

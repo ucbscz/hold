@@ -88,7 +88,7 @@ The frontend follows Feature-Sliced Design with its layers directly under `code/
 | `entities` | Domain models, API services and entity-specific UI.              |
 | `shared`   | Cross-cutting utilities, directives, primitives and reusable UI. |
 
-Deployment-specific configuration lives beside the layers and contains no logic: `brand` (organization name, labels, colors, fonts and asset paths), `region` (locale and time zone) and `external-services` (identity provider, network provider and blocked image origins).
+Deployment-specific configuration lives in the `shared/config` segment and contains no logic: `brand` (organization name, labels, colors, fonts and asset paths), `region` (locale and time zone) and `external-services` (identity provider, network provider and blocked image origins).
 
 The backend is a modular monolith. Each business module owns its domain, use cases, persistence and HTTP endpoints, and registers its services through a single `Add<Module>Module` extension:
 
@@ -197,13 +197,13 @@ Generated coverage and quality outputs must stay out of source control. CI publi
 
 ## Operations
 
-| Concern           | Policy                                                                                                    |
-| ----------------- | --------------------------------------------------------------------------------------------------------- |
-| Configuration     | Local secrets belong in `code/server.env`, environment variables or `dotnet user-secrets`.                |
-| Database schema   | `code/database/schema.sql` documents the database structure maintained by the application.                |
-| Database releases | Releases publish source code only; `schema.sql` lives in the repository and backups stay private.         |
-| Generated reports | Coverage, SonarQube exports and HTML reports are ignored and uploaded by CI when needed.                  |
-| Releases          | Each release publishes source code only; SQL for existing databases goes in the release notes.            |
+| Concern           | Policy                                                                                            |
+| ----------------- | ------------------------------------------------------------------------------------------------- |
+| Configuration     | Local secrets belong in `code/server.env`, environment variables or `dotnet user-secrets`.        |
+| Database schema   | `code/database/schema.sql` documents the database structure maintained by the application.        |
+| Database releases | Releases publish source code only; `schema.sql` lives in the repository and backups stay private. |
+| Generated reports | Coverage, SonarQube exports and HTML reports are ignored and uploaded by CI when needed.          |
+| Releases          | Each release publishes source code only; SQL for existing databases goes in the release notes.    |
 
 ---
 

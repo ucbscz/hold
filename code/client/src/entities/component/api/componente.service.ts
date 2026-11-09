@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Componente } from '../model/componente';
-import { environment } from '@environments/environment';
+import { environment } from '@shared/config';
 import { ApiResponse, extractApiValue } from '@shared/api';
 import { map, Observable } from 'rxjs';
 import { ComponenteApiItem } from './componente-api-item';

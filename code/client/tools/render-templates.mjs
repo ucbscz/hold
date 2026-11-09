@@ -5,8 +5,10 @@ const readJson = (path) =>
   JSON.parse(readFileSync(new URL(path, root), "utf8"));
 
 const context = {
-  ...readJson("src/brand/brand.json"),
-  services: readJson("src/external-services/external-services.json"),
+  ...readJson("src/shared/config/brand/brand.json"),
+  services: readJson(
+    "src/shared/config/external-services/external-services.json",
+  ),
 };
 
 const escapeHtml = (value) =>

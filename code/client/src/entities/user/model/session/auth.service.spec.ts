@@ -1,7 +1,7 @@
 import { HttpTestingController } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { UsuarioService } from './usuario.service';
-import { environment } from '@environments/environment';
+import { environment } from '@shared/config';
 import { withDefaultTestingProviders } from '@shared/lib/testing';
 import { AuthService } from './auth.service';
 

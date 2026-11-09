@@ -12,6 +12,8 @@ namespace UCB_Hold.Server.Modules.Inventario.Application;
 
 public class GrupoEquipoService : Service<GrupoEquipoEntity, GrupoEquipoRepository, GrupoEquipoDto>
 {
+    private readonly AuditLogService _audit;
+
     private static readonly TimeSpan GrupoEquipoSearchTtl = TimeSpan.FromMinutes(5);
     private static readonly TimeSpan VersionTtl = TimeSpan.FromDays(30);
     private readonly CacheRepository _cacheRepository;
@@ -27,6 +29,7 @@ public class GrupoEquipoService : Service<GrupoEquipoEntity, GrupoEquipoReposito
     )
         : base(repository, validator, mapper, audit)
     {
+        _audit = audit;
         _cacheRepository = cacheRepository;
         _searchIndex = searchIndex;
     }
@@ -45,7 +48,7 @@ public class GrupoEquipoService : Service<GrupoEquipoEntity, GrupoEquipoReposito
         {
             await BumpSearchVersion();
             await IndexGrupo(createResult.Value);
-            await Audit!.Log(
+            await _audit.Log(
                 AuditAccion.Crear,
                 typeof(GrupoEquipoEntity).Name,
                 createResult.Value?.Id?.ToString(CultureInfo.InvariantCulture),
@@ -75,7 +78,7 @@ public class GrupoEquipoService : Service<GrupoEquipoEntity, GrupoEquipoReposito
         {
             await BumpSearchVersion();
             await IndexGrupo(updateResult.Value);
-            await Audit!.Log(
+            await _audit.Log(
                 AuditAccion.Editar,
                 typeof(GrupoEquipoEntity).Name,
                 id.ToString(CultureInfo.InvariantCulture),

@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { environment } from '@environments/environment';
+import { environment } from '@shared/config';
 import { finalize, forkJoin, map, Observable, of, shareReplay } from 'rxjs';
 import { Disponibilidad } from '../model/disponibilidad';
 import { DisponibilidadApiItem } from './disponibilidad-api-item';

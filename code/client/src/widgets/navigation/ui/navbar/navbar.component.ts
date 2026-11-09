@@ -1,4 +1,4 @@
-import { BRAND } from '@brand/brand';
+import { BRAND } from '@shared/config';
 import { CommonModule, DatePipe, Location } from '@angular/common';
 import {
   Component,

@@ -1,4 +1,4 @@
-import { BRAND } from '@brand/brand';
+import { BRAND } from '@shared/config';
 import { CommonModule } from '@angular/common';
 import { InspeccionEquipoComponent } from '@features/equipment-inspection';
 import {

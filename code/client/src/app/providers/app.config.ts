@@ -18,7 +18,7 @@ import { JwtInterceptor } from '@app/providers/http-interceptors/jwt.interceptor
 import { ResultResponseInterceptor } from '@app/providers/http-interceptors/result-response.interceptor';
 import { routes } from '@app/routing/app.routes';
 import { ConfiguracionService } from '@entities/configuracion';
-import { REGION } from '@region/region';
+import { REGION } from '@shared/config';
 
 registerLocaleData(localeEs);
 

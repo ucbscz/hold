@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { PrestamoDto } from '../model/prestamo';
 import type { Carrito } from '@entities/cart/@x/loan';
-import { environment } from '@environments/environment';
+import { environment } from '@shared/config';
 import {
   ApiResponse,
   extractApiValue,

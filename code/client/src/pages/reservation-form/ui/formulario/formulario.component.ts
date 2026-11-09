@@ -1,5 +1,4 @@
-import { REGION } from '@region/region';
-import { BRAND } from '@brand/brand';
+import { BRAND, REGION } from '@shared/config';
 import { HttpClient } from '@angular/common/http';
 import {
   Component,

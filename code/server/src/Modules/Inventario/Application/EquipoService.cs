@@ -10,6 +10,7 @@ namespace UCB_Hold.Server.Modules.Inventario.Application;
 
 public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
 {
+    private readonly AuditLogService _audit;
     private readonly EquipmentLabels _labels;
     private readonly IHistorialPrestamosEquipo _historial;
 
@@ -23,6 +24,7 @@ public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
     )
         : base(repository, validator, mapper, audit)
     {
+        _audit = audit;
         _labels = labels;
         _historial = historial;
     }
@@ -50,7 +52,7 @@ public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
         if (result.IsSuccess)
         {
             await Repository.RecalcGrupoStats(entity.IdGrupoEquipo);
-            await Audit!.Log(
+            await _audit.Log(
                 AuditAccion.Crear,
                 typeof(EquipoEntity).Name,
                 result.Value?.Id?.ToString(CultureInfo.InvariantCulture),
@@ -89,7 +91,7 @@ public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
         if (existing.IdGrupoEquipo != entity.IdGrupoEquipo)
             await Repository.RecalcGrupoStats(existing.IdGrupoEquipo);
 
-        await Audit!.Log(
+        await _audit.Log(
             AuditAccion.Editar,
             typeof(EquipoEntity).Name,
             id.ToString(CultureInfo.InvariantCulture),

@@ -1,4 +1,4 @@
-import { INVENTORY_LABELS } from '@brand/brand';
+import { INVENTORY_LABELS } from '@shared/config';
 import { CommonModule } from '@angular/common';
 import {
   Component,
@@ -21,6 +21,7 @@ import {
 } from '@shared/ui';
 import {
   AdminTabsComponent,
+  ColumnaOrdenableComponent,
   Tabla,
   TablePaginationComponent,
 } from '@shared/lib/admin-table';
@@ -36,6 +37,7 @@ import { DetallesMantenimientoComponent } from './detalles-mantenimiento/detalle
   selector: 'app-mantenimientos-tabla',
   standalone: true,
   imports: [
+    ColumnaOrdenableComponent,
     AdminTabsComponent,
     StickyScrollDirective,
     CommonModule,

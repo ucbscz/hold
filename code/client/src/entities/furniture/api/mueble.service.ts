@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Muebles } from '../model/mueble';
-import { environment } from '@environments/environment';
+import { environment } from '@shared/config';
 import { ApiResponse, extractApiValue } from '@shared/api';
 import { map, Observable } from 'rxjs';
 import { MuebleApiItem } from './mueble-api-item';
@@ -13,17 +13,7 @@ export class MuebleService {
   constructor(private readonly http: HttpClient) {}
 
   crearMueble(mueble: Muebles) {
-    const enviar = {
-      Nombre: mueble.Nombre,
-      Tipo: mueble.Tipo,
-      Costo: mueble.Costo,
-      Ubicacion: mueble.Ubicacion,
-      IdAmbiente: mueble.IdAmbiente,
-      Longitud: mueble.Longitud,
-      Profundidad: mueble.Profundidad,
-      Altura: mueble.Altura,
-    };
-    return this.http.post<unknown>(this.apiUrl, enviar);
+    return this.http.post<unknown>(this.apiUrl, this.cuerpo(mueble));
   }
 
   obtenerMuebles(): Observable<Muebles[]> {
@@ -47,8 +37,18 @@ export class MuebleService {
   }
 
   actualizarMueble(mueble: Muebles) {
-    const enviar = {
+    return this.http.put<unknown>(`${this.apiUrl}/${mueble.Id}`, {
       Id: mueble.Id,
+      ...this.cuerpo(mueble),
+    });
+  }
+
+  eliminarMueble(id: number) {
+    return this.http.delete<unknown>(`${this.apiUrl}/${id}`);
+  }
+
+  private cuerpo(mueble: Muebles) {
+    return {
       Nombre: mueble.Nombre,
       Tipo: mueble.Tipo,
       Costo: mueble.Costo,
@@ -58,10 +58,5 @@ export class MuebleService {
       Profundidad: mueble.Profundidad,
       Altura: mueble.Altura,
     };
-    return this.http.put<unknown>(`${this.apiUrl}/${mueble.Id}`, enviar);
-  }
-
-  eliminarMueble(id: number) {
-    return this.http.delete<unknown>(`${this.apiUrl}/${id}`);
   }
 }
