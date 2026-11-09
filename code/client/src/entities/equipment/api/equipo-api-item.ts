@@ -14,5 +14,7 @@ export interface EquipoApiItem {
   CostoReferencia: number | null;
   Descripcion: string | null;
   Procedencia: string | null;
+  IdCarrera?: number | null;
+  CodigoCarrera?: string | null;
   FechaIngresoEquipo: Date | null;
 }

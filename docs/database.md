@@ -21,7 +21,7 @@ UCB Hold uses PostgreSQL 16+ with Entity Framework Core 8. The database name, ad
 | `configuraciones_sistema` | Global opening hours and weekly/date exceptions in `horarios` JSONB.                                         | No          |
 | `categorias`              | Equipment classification.                                                                                    | Yes         |
 | `comentarios_equipos`     | Comments, replies and likes on equipment groups.                                                             | Yes         |
-| `carreras`                | Academic programs associated with users.                                                                     | Yes         |
+| `carreras`                | Academic programs with a unique short `codigo` (e.g. `IMT`), associated with users and optionally equipment. | Yes         |
 | `muebles`                 | Storage furniture.                                                                                           | Yes         |
 | `gaveteros`               | Storage lockers inside furniture.                                                                            | Yes         |
 | `accesorios`              | Accessories assigned to equipment groups.                                                                    | Yes         |

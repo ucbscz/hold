@@ -13,6 +13,8 @@ public class EquipoValidator : AbstractValidator<EquipoDto>
             .When(e => e.IdAmbiente.HasValue).WithMessage("El ambiente no existe");
         RuleFor(e => e.IdProcedencia).MustAsync((id, token) => dbContext.Procedencias.AnyAsync(a => a.Id == id, token))
             .When(e => e.IdProcedencia.HasValue).WithMessage("La procedencia no existe");
+        RuleFor(e => e.IdCarrera).MustAsync((id, token) => dbContext.Carreras.AnyAsync(c => c.Id == id, token))
+            .When(e => e.IdCarrera.HasValue).WithMessage("La carrera no existe");
         RuleFor(e => e.CostoReferencia).GreaterThanOrEqualTo(0).When(e => e.CostoReferencia.HasValue);
         RuleFor(e => e.CodigoUcb).MaximumLength(256);
         RuleFor(e => e.IdGrupoEquipo)

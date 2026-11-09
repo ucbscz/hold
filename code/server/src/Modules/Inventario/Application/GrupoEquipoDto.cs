@@ -14,4 +14,5 @@ public class GrupoEquipoDto
     public int? Cantidad { get; set; }
     public decimal? CostoPromedio { get; set; }
     public int? TiempoMaximoPrestamoDias { get; set; } = 7;
+    public List<string> CodigosCarrera { get; set; } = [];
 }

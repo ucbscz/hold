@@ -18,4 +18,16 @@ describe('CarrerasFormularioComponent', () => {
   it('opens in create mode without a record', () => {
     expect(fixture.componentInstance.editando).toBeFalse();
   });
+
+  it('keeps the career code in uppercase letters and digits', () => {
+    const component = fixture.componentInstance;
+    component.modelo.Nombre = 'Ingeniería Mecatrónica';
+
+    component.normalizarCodigo('i-mt 2');
+
+    expect(component.modelo.Codigo).toBe('IMT2');
+    expect(component['validar']()).toBeNull();
+    component.normalizarCodigo('i');
+    expect(component['validar']()).toContain('código');
+  });
 });

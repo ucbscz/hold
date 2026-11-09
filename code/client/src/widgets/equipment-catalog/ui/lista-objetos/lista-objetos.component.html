@@ -41,9 +41,11 @@
                 {{ item.nombre + " " + item.modelo + " " + item.marca }}
               </h3>
               <div class="product-card__meta">
-                <span class="product-card__imt">{{
-                  marca.inventory.internalCodeLabel
-                }}</span>
+                @if (item.codigosCarrera?.length) {
+                  <span class="product-card__carrera">{{
+                    item.codigosCarrera!.join(" · ")
+                  }}</span>
+                }
               </div>
             </div>
           </a>

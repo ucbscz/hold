@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using UCB_Hold.Server.Modules.Inventario.Application;
 using UCB_Hold.Server.Modules.Inventario.Domain;
 using UCB_Hold.Server.Modules.Inventario.Infrastructure;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
 using UCB_Hold.Server.Shared.Persistence;
 
 namespace UCB_Hold.Tests.Unit.Modules.Inventario;
@@ -76,6 +77,35 @@ public class GrupoEquipoRepositoryTests
         var result = await _repository.Search();
 
         result.Should().HaveCount(2);
+    }
+
+    [Test]
+    public async Task GetAll_ReturnsDistinctCareerCodesOfActiveCareers()
+    {
+        var categoria = new Categoria { Id = 30, Nombre = "Cat3" };
+        _dbContext.Categorias.Add(categoria);
+        _dbContext.Carreras.AddRange(
+            new Carrera { Id = 1, Nombre = "Ingeniería Mecatrónica", Codigo = "IMT" },
+            new Carrera { Id = 2, Nombre = "Ingeniería Industrial", Codigo = "IND" },
+            new Carrera { Id = 3, Nombre = "Eliminada", Codigo = "ELI", EstadoEliminado = true }
+        );
+        _dbContext.GruposEquipos.AddRange(
+            new GrupoEquipo { Id = 1, Nombre = "G1", Modelo = "", Marca = "", Categoria = categoria },
+            new GrupoEquipo { Id = 2, Nombre = "G2", Modelo = "", Marca = "", Categoria = categoria }
+        );
+        _dbContext.Equipos.AddRange(
+            new Equipo { Id = 1, IdGrupoEquipo = 1, CodigoImt = 1, IdCarrera = 2 },
+            new Equipo { Id = 2, IdGrupoEquipo = 1, CodigoImt = 2, IdCarrera = 1 },
+            new Equipo { Id = 3, IdGrupoEquipo = 1, CodigoImt = 3, IdCarrera = 1 },
+            new Equipo { Id = 4, IdGrupoEquipo = 1, CodigoImt = 4, IdCarrera = 3 },
+            new Equipo { Id = 5, IdGrupoEquipo = 2, CodigoImt = 5 }
+        );
+        await _dbContext.SaveChangesAsync();
+
+        var result = await _repository.GetAll();
+
+        result.Value.Single(g => g.Id == 1).CodigosCarrera.Should().Equal("IMT", "IND");
+        result.Value.Single(g => g.Id == 2).CodigosCarrera.Should().BeEmpty();
     }
 
     [Test]

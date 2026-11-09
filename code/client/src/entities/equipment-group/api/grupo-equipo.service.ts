@@ -87,6 +87,7 @@ export class GrupoequipoService {
       Cantidad: item.Cantidad || 0,
       CostoPromedio: item.CostoPromedio || 0,
       TiempoMaximoPrestamoDias: item.TiempoMaximoPrestamoDias ?? 7,
+      codigosCarrera: item.CodigosCarrera ?? [],
     };
   }
 

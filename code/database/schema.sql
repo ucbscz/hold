@@ -3898,7 +3898,8 @@ CREATE TABLE public.equipos (
     fecha_ingreso_equipo date DEFAULT CURRENT_DATE NOT NULL,
     codigo_ucb character varying,
     id_ambiente integer,
-    id_procedencia integer
+    id_procedencia integer,
+    id_carrera integer
 );
 
 
@@ -4215,7 +4216,9 @@ ALTER TABLE public.avisos_disponibilidad ALTER COLUMN id_aviso ADD GENERATED ALW
 CREATE TABLE public.carreras (
     id_carrera integer NOT NULL,
     nombre character varying(255) NOT NULL,
-    estado_eliminado boolean DEFAULT false NOT NULL
+    estado_eliminado boolean DEFAULT false NOT NULL,
+    codigo character varying(10) NOT NULL,
+    CONSTRAINT ck_carreras_codigo CHECK (((codigo)::text ~ '^[A-Z0-9]{2,10}$'::text))
 );
 
 
@@ -5177,6 +5180,20 @@ CREATE INDEX idx_carreras_nombre ON public.carreras USING btree (nombre, estado_
 
 
 --
+-- Name: unique_carreras_codigo; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX unique_carreras_codigo ON public.carreras USING btree (codigo) WHERE (NOT estado_eliminado);
+
+
+--
+-- Name: idx_equipos_id_carrera; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_equipos_id_carrera ON public.equipos USING btree (id_carrera);
+
+
+--
 -- Name: idx_categorias_nombre; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -5617,6 +5634,14 @@ ALTER TABLE ONLY public.equipos
 
 
 --
+-- Name: equipos equipos_id_carrera_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.equipos
+    ADD CONSTRAINT equipos_id_carrera_fkey FOREIGN KEY (id_carrera) REFERENCES public.carreras(id_carrera) ON DELETE RESTRICT;
+
+
+--
 -- Name: ambientes fk_ambientes_administrador; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -5686,6 +5711,13 @@ ALTER TABLE ONLY public.usuarios
 
 ALTER TABLE ONLY public.notificaciones
     ADD CONSTRAINT notificaciones_carnet_usuario_fkey FOREIGN KEY (carnet_usuario) REFERENCES public.usuarios(carnet);
+
+
+--
+-- Default data
+--
+
+INSERT INTO public.carreras (nombre, codigo) VALUES ('Ingeniería Mecatrónica', 'IMT') ON CONFLICT (nombre) DO NOTHING;
 
 
 --

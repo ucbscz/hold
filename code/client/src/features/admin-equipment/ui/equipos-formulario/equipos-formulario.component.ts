@@ -5,6 +5,7 @@ import {
   EquipoService,
   ESTADO_EQUIPO_OPCIONES,
 } from '@entities/equipment';
+import { CarreraService } from '@entities/career';
 import { Gaveteros, GaveteroService } from '@entities/locker';
 import { GrupoEquipo, GrupoequipoService } from '@entities/equipment-group';
 import {
@@ -36,12 +37,14 @@ export class EquiposFormularioComponent
   private readonly equipoService = inject(EquipoService);
   private readonly grupoEquipoService = inject(GrupoequipoService);
   private readonly gaveteroService = inject(GaveteroService);
+  private readonly carreraService = inject(CarreraService);
   protected readonly entidad = { nombre: 'equipo' };
   protected readonly estadoOpciones = ESTADO_EQUIPO_OPCIONES;
   grupoequipo: GrupoEquipo[] = [];
   grupoequipoSeleccionado: GrupoEquipo | null = null;
   gaveteros: Gaveteros[] = [];
   gaveteroSeleccionado: Gaveteros | null = null;
+  carrerasOpciones: OpcionSelect[] = [{ value: null, label: 'Sin carrera' }];
 
   get gruposOpciones(): OpcionSelect[] {
     const opciones = this.grupoequipo.map((g) => ({
@@ -74,6 +77,18 @@ export class EquiposFormularioComponent
           gaveteros.find((g) => g.Id === this.modelo.IdGavetero) ?? null;
       },
       'No se pudieron cargar los gaveteros.',
+    );
+    this.cargarOpciones(
+      this.carreraService.obtenerCarreras(),
+      (carreras) =>
+        (this.carrerasOpciones = [
+          { value: null, label: 'Sin carrera' },
+          ...carreras.map((c) => ({
+            value: c.Id,
+            label: `${c.Codigo} · ${c.Nombre}`,
+          })),
+        ]),
+      'No se pudieron cargar las carreras.',
     );
   }
 

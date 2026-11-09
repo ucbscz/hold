@@ -18,14 +18,16 @@ export class CarreraService {
         extractApiValue(response, []).map((item) => ({
           Id: item.Id,
           Nombre: item.Nombre,
+          Codigo: item.Codigo ?? null,
         })),
       ),
     );
   }
 
-  crearCarrera(carrera: string) {
+  crearCarrera(carrera: Carrera) {
     const envio = {
-      Nombre: carrera,
+      Nombre: carrera.Nombre,
+      Codigo: carrera.Codigo,
     };
     return this.http.post<unknown>(this.apiUrl, envio);
   }
@@ -34,6 +36,7 @@ export class CarreraService {
     const envio = {
       Id: carrera.Id,
       Nombre: carrera.Nombre,
+      Codigo: carrera.Codigo,
     };
     return this.http.put<unknown>(`${this.apiUrl}/${carrera.Id}`, envio);
   }

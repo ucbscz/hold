@@ -133,7 +133,7 @@
   display: flex;
   align-items: center;
 }
-.product-card__imt {
+.product-card__carrera {
   font-family: var(--font);
   font-weight: 500;
   font-size: 0.8rem;
@@ -181,7 +181,7 @@
   .product-card__info {
     padding: 0.75rem;
   }
-  .product-card__imt {
+  .product-card__carrera {
     font-size: 0.75rem;
     padding: 0.2rem 0.5rem;
   }

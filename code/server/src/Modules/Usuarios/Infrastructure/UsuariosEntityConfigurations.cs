@@ -13,6 +13,7 @@ internal sealed class CarreraConfiguration : IEntityTypeConfiguration<Carrera>
         entity.HasKey(e => e.Id);
         entity.Property(e => e.Id).HasColumnName("id_carrera");
         entity.Property(e => e.Nombre).IsRequired().HasMaxLength(255).HasColumnName(DatabaseColumns.Nombre);
+        entity.Property(e => e.Codigo).IsRequired().HasMaxLength(10).HasColumnName("codigo");
         entity.Property(e => e.EstadoEliminado).HasColumnName(DatabaseColumns.EstadoEliminado);
         entity.HasIndex(e => new { e.Nombre, e.EstadoEliminado });
         entity.HasQueryFilter(e => !e.EstadoEliminado);

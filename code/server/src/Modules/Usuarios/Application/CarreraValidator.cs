@@ -25,5 +25,22 @@ public class CarreraValidator : AbstractValidator<CarreraDto>
             )
             .When(carrera => !string.IsNullOrEmpty(carrera.Nombre))
             .WithMessage("Ya existe una carrera con ese nombre");
+
+        RuleFor(carrera => carrera.Codigo)
+            .Cascade(CascadeMode.Stop)
+            .NotEmpty()
+            .WithMessage("Código requerido")
+            .Matches("^[A-Z0-9]{2,10}$")
+            .WithMessage("El código debe tener de 2 a 10 letras mayúsculas o números");
+
+        RuleFor(carrera => carrera)
+            .MustAsync(
+                (dto, cancellationToken) =>
+                    dbContext
+                        .Carreras.AsNoTracking()
+                        .AllAsync(c => c.Codigo != dto.Codigo || c.Id == dto.Id, cancellationToken)
+            )
+            .When(carrera => !string.IsNullOrEmpty(carrera.Codigo))
+            .WithMessage("Ya existe una carrera con ese código");
     }
 }

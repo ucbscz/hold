@@ -10,4 +10,5 @@ export interface GrupoEquipoApiItem {
   Cantidad?: number | null;
   CostoPromedio?: number | null;
   TiempoMaximoPrestamoDias?: number | null;
+  CodigosCarrera?: string[] | null;
 }

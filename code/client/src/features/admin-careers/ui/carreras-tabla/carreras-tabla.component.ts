@@ -36,7 +36,7 @@ export class CarrerasTablaComponent extends TablaGestion {
   carreras: Carrera[] = [];
   carrerascopia: Carrera[] = [];
   carreraSeleccionada: Carrera = new Carrera();
-  override columnas: string[] = ['Nombre'];
+  override columnas: string[] = ['Nombre', 'Código'];
 
   constructor(private readonly carreraService: CarreraService) {
     super();
@@ -90,6 +90,10 @@ export class CarrerasTablaComponent extends TablaGestion {
             return this.normalizeText(carrera.Nombre || '').includes(
               busquedaNormalizada,
             );
+          case 'Código':
+            return this.normalizeText(carrera.Codigo || '').includes(
+              busquedaNormalizada,
+            );
           default:
             return this.normalizeText(carrera.Nombre || '').includes(
               busquedaNormalizada,
@@ -105,6 +109,7 @@ export class CarrerasTablaComponent extends TablaGestion {
   override sortTable(sort: { col: string; dir: 'asc' | 'desc' }): void {
     this.carreras = this.sortByColumn(this.carreras, sort, {
       Nombre: (carrera) => carrera.Nombre,
+      Código: (carrera) => carrera.Codigo,
     });
   }
 

@@ -35,6 +35,7 @@
                   carrera.Nombre
                 }}</span>
               </td>
+              <td>{{ carrera.Codigo }}</td>
               <td class="actions-column">
                 <button
                   class="btn-icon btn-delete"
@@ -57,7 +58,7 @@
           }
           @if (carreras.length === 0) {
             <tr>
-              <td colspan="2" class="empty-table">
+              <td colspan="3" class="empty-table">
                 <div class="empty-state">
                   <i class="fas fa-search fa-3x"></i>
                   <p>No se encontraron carreras</p>

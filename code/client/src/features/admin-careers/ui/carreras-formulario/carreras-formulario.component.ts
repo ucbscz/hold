@@ -26,13 +26,20 @@ export class CarrerasFormularioComponent extends FormularioAdminComponent<Carrer
   }
 
   protected override validar(): string | null {
-    return this.modelo.Nombre?.trim()
+    if (!this.modelo.Nombre?.trim())
+      return 'El nombre de la carrera no puede estar vacío.';
+    return /^[A-Z0-9]{2,10}$/.test(this.modelo.Codigo ?? '')
       ? null
-      : 'El nombre de la carrera no puede estar vacío.';
+      : 'El código debe tener de 2 a 10 letras mayúsculas o números.';
+  }
+
+  normalizarCodigo(codigo: string): void {
+    this.modelo.Codigo = codigo.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    this.error.set(false);
   }
 
   protected crear(registro: Carrera) {
-    return this.servicio.crearCarrera(registro.Nombre ?? '');
+    return this.servicio.crearCarrera(registro);
   }
 
   protected editar(registro: Carrera) {

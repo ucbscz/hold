@@ -47,6 +47,15 @@
     </div>
     <app-catalogo-selector [equipo]="modelo" />
     <div class="form-group">
+      <label for="carrera">Carrera (opcional)</label>
+      <app-custom-select
+        name="carrera"
+        [(ngModel)]="modelo.IdCarrera"
+        [opciones]="carrerasOpciones"
+        placeholder="Sin carrera"
+      ></app-custom-select>
+    </div>
+    <div class="form-group">
       <label for="nombre_gavetero">Gavetero</label>
       <app-custom-select
         name="nombre_gavetero"
