@@ -131,15 +131,18 @@ All CRUD operations for the following resources use `GET /`, `GET /{id}`, `POST 
 
 Additional catalog routes:
 
-| Method | Route                                   | Purpose                                                     |
-| ------ | --------------------------------------- | ----------------------------------------------------------- |
-| `GET`  | `/api/equipos?grupoId={id}`             | List equipment units in a group.                            |
-| `GET`  | `/api/equipos?gaveteroId={id}`          | List equipment units in a locker.                           |
-| `GET`  | `/api/equipos/{id}/prestamos`           | Get equipment loan records. Administrator only.             |
-| `GET`  | `/api/gaveteros?muebleId={id}`          | List lockers in a furniture item.                           |
-| `GET`  | `/api/grupos?nombre=&categoria=`        | Search equipment groups.                                    |
-| `GET`  | `/api/grupos/{id}/componentes?pagina=1` | Authenticated component inspection, 100 items per page.     |
-| `POST` | `/api/grupos/importar`                  | Root-only product metadata preview from a public HTTPS URL. |
+| Method | Route                                    | Purpose                                                     |
+| ------ | ---------------------------------------- | ----------------------------------------------------------- |
+| `GET`  | `/api/equipos?pagina=1&tamanoPagina=500` | List equipment units ordered by id, up to 500 per page.     |
+| `GET`  | `/api/equipos?grupoId={id}`              | List equipment units in a group.                            |
+| `GET`  | `/api/equipos?gaveteroId={id}`           | List equipment units in a locker.                           |
+| `GET`  | `/api/equipos/{id}/prestamos`            | Get equipment loan records. Administrator only.             |
+| `GET`  | `/api/gaveteros?muebleId={id}`           | List lockers in a furniture item.                           |
+| `GET`  | `/api/grupos?nombre=&categoria=`         | Search equipment groups.                                    |
+| `GET`  | `/api/grupos/{id}/componentes?pagina=1`  | Authenticated component inspection, 100 items per page.     |
+| `POST` | `/api/grupos/importar`                   | Root-only product metadata preview from a public HTTPS URL. |
+
+`GET /api/usuarios`, `GET /api/prestamos` and `GET /api/equipos` accept `pagina` (from 1) and `tamanoPagina` (1 to 500, default 500). Clients request the next page while the current one is full; loan pages count distinct loans, so a page can contain more rows than loans.
 
 Equipment group payloads expose `TiempoMaximoPrestamoDias` (1 to 365). This group-level value applies to every physical unit in the group and is required for create and update operations.
 

@@ -114,27 +114,7 @@ public sealed class CambioEstadoPrestamoService
                 "No se puede aprobar: no hay equipos disponibles para uno o más grupos en las fechas solicitadas"
             );
 
-        var previous = AuditSnapshot(loan);
-        ApplyState(loan, state, actor, observacion);
-        await _repository.UpdateTracked(loan, cancellationToken);
-
-        RetornoEquipos? retorno = null;
-        string? auditDetail;
-
-        if (state == EstadoPrestamo.Finalizado)
-        {
-            retorno = await _retornos.Apply(id, observacion, body, previous.EstadoPrestamo, cancellationToken);
-            auditDetail = retorno.AuditDetail;
-        }
-        else
-            auditDetail = AuditChangeDetail.Build(previous, AuditSnapshot(loan));
-
-        await _audit.Log(
-            ToAuditAction(state),
-            typeof(PrestamoEntity).Name,
-            id.ToString(CultureInfo.InvariantCulture),
-            auditDetail
-        );
+        var retorno = await PersistTransition(loan, state, actor, observacion, body, cancellationToken);
 
         await _notificaciones.NotifyStatusChange(
             id,
@@ -148,6 +128,33 @@ public sealed class CambioEstadoPrestamoService
         await AfterTransition(loan.Carnet!, state, cancellationToken);
 
         return await _queries.Get(id, cancellationToken);
+    }
+
+    private async Task<RetornoEquipos?> PersistTransition(
+        PrestamoEntity loan,
+        EstadoPrestamo state,
+        string? actor,
+        string? observacion,
+        PrestamoDto? body,
+        CancellationToken cancellationToken
+    )
+    {
+        var previous = AuditSnapshot(loan);
+        ApplyState(loan, state, actor, observacion);
+        await _repository.UpdateTracked(loan, cancellationToken);
+
+        var retorno = state == EstadoPrestamo.Finalizado
+            ? await _retornos.Apply(loan.Id, observacion, body, previous.EstadoPrestamo, cancellationToken)
+            : null;
+
+        await _audit.Log(
+            ToAuditAction(state),
+            typeof(PrestamoEntity).Name,
+            loan.Id.ToString(CultureInfo.InvariantCulture),
+            retorno != null ? retorno.AuditDetail : AuditChangeDetail.Build(previous, AuditSnapshot(loan))
+        );
+
+        return retorno;
     }
 
     private static Result<PrestamoDto>? RejectTransition(

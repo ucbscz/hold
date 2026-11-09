@@ -18,6 +18,18 @@ public static class InventarioModule
         services.AddSingleton<EquipmentLabels>();
         services.AddInventoryCatalogs();
 
+        AddRepositories(services);
+        AddServices(services);
+        AddMappers(services);
+        AddValidators(services);
+
+        if (ElasticsearchSettings.IsConfigured(configuration))
+            services.AddHostedService<SearchReindexer>();
+        return services;
+    }
+
+    private static void AddRepositories(IServiceCollection services)
+    {
         services.AddScoped<IAuditEntityNames, InventarioAuditNames>();
         services.AddScoped<EquipoRepository>();
         services.AddScoped<AccesorioRepository>();
@@ -27,7 +39,10 @@ public static class InventarioModule
         services.AddScoped<ComentarioEquipoRepository>();
         services.AddScoped<Repository<Categoria, CategoriaDto>>();
         services.AddScoped<Repository<Mueble, MuebleDto>>();
+    }
 
+    private static void AddServices(IServiceCollection services)
+    {
         services.AddScoped<EquipoService>();
         services.AddScoped<GrupoEquipoService>();
         services.AddSingleton<GrupoEquipoImportacionService>();
@@ -37,7 +52,10 @@ public static class InventarioModule
         services.AddScoped<Service<Mueble, Repository<Mueble, MuebleDto>, MuebleDto>>();
         services.AddScoped<Service<Accesorio, AccesorioRepository, AccesorioDto>>();
         services.AddScoped<Service<Componente, ComponenteRepository, ComponenteDto>>();
+    }
 
+    private static void AddMappers(IServiceCollection services)
+    {
         services.AddMapper<Equipo, EquipoDto, EquipoMapper>();
         services.AddMapper<Categoria, CategoriaDto, CategoriaMapper>();
         services.AddMapper<GrupoEquipo, GrupoEquipoDto, GrupoEquipoMapper>();
@@ -45,7 +63,10 @@ public static class InventarioModule
         services.AddMapper<Mueble, MuebleDto, MuebleMapper>();
         services.AddMapper<Accesorio, AccesorioDto, AccesorioMapper>();
         services.AddMapper<Componente, ComponenteDto, ComponenteMapper>();
+    }
 
+    private static void AddValidators(IServiceCollection services)
+    {
         services.AddScoped<IValidator<AccesorioDto>, AccesorioValidator>();
         services.AddScoped<IValidator<CategoriaDto>, CategoriaValidator>();
         services.AddScoped<IValidator<ComponenteDto>, ComponenteValidator>();
@@ -53,9 +74,5 @@ public static class InventarioModule
         services.AddScoped<IValidator<GaveteroDto>, GaveteroValidator>();
         services.AddScoped<IValidator<GrupoEquipoDto>, GrupoEquipoValidator>();
         services.AddScoped<IValidator<MuebleDto>, MuebleValidator>();
-
-        if (ElasticsearchSettings.IsConfigured(configuration))
-            services.AddHostedService<SearchReindexer>();
-        return services;
     }
 }

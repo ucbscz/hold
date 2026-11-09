@@ -1,7 +1,12 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@environments/environment';
-import { ApiResponse, extractApiValue } from '@shared/api';
+import {
+  ApiResponse,
+  extractApiValue,
+  obtenerTodasLasPaginas,
+  parametrosPagina,
+} from '@shared/api';
 import { map } from 'rxjs';
 import { Usuario } from '../model/usuario';
 import { UsuarioApiItem } from './usuario-api-item';
@@ -170,8 +175,16 @@ export class UsuarioServiceAPI {
   }
 
   obtenerUsuarios() {
+    return obtenerTodasLasPaginas((pagina) =>
+      this.obtenerPaginaUsuarios(pagina),
+    );
+  }
+
+  private obtenerPaginaUsuarios(pagina: number) {
     return this.http
-      .get<UsuarioListApiResponse>(this.apiUrl)
+      .get<UsuarioListApiResponse>(this.apiUrl, {
+        params: parametrosPagina(pagina),
+      })
       .pipe(
         map((response) =>
           response.Value.map((item) => this.mapearUsuario(item)),

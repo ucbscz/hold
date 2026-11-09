@@ -88,8 +88,30 @@ public sealed class PrestamoReadRepository
         CancellationToken cancellationToken = default
     )
     {
-        var safeOffset = Math.Max(0, offset);
-        var safeLimit = Math.Clamp(limit, 1, MaxPageSize);
+        var pageIds = await OrderedIds(Filter(carnetUsuario, estado, guardado))
+            .Skip(Math.Max(0, offset))
+            .Take(Math.Clamp(limit, 1, MaxPageSize))
+            .ToListAsync(cancellationToken);
+
+        if (pageIds.Count == 0)
+            return [];
+
+        var position = pageIds
+            .Select((id, index) => (id, index))
+            .ToDictionary(item => item.id, item => item.index);
+        var loans = await GetPrestamoList(
+            _dbContext.Prestamos.AsNoTracking().Where(loan => pageIds.Contains(loan.Id)),
+            cancellationToken
+        );
+        return loans.OrderBy(loan => position[loan.Id!.Value]).ToList();
+    }
+
+    private IQueryable<PrestamoEntity> Filter(
+        string? carnetUsuario,
+        EstadoPrestamo? estado,
+        bool? guardado
+    )
+    {
         var query = _dbContext.Prestamos.AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(carnetUsuario))
@@ -101,38 +123,28 @@ public sealed class PrestamoReadRepository
         if (guardado.HasValue)
             query = query.Where(loan => loan.Guardado == guardado.Value);
 
-        var pageIds = await (
-            from loan in query
-            join user in _dbContext.Usuarios.AsNoTracking().IgnoreQueryFilters()
-                on loan.Carnet equals user.Carnet
-                into userJoin
-            from user in userJoin.DefaultIfEmpty()
-            orderby
-                loan.EstadoPrestamo == EstadoPrestamo.Pendiente ? 0 : 1,
-                (loan.EstadoPrestamo == EstadoPrestamo.Finalizado
-                    || loan.EstadoPrestamo == EstadoPrestamo.Cancelado
-                    || loan.EstadoPrestamo == EstadoPrestamo.Rechazado) ? 1 : 0,
-                user != null && user.Rol == TipoUsuario.Administrador ? 0
-                    : user != null && user.Rol == TipoUsuario.Administrador_Laboratorio ? 1
-                    : user != null && user.Rol == TipoUsuario.Docente ? 2
-                    : user != null && user.Rol == TipoUsuario.Administrativo ? 3
-                    : 4,
-                loan.FechaSolicitud descending,
-                loan.Id descending
-            select loan.Id
-        )
-            .Skip(safeOffset)
-            .Take(safeLimit)
-            .ToListAsync(cancellationToken);
-
-        if (pageIds.Count == 0)
-            return [];
-
-        return await GetPrestamoList(
-            _dbContext.Prestamos.AsNoTracking().Where(loan => pageIds.Contains(loan.Id)),
-            cancellationToken
-        );
+        return query;
     }
+
+    private IQueryable<int> OrderedIds(IQueryable<PrestamoEntity> query) =>
+        from loan in query
+        join user in _dbContext.Usuarios.AsNoTracking().IgnoreQueryFilters()
+            on loan.Carnet equals user.Carnet
+            into userJoin
+        from user in userJoin.DefaultIfEmpty()
+        orderby
+            loan.EstadoPrestamo == EstadoPrestamo.Pendiente ? 0 : 1,
+            (loan.EstadoPrestamo == EstadoPrestamo.Finalizado
+                || loan.EstadoPrestamo == EstadoPrestamo.Cancelado
+                || loan.EstadoPrestamo == EstadoPrestamo.Rechazado) ? 1 : 0,
+            user != null && user.Rol == TipoUsuario.Administrador ? 0
+                : user != null && user.Rol == TipoUsuario.Administrador_Laboratorio ? 1
+                : user != null && user.Rol == TipoUsuario.Docente ? 2
+                : user != null && user.Rol == TipoUsuario.Administrativo ? 3
+                : 4,
+            loan.FechaSolicitud descending,
+            loan.Id descending
+        select loan.Id;
 
     public async Task<string> GetUsuarioDisplayName(
         string carnet,
@@ -215,125 +227,155 @@ public sealed class PrestamoReadRepository
         CancellationToken cancellationToken
     )
     {
-        var rows = await (
-            from prestamo in source
-            join usuario in _dbContext.Usuarios.AsNoTracking().IgnoreQueryFilters()
-                on prestamo.Carnet equals usuario.Carnet
-                into usuarioJoin
-            from usuario in usuarioJoin.DefaultIfEmpty()
-            join detalle in _dbContext
-                .DetallesPrestamos.AsNoTracking()
-                .IgnoreQueryFilters()
-                .Where(detail => !detail.EstadoEliminado)
-                on prestamo.Id equals detalle.IdPrestamo
-                into detalleJoin
-            from detalle in detalleJoin.DefaultIfEmpty()
-            join equipo in _dbContext.Equipos.AsNoTracking().IgnoreQueryFilters()
-                on detalle.IdEquipo equals equipo.Id
-                into equipoJoin
-            from equipo in equipoJoin.DefaultIfEmpty()
-            join grupoReserva in _dbContext.GruposEquipos.AsNoTracking().IgnoreQueryFilters()
-                on detalle.IdGrupoEquipo equals grupoReserva.Id
-                into grupoReservaJoin
-            from grupoReserva in grupoReservaJoin.DefaultIfEmpty()
-            join gavetero in _dbContext.Gaveteros.AsNoTracking().IgnoreQueryFilters()
-                on equipo.IdGavetero equals gavetero.Id
-                into gaveteroJoin
-            from gavetero in gaveteroJoin.DefaultIfEmpty()
-            join mueble in _dbContext.Muebles.AsNoTracking().IgnoreQueryFilters()
-                on gavetero.IdMueble equals mueble.Id
-                into muebleJoin
-            from mueble in muebleJoin.DefaultIfEmpty()
-            join ambiente in _dbContext.Ambientes.AsNoTracking().IgnoreQueryFilters()
-                on ((mueble != null ? mueble.IdAmbiente : null) ?? (equipo != null ? equipo.IdAmbiente : null)) equals ambiente.Id
-                into ambienteJoin
-            from ambiente in ambienteJoin.DefaultIfEmpty()
-            join responsable in _dbContext.Usuarios.AsNoTracking().IgnoreQueryFilters()
-                on (ambiente != null ? ambiente.CarnetAdministrador : null) equals responsable.Carnet
-                into responsableJoin
-            from responsable in responsableJoin.DefaultIfEmpty()
-            orderby
-                prestamo.EstadoPrestamo == EstadoPrestamo.Pendiente ? 0 : 1,
-                (prestamo.EstadoPrestamo == EstadoPrestamo.Finalizado
-                    || prestamo.EstadoPrestamo == EstadoPrestamo.Cancelado
-                    || prestamo.EstadoPrestamo == EstadoPrestamo.Rechazado) ? 1 : 0,
-                usuario != null && usuario.Rol == TipoUsuario.Administrador ? 0
-                    : usuario != null && usuario.Rol == TipoUsuario.Administrador_Laboratorio ? 1
-                    : usuario != null && usuario.Rol == TipoUsuario.Docente ? 2
-                    : usuario != null && usuario.Rol == TipoUsuario.Administrativo ? 3
-                    : 4,
-                prestamo.FechaSolicitud descending,
-                prestamo.Id descending
-            select new
-            {
-                PrestamoId = prestamo.Id,
-                prestamo.Carnet,
-                UsuarioNombre = usuario != null ? usuario.Nombre : null,
-                UsuarioApellido = usuario != null ? usuario.ApellidoPaterno : null,
-                UsuarioTelefono = usuario != null ? usuario.Telefono : null,
-                TipoUsuario = usuario != null ? usuario.Rol.ToString() : null,
-                prestamo.EstadoPrestamo,
-                prestamo.FechaSolicitud,
-                prestamo.FechaPrestamoEsperada,
-                prestamo.FechaPrestamo,
-                prestamo.FechaDevolucionEsperada,
-                prestamo.FechaDevolucion,
-                prestamo.Observacion,
-                prestamo.MotivoRechazo,
-                prestamo.AutorizadoPor,
-                prestamo.EntregadoPor,
-                prestamo.IdContrato,
-                prestamo.DestinoPrestamo,
-                prestamo.IdCarrera,
-                prestamo.NombreMateria,
-                prestamo.Guardado,
-                GrupoEquipoId = detalle != null ? (int?)detalle.IdGrupoEquipo : null,
-                NombreGrupoEquipo = grupoReserva != null ? grupoReserva.Nombre : null,
-                CodigoImt = equipo != null ? (int?)equipo.CodigoImt : null,
-                CodigoUcb = equipo != null ? equipo.CodigoUcb : null,
-                NumeroSerial = equipo != null ? equipo.NumeroSerial : null,
-                UbicacionEquipo = ambiente != null ? ambiente.Nombre : null,
-                AdministradorAmbiente = responsable != null
-                    ? (responsable.Nombre + " " + responsable.ApellidoPaterno + " " + responsable.ApellidoMaterno).Trim() : null,
-                NombreGavetero = gavetero != null ? gavetero.Nombre : null,
-                NombreMueble = mueble != null ? mueble.Nombre : null,
-                UbicacionMueble = mueble != null ? mueble.Ubicacion : null,
-            }
-        ).ToListAsync(cancellationToken);
+        var rows = (await LoanRows(source).ToListAsync(cancellationToken))
+            .OrderBy(row => row.DetalleId)
+            .ToList();
+        var equipmentIds = rows
+            .Where(row => row.IdEquipo.HasValue)
+            .Select(row => row.IdEquipo!.Value)
+            .Distinct()
+            .ToList();
+        var locations = equipmentIds.Count == 0
+            ? new Dictionary<int, EquipmentLocation>()
+            : await EquipmentLocations(equipmentIds, cancellationToken);
 
-        return rows.Select(row => new PrestamoDto
+        return rows
+            .Select(row => ToDto(
+                row,
+                row.IdEquipo.HasValue ? locations.GetValueOrDefault(row.IdEquipo.Value) : null
+            ))
+            .ToList();
+    }
+
+    private IQueryable<PrestamoRow> LoanRows(IQueryable<PrestamoEntity> source) =>
+        from prestamo in source
+        join usuario in _dbContext.Usuarios.AsNoTracking().IgnoreQueryFilters()
+            on prestamo.Carnet equals usuario.Carnet
+            into usuarioJoin
+        from usuario in usuarioJoin.DefaultIfEmpty()
+        join detalle in _dbContext
+            .DetallesPrestamos.AsNoTracking()
+            .IgnoreQueryFilters()
+            .Where(detail => !detail.EstadoEliminado)
+            on prestamo.Id equals detalle.IdPrestamo
+            into detalleJoin
+        from detalle in detalleJoin.DefaultIfEmpty()
+        join equipo in _dbContext.Equipos.AsNoTracking().IgnoreQueryFilters()
+            on detalle.IdEquipo equals equipo.Id
+            into equipoJoin
+        from equipo in equipoJoin.DefaultIfEmpty()
+        join grupo in _dbContext.GruposEquipos.AsNoTracking().IgnoreQueryFilters()
+            on detalle.IdGrupoEquipo equals grupo.Id
+            into grupoJoin
+        from grupo in grupoJoin.DefaultIfEmpty()
+        select new PrestamoRow
         {
-            Id = row.PrestamoId,
-            CarnetUsuario = row.Carnet,
+            Prestamo = prestamo,
+            UsuarioNombre = usuario != null ? usuario.Nombre : null,
+            UsuarioApellido = usuario != null ? usuario.ApellidoPaterno : null,
+            UsuarioTelefono = usuario != null ? usuario.Telefono : null,
+            TipoUsuario = usuario != null ? usuario.Rol.ToString() : null,
+            DetalleId = detalle != null ? (int?)detalle.Id : null,
+            GrupoEquipoId = detalle != null ? (int?)detalle.IdGrupoEquipo : null,
+            NombreGrupoEquipo = grupo != null ? grupo.Nombre : null,
+            IdEquipo = equipo != null ? (int?)equipo.Id : null,
+            CodigoImt = equipo != null ? (int?)equipo.CodigoImt : null,
+            CodigoUcb = equipo != null ? equipo.CodigoUcb : null,
+            NumeroSerial = equipo != null ? equipo.NumeroSerial : null,
+        };
+
+    private async Task<Dictionary<int, EquipmentLocation>> EquipmentLocations(
+        List<int> equipmentIds,
+        CancellationToken cancellationToken
+    ) => await (
+        from equipo in _dbContext.Equipos.AsNoTracking().IgnoreQueryFilters()
+        where equipmentIds.Contains(equipo.Id)
+        join gavetero in _dbContext.Gaveteros.AsNoTracking().IgnoreQueryFilters()
+            on equipo.IdGavetero equals gavetero.Id
+            into gaveteroJoin
+        from gavetero in gaveteroJoin.DefaultIfEmpty()
+        join mueble in _dbContext.Muebles.AsNoTracking().IgnoreQueryFilters()
+            on gavetero.IdMueble equals mueble.Id
+            into muebleJoin
+        from mueble in muebleJoin.DefaultIfEmpty()
+        join ambiente in _dbContext.Ambientes.AsNoTracking().IgnoreQueryFilters()
+            on (mueble != null ? mueble.IdAmbiente : null) ?? equipo.IdAmbiente equals ambiente.Id
+            into ambienteJoin
+        from ambiente in ambienteJoin.DefaultIfEmpty()
+        join responsable in _dbContext.Usuarios.AsNoTracking().IgnoreQueryFilters()
+            on (ambiente != null ? ambiente.CarnetAdministrador : null) equals responsable.Carnet
+            into responsableJoin
+        from responsable in responsableJoin.DefaultIfEmpty()
+        select new EquipmentLocation(
+            equipo.Id,
+            ambiente != null ? ambiente.Nombre : null,
+            responsable != null
+                ? (responsable.Nombre + " " + responsable.ApellidoPaterno + " " + responsable.ApellidoMaterno).Trim()
+                : null,
+            gavetero != null ? gavetero.Nombre : null,
+            mueble != null ? mueble.Nombre : null,
+            mueble != null ? mueble.Ubicacion : null
+        )
+    ).ToDictionaryAsync(location => location.IdEquipo, cancellationToken);
+
+    private static PrestamoDto ToDto(PrestamoRow row, EquipmentLocation? location) =>
+        new()
+        {
+            Id = row.Prestamo.Id,
+            CarnetUsuario = row.Prestamo.Carnet,
             NombreUsuario = row.UsuarioNombre,
             ApellidoPaternoUsuario = row.UsuarioApellido,
             TelefonoUsuario = row.UsuarioTelefono,
             TipoUsuario = row.TipoUsuario,
-            EstadoPrestamo = PrestamoState.ToText(row.EstadoPrestamo),
-            FechaSolicitud = row.FechaSolicitud,
-            FechaPrestamoEsperada = row.FechaPrestamoEsperada,
-            FechaPrestamo = row.FechaPrestamo,
-            FechaDevolucionEsperada = row.FechaDevolucionEsperada,
-            FechaDevolucion = row.FechaDevolucion,
-            Observacion = row.Observacion,
-            MotivoRechazo = row.MotivoRechazo,
-            AutorizadoPor = row.AutorizadoPor,
-            EntregadoPor = row.EntregadoPor,
-            IdContrato = row.IdContrato,
-            DestinoPrestamo = row.DestinoPrestamo,
-            IdCarrera = row.IdCarrera,
-            NombreMateria = row.NombreMateria,
-            Guardado = row.Guardado,
+            EstadoPrestamo = PrestamoState.ToText(row.Prestamo.EstadoPrestamo),
+            FechaSolicitud = row.Prestamo.FechaSolicitud,
+            FechaPrestamoEsperada = row.Prestamo.FechaPrestamoEsperada,
+            FechaPrestamo = row.Prestamo.FechaPrestamo,
+            FechaDevolucionEsperada = row.Prestamo.FechaDevolucionEsperada,
+            FechaDevolucion = row.Prestamo.FechaDevolucion,
+            Observacion = row.Prestamo.Observacion,
+            MotivoRechazo = row.Prestamo.MotivoRechazo,
+            AutorizadoPor = row.Prestamo.AutorizadoPor,
+            EntregadoPor = row.Prestamo.EntregadoPor,
+            IdContrato = row.Prestamo.IdContrato,
+            DestinoPrestamo = row.Prestamo.DestinoPrestamo,
+            IdCarrera = row.Prestamo.IdCarrera,
+            NombreMateria = row.Prestamo.NombreMateria,
+            Guardado = row.Prestamo.Guardado,
             GrupoEquipoId = row.GrupoEquipoId.HasValue ? [row.GrupoEquipoId.Value] : [],
             NombreGrupoEquipo = row.NombreGrupoEquipo,
             CodigoImt = row.CodigoImt?.ToString(CultureInfo.InvariantCulture),
             CodigoUcb = row.CodigoUcb,
             NumeroSerial = row.NumeroSerial,
-            UbicacionEquipo = row.UbicacionEquipo,
-            NombreGavetero = row.NombreGavetero,
-            NombreMueble = row.NombreMueble,
-            UbicacionMueble = row.UbicacionMueble,
-            AdministradorAmbiente = row.AdministradorAmbiente,
-        }).ToList();
+            UbicacionEquipo = location?.Ambiente,
+            NombreGavetero = location?.Gavetero,
+            NombreMueble = location?.Mueble,
+            UbicacionMueble = location?.UbicacionMueble,
+            AdministradorAmbiente = location?.Administrador,
+        };
+
+    private sealed class PrestamoRow
+    {
+        public required PrestamoEntity Prestamo { get; init; }
+        public string? UsuarioNombre { get; init; }
+        public string? UsuarioApellido { get; init; }
+        public string? UsuarioTelefono { get; init; }
+        public string? TipoUsuario { get; init; }
+        public int? DetalleId { get; init; }
+        public int? GrupoEquipoId { get; init; }
+        public string? NombreGrupoEquipo { get; init; }
+        public int? IdEquipo { get; init; }
+        public int? CodigoImt { get; init; }
+        public string? CodigoUcb { get; init; }
+        public string? NumeroSerial { get; init; }
     }
+
+    private sealed record EquipmentLocation(
+        int IdEquipo,
+        string? Ambiente,
+        string? Administrador,
+        string? Gavetero,
+        string? Mueble,
+        string? UbicacionMueble
+    );
 }

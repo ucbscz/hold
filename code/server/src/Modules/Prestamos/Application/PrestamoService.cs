@@ -63,35 +63,15 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         entity.FechaDevolucionEsperada = dto.FechaDevolucionEsperada!.Value;
         entity.EstadoPrestamo = EstadoPrestamo.Pendiente;
 
-        var contract = dto.Contrato;
-        if (!string.IsNullOrWhiteSpace(contract))
-        {
-            try
-            {
-                var config = await _configuracion.GetConfiguracion(cancellationToken);
-                contract = _contractHtml.RenderInstitutionalSigner(
-                    contract,
-                    config.NombreJefeCarrera,
-                    config.CarnetJefeCarrera ?? "No registrado",
-                    config.FirmaJefeCarreraBase64
-                );
-            }
-            catch (ArgumentException exception)
-            {
-                return Result<PrestamoDto>.Invalid(
-                    new Ardalis.Result.ValidationError
-                    {
-                        Identifier = nameof(dto.Contrato),
-                        ErrorMessage = exception.Message,
-                    }
-                );
-            }
-        }
+        var contract = await RenderContract(dto.Contrato, cancellationToken);
+
+        if (contract.Error != null)
+            return contract.Error;
 
         var createResult = await Repository.CreateReservation(
             entity,
             dto.GrupoEquipoId ?? [],
-            contract,
+            contract.Html,
             cancellationToken
         );
 
@@ -101,9 +81,46 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             );
 
         var createdLoan = await _queries.Get(entity.Id, cancellationToken);
-        if (!createdLoan.IsSuccess)
-            return createdLoan;
+        if (createdLoan.IsSuccess)
+            await RecordCreation(entity, createdLoan.Value, cancellationToken);
 
+        return createdLoan;
+    }
+
+    private async Task<(string? Html, Result<PrestamoDto>? Error)> RenderContract(
+        string? contract,
+        CancellationToken cancellationToken
+    )
+    {
+        if (string.IsNullOrWhiteSpace(contract))
+            return (contract, null);
+
+        try
+        {
+            var config = await _configuracion.GetConfiguracion(cancellationToken);
+            return (_contractHtml.RenderInstitutionalSigner(contract, config), null);
+        }
+        catch (ArgumentException exception)
+        {
+            return (
+                null,
+                Result<PrestamoDto>.Invalid(
+                    new Ardalis.Result.ValidationError
+                    {
+                        Identifier = nameof(PrestamoDto.Contrato),
+                        ErrorMessage = exception.Message,
+                    }
+                )
+            );
+        }
+    }
+
+    private async Task RecordCreation(
+        PrestamoEntity entity,
+        PrestamoDto createdLoan,
+        CancellationToken cancellationToken
+    )
+    {
         var userDisplayName = await _queries.GetUsuarioDisplayName(
             entity.Carnet!,
             cancellationToken
@@ -112,7 +129,7 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
         {
             Usuario = userDisplayName,
             CarnetUsuario = entity.Carnet,
-            Equipos = createdLoan.Value.NombreGrupoEquipo,
+            Equipos = createdLoan.NombreGrupoEquipo,
             FechaInicio = entity.FechaPrestamoEsperada,
             FechaDevolucion = entity.FechaDevolucionEsperada,
             entity.EstadoPrestamo,
@@ -132,8 +149,6 @@ public class PrestamoService : Service<PrestamoEntity, PrestamoRepository, Prest
             $"{userDisplayName} realizó una reserva.",
             userDisplayName
         );
-
-        return createdLoan;
     }
 
     public Task<Result<PrestamoDto>> CreateForUser(

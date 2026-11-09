@@ -1,0 +1,277 @@
+<section
+  #comentariosSection
+  class="comentarios-equipo"
+  aria-labelledby="comentarios-equipo-title"
+>
+  <div class="comentarios-equipo__header">
+    <div>
+      <h3 id="comentarios-equipo-title" class="comentarios-equipo__title">
+        Comentarios del equipo
+      </h3>
+      <p class="comentarios-equipo__subtitle">
+        Tu comentario se publicará con tu usuario registrado.
+      </p>
+    </div>
+    <div class="comentarios-equipo__tools">
+      <span class="comentarios-equipo__count"
+        >{{ totalComentarios() }} comentario{{
+          totalComentarios() !== 1 ? "s" : ""
+        }}</span
+      >
+      <label class="comentarios-equipo__sort-label" for="orden-comentarios">
+        Ordenar
+      </label>
+      <app-custom-select
+        id="orden-comentarios"
+        name="orden-comentarios"
+        class="comentarios-equipo__sort"
+        [ngModel]="ordenComentarios"
+        (ngModelChange)="cambiarOrdenComentarios($event)"
+        [opciones]="ordenComentariosOpciones"
+        placeholder="Ordenar comentarios"
+        [searchThreshold]="99"
+      ></app-custom-select>
+    </div>
+  </div>
+
+  <form class="comentarios-equipo__form" (ngSubmit)="publicarComentario()">
+    <label class="comentarios-equipo__label" for="comentario-equipo">
+      Agregar comentario
+    </label>
+    <textarea
+      id="comentario-equipo"
+      name="comentario-equipo"
+      class="comentarios-equipo__textarea"
+      [(ngModel)]="comentarioTexto"
+      [attr.maxlength]="maxCommentLength"
+      rows="3"
+      placeholder="Escribe una observación útil sobre este equipo"
+    ></textarea>
+    <div class="comentarios-equipo__form-footer">
+      <span class="comentarios-equipo__limit">
+        {{ comentarioTexto.length }}/{{ maxCommentLength }}
+      </span>
+      <button
+        type="submit"
+        class="comentarios-equipo__submit"
+        [disabled]="publicandoComentario || comentarioTexto.trim().length === 0"
+      >
+        @if (publicandoComentario) {
+          <span class="comentarios-equipo__button-loader"></span>
+        }
+        {{ publicandoComentario ? "Publicando..." : "Publicar comentario" }}
+      </button>
+    </div>
+    @if (comentarioError) {
+      <p class="comentarios-equipo__error">{{ comentarioError }}</p>
+    }
+  </form>
+
+  <div class="comentarios-equipo__list">
+    @if (cargandoComentarios) {
+      @for (item of skeletonComentarios; track item) {
+        <article
+          class="comentarios-equipo__item comentarios-equipo__skeleton"
+          aria-hidden="true"
+        >
+          <span
+            class="comentarios-equipo__skeleton-line comentarios-equipo__skeleton-line--medium"
+          ></span>
+          <span
+            class="comentarios-equipo__skeleton-line comentarios-equipo__skeleton-line--short"
+          ></span>
+          <span class="comentarios-equipo__skeleton-line"></span>
+        </article>
+      }
+    } @else if (comentarios.length === 0) {
+      <p class="comentarios-equipo__empty">
+        Aún no hay comentarios para este equipo.
+      </p>
+    } @else {
+      @for (comentario of comentarios; track comentario.id) {
+        <article
+          class="comentarios-equipo__item"
+          [class.comentarios-equipo__item--removing]="
+            eliminandoComentarioId === comentario.id
+          "
+        >
+          <div class="comentarios-equipo__item-header">
+            <div>
+              <strong class="comentarios-equipo__author">
+                {{ comentario.nombreUsuario }}
+              </strong>
+              <span class="comentarios-equipo__carnet">
+                {{ comentario.carnetUsuario }}
+              </span>
+            </div>
+            <time
+              class="comentarios-equipo__date"
+              [attr.datetime]="comentario.fechaCreacion"
+            >
+              {{ comentario.fechaCreacion | date: "dd/MM/yyyy HH:mm" }}
+            </time>
+          </div>
+          <p class="comentarios-equipo__content">
+            {{ comentario.contenido }}
+          </p>
+          <div class="comentarios-equipo__actions">
+            <button
+              type="button"
+              class="comentarios-equipo__action comentarios-equipo__action--like"
+              [class.comentarios-equipo__action--active]="
+                comentario.likedByCurrentUser
+              "
+              [disabled]="likePendiente(comentario.id)"
+              [attr.aria-pressed]="comentario.likedByCurrentUser"
+              (click)="alternarLikeComentario(comentario)"
+            >
+              <i class="fa-solid fa-thumbs-up"></i>
+              <span>{{ comentario.likes }}</span>
+            </button>
+            <button
+              type="button"
+              class="comentarios-equipo__action"
+              (click)="alternarRespuesta(comentario.id)"
+            >
+              <i class="fa-regular fa-comment"></i>
+              Responder
+            </button>
+            @if (comentario.puedeEliminar) {
+              <button
+                type="button"
+                class="comentarios-equipo__action comentarios-equipo__action--delete"
+                [disabled]="eliminandoComentarioId === comentario.id"
+                (click)="eliminarComentario(comentario)"
+              >
+                <i class="fa-regular fa-trash-can"></i>
+                {{
+                  eliminandoComentarioId === comentario.id
+                    ? "Eliminando..."
+                    : "Eliminar"
+                }}
+              </button>
+            }
+          </div>
+          @if (respuestaActivaId === comentario.id) {
+            <form
+              class="comentarios-equipo__reply-form"
+              (ngSubmit)="publicarRespuesta(comentario.id)"
+            >
+              <textarea
+                class="comentarios-equipo__textarea comentarios-equipo__textarea--reply"
+                name="respuesta-{{ comentario.id }}"
+                [(ngModel)]="respuestaTexto[comentario.id]"
+                [attr.maxlength]="maxCommentLength"
+                rows="3"
+                placeholder="Responder a este comentario"
+              ></textarea>
+              <div class="comentarios-equipo__form-footer">
+                <span class="comentarios-equipo__limit">
+                  {{ (respuestaTexto[comentario.id] ?? "").length }}/{{
+                    maxCommentLength
+                  }}
+                </span>
+                <div class="comentarios-equipo__reply-actions">
+                  <button
+                    type="button"
+                    class="comentarios-equipo__action"
+                    (click)="cancelarRespuesta(comentario.id)"
+                  >
+                    Cancelar
+                  </button>
+                  <button
+                    type="submit"
+                    class="comentarios-equipo__submit"
+                    [disabled]="
+                      publicandoRespuestaId === comentario.id ||
+                      (respuestaTexto[comentario.id] ?? '').trim().length === 0
+                    "
+                  >
+                    {{
+                      publicandoRespuestaId === comentario.id
+                        ? "Respondiendo..."
+                        : "Responder"
+                    }}
+                  </button>
+                </div>
+              </div>
+            </form>
+          }
+          @if (comentario.respuestas.length > 0) {
+            <div class="comentarios-equipo__replies">
+              @for (respuesta of comentario.respuestas; track respuesta.id) {
+                <article
+                  class="comentarios-equipo__item comentarios-equipo__reply"
+                  [class.comentarios-equipo__item--removing]="
+                    eliminandoComentarioId === respuesta.id
+                  "
+                >
+                  <div class="comentarios-equipo__item-header">
+                    <div>
+                      <strong class="comentarios-equipo__author">
+                        {{ respuesta.nombreUsuario }}
+                      </strong>
+                      <span class="comentarios-equipo__carnet">
+                        {{ respuesta.carnetUsuario }}
+                      </span>
+                    </div>
+                    <time
+                      class="comentarios-equipo__date"
+                      [attr.datetime]="respuesta.fechaCreacion"
+                    >
+                      {{ respuesta.fechaCreacion | date: "dd/MM/yyyy HH:mm" }}
+                    </time>
+                  </div>
+                  <p class="comentarios-equipo__content">
+                    {{ respuesta.contenido }}
+                  </p>
+                  <div class="comentarios-equipo__actions">
+                    <button
+                      type="button"
+                      class="comentarios-equipo__action comentarios-equipo__action--like"
+                      [class.comentarios-equipo__action--active]="
+                        respuesta.likedByCurrentUser
+                      "
+                      [disabled]="likePendiente(respuesta.id)"
+                      [attr.aria-pressed]="respuesta.likedByCurrentUser"
+                      (click)="alternarLikeComentario(respuesta)"
+                    >
+                      <i class="fa-solid fa-thumbs-up"></i>
+                      <span>{{ respuesta.likes }}</span>
+                    </button>
+                    @if (respuesta.puedeEliminar) {
+                      <button
+                        type="button"
+                        class="comentarios-equipo__action comentarios-equipo__action--delete"
+                        [disabled]="eliminandoComentarioId === respuesta.id"
+                        (click)="eliminarComentario(respuesta)"
+                      >
+                        <i class="fa-regular fa-trash-can"></i>
+                        {{
+                          eliminandoComentarioId === respuesta.id
+                            ? "Eliminando..."
+                            : "Eliminar"
+                        }}
+                      </button>
+                    }
+                  </div>
+                </article>
+              }
+            </div>
+          }
+        </article>
+      }
+    }
+  </div>
+</section>
+@if (mostrarBotonSubir()) {
+  <button
+    type="button"
+    class="comentarios-subir"
+    (click)="subirAComentarios()"
+    aria-label="Volver al inicio de los comentarios"
+    title="Volver al inicio de los comentarios"
+  >
+    <i class="fas fa-arrow-up" aria-hidden="true"></i>
+  </button>
+}

@@ -3,7 +3,14 @@ import { Injectable } from '@angular/core';
 import { PrestamoDto } from '../model/prestamo';
 import type { Carrito } from '@entities/cart/@x/loan';
 import { environment } from '@environments/environment';
-import { ApiResponse, extractApiValue, getApiList } from '@shared/api';
+import {
+  ApiResponse,
+  extractApiValue,
+  getApiList,
+  obtenerTodasLasPaginas,
+  parametrosPagina,
+  TAMANO_PAGINA_API,
+} from '@shared/api';
 import { map, Observable } from 'rxjs';
 import { PrestamoInlineItem } from '../model/prestamo-inline-item';
 import { PrestamoApiItem } from './prestamo-api-item';
@@ -59,8 +66,18 @@ export class PrestamosAPIService {
   }
 
   obtenerPrestamos() {
+    return obtenerTodasLasPaginas(
+      (pagina) => this.obtenerPaginaPrestamos(pagina),
+      TAMANO_PAGINA_API,
+      (filas) => new Set(filas.map((fila) => fila.Id)).size,
+    );
+  }
+
+  private obtenerPaginaPrestamos(pagina: number) {
     return this.http
-      .get<ApiResponse<PrestamoApiItem[]> | PrestamoApiItem[]>(this.url)
+      .get<ApiResponse<PrestamoApiItem[]> | PrestamoApiItem[]>(this.url, {
+        params: parametrosPagina(pagina),
+      })
       .pipe(
         map((data) => {
           const arrayData = Array.isArray(data)

@@ -45,6 +45,21 @@ public class EquipoRepositoryTests
     }
 
     [Test]
+    public async Task GetPage_ReturnsBoundedSliceOrderedById()
+    {
+        var grupo = new GrupoEquipo { Id = 7, Nombre = "G" };
+        for (var code = 1; code <= 5; code++)
+            _dbContext.Equipos.Add(new Equipo { Id = code, CodigoImt = code, IdGrupoEquipo = 7, GrupoEquipo = grupo, NumeroSerial = $"E{code}" });
+        await _dbContext.SaveChangesAsync();
+
+        var page = await _repository.GetPage(2, 2);
+        var clamped = await _repository.GetPage(0, 10_000);
+
+        page.Value.Select(e => e.CodigoImt).Should().Equal(3, 4);
+        clamped.Value.Should().HaveCount(5);
+    }
+
+    [Test]
     public async Task GetMaxCodigoImt_Empty_ReturnsZero()
     {
         var max = await _repository.GetMaxCodigoImt();

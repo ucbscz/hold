@@ -20,38 +20,21 @@ import {
 } from '@shared/lib/directives';
 import { printTable, TablePaginationComponent } from '@shared/lib/admin-table';
 import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
-import { parseJsonResult } from '@shared/lib/result';
 import { formatRegionDateTime } from '@shared/lib/date';
 import { AuditObservationDetail } from '../../model/audit-observation-detail';
+import {
+  parseAuditDetail,
+  separarPalabras,
+} from '../../model/audit-detail-parser';
+import {
+  ACCIONES_POR_ENTIDAD,
+  badgeAccion,
+  descripcionAccion,
+  etiquetaEntidad,
+} from '../../model/audit-labels';
 
 const CAMPO_CODIGO_INTERNO = 'Código interno';
 const INTERVALO_ACTUALIZACION_MS = 30000;
-
-const ACCIONES_POR_ENTIDAD: Record<string, string[]> = {
-  Prestamo: [
-    'Crear',
-    'Aprobar',
-    'Rechazar',
-    'Recoger',
-    'Devolver',
-    'Cancelar',
-    'AtrasadoAutomatico',
-    'RegistrarContrato',
-    'EliminarContrato',
-    'Eliminar',
-  ],
-  Usuario: ['Crear', 'Editar', 'Bloquear', 'Desbloquear', 'Eliminar'],
-  Equipo: ['Crear', 'Editar', 'Eliminar'],
-  GrupoEquipo: ['Crear', 'Editar', 'EliminarComentario', 'Eliminar'],
-  Accesorio: ['Crear', 'Editar', 'Eliminar'],
-  Componente: ['Crear', 'Editar', 'Eliminar'],
-  Gavetero: ['Crear', 'Editar', 'Eliminar'],
-  Mueble: ['Crear', 'Editar', 'Eliminar'],
-  Mantenimiento: ['Crear', 'Editar', 'Eliminar'],
-  EmpresaMantenimiento: ['Crear', 'Editar', 'Eliminar'],
-  Carrera: ['Crear', 'Editar', 'Eliminar'],
-  Categoria: ['Crear', 'Editar', 'Eliminar'],
-};
 
 @Component({
   selector: 'app-audit-panel',
@@ -245,19 +228,10 @@ export class AuditPanelComponent implements OnChanges, OnDestroy {
 
   parseDetalle(detalle?: string): AuditObservationDetail | null {
     if (!detalle) return null;
-    if (this.detalleCache.has(detalle)) {
-      return this.detalleCache.get(detalle) ?? null;
-    }
+    const cached = this.detalleCache.get(detalle);
+    if (cached) return cached;
 
-    const parsedDetail = parseJsonResult<unknown>(detalle);
-
-    if (parsedDetail.isOk() && this.isRecord(parsedDetail.value)) {
-      const structuredDetail = this.normalizarDetalle(parsedDetail.value);
-      this.detalleCache.set(detalle, structuredDetail);
-      return structuredDetail;
-    }
-
-    const resultado = this.parseLegacyLoanDetail(detalle) ?? { texto: detalle };
+    const resultado = parseAuditDetail(detalle);
     this.detalleCache.set(detalle, resultado);
     return resultado;
   }
@@ -309,59 +283,15 @@ export class AuditPanelComponent implements OnChanges, OnDestroy {
   protected readonly estadoEquipoCssClass = estadoEquipoCssClass;
 
   badgeClass(accion: string | undefined): string {
-    switch (accion?.toLowerCase()) {
-      case 'crear':
-        return 'badge-aprobado';
-      case 'editar':
-        return 'badge-pendiente';
-      case 'aprobar':
-      case 'recoger':
-        return 'badge-activo';
-      case 'devolver':
-        return 'badge-finalizado';
-      case 'eliminar':
-      case 'rechazar':
-      case 'cancelar':
-        return 'badge-rechazado';
-      case 'atrasadoautomatico':
-        return 'badge-atrasado';
-      case 'registrarcontrato':
-        return 'badge-aprobado';
-      case 'eliminarcontrato':
-        return 'badge-rechazado';
-      default:
-        return 'badge-cancelado';
-    }
+    return badgeAccion(accion);
   }
 
   accionLabel(accion?: string): string {
-    if (!accion) return 'Acción registrada';
-
-    return accion
-      .replace(/([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])/g, '$1 $2')
-      .replace(/^./, (value) => value.toUpperCase());
+    return accion ? separarPalabras(accion) : 'Acción registrada';
   }
 
   entidadLabel(entidad?: string): string {
-    const labels: Record<string, string> = {
-      Prestamo: 'Préstamo',
-      Usuario: 'Usuario',
-      Equipo: 'Equipo',
-      GrupoEquipo: 'Grupo de equipos',
-      Accesorio: 'Accesorio',
-      Componente: 'Componente',
-      Gavetero: 'Gavetero',
-      Mueble: 'Mueble',
-      Mantenimiento: 'Mantenimiento',
-      EmpresaMantenimiento: 'Empresa de mantenimiento',
-      Carrera: 'Carrera',
-      Categoria: 'Categoría',
-      Ambiente: 'Ambiente',
-      Procedencia: 'Procedencia',
-      ConfiguracionSistema: 'Configuración del sistema',
-    };
-
-    return labels[entidad ?? ''] ?? entidad ?? this.entidad;
+    return etiquetaEntidad(entidad, this.entidad);
   }
 
   registroLabel(log: AuditLogDto): string {
@@ -371,29 +301,10 @@ export class AuditPanelComponent implements OnChanges, OnDestroy {
   }
 
   descripcionAccion(log: AuditLogDto): string {
-    const entidad = this.entidadLabel(log.Entidad).toLowerCase();
-    const registro = ` “${this.registroLabel(log)}”`;
-    const action = log.Accion?.toLowerCase();
-    const descriptions: Record<string, string> = {
-      crear: `Se creó el registro de ${entidad}${registro}.`,
-      editar: `Se actualizaron los datos de ${entidad}${registro}.`,
-      eliminar: `Se eliminó el registro de ${entidad}${registro}.`,
-      aprobar: `Se aprobó el ${entidad}${registro}.`,
-      rechazar: `Se rechazó el ${entidad}${registro}.`,
-      recoger: `Se registró la entrega del ${entidad}${registro}.`,
-      devolver: `Se registró la devolución del ${entidad}${registro}.`,
-      cancelar: `Se canceló el ${entidad}${registro}.`,
-      bloquear: `Se bloqueó el registro de ${entidad}${registro}.`,
-      desbloquear: `Se desbloqueó el registro de ${entidad}${registro}.`,
-      atrasadoautomatico: `El sistema marcó el ${entidad}${registro} como atrasado.`,
-      registrarcontrato: `Se registró el contrato del ${entidad}${registro}.`,
-      eliminarcontrato: `Se eliminó el contrato del ${entidad}${registro}.`,
-      eliminarcomentario: `Se eliminó un comentario de ${entidad}${registro}.`,
-    };
-
-    return (
-      descriptions[action ?? ''] ??
-      `Se registró una acción en ${entidad}${registro}.`
+    return descripcionAccion(
+      log.Accion,
+      this.entidadLabel(log.Entidad).toLowerCase(),
+      this.registroLabel(log),
     );
   }
 
@@ -474,102 +385,6 @@ export class AuditPanelComponent implements OnChanges, OnDestroy {
     }
 
     return this.descripcionAccion(log);
-  }
-
-  private normalizarDetalle(
-    value: Record<string, unknown>,
-  ): AuditObservationDetail {
-    const detail = value as unknown as AuditObservationDetail;
-    const legacy =
-      typeof detail.texto === 'string'
-        ? this.parseLegacyLoanDetail(detail.texto)
-        : null;
-
-    if (legacy) return legacy;
-
-    const ignored = new Set([
-      'observacion',
-      'texto',
-      'equipos',
-      'usuarioNombre',
-      'usuarioCarnet',
-      'equiposPrestamo',
-      'fechaInicio',
-      'fechaDevolucion',
-      'cambios',
-    ]);
-    const datos = Object.entries(value)
-      .filter(([key]) => !ignored.has(key) && !this.esClaveSensible(key))
-      .map(([key, item]) => ({
-        etiqueta: this.etiquetaDato(key),
-        valor: this.formatearDato(item),
-      }))
-      .filter((item) => item.valor !== '');
-
-    return {
-      ...detail,
-      datos: datos.length ? datos : undefined,
-    };
-  }
-
-  private isRecord(value: unknown): value is Record<string, unknown> {
-    return !!value && typeof value === 'object' && !Array.isArray(value);
-  }
-
-  private esClaveSensible(key: string): boolean {
-    return /(contrasena|password|token|hash|secret|imagen|firma|identidadexternaid|googleid|refresh)/i.test(
-      key,
-    );
-  }
-
-  private etiquetaDato(key: string): string {
-    const labels: Record<string, string> = {
-      cuentaRecreada: 'Cuenta recreada',
-      aceptoTerminos: 'Aceptó términos',
-      versionTerminos: 'Versión de términos',
-      fechaAceptacion: 'Fecha de aceptación',
-      anterior: 'Valor anterior',
-    };
-
-    return (
-      labels[key] ??
-      key
-        .replace(/([a-záéíóúñ])([A-ZÁÉÍÓÚÑ])/g, '$1 $2')
-        .replace(/^./, (value) => value.toUpperCase())
-    );
-  }
-
-  private formatearDato(value: unknown): string {
-    if (value === null || value === undefined || value === '')
-      return 'Sin valor';
-    if (typeof value === 'boolean') return value ? 'Sí' : 'No';
-    if (typeof value === 'string' || typeof value === 'number')
-      return String(value);
-    if (Array.isArray(value) && value.every((item) => typeof item !== 'object'))
-      return value.join(', ');
-
-    return '';
-  }
-
-  private parseLegacyLoanDetail(detail: string): AuditObservationDetail | null {
-    const match = detail.match(
-      /^Usuario:\s*(.+?)\s*\(([^)]+)\)\.\s*Equipos:\s*(.+?)\.\s*Inicio:\s*(.+?)\s+UTC\.\s*Devolución:\s*(.+?)\s+UTC\.?$/i,
-    );
-
-    if (!match) return null;
-
-    return {
-      usuarioNombre: match[1].trim(),
-      usuarioCarnet: match[2].trim(),
-      equiposPrestamo: match[3].trim(),
-      fechaInicio: this.normalizarFechaUtcLegacy(match[4]),
-      fechaDevolucion: this.normalizarFechaUtcLegacy(match[5]),
-    };
-  }
-
-  private normalizarFechaUtcLegacy(value: string): string {
-    const normalized = value.trim().replace(' ', 'T');
-    return normalized.endsWith('Z') ? normalized : `${normalized}:00Z`;
   }
 
   private inicioDelDia(fecha: Date): Date {

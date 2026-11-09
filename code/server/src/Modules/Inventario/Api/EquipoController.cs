@@ -2,6 +2,7 @@ using UCB_Hold.Server.Shared.Web;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using UCB_Hold.Server.Modules.Inventario.Application;
+using UCB_Hold.Server.Shared.Kernel;
 using UCB_Hold.Server.Shared.Security;
 
 namespace UCB_Hold.Server.Modules.Inventario.Api;
@@ -17,7 +18,9 @@ public class EquipoController : ApiController
     [HttpGet]
     public async Task<IActionResult> GetAll(
         [FromQuery] int? grupoId = null,
-        [FromQuery] int? gaveteroId = null
+        [FromQuery] int? gaveteroId = null,
+        [FromQuery] int pagina = 1,
+        [FromQuery] int tamanoPagina = Paginacion.MaxPageSize
     )
     {
         if (grupoId.HasValue)
@@ -26,7 +29,7 @@ public class EquipoController : ApiController
         if (gaveteroId.HasValue)
             return ToResponse(await _service.GetByGavetero(gaveteroId.Value));
 
-        return ToResponse(await _service.GetAll());
+        return ToResponse(await _service.GetPage(pagina, tamanoPagina));
     }
 
     [HttpGet("{id:int}")]

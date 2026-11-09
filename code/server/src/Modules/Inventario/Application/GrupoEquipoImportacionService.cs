@@ -28,7 +28,7 @@ public sealed class GrupoEquipoImportacionService
         CancellationToken cancellationToken
     )
     {
-        if (!TryValidateUri(url, out var currentUri))
+        if (!TryValidateUri(url, out var uri))
             return Result<GrupoEquipoImportacionDto>.Error(
                 "Ingresa una URL HTTPS pública y válida"
             );
@@ -38,59 +38,16 @@ public sealed class GrupoEquipoImportacionService
             using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
             timeout.CancelAfter(TimeSpan.FromSeconds(8));
 
-            for (var redirect = 0; redirect <= MaxRedirects; redirect++)
-            {
-                using var client = CreateSecureClient();
-                using var request = new HttpRequestMessage(HttpMethod.Get, currentUri);
-                request.Headers.UserAgent.ParseAdd(UserAgent);
-                request.Headers.Accept.ParseAdd("text/html,application/xhtml+xml");
-                using var response = await client.SendAsync(
-                    request,
-                    HttpCompletionOption.ResponseHeadersRead,
-                    timeout.Token
-                );
+            var page = await Fetch(uri, timeout.Token);
+            if (page.Error != null)
+                return Result<GrupoEquipoImportacionDto>.Error(page.Error);
 
-                if (IsRedirect(response.StatusCode))
-                {
-                    if (redirect == MaxRedirects || response.Headers.Location == null)
-                        return Result<GrupoEquipoImportacionDto>.Error(
-                            "La URL contiene demasiadas redirecciones"
-                        );
-
-                    var next = response.Headers.Location.IsAbsoluteUri
-                        ? response.Headers.Location
-                        : new Uri(currentUri, response.Headers.Location);
-                    if (!TryValidateUri(next.AbsoluteUri, out currentUri))
-                        return Result<GrupoEquipoImportacionDto>.Error(
-                            "La redirección conduce a una dirección no permitida"
-                        );
-                    continue;
-                }
-
-                if (!response.IsSuccessStatusCode)
-                    return Result<GrupoEquipoImportacionDto>.Error(
-                        "No se pudo leer la página indicada"
-                    );
-
-                var mediaType = response.Content.Headers.ContentType?.MediaType;
-                if (mediaType is not "text/html" and not "application/xhtml+xml")
-                    return Result<GrupoEquipoImportacionDto>.Error(
-                        "La URL debe apuntar a una página HTML"
-                    );
-
-                if (response.Content.Headers.ContentLength > MaxResponseBytes)
-                    return Result<GrupoEquipoImportacionDto>.Error(
-                        "La página supera el tamaño permitido"
-                    );
-
-                var html = await ReadLimited(response.Content, timeout.Token);
-                var preview = Parse(html, currentUri);
-                return string.IsNullOrWhiteSpace(preview.Nombre)
-                    ? Result<GrupoEquipoImportacionDto>.Error(
-                        "No se encontraron datos de producto reconocibles"
-                    )
-                    : Result<GrupoEquipoImportacionDto>.Success(preview);
-            }
+            var preview = Parse(page.Html!, page.Source);
+            return string.IsNullOrWhiteSpace(preview.Nombre)
+                ? Result<GrupoEquipoImportacionDto>.Error(
+                    "No se encontraron datos de producto reconocibles"
+                )
+                : Result<GrupoEquipoImportacionDto>.Success(preview);
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
         {
@@ -109,19 +66,91 @@ public sealed class GrupoEquipoImportacionService
                 "No fue posible obtener una vista previa segura"
             );
         }
+    }
 
-        return Result<GrupoEquipoImportacionDto>.Error("No fue posible importar la página");
+    private static async Task<FetchedPage> Fetch(Uri uri, CancellationToken cancellationToken)
+    {
+        var currentUri = uri;
+
+        for (var redirect = 0; redirect <= MaxRedirects; redirect++)
+        {
+            using var client = CreateSecureClient();
+            using var request = new HttpRequestMessage(HttpMethod.Get, currentUri);
+            request.Headers.UserAgent.ParseAdd(UserAgent);
+            request.Headers.Accept.ParseAdd("text/html,application/xhtml+xml");
+            using var response = await client.SendAsync(
+                request,
+                HttpCompletionOption.ResponseHeadersRead,
+                cancellationToken
+            );
+
+            if (!IsRedirect(response.StatusCode))
+                return await ReadPage(response, currentUri, cancellationToken);
+
+            if (redirect == MaxRedirects || response.Headers.Location == null)
+                return FetchedPage.Failed("La URL contiene demasiadas redirecciones");
+
+            var next = response.Headers.Location.IsAbsoluteUri
+                ? response.Headers.Location
+                : new Uri(currentUri, response.Headers.Location);
+            if (!TryValidateUri(next.AbsoluteUri, out currentUri))
+                return FetchedPage.Failed("La redirección conduce a una dirección no permitida");
+        }
+
+        return FetchedPage.Failed("No fue posible importar la página");
+    }
+
+    private static async Task<FetchedPage> ReadPage(
+        HttpResponseMessage response,
+        Uri source,
+        CancellationToken cancellationToken
+    )
+    {
+        if (!response.IsSuccessStatusCode)
+            return FetchedPage.Failed("No se pudo leer la página indicada");
+
+        var mediaType = response.Content.Headers.ContentType?.MediaType;
+        if (mediaType is not "text/html" and not "application/xhtml+xml")
+            return FetchedPage.Failed("La URL debe apuntar a una página HTML");
+
+        if (response.Content.Headers.ContentLength > MaxResponseBytes)
+            return FetchedPage.Failed("La página supera el tamaño permitido");
+
+        return new FetchedPage(await ReadLimited(response.Content, cancellationToken), source, null);
+    }
+
+    private sealed record FetchedPage(string? Html, Uri Source, string? Error)
+    {
+        public static FetchedPage Failed(string error) => new(null, null!, error);
     }
 
     private static GrupoEquipoImportacionDto Parse(string html, Uri source)
     {
         var document = new HtmlParser().ParseDocument(html);
-        string? name = null;
-        string? model = null;
-        string? brand = null;
-        string? description = null;
-        string? image = null;
+        var product = ReadStructuredProduct(document) ?? new ProductData(null, null, null, null, null);
+        var name = product.Name ?? Meta(document, "og:title") ?? document.Title;
+        var brand = product.Brand ?? Meta(document, "product:brand");
+        var description = product.Description
+            ?? Meta(document, "og:description")
+            ?? MetaName(document, "description");
+        var image = product.Image ?? Meta(document, "og:image");
 
+        return new GrupoEquipoImportacionDto
+        {
+            Nombre = Limit(Normalize(name), 50),
+            Modelo = Limit(Normalize(product.Model), 50),
+            Marca = Limit(Normalize(brand), 50),
+            Descripcion = Limit(Normalize(description), 200),
+            UrlImagen = SecureAbsoluteUrl(image, source),
+            UrlDataSheet = source.AbsolutePath.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)
+                ? Limit(source.AbsoluteUri, 200)
+                : null,
+            UrlOrigen = source.AbsoluteUri,
+        };
+    }
+
+    private static ProductData? ReadStructuredProduct(AngleSharp.Html.Dom.IHtmlDocument document)
+    {
         foreach (var script in document.QuerySelectorAll("script[type='application/ld+json']"))
         {
             if (string.IsNullOrWhiteSpace(script.TextContent))
@@ -133,41 +162,32 @@ public sealed class GrupoEquipoImportacionService
                     script.TextContent,
                     new JsonDocumentOptions { MaxDepth = 32 }
                 );
-                var product = FindProduct(json.RootElement);
-                if (product == null)
+                if (FindProduct(json.RootElement) is not { } value)
                     continue;
 
-                var value = product.Value;
-                name ??= ReadString(value, "name");
-                model ??= ReadString(value, "model") ?? ReadString(value, "mpn");
-                brand ??= ReadBrand(value);
-                description ??= ReadString(value, "description");
-                image ??= ReadImage(value);
-                break;
+                return new ProductData(
+                    ReadString(value, "name"),
+                    ReadString(value, "model") ?? ReadString(value, "mpn"),
+                    ReadBrand(value),
+                    ReadString(value, "description"),
+                    ReadImage(value)
+                );
             }
             catch (JsonException)
             {
             }
         }
 
-        name ??= Meta(document, "og:title") ?? document.Title;
-        brand ??= Meta(document, "product:brand");
-        description ??= Meta(document, "og:description") ?? MetaName(document, "description");
-        image ??= Meta(document, "og:image");
-
-        return new GrupoEquipoImportacionDto
-        {
-            Nombre = Limit(Normalize(name), 50),
-            Modelo = Limit(Normalize(model), 50),
-            Marca = Limit(Normalize(brand), 50),
-            Descripcion = Limit(Normalize(description), 200),
-            UrlImagen = SecureAbsoluteUrl(image, source),
-            UrlDataSheet = source.AbsolutePath.EndsWith(".pdf", StringComparison.OrdinalIgnoreCase)
-                ? Limit(source.AbsoluteUri, 200)
-                : null,
-            UrlOrigen = source.AbsoluteUri,
-        };
+        return null;
     }
+
+    private sealed record ProductData(
+        string? Name,
+        string? Model,
+        string? Brand,
+        string? Description,
+        string? Image
+    );
 
     private static JsonElement? FindProduct(JsonElement element)
     {

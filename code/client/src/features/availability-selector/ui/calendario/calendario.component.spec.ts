@@ -65,21 +65,6 @@ describe('CalendarioComponent', () => {
     expect(component.rangoValido).toBeTrue();
   });
 
-  it('defaults to the nearest valid minute after the current time', () => {
-    jasmine.clock().install();
-    try {
-      jasmine.clock().mockDate(new Date(2030, 0, 10, 10, 12, 30));
-      const next = (
-        component as unknown as { siguienteBloque: () => Date }
-      ).siguienteBloque();
-
-      expect(next.getHours()).toBe(10);
-      expect(next.getMinutes()).toBe(13);
-    } finally {
-      jasmine.clock().uninstall();
-    }
-  });
-
   it('disables Sundays in the calendar', () => {
     expect(component.esDiaDeshabilitado(new Date(2030, 0, 6))).toBeTrue();
     expect(component.esDiaDeshabilitado(new Date(2030, 0, 7))).toBeFalse();

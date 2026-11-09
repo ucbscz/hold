@@ -291,7 +291,7 @@ describe('PrestamosTablaComponent', () => {
     expect(component.puedeAprobar(prestamo)).toBeFalse();
   });
 
-  it('sends and preserves an approval annotation through retries', () => {
+  it('opens the decision dialog and closes it after a decision', () => {
     cargarPrestamos([
       crearPrestamo({
         id: 8,
@@ -299,45 +299,16 @@ describe('PrestamosTablaComponent', () => {
         fechaPrestamoEsperada: '2030-06-13T10:00:00',
       }),
     ]);
-    const api = component['prestamosapi'];
-    const request = spyOn(api, 'cambiarEstadoPrestamo');
-    request.and.returnValue(throwError(() => new Error('Offline')));
 
     component.validaraprobacion(8);
-    component.detalleDecision = 'Autorizado para la práctica de laboratorio';
-    component.aprobarprestamo(8);
-
     expect(component.prestamoKeySeleccionado).toBe(8);
     expect(component.decisionPrestamo).toBe('aprobado');
-    request.and.returnValue(of({}));
-    component.aprobarprestamo(8);
-    expect(request).toHaveBeenCalledWith(
-      8,
-      'aprobado',
-      'Autorizado para la práctica de laboratorio',
-    );
+
+    component.alDecidir('Préstamo aprobado con éxito.');
     expect(component.decisionPrestamo).toBeNull();
-  });
 
-  it('requires and sends the rejection reason', () => {
-    cargarPrestamos([crearPrestamo({ id: 9, nombre: 'Usuario' })]);
-    const request = spyOn(
-      component['prestamosapi'],
-      'cambiarEstadoPrestamo',
-    ).and.returnValue(of({}));
-
-    component.validarrechazo(9);
-    component.rechazarprestamo(9);
-    expect(request).not.toHaveBeenCalled();
-    component.detalleDecision = 'El equipo está reservado para mantenimiento';
-    component.rechazarprestamo(9);
-
-    expect(request).toHaveBeenCalledWith(
-      9,
-      'rechazado',
-      'El equipo está reservado para mantenimiento',
-    );
-    expect(component.decisionPrestamo).toBeNull();
+    component.validarrechazo(8);
+    expect(component.decisionPrestamo).toBe('rechazado');
   });
 
   it('exports the same data columns shown in the loan table', () => {

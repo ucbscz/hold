@@ -100,4 +100,13 @@ public class Repository<TEntity, TDto>
         var dtos = await _mapper.ProjectTo(DbContext.Set<TEntity>().AsNoTracking()).ToListAsync();
         return Result<List<TDto>>.Success(dtos);
     }
+
+    public async Task<Result<List<TDto>>> GetPage(int page, int pageSize)
+    {
+        var (skip, take) = Paginacion.Rango(page, pageSize);
+        var dtos = await _mapper
+            .ProjectTo(DbContext.Set<TEntity>().AsNoTracking().OrderBy(e => e.Id).Skip(skip).Take(take))
+            .ToListAsync();
+        return Result<List<TDto>>.Success(dtos);
+    }
 }

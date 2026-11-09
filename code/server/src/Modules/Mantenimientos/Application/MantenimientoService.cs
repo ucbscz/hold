@@ -93,7 +93,11 @@ public class MantenimientoService
         }
 
         await _estadoJob.Execute(CancellationToken.None);
+        return await RecordUpdate(id, previous);
+    }
 
+    private async Task<Result<MantenimientoDto>> RecordUpdate(int id, Result<MantenimientoDto> previous)
+    {
         var updated = await Repository.Get(id);
 
         await Audit!.Log(

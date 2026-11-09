@@ -82,42 +82,8 @@ public sealed class PrestamoDisponibilidadRepository
                 )
                 .ToListAsync(cancellationToken);
 
-            if (details.Count == 0)
+            if (details.Count == 0 || !await AssignCandidates(loan, details, cancellationToken))
                 return false;
-
-            var requiredByGroup = details
-                .GroupBy(detail => detail.IdGrupoEquipo)
-                .ToDictionary(group => group.Key, group => group.Count());
-            var candidatesByGroup = new Dictionary<int, Queue<int>>();
-
-            foreach (var required in requiredByGroup)
-            {
-                var candidateIds = await AvailableEquipos(
-                        [required.Key],
-                        loan.FechaPrestamoEsperada,
-                        loan.FechaDevolucionEsperada
-                    )
-                    .OrderBy(equipment => equipment.Id)
-                    .Select(equipment => equipment.Id)
-                    .Take(required.Value)
-                    .ToListAsync(cancellationToken);
-
-                if (candidateIds.Count < required.Value)
-                    return false;
-
-                candidatesByGroup[required.Key] = new Queue<int>(candidateIds);
-            }
-
-            foreach (var detail in details)
-            {
-                if (
-                    !candidatesByGroup.TryGetValue(detail.IdGrupoEquipo, out var available)
-                    || available.Count == 0
-                )
-                    return false;
-
-                detail.IdEquipo = available.Dequeue();
-            }
 
             loan.EstadoPrestamo = EstadoPrestamo.Aprobado;
             loan.AutorizadoPor = actor;
@@ -128,24 +94,52 @@ public sealed class PrestamoDisponibilidadRepository
 
             return true;
         }
-        catch (DbUpdateException exception)
-            when (exception.InnerException is PostgresException
-            {
-                SqlState: PostgresErrorCodes.SerializationFailure,
-            })
-        {
-            if (transaction != null)
-                await transaction.RollbackAsync(cancellationToken);
-            return false;
-        }
-        catch (PostgresException exception)
-            when (exception.SqlState == PostgresErrorCodes.SerializationFailure)
+        catch (Exception exception) when (IsSerializationFailure(exception))
         {
             if (transaction != null)
                 await transaction.RollbackAsync(cancellationToken);
             return false;
         }
     }
+
+    private async Task<bool> AssignCandidates(
+        Prestamo loan,
+        List<DetallePrestamo> details,
+        CancellationToken cancellationToken
+    )
+    {
+        var candidatesByGroup = new Dictionary<int, Queue<int>>();
+
+        foreach (var required in details.GroupBy(detail => detail.IdGrupoEquipo))
+        {
+            var candidateIds = await AvailableEquipos(
+                    [required.Key],
+                    loan.FechaPrestamoEsperada,
+                    loan.FechaDevolucionEsperada
+                )
+                .OrderBy(equipment => equipment.Id)
+                .Select(equipment => equipment.Id)
+                .Take(required.Count())
+                .ToListAsync(cancellationToken);
+
+            if (candidateIds.Count < required.Count())
+                return false;
+
+            candidatesByGroup[required.Key] = new Queue<int>(candidateIds);
+        }
+
+        foreach (var detail in details)
+            detail.IdEquipo = candidatesByGroup[detail.IdGrupoEquipo].Dequeue();
+
+        return true;
+    }
+
+    private static bool IsSerializationFailure(Exception exception) =>
+        exception is PostgresException { SqlState: PostgresErrorCodes.SerializationFailure }
+        || exception is DbUpdateException
+        {
+            InnerException: PostgresException { SqlState: PostgresErrorCodes.SerializationFailure },
+        };
 
     private IQueryable<Equipo> AvailableEquipos(
         int[] grupoEquipoIds,

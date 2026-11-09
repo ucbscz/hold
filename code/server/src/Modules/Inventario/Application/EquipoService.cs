@@ -75,13 +75,7 @@ public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
 
         var previous = MapToDto(existing);
 
-        var entity = MapToEntity(dto);
-        entity.Id = id;
-        entity.CodigoImt = existing.CodigoImt;
-        entity.FechaIngresoEquipo = existing.FechaIngresoEquipo;
-        entity.EstadoEliminado = existing.EstadoEliminado;
-
-        entity.CodigoUcb = string.IsNullOrWhiteSpace(entity.CodigoUcb) ? null : entity.CodigoUcb.Trim().ToUpperInvariant();
+        var entity = MergeWithExisting(dto, existing);
         if (entity.CodigoUcb != null && await Repository.ExistsByCodigoUcb(entity.CodigoUcb, id))
             return Result<EquipoDto>.Error(_labels.DuplicateOrganizationCode);
 
@@ -103,6 +97,19 @@ public class EquipoService : Service<EquipoEntity, EquipoRepository, EquipoDto>
         );
 
         return result;
+    }
+
+    private EquipoEntity MergeWithExisting(EquipoDto dto, EquipoEntity existing)
+    {
+        var entity = MapToEntity(dto);
+        entity.Id = existing.Id;
+        entity.CodigoImt = existing.CodigoImt;
+        entity.FechaIngresoEquipo = existing.FechaIngresoEquipo;
+        entity.EstadoEliminado = existing.EstadoEliminado;
+        entity.CodigoUcb = string.IsNullOrWhiteSpace(entity.CodigoUcb)
+            ? null
+            : entity.CodigoUcb.Trim().ToUpperInvariant();
+        return entity;
     }
 
     public override async Task<Result<object>> Delete(int id)

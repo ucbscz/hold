@@ -2,7 +2,11 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { Equipos } from '../model/equipo';
 import { environment } from '@environments/environment';
-import { getApiList } from '@shared/api';
+import {
+  getApiList,
+  obtenerTodasLasPaginas,
+  parametrosPagina,
+} from '@shared/api';
 import { map, Observable } from 'rxjs';
 import { EquipoHistorialInlineItem } from '../model/equipo-historial-inline-item';
 import { EquipoInlineItem } from '../model/equipo-inline-item';
@@ -36,28 +40,36 @@ export class EquipoService {
   }
 
   obtenerEquipos() {
-    return this.http.get<EquipoApiResponse>(this.apiUrl).pipe(
-      map((data) =>
-        data.Value.map((item) => ({
-          Id: item.Id,
-          NombreGrupoEquipo: item.NombreGrupoEquipo,
-          IdGrupoEquipo: item.IdGrupoEquipo,
-          CodigoImt: item.CodigoImt,
-          CodigoUcb: item.CodigoUcb,
-          NumeroSerial: item.NumeroSerial,
-          EstadoEquipo: item.EstadoEquipo,
-          Ubicacion: item.Ubicacion,
-          IdAmbiente: item.IdAmbiente,
-          IdProcedencia: item.IdProcedencia,
-          NombreGavetero: item.NombreGavetero,
-          IdGavetero: item.IdGavetero,
-          CostoReferencia: item.CostoReferencia,
-          Descripcion: item.Descripcion,
-          Procedencia: item.Procedencia,
-          FechaIngresoEquipo: item.FechaIngresoEquipo,
-        })),
-      ),
+    return obtenerTodasLasPaginas((pagina) =>
+      this.obtenerPaginaEquipos(pagina),
     );
+  }
+
+  private obtenerPaginaEquipos(pagina: number) {
+    return this.http
+      .get<EquipoApiResponse>(this.apiUrl, { params: parametrosPagina(pagina) })
+      .pipe(
+        map((data) =>
+          data.Value.map((item) => ({
+            Id: item.Id,
+            NombreGrupoEquipo: item.NombreGrupoEquipo,
+            IdGrupoEquipo: item.IdGrupoEquipo,
+            CodigoImt: item.CodigoImt,
+            CodigoUcb: item.CodigoUcb,
+            NumeroSerial: item.NumeroSerial,
+            EstadoEquipo: item.EstadoEquipo,
+            Ubicacion: item.Ubicacion,
+            IdAmbiente: item.IdAmbiente,
+            IdProcedencia: item.IdProcedencia,
+            NombreGavetero: item.NombreGavetero,
+            IdGavetero: item.IdGavetero,
+            CostoReferencia: item.CostoReferencia,
+            Descripcion: item.Descripcion,
+            Procedencia: item.Procedencia,
+            FechaIngresoEquipo: item.FechaIngresoEquipo,
+          })),
+        ),
+      );
   }
 
   editarEquipo(equipo: Equipos) {

@@ -19,52 +19,62 @@ public sealed class NotificacionPrestamoService
         string emitter
     )
     {
-        switch (estado)
-        {
-            case EstadoPrestamo.Aprobado:
-                var approvalDetail = string.IsNullOrWhiteSpace(observacion)
-                    ? "Solicitud aprobada."
-                    : observacion.Trim();
-                await _notifications.Create(
-                    carnet,
-                    TipoNotificacion.PrestamoAprobado,
-                    "Préstamo aprobado",
-                    string.IsNullOrWhiteSpace(observacion)
-                        ? "Tu solicitud de préstamo fue aprobada. Ya puedes revisar los detalles de recogida."
-                        : $"Tu solicitud de préstamo fue aprobada. Detalle: {approvalDetail}",
-                    NotificacionService.BuildEmitterDetail(emitter, approvalDetail, prestamoId)
-                );
-                break;
-            case EstadoPrestamo.Rechazado:
-                await _notifications.Create(
-                    carnet,
-                    TipoNotificacion.PrestamoRechazado,
-                    "Préstamo rechazado",
-                    string.IsNullOrWhiteSpace(observacion)
-                        ? "Tu solicitud de préstamo fue rechazada."
-                        : $"Tu solicitud de préstamo fue rechazada: {observacion}",
-                    NotificacionService.BuildEmitterDetail(
-                        emitter,
-                        observacion ?? "Solicitud rechazada.",
-                        prestamoId
-                    )
-                );
-                break;
-            case EstadoPrestamo.Finalizado when retorno?.HasDamagedEquipment == true:
-                await _notifications.Create(
-                    carnet,
-                    TipoNotificacion.EquipoObservacion,
-                    "Equipo marcado como inoperativo",
-                    retorno.UserMessage,
-                    NotificacionService.BuildEmitterDetail(
-                        emitter,
-                        observacion ?? "Equipo devuelto con observaciones.",
-                        prestamoId
-                    )
-                );
-                break;
-        }
+        var message = StatusMessage(estado, observacion, retorno);
+
+        if (message == null)
+            return;
+
+        await _notifications.Create(
+            carnet,
+            message.Tipo,
+            message.Titulo,
+            message.Contenido,
+            NotificacionService.BuildEmitterDetail(emitter, message.Detalle, prestamoId)
+        );
     }
+
+    private static StatusMessageData? StatusMessage(
+        EstadoPrestamo estado,
+        string? observacion,
+        RetornoEquipos? retorno
+    )
+    {
+        var sinObservacion = string.IsNullOrWhiteSpace(observacion);
+
+        return estado switch
+        {
+            EstadoPrestamo.Aprobado => new StatusMessageData(
+                TipoNotificacion.PrestamoAprobado,
+                "Préstamo aprobado",
+                sinObservacion
+                    ? "Tu solicitud de préstamo fue aprobada. Ya puedes revisar los detalles de recogida."
+                    : $"Tu solicitud de préstamo fue aprobada. Detalle: {observacion!.Trim()}",
+                sinObservacion ? "Solicitud aprobada." : observacion!.Trim()
+            ),
+            EstadoPrestamo.Rechazado => new StatusMessageData(
+                TipoNotificacion.PrestamoRechazado,
+                "Préstamo rechazado",
+                sinObservacion
+                    ? "Tu solicitud de préstamo fue rechazada."
+                    : $"Tu solicitud de préstamo fue rechazada: {observacion}",
+                observacion ?? "Solicitud rechazada."
+            ),
+            EstadoPrestamo.Finalizado when retorno?.HasDamagedEquipment == true => new StatusMessageData(
+                TipoNotificacion.EquipoObservacion,
+                "Equipo marcado como inoperativo",
+                retorno.UserMessage,
+                observacion ?? "Equipo devuelto con observaciones."
+            ),
+            _ => null,
+        };
+    }
+
+    private sealed record StatusMessageData(
+        TipoNotificacion Tipo,
+        string Titulo,
+        string? Contenido,
+        string Detalle
+    );
 
     public Task NotifyAutomaticUnblock(string carnet) =>
         _notifications.Create(

@@ -41,7 +41,7 @@ public class MantenimientoRepository : Repository<MantenimientoEntity, Mantenimi
                 on equipo.IdGrupoEquipo equals grupo.Id
                 into grupoJoin
             from grupo in grupoJoin.DefaultIfEmpty()
-            select new
+            select new MantenimientoRow
             {
                 Mantenimiento = mantenimiento,
                 NombreEmpresa = empresa != null ? empresa.Nombre : null,
@@ -52,24 +52,33 @@ public class MantenimientoRepository : Repository<MantenimientoEntity, Mantenimi
             }
         ).ToListAsync();
 
-        var dtos = rows
-            .Select(row => new MantenimientoDto
-            {
-                Id = row.Mantenimiento.Id,
-                IdEmpresa = row.Mantenimiento.IdEmpresa,
-                NombreEmpresaMantenimiento = row.NombreEmpresa,
-                FechaMantenimiento = row.Mantenimiento.FechaMantenimiento,
-                FechaFinalMantenimiento = row.Mantenimiento.FechaFinalMantenimiento,
-                Costo = row.Mantenimiento.Costo,
-                Descripcion = row.Mantenimiento.Descripcion,
-                TipoMantenimiento = row.TipoMantenimiento,
-                CodigoImtEquipo = row.CodigoImt?.ToString(CultureInfo.InvariantCulture),
-                NombreGrupoEquipo = row.NombreGrupo,
-                DescripcionEquipo = row.DescripcionEquipo,
-            })
-            .ToList();
+        return Result<List<MantenimientoDto>>.Success(rows.Select(ToDto).ToList());
+    }
 
-        return Result<List<MantenimientoDto>>.Success(dtos);
+    private static MantenimientoDto ToDto(MantenimientoRow row) =>
+        new()
+        {
+            Id = row.Mantenimiento.Id,
+            IdEmpresa = row.Mantenimiento.IdEmpresa,
+            NombreEmpresaMantenimiento = row.NombreEmpresa,
+            FechaMantenimiento = row.Mantenimiento.FechaMantenimiento,
+            FechaFinalMantenimiento = row.Mantenimiento.FechaFinalMantenimiento,
+            Costo = row.Mantenimiento.Costo,
+            Descripcion = row.Mantenimiento.Descripcion,
+            TipoMantenimiento = row.TipoMantenimiento,
+            CodigoImtEquipo = row.CodigoImt?.ToString(CultureInfo.InvariantCulture),
+            NombreGrupoEquipo = row.NombreGrupo,
+            DescripcionEquipo = row.DescripcionEquipo,
+        };
+
+    private sealed class MantenimientoRow
+    {
+        public required MantenimientoEntity Mantenimiento { get; init; }
+        public string? NombreEmpresa { get; init; }
+        public string? TipoMantenimiento { get; init; }
+        public int? CodigoImt { get; init; }
+        public string? NombreGrupo { get; init; }
+        public string? DescripcionEquipo { get; init; }
     }
 
     public override async Task<Result<MantenimientoDto>> Get(int id)
@@ -186,18 +195,7 @@ public class MantenimientoRepository : Repository<MantenimientoEntity, Mantenimi
         CancellationToken cancellationToken = default
     )
     {
-        var activeEquipmentIds = await (
-            from detail in DbContext.DetallesMantenimientos.IgnoreQueryFilters()
-            join maintenance in DbContext.Mantenimientos
-                on detail.IdMantenimiento equals maintenance.Id
-            where
-                !detail.EstadoEliminado
-                && !maintenance.EstadoEliminado
-                && maintenance.FechaMantenimiento <= now
-                && maintenance.FechaFinalMantenimiento > now
-            select detail.IdEquipo
-        ).Distinct().ToListAsync(cancellationToken);
-
+        var activeEquipmentIds = await ActiveEquipmentIds(now, cancellationToken);
         var changed = await DbContext
             .Equipos.Where(equipment =>
                 !equipment.EstadoEliminado
@@ -208,23 +206,12 @@ public class MantenimientoRepository : Repository<MantenimientoEntity, Mantenimi
                         && equipment.EstadoEquipo == EstadoEquipo.EnMantenimiento)
                 )
             )
-            .Select(equipment => new
-            {
-                equipment.Id,
-                equipment.CodigoImt,
-                Active = activeEquipmentIds.Contains(equipment.Id),
-            })
             .ToListAsync(cancellationToken);
 
         if (changed.Count == 0)
             return [];
 
-        var changedIds = changed.Select(item => item.Id).ToArray();
-        var entities = await DbContext
-            .Equipos.Where(equipment => changedIds.Contains(equipment.Id))
-            .ToListAsync(cancellationToken);
-
-        foreach (var equipment in entities)
+        foreach (var equipment in changed)
             equipment.EstadoEquipo = activeEquipmentIds.Contains(equipment.Id)
                 ? EstadoEquipo.EnMantenimiento
                 : EstadoEquipo.Operativo;
@@ -232,11 +219,20 @@ public class MantenimientoRepository : Repository<MantenimientoEntity, Mantenimi
         await DbContext.SaveChangesAsync(cancellationToken);
 
         return changed
-            .Select(item => (
-                item.Id,
-                item.CodigoImt,
-                item.Active ? EstadoEquipo.EnMantenimiento : EstadoEquipo.Operativo
-            ))
+            .Select(equipment => (equipment.Id, equipment.CodigoImt, equipment.EstadoEquipo))
             .ToList();
     }
+
+    private Task<List<int>> ActiveEquipmentIds(DateTime now, CancellationToken cancellationToken) =>
+        (
+            from detail in DbContext.DetallesMantenimientos.IgnoreQueryFilters()
+            join maintenance in DbContext.Mantenimientos
+                on detail.IdMantenimiento equals maintenance.Id
+            where
+                !detail.EstadoEliminado
+                && !maintenance.EstadoEliminado
+                && maintenance.FechaMantenimiento <= now
+                && maintenance.FechaFinalMantenimiento > now
+            select detail.IdEquipo
+        ).Distinct().ToListAsync(cancellationToken);
 }

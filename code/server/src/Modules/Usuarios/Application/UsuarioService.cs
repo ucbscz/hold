@@ -272,11 +272,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (existing == null)
             return Result<UsuarioDto>.NotFound();
 
-        var previous = _mapper.ToDto(existing);
-        previous.CarreraNombre = await _queries.GetCarreraName(
-            existing.IdCarrera,
-            cancellationToken
-        );
+        var previous = await ToDtoWithCarrera(existing, cancellationToken);
 
         if (!isAdmin)
             PreserveTraceableFields(dto, existing);
@@ -299,6 +295,21 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         )
             return Result<UsuarioDto>.Error("Teléfono ya registrado");
 
+        await ApplyChanges(dto, existing, isAdmin, cancellationToken);
+        await Repository.UpdateEntity(existing, cancellationToken: cancellationToken);
+
+        return Result<UsuarioDto>.Success(
+            await RecordUpdate(carnet, previous, existing, cancellationToken)
+        );
+    }
+
+    private async Task ApplyChanges(
+        UsuarioDto dto,
+        UsuarioEntity existing,
+        bool isAdmin,
+        CancellationToken cancellationToken
+    )
+    {
         if (isAdmin)
             await ResolveCarrera(dto, cancellationToken);
         ProtectProfileDocuments(dto, existing);
@@ -309,14 +320,16 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
 
         if (!string.IsNullOrWhiteSpace(dto.Contrasena))
             existing.Contrasena = BCryptLib.HashPassword(dto.Contrasena, workFactor: 12);
+    }
 
-        await Repository.UpdateEntity(existing, cancellationToken: cancellationToken);
-
-        var resultDto = _mapper.ToDto(existing);
-        resultDto.CarreraNombre = await _queries.GetCarreraName(
-            existing.IdCarrera,
-            cancellationToken
-        );
+    private async Task<UsuarioDto> RecordUpdate(
+        string carnet,
+        UsuarioDto previous,
+        UsuarioEntity existing,
+        CancellationToken cancellationToken
+    )
+    {
+        var resultDto = await ToDtoWithCarrera(existing, cancellationToken);
         var auditDetail = AuditChangeDetail.Build(previous, resultDto);
         ProfileDocuments.Clear(resultDto);
 
@@ -328,7 +341,17 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
             auditDetail
         );
 
-        return Result<UsuarioDto>.Success(resultDto);
+        return resultDto;
+    }
+
+    private async Task<UsuarioDto> ToDtoWithCarrera(
+        UsuarioEntity user,
+        CancellationToken cancellationToken
+    )
+    {
+        var dto = _mapper.ToDto(user);
+        dto.CarreraNombre = await _queries.GetCarreraName(user.IdCarrera, cancellationToken);
+        return dto;
     }
 
     public async Task<Result<UsuarioDto>> UpdateProfile(
@@ -375,8 +398,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (user == null)
             return Result<UsuarioDto>.NotFound();
 
-        var dto = _mapper.ToDto(user);
-        dto.CarreraNombre = await _queries.GetCarreraName(user.IdCarrera, cancellationToken);
+        var dto = await ToDtoWithCarrera(user, cancellationToken);
         ProfileDocuments.Clear(dto);
 
         _ = await _cacheRepository.Set(cacheKey, dto, UsuarioCacheTtl, cancellationToken);
@@ -394,11 +416,7 @@ public class UsuarioService : Service<UsuarioEntity, UsuarioRepository, UsuarioD
         if (user == null)
             return Result<UsuarioDto>.NotFound();
 
-        var dto = _mapper.ToDto(user);
-        dto.CarreraNombre = await _queries.GetCarreraName(
-            user.IdCarrera,
-            cancellationToken
-        );
+        var dto = await ToDtoWithCarrera(user, cancellationToken);
         SetProfileDocuments(dto, user);
         return Result<UsuarioDto>.Success(dto);
     }

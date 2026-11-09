@@ -9,6 +9,7 @@ namespace UCB_Hold.Server.Modules.Prestamos.Application;
 public class PrestamoValidator : AbstractValidator<PrestamoDto>
 {
     private readonly HorarioReserva _horario;
+
     public PrestamoValidator(
         ApplicationDbContext dbContext,
         HorarioReserva horario,
@@ -16,12 +17,24 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
     )
     {
         _horario = horario;
+        AddDestinoRules();
+        AddUsuarioRules(dbContext);
+        AddEquipoRules();
+        AddFechaRules();
+        AddHorarioRules(configRepository);
+    }
+
+    private void AddDestinoRules()
+    {
         RuleFor(p => p.DestinoPrestamo).Must(DestinoUso.EsValido)
             .WithMessage("Selecciona uso interno o externo");
         RuleFor(p => p).Must(p => p.DestinoPrestamo == DestinoUso.Casa
             || !p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue
             || _horario.MismoDia(p.FechaPrestamoEsperada.Value, p.FechaDevolucionEsperada.Value))
             .WithMessage("El uso interno en clases o laboratorio requiere devolución el mismo día");
+    }
+
+    private void AddUsuarioRules(ApplicationDbContext dbContext) =>
         RuleFor(p => p.CarnetUsuario)
             .Cascade(CascadeMode.Stop)
             .NotEmpty()
@@ -35,6 +48,8 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
             )
             .WithMessage("Usuario no existe o está inactivo");
 
+    private void AddEquipoRules()
+    {
         RuleFor(p => p.GrupoEquipoId)
             .NotEmpty()
             .WithMessage("Debe seleccionar al menos un equipo")
@@ -48,7 +63,10 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
         RuleFor(p => p.Contrato)
             .MaximumLength(ContractHtmlProcessor.MaxHtmlLength)
             .WithMessage("El contrato supera el tamaño máximo permitido");
+    }
 
+    private void AddFechaRules()
+    {
         RuleFor(p => p.FechaPrestamoEsperada)
             .NotNull()
             .WithMessage("Fecha préstamo esperada requerida")
@@ -68,26 +86,27 @@ public class PrestamoValidator : AbstractValidator<PrestamoDto>
                 || p.FechaDevolucionEsperada.Value > p.FechaPrestamoEsperada.Value
             )
             .WithMessage("La fecha y hora de devolución debe ser posterior al inicio del préstamo");
+    }
 
+    private void AddHorarioRules(IConfiguracionProvider configRepository)
+    {
         RuleFor(p => p)
             .MustAsync(async (p, cancellationToken) =>
             {
-                if (!p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue) return true;
+                if (!p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue)
+                    return true;
 
                 var config = await configRepository.GetConfiguracion(cancellationToken);
                 var duracion = p.FechaDevolucionEsperada.Value - p.FechaPrestamoEsperada.Value;
-
-                if (duracion < TimeSpan.FromMinutes(config.TiempoMinimoReservaMinutos))
-                    return false;
-
-                return true;
+                return duracion >= TimeSpan.FromMinutes(config.TiempoMinimoReservaMinutos);
             })
             .WithMessage(p => "El préstamo no cumple la duración mínima requerida");
 
         RuleFor(p => p)
             .MustAsync(async (p, cancellationToken) =>
             {
-                if (!p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue) return true;
+                if (!p.FechaPrestamoEsperada.HasValue || !p.FechaDevolucionEsperada.HasValue)
+                    return true;
 
                 var config = await configRepository.GetConfiguracion(cancellationToken);
                 return _horario.EsValido(

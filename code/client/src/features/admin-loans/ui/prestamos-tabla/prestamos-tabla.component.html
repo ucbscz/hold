@@ -343,86 +343,13 @@
   <app-mostrarerror [error]="error" [mensaje]="mensajeerror"></app-mostrarerror>
 }
 @if (decisionPrestamo) {
-  <div class="devuelto-overlay">
-    <section
-      class="devuelto-modal"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="decision-title"
-    >
-      <button
-        class="modal-close-btn"
-        aria-label="Cerrar"
-        [disabled]="procesandoDecision"
-        (click)="cerrarDecision()"
-      >
-        <i class="fas fa-times"></i>
-      </button>
-      <h2 id="decision-title">
-        {{
-          decisionPrestamo === "aprobado"
-            ? "Aprobar préstamo"
-            : "Rechazar préstamo"
-        }}
-      </h2>
-      <p class="decision-description">
-        {{
-          decisionPrestamo === "aprobado"
-            ? "Puedes añadir una anotación para dejar constancia de la decisión."
-            : "Indica el motivo para informar al usuario y dejarlo registrado."
-        }}
-      </p>
-      <label class="decision-label" for="detalle-decision">
-        {{
-          decisionPrestamo === "aprobado"
-            ? "Anotación (opcional)"
-            : "Motivo del rechazo"
-        }}
-      </label>
-      <textarea
-        id="detalle-decision"
-        class="observaciones-input"
-        maxlength="1024"
-        rows="5"
-        [placeholder]="
-          decisionPrestamo === 'aprobado'
-            ? 'Ejemplo: autorizado para la práctica de laboratorio'
-            : 'Explica brevemente por qué se rechaza la solicitud'
-        "
-        [(ngModel)]="detalleDecision"
-      ></textarea>
-      <span class="decision-counter"> {{ detalleDecision.length }}/1024 </span>
-      <div class="devuelto-actions">
-        <button
-          class="btn btn-secondary"
-          [disabled]="procesandoDecision"
-          (click)="cerrarDecision()"
-        >
-          Cancelar
-        </button>
-        <button
-          class="btn btn-primary"
-          [disabled]="
-            procesandoDecision ||
-            (decisionPrestamo === 'rechazado' && !detalleDecision.trim())
-          "
-          (click)="
-            decisionPrestamo === 'aprobado'
-              ? aprobarprestamo(prestamoKeySeleccionado)
-              : rechazarprestamo(prestamoKeySeleccionado)
-          "
-        >
-          {{
-            procesandoDecision
-              ? "Guardando..."
-              : decisionPrestamo === "aprobado"
-                ? "Aprobar préstamo"
-                : "Rechazar préstamo"
-          }}
-        </button>
-      </div>
-    </section>
-  </div>
+  <app-decision-prestamo
+    [decision]="decisionPrestamo"
+    [prestamoId]="prestamos.get(prestamoKeySeleccionado)!.datosgrupo.Id"
+    (cerrar)="cerrarDecision()"
+    (decidido)="alDecidir($event)"
+    (fallo)="mostrarError($event)"
+  />
 }
 @if (editandoObservacion !== null) {
   <div class="devuelto-overlay">
@@ -471,66 +398,9 @@
   ></app-aviso>
 }
 @if (avisodevuelto()) {
-  <div class="devuelto-overlay">
-    <div class="devuelto-modal">
-      <button
-        type="button"
-        class="modal-close-btn"
-        (click)="avisodevuelto.set(false)"
-        aria-label="Cerrar"
-      >
-        <img src="assets/x.png" alt="" />
-      </button>
-      <h3 class="devuelto-title">Marcar como devuelto</h3>
-      <p class="devuelto-text">
-        Indique el estado con el que se devuelve cada equipo y, opcionalmente,
-        una observación.
-      </p>
-      @if (equiposDevolucion.length > 0) {
-        <div class="devuelto-equipos">
-          @for (eq of equiposDevolucion; track eq.CodigoImt) {
-            <div class="devuelto-equipo-row">
-              <div class="devuelto-equipo-info">
-                <span class="devuelto-equipo-nombre">{{
-                  eq.NombreGrupoEquipo
-                }}</span>
-                <span class="devuelto-equipo-codigo"
-                  >IMT {{ eq.CodigoImt }}</span
-                >
-              </div>
-              <app-custom-select
-                class="devuelto-equipo-select"
-                [opciones]="estadoEquipoOpciones"
-                [(ngModel)]="estadosRetorno[eq.CodigoImt!]"
-                placeholder="Estado"
-              ></app-custom-select>
-            </div>
-          }
-        </div>
-      }
-      <textarea
-        [(ngModel)]="observacionDevolucion"
-        class="observaciones-input"
-        placeholder="Observaciones (opcional)..."
-      ></textarea>
-      <label class="devuelto-bloqueo">
-        <input type="checkbox" [(ngModel)]="bloquearAlDevolver" />
-        <span>Bloquear a este usuario para nuevas reservas</span>
-      </label>
-      <div class="devuelto-actions">
-        <button
-          class="devuelto-btn devuelto-btn-cancel"
-          (click)="avisodevuelto.set(false)"
-        >
-          Cancelar
-        </button>
-        <button
-          class="devuelto-btn devuelto-btn-confirm"
-          (click)="devolverprestamo(prestamoKeySeleccionado)"
-        >
-          Aceptar
-        </button>
-      </div>
-    </div>
-  </div>
+  <app-devolucion-prestamo
+    [equipos]="equiposDevolucion"
+    (cancelar)="avisodevuelto.set(false)"
+    (devolver)="devolverprestamo(prestamoKeySeleccionado, $event)"
+  />
 }

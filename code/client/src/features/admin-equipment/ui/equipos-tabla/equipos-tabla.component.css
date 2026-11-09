@@ -93,21 +93,12 @@
 }
 
 .table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
   margin-bottom: 0.5rem;
 }
 
 .table-responsive {
-  overflow-x: auto;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
   scrollbar-width: thin;
-  background-color: var(--surface);
-  border-radius: 12px;
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--border);
 }
 
 .table-responsive::-webkit-scrollbar {
@@ -118,7 +109,6 @@
 .actions-column {
   width: 130px;
   min-width: 130px;
-  text-align: right;
   white-space: nowrap;
 }
 
@@ -141,14 +131,6 @@
 
 .btn-history.active {
   color: var(--interactive);
-  background-color: var(--interactive-subtle);
-}
-
-.btn-edit {
-  color: var(--ink);
-}
-
-.btn-edit:hover {
   background-color: var(--interactive-subtle);
 }
 

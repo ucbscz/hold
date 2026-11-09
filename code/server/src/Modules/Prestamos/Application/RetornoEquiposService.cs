@@ -55,8 +55,19 @@ public sealed class RetornoEquiposService
         var affectedEquipment = appliedReturns
             .Where(equipment => equipment.EstadoEquipo != EstadoEquipoNombre.Operativo)
             .ToList();
+        var auditDetail = BuildAuditDetail(observacion, previousState, appliedReturns);
 
-        var auditDetail = JsonSerializer.Serialize(
+        return affectedEquipment.Count == 0
+            ? new RetornoEquipos(auditDetail, null, false)
+            : new RetornoEquipos(auditDetail, BuildUserMessage(affectedEquipment), true);
+    }
+
+    private static string BuildAuditDetail(
+        string? observacion,
+        EstadoPrestamo previousState,
+        List<(int CodigoImt, string? NombreGrupoEquipo, string EstadoEquipo)> appliedReturns
+    ) =>
+        JsonSerializer.Serialize(
             new
             {
                 observacion,
@@ -79,9 +90,10 @@ public sealed class RetornoEquiposService
             }
         );
 
-        if (affectedEquipment.Count == 0)
-            return new RetornoEquipos(auditDetail, null, false);
-
+    private string BuildUserMessage(
+        List<(int CodigoImt, string? NombreGrupoEquipo, string EstadoEquipo)> affectedEquipment
+    )
+    {
         var inoperableEquipment = affectedEquipment
             .Where(equipment => equipment.EstadoEquipo == EstadoEquipoNombre.Inoperativo)
             .ToList();
@@ -98,10 +110,9 @@ public sealed class RetornoEquiposService
         var stateText = inoperableEquipment.Count > 0
             ? EstadoEquipoNombre.Inoperativo
             : "con observación";
-        var message = selectedEquipment.Count == 1
+
+        return selectedEquipment.Count == 1
             ? $"Se ha marcado {equipmentNames} como {stateText} en tu préstamo."
             : $"Se han marcado estos equipos como {stateText} en tu préstamo: {equipmentNames}.";
-
-        return new RetornoEquipos(auditDetail, message, true);
     }
 }

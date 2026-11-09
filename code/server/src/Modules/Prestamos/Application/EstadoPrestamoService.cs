@@ -73,6 +73,22 @@ public class EstadoPrestamoService
             overdue.Select(GetLoanId).ToList(),
             cancellationToken
         );
+        var newlyBlockedCarnets = await BlockOverdueUsers(overdue, cancellationToken);
+
+        await _audit.LogMany(OverdueAuditEntries(overdue, newlyBlockedCarnets));
+        await _notifications.CreateMany(overdue.Select(OverdueNotification).ToList());
+        await _notifications.CreateForAdmins(
+            TipoNotificacion.AdminPrestamoAtrasado,
+            "Préstamo atrasado",
+            $"Hay {overdue.Count} préstamo(s) atrasado(s) sin devolver."
+        );
+    }
+
+    private async Task<List<string>> BlockOverdueUsers(
+        List<PrestamoDto> overdue,
+        CancellationToken cancellationToken
+    )
+    {
         var affectedCarnets = overdue.Select(loan => loan.CarnetUsuario ?? string.Empty)
             .Where(carnet => !string.IsNullOrWhiteSpace(carnet))
             .Distinct()
@@ -89,50 +105,46 @@ public class EstadoPrestamoService
             cancellationToken
         );
 
-        var loanEntries = overdue.Select(loan => new AuditEntry(
-            AuditAccion.AtrasadoAutomatico,
-            nameof(PrestamoEntity),
-            GetLoanIdText(loan),
-            BuildLoanDetail(
-                loan,
-                "Bloqueo automático por préstamo vencido.",
-                loan.FechaDevolucionEsperada
-            )
-        ));
-        var userEntries = newlyBlockedCarnets
-            .Select(carnet => new AuditEntry(
+        return newlyBlockedCarnets;
+    }
+
+    private static List<AuditEntry> OverdueAuditEntries(
+        List<PrestamoDto> overdue,
+        List<string> newlyBlockedCarnets
+    ) =>
+        overdue
+            .Select(loan => new AuditEntry(
+                AuditAccion.AtrasadoAutomatico,
+                nameof(PrestamoEntity),
+                GetLoanIdText(loan),
+                BuildLoanDetail(
+                    loan,
+                    "Bloqueo automático por préstamo vencido.",
+                    loan.FechaDevolucionEsperada
+                )
+            ))
+            .Concat(newlyBlockedCarnets.Select(carnet => new AuditEntry(
                 AuditAccion.Bloquear,
                 nameof(UsuarioEntity),
                 carnet,
                 AutomaticBlockReasons.OverdueLoan
-            ));
+            )))
+            .ToList();
 
-        await _audit.LogMany(loanEntries.Concat(userEntries).ToList());
-
-        await _notifications.CreateMany(
-            overdue
-                .Select(loan => new NotificacionDto
-                {
-                    CarnetUsuario = loan.CarnetUsuario,
-                    Tipo = nameof(TipoNotificacion.PrestamoAtrasado),
-                    Titulo = "Cuenta bloqueada por atraso",
-                    Contenido =
-                        "Tu préstamo está atrasado. Tu cuenta queda bloqueada para nuevas reservas hasta que devuelvas los equipos. Si necesitas ayuda, contacta con un administrador.",
-                    Detalle = BuildLoanDetail(
-                        loan,
-                        "El préstamo no fue devuelto dentro del horario acordado.",
-                        loan.FechaDevolucionEsperada
-                    ),
-                })
-                .ToList()
-        );
-
-        await _notifications.CreateForAdmins(
-            TipoNotificacion.AdminPrestamoAtrasado,
-            "Préstamo atrasado",
-            $"Hay {overdue.Count} préstamo(s) atrasado(s) sin devolver."
-        );
-    }
+    private static NotificacionDto OverdueNotification(PrestamoDto loan) =>
+        new()
+        {
+            CarnetUsuario = loan.CarnetUsuario,
+            Tipo = nameof(TipoNotificacion.PrestamoAtrasado),
+            Titulo = "Cuenta bloqueada por atraso",
+            Contenido =
+                "Tu préstamo está atrasado. Tu cuenta queda bloqueada para nuevas reservas hasta que devuelvas los equipos. Si necesitas ayuda, contacta con un administrador.",
+            Detalle = BuildLoanDetail(
+                loan,
+                "El préstamo no fue devuelto dentro del horario acordado.",
+                loan.FechaDevolucionEsperada
+            ),
+        };
 
     private async Task ProcessExpired(DateTime now, CancellationToken cancellationToken)
     {
@@ -160,24 +172,23 @@ public class EstadoPrestamoService
                 .ToList()
         );
 
-        await _notifications.CreateMany(
-            expired
-                .Select(loan => new NotificacionDto
-                {
-                    CarnetUsuario = loan.CarnetUsuario,
-                    Tipo = nameof(TipoNotificacion.PrestamoRechazado),
-                    Titulo = "Préstamo rechazado",
-                    Contenido =
-                        "Tu solicitud fue rechazada automáticamente por exceder la fecha de inicio.",
-                    Detalle = BuildLoanDetail(
-                        loan,
-                        "La solicitud no fue recogida antes de la fecha de inicio acordada.",
-                        loan.FechaPrestamoEsperada
-                    ),
-                })
-                .ToList()
-        );
+        await _notifications.CreateMany(expired.Select(ExpiredNotification).ToList());
     }
+
+    private static NotificacionDto ExpiredNotification(PrestamoDto loan) =>
+        new()
+        {
+            CarnetUsuario = loan.CarnetUsuario,
+            Tipo = nameof(TipoNotificacion.PrestamoRechazado),
+            Titulo = "Préstamo rechazado",
+            Contenido =
+                "Tu solicitud fue rechazada automáticamente por exceder la fecha de inicio.",
+            Detalle = BuildLoanDetail(
+                loan,
+                "La solicitud no fue recogida antes de la fecha de inicio acordada.",
+                loan.FechaPrestamoEsperada
+            ),
+        };
 
     private async Task ProcessReminders(
         DateTime now,

@@ -69,8 +69,6 @@ public class AuditLogRepository
         await _db.SaveChangesAsync();
     }
 
-    [SuppressMessage("Globalization", "CA1304", Justification = SqlTranslation.Justification)]
-    [SuppressMessage("Globalization", "CA1311", Justification = SqlTranslation.Justification)]
     public async Task<List<AuditLogDto>> GetFiltered(
         string? entidad,
         string? actor,
@@ -85,42 +83,11 @@ public class AuditLogRepository
         if (!string.IsNullOrWhiteSpace(entidad))
             query = query.Where(a => a.Entidad == entidad);
         if (!string.IsNullOrWhiteSpace(actor))
-        {
-            var normalizedActor = actor.Trim().ToLowerInvariant();
-            query = query.Where(a =>
-                a.AdminCarnet.ToLower().Contains(normalizedActor)
-                || a.AdminNombre.ToLower().Contains(normalizedActor)
-            );
-        }
+            query = FilterByActor(query, actor);
         if (!string.IsNullOrWhiteSpace(accion))
             query = query.Where(a => a.Accion == accion);
         if (!string.IsNullOrWhiteSpace(buscar))
-        {
-            var normalizedSearch = buscar.Trim().ToLowerInvariant();
-            var hasSearchDate = DateTime.TryParseExact(
-                buscar.Trim(),
-                ["d/M/yyyy", "dd/MM/yyyy", "d-M-yyyy", "dd-MM-yyyy", "yyyy-MM-dd"],
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.AssumeLocal,
-                out var searchDate
-            );
-            var searchDateStart = hasSearchDate
-                ? searchDate.Date.ToUniversalTime()
-                : DateTime.MinValue;
-            var searchDateEnd = hasSearchDate
-                ? searchDate.Date.AddDays(1).ToUniversalTime()
-                : DateTime.MinValue;
-
-            query = query.Where(a =>
-                a.AdminCarnet.ToLower().Contains(normalizedSearch)
-                || a.AdminNombre.ToLower().Contains(normalizedSearch)
-                || a.Accion.ToLower().Contains(normalizedSearch)
-                || a.Entidad.ToLower().Contains(normalizedSearch)
-                || (a.EntidadId != null && a.EntidadId.ToLower().Contains(normalizedSearch))
-                || (a.Detalle != null && a.Detalle.ToLower().Contains(normalizedSearch))
-                || (hasSearchDate && a.Timestamp >= searchDateStart && a.Timestamp < searchDateEnd)
-            );
-        }
+            query = FilterBySearch(query, buscar);
         if (desde.HasValue)
             query = query.Where(a => a.Timestamp >= desde.Value.ToUniversalTime());
         if (hasta.HasValue)
@@ -144,6 +111,43 @@ public class AuditLogRepository
 
         await PopulateEntityNames(logs);
         return logs;
+    }
+
+    [SuppressMessage("Globalization", "CA1304", Justification = SqlTranslation.Justification)]
+    [SuppressMessage("Globalization", "CA1311", Justification = SqlTranslation.Justification)]
+    private static IQueryable<AuditLogEntity> FilterByActor(IQueryable<AuditLogEntity> query, string actor)
+    {
+        var normalizedActor = actor.Trim().ToLowerInvariant();
+        return query.Where(a =>
+            a.AdminCarnet.ToLower().Contains(normalizedActor)
+            || a.AdminNombre.ToLower().Contains(normalizedActor)
+        );
+    }
+
+    [SuppressMessage("Globalization", "CA1304", Justification = SqlTranslation.Justification)]
+    [SuppressMessage("Globalization", "CA1311", Justification = SqlTranslation.Justification)]
+    private static IQueryable<AuditLogEntity> FilterBySearch(IQueryable<AuditLogEntity> query, string buscar)
+    {
+        var normalizedSearch = buscar.Trim().ToLowerInvariant();
+        var hasSearchDate = DateTime.TryParseExact(
+            buscar.Trim(),
+            ["d/M/yyyy", "dd/MM/yyyy", "d-M-yyyy", "dd-MM-yyyy", "yyyy-MM-dd"],
+            CultureInfo.InvariantCulture,
+            DateTimeStyles.AssumeLocal,
+            out var searchDate
+        );
+        var searchDateStart = hasSearchDate ? searchDate.Date.ToUniversalTime() : DateTime.MinValue;
+        var searchDateEnd = hasSearchDate ? searchDate.Date.AddDays(1).ToUniversalTime() : DateTime.MinValue;
+
+        return query.Where(a =>
+            a.AdminCarnet.ToLower().Contains(normalizedSearch)
+            || a.AdminNombre.ToLower().Contains(normalizedSearch)
+            || a.Accion.ToLower().Contains(normalizedSearch)
+            || a.Entidad.ToLower().Contains(normalizedSearch)
+            || (a.EntidadId != null && a.EntidadId.ToLower().Contains(normalizedSearch))
+            || (a.Detalle != null && a.Detalle.ToLower().Contains(normalizedSearch))
+            || (hasSearchDate && a.Timestamp >= searchDateStart && a.Timestamp < searchDateEnd)
+        );
     }
 
     private async Task PopulateEntityNames(List<AuditLogDto> logs)

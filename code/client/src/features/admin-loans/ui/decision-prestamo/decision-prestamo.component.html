@@ -1,0 +1,67 @@
+<div class="devuelto-overlay">
+  <section
+    class="devuelto-modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="decision-title"
+  >
+    <button
+      class="modal-close-btn"
+      aria-label="Cerrar"
+      [disabled]="procesando"
+      (click)="salir()"
+    >
+      <i class="fas fa-times"></i>
+    </button>
+    <h2 id="decision-title">
+      {{ decision === "aprobado" ? "Aprobar préstamo" : "Rechazar préstamo" }}
+    </h2>
+    <p class="decision-description">
+      {{
+        decision === "aprobado"
+          ? "Puedes añadir una anotación para dejar constancia de la decisión."
+          : "Indica el motivo para informar al usuario y dejarlo registrado."
+      }}
+    </p>
+    <label class="decision-label" for="detalle-decision">
+      {{
+        decision === "aprobado" ? "Anotación (opcional)" : "Motivo del rechazo"
+      }}
+    </label>
+    <textarea
+      id="detalle-decision"
+      class="observaciones-input"
+      maxlength="1024"
+      rows="5"
+      [placeholder]="
+        decision === 'aprobado'
+          ? 'Ejemplo: autorizado para la práctica de laboratorio'
+          : 'Explica brevemente por qué se rechaza la solicitud'
+      "
+      [(ngModel)]="detalle"
+    ></textarea>
+    <span class="decision-counter"> {{ detalle.length }}/1024 </span>
+    <div class="devuelto-actions">
+      <button
+        class="btn btn-secondary"
+        [disabled]="procesando"
+        (click)="salir()"
+      >
+        Cancelar
+      </button>
+      <button
+        class="btn btn-primary"
+        [disabled]="procesando || (decision === 'rechazado' && !detalle.trim())"
+        (click)="confirmar()"
+      >
+        {{
+          procesando
+            ? "Guardando..."
+            : decision === "aprobado"
+              ? "Aprobar préstamo"
+              : "Rechazar préstamo"
+        }}
+      </button>
+    </div>
+  </section>
+</div>

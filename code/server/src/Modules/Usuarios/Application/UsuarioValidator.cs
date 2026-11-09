@@ -17,6 +17,16 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
 
     public UsuarioValidator(ApplicationDbContext dbContext, InstitutionalEmailPolicy institutionalEmail)
     {
+        AddIdentityRules();
+        AddEmailRules(institutionalEmail);
+        AddPasswordRules();
+        AddContactRules();
+        AddImageRules();
+        AddCarreraRules(dbContext);
+    }
+
+    private void AddIdentityRules()
+    {
         RuleFor(usuario => usuario.Rol)
             .Must(rol => string.IsNullOrWhiteSpace(rol) || Roles.Contains(rol))
             .WithMessage("Rol de usuario no reconocido");
@@ -38,6 +48,10 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
         RuleFor(usuario => usuario.ApellidoMaterno)
             .MaximumLength(64)
             .WithMessage("Apellido materno no puede superar 64 caracteres");
+    }
+
+    private void AddEmailRules(InstitutionalEmailPolicy institutionalEmail)
+    {
         RuleFor(usuario => usuario.Email)
             .NotEmpty()
             .EmailAddress()
@@ -46,6 +60,10 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
             .WithMessage($"Debes usar un correo institucional {institutionalEmail.Suffix}")
             .MaximumLength(255)
             .WithMessage("Email no puede superar 255 caracteres");
+    }
+
+    private void AddPasswordRules()
+    {
         RuleFor(usuario => usuario.Contrasena)
             .Cascade(CascadeMode.Stop)
             .MinimumLength(8)
@@ -59,7 +77,10 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
             .MaximumLength(72)
             .WithMessage("Contraseña no puede superar 72 caracteres")
             .When(usuario => !string.IsNullOrWhiteSpace(usuario.Contrasena));
+    }
 
+    private void AddContactRules()
+    {
         RuleFor(usuario => usuario.Telefono)
             .MaximumLength(32)
             .WithMessage("Teléfono no puede superar 32 caracteres");
@@ -75,6 +96,10 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
         RuleFor(usuario => usuario.MotivoBloqueo)
             .MaximumLength(1024)
             .WithMessage("Motivo de bloqueo no puede superar 1024 caracteres");
+    }
+
+    private void AddImageRules()
+    {
         RuleFor(usuario => usuario.ImagenPerfil)
             .Must(image => AllowedImage.IsValid(image, MaxProfileImageBytes))
             .WithMessage("La foto de perfil debe ser JPG, PNG o WebP de hasta 1 MB");
@@ -87,7 +112,10 @@ public class UsuarioValidator : AbstractValidator<UsuarioDto>
         RuleFor(usuario => usuario.ImagenFirma)
             .Must(image => AllowedImage.IsValid(image, MaxProfileImageBytes))
             .WithMessage("La firma debe ser JPG, PNG o WebP de hasta 1 MB");
+    }
 
+    private void AddCarreraRules(ApplicationDbContext dbContext)
+    {
         RuleFor(usuario => usuario.IdCarrera)
             .MustAsync(
                 async (id, cancellationToken) =>

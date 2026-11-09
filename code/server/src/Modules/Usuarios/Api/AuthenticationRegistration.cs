@@ -21,13 +21,40 @@ public static class AuthenticationRegistration
     )
     {
         var section = configuration.GetSection(AuthenticationSettings.SectionName);
+        var settings = ReadSettings(section);
+        var credentials = ReadCredentials(section, settings.Provider.ToString());
+        var scheme = ResolveScheme(settings.Provider);
+
+        services.Configure<AuthenticationSettings>(section);
+        services.AddSingleton<InstitutionalEmailPolicy>();
+
+        var builder = AddSchemes(services, jwt);
+        if (credentials.IsConfigured)
+            AddProvider(builder, settings.Provider, scheme, credentials);
+
+        services.AddSingleton(new ExternalIdentityScheme(scheme, credentials.IsConfigured));
+        services
+            .AddAuthorizationBuilder()
+            .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
+        return services;
+    }
+
+    private static AuthenticationSettings ReadSettings(IConfigurationSection section)
+    {
         var settings = section.Get<AuthenticationSettings>() ?? new AuthenticationSettings();
         if (string.IsNullOrWhiteSpace(settings.InstitutionalDomain))
             throw new InvalidOperationException(
                 $"{AuthenticationSettings.SectionName}:{nameof(AuthenticationSettings.InstitutionalDomain)} is required."
             );
 
-        var providerName = settings.Provider.ToString();
+        return settings;
+    }
+
+    private static ExternalProviderCredentials ReadCredentials(
+        IConfigurationSection section,
+        string providerName
+    )
+    {
         var credentials =
             section.GetSection(providerName).Get<ExternalProviderCredentials>()
             ?? new ExternalProviderCredentials();
@@ -36,10 +63,20 @@ public static class AuthenticationRegistration
                 $"{AuthenticationSettings.SectionName}:{providerName} ClientId and ClientSecret must be configured together."
             );
 
-        services.Configure<AuthenticationSettings>(section);
-        services.AddSingleton<InstitutionalEmailPolicy>();
+        return credentials;
+    }
 
-        var builder = services
+    private static string ResolveScheme(ExternalIdentityProvider provider) =>
+        provider switch
+        {
+            ExternalIdentityProvider.Google => GoogleDefaults.AuthenticationScheme,
+            _ => throw new InvalidOperationException(
+                $"{AuthenticationSettings.SectionName}:{nameof(AuthenticationSettings.Provider)} {provider} is not supported."
+            ),
+        };
+
+    private static AuthenticationBuilder AddSchemes(IServiceCollection services, JwtSettings jwt) =>
+        services
             .AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -54,23 +91,6 @@ public static class AuthenticationRegistration
                 options.Cookie.SameSite = SameSiteMode.None;
                 options.ExpireTimeSpan = ExternalSignInLifetime;
             });
-
-        var scheme = settings.Provider switch
-        {
-            ExternalIdentityProvider.Google => GoogleDefaults.AuthenticationScheme,
-            _ => throw new InvalidOperationException(
-                $"{AuthenticationSettings.SectionName}:{nameof(AuthenticationSettings.Provider)} {providerName} is not supported."
-            ),
-        };
-        if (credentials.IsConfigured)
-            AddProvider(builder, settings.Provider, scheme, credentials);
-
-        services.AddSingleton(new ExternalIdentityScheme(scheme, credentials.IsConfigured));
-        services
-            .AddAuthorizationBuilder()
-            .SetFallbackPolicy(new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build());
-        return services;
-    }
 
     private static void AddProvider(
         AuthenticationBuilder builder,

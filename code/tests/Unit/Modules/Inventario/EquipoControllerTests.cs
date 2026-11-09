@@ -25,7 +25,7 @@ public class EquipoControllerTests
     public async Task GetAll_ReturnsOkWithData()
     {
         var data = new List<EquipoDto> { new EquipoDto { Id = 1, NumeroSerial = "S1" } };
-        _serviceMock.Setup(s => s.GetAll()).ReturnsAsync(Result<List<EquipoDto>>.Success(data));
+        _serviceMock.Setup(s => s.GetPage(1, Paginacion.MaxPageSize)).ReturnsAsync(Result<List<EquipoDto>>.Success(data));
 
         var result = await _controller.GetAll();
 

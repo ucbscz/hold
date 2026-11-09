@@ -1,0 +1,57 @@
+<div class="devuelto-overlay">
+  <div class="devuelto-modal">
+    <button
+      type="button"
+      class="modal-close-btn"
+      (click)="cancelar.emit()"
+      aria-label="Cerrar"
+    >
+      <img src="assets/x.png" alt="" />
+    </button>
+    <h3 class="devuelto-title">Marcar como devuelto</h3>
+    <p class="devuelto-text">
+      Indique el estado con el que se devuelve cada equipo y, opcionalmente, una
+      observación.
+    </p>
+    @if (equipos.length > 0) {
+      <div class="devuelto-equipos">
+        @for (eq of equipos; track eq.CodigoImt) {
+          <div class="devuelto-equipo-row">
+            <div class="devuelto-equipo-info">
+              <span class="devuelto-equipo-nombre">{{
+                eq.NombreGrupoEquipo
+              }}</span>
+              <span class="devuelto-equipo-codigo">IMT {{ eq.CodigoImt }}</span>
+            </div>
+            <app-custom-select
+              class="devuelto-equipo-select"
+              [opciones]="estadoEquipoOpciones"
+              [(ngModel)]="estados[eq.CodigoImt!]"
+              placeholder="Estado"
+            ></app-custom-select>
+          </div>
+        }
+      </div>
+    }
+    <textarea
+      [(ngModel)]="observacion"
+      class="observaciones-input"
+      placeholder="Observaciones (opcional)..."
+    ></textarea>
+    <label class="devuelto-bloqueo">
+      <input type="checkbox" [(ngModel)]="bloquearUsuario" />
+      <span>Bloquear a este usuario para nuevas reservas</span>
+    </label>
+    <div class="devuelto-actions">
+      <button
+        class="devuelto-btn devuelto-btn-cancel"
+        (click)="cancelar.emit()"
+      >
+        Cancelar
+      </button>
+      <button class="devuelto-btn devuelto-btn-confirm" (click)="confirmar()">
+        Aceptar
+      </button>
+    </div>
+  </div>
+</div>

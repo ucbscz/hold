@@ -20,18 +20,14 @@ import {
   UsuarioServiceAPI,
   UsuarioService,
   NombreRolPipe,
-  nombreRol,
-  ROL_OPCIONES,
   ROL_ADMINISTRADOR,
 } from '@entities/user';
-import { ESTADO_EQUIPO_OPCIONES } from '@entities/equipment';
 import {
   Aviso,
   AvisoEliminarComponent,
   BuscadorComponent,
   CustomSelectComponent,
   MostrarerrorComponent,
-  OpcionSelect,
   PantallaCargaComponent,
   ToastService,
 } from '@shared/ui';
@@ -46,9 +42,28 @@ import {
   StickyScrollDirective,
 } from '@shared/lib/directives';
 import { extractErrorMessage } from '@shared/lib/error';
-import { formatRegionDateTime } from '@shared/lib/date';
 import { AuditPanelComponent } from '@entities/audit-log';
-import { finalize } from 'rxjs';
+import { finalize, Observable } from 'rxjs';
+import {
+  COLUMNAS_PRESTAMOS,
+  ORDEN_PRESTAMOS,
+  ROLES_FILTRO_PRESTAMOS,
+  camposBusqueda,
+  detalleEquipos,
+  enRangoDeFechas,
+  estadoCalculado,
+  filaExportacion,
+  resumenEquipo,
+} from '../../model/filtros-prestamos';
+import {
+  DevolucionPrestamo,
+  DevolucionPrestamoComponent,
+} from '../devolucion-prestamo/devolucion-prestamo.component';
+import {
+  DecisionPrestamo,
+  DecisionPrestamoComponent,
+} from '../decision-prestamo/decision-prestamo.component';
+
 @Component({
   selector: 'app-prestamos-tabla',
   standalone: true,
@@ -70,34 +85,50 @@ import { finalize } from 'rxjs';
     CustomSelectComponent,
     TablePaginationComponent,
     FlatpickrDirective,
+    DevolucionPrestamoComponent,
+    DecisionPrestamoComponent,
   ],
   templateUrl: './prestamos-tabla.component.html',
   styleUrls: [
     '../../../../shared/lib/admin-table/tabla-admin.css',
+    '../modal-prestamo.css',
     './prestamos-tabla.component.css',
   ],
 })
 export class PrestamosTablaComponent extends Tabla implements OnInit {
   private readonly toast = inject(ToastService);
+  private readonly prestamosapi = inject(PrestamosAPIService);
+  private readonly usuarioapi = inject(UsuarioServiceAPI);
   readonly esRoot =
     inject(UsuarioService).obtenerUsuario().rol?.toLowerCase() ===
     ROL_ADMINISTRADOR;
   expandedRowId: number | null = null;
   auditRefresh = 0;
-
-  toggleExpand(id: number) {
-    this.expandedRowId = this.expandedRowId === id ? null : id;
-  }
-  cargando: boolean = false;
-  alertaeliminar: boolean = false;
-  prestamos: Map<number, PrestamoAgrupados> = new Map<
-    number,
-    PrestamoAgrupados
-  >();
-  prestamoscopia: Map<number, PrestamoAgrupados> = new Map<
-    number,
-    PrestamoAgrupados
-  >();
+  cargando = false;
+  alertaeliminar = false;
+  prestamos = new Map<number, PrestamoAgrupados>();
+  prestamoscopia = new Map<number, PrestamoAgrupados>();
+  vercontrato: WritableSignal<boolean> = signal(false);
+  prestamoSeleccionado: PrestamoDto = new PrestamoDto();
+  prestamoKeySeleccionado = 0;
+  decisionPrestamo: DecisionPrestamo | null = null;
+  avisocancelar: WritableSignal<boolean> = signal(false);
+  avisorecogido: WritableSignal<boolean> = signal(false);
+  avisodevuelto: WritableSignal<boolean> = signal(false);
+  mensajeavisocancelar = '¿Está seguro de cancelar el préstamo seleccionado?';
+  override columnas: string[] = [...COLUMNAS_PRESTAMOS];
+  estadoSeleccionado = '';
+  readonly estadoFiltroOpciones = ESTADO_PRESTAMO_FILTRO_OPCIONES;
+  rolSeleccionado = '';
+  readonly rolesFiltroOpciones = ROLES_FILTRO_PRESTAMOS;
+  fechaPrestamoDesde = '';
+  fechaPrestamoHasta = '';
+  abrirVista = false;
+  prestamosVista: PrestamoDto[] = [];
+  observacionEditar = '';
+  editandoObservacion: number | null = null;
+  equiposDevolucion: PrestamoDto[] = [];
+  private busquedaActual?: [string, string];
 
   get prestamosTabla() {
     return Array.from(this.prestamos.entries(), ([key, value]) => ({
@@ -106,17 +137,24 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     }));
   }
 
-  resumenEquipo(prestamo: PrestamoAgrupados): string {
-    const primerEquipo = prestamo.equipos[0]?.NombreGrupoEquipo ?? '';
+  private get columnasExportacion(): string[] {
+    return [...this.columnas, 'Estado'];
+  }
 
-    return prestamo.equipos.length > 1 ? `${primerEquipo}...` : primerEquipo;
+  ngOnInit() {
+    this.cargarPrestamos();
+  }
+
+  toggleExpand(id: number) {
+    this.expandedRowId = this.expandedRowId === id ? null : id;
+  }
+
+  resumenEquipo(prestamo: PrestamoAgrupados): string {
+    return resumenEquipo(prestamo);
   }
 
   detalleEquipos(prestamo: PrestamoAgrupados): string {
-    return prestamo.equipos
-      .map((equipo) => equipo.NombreGrupoEquipo)
-      .filter((nombre): nombre is string => !!nombre)
-      .join(', ');
+    return detalleEquipos(prestamo);
   }
 
   exportarPrestamos(): void {
@@ -135,65 +173,6 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     });
   }
 
-  private readonly columnasExportacion = [
-    'Usuario',
-    'Carnet',
-    'Rol',
-    'Teléfono',
-    'Equipos',
-    'Fecha Solicitud',
-    'Fecha Préstamo Esperada',
-    'Fecha Devolución Esperada',
-    'Estado',
-  ];
-
-  private filasExportacion() {
-    return this.prestamosTabla.map(({ value }) => [
-      `${value.datosgrupo.NombreUsuario ?? ''} ${value.datosgrupo.ApellidoPaternoUsuario ?? ''}`.trim(),
-      value.datosgrupo.CarnetUsuario,
-      nombreRol(value.datosgrupo.TipoUsuario),
-      value.datosgrupo.TelefonoUsuario,
-      this.detalleEquipos(value),
-      formatRegionDateTime(value.datosgrupo.FechaSolicitud),
-      formatRegionDateTime(value.datosgrupo.FechaPrestamoEsperada),
-      formatRegionDateTime(value.datosgrupo.FechaDevolucionEsperada),
-      this.getEstadoCalculado(value),
-    ]);
-  }
-
-  vercontrato: WritableSignal<boolean> = signal(false);
-  prestamoSeleccionado: PrestamoDto = new PrestamoDto();
-  prestamoKeySeleccionado: number = 0;
-  decisionPrestamo: 'aprobado' | 'rechazado' | null = null;
-  detalleDecision = '';
-  procesandoDecision = false;
-  avisocancelar: WritableSignal<boolean> = signal(false);
-  mensajeavisocancelar: string =
-    '¿Está seguro de cancelar el préstamo seleccionado?';
-  override columnas: string[] = [
-    'Usuario',
-    'Carnet',
-    'Rol',
-    'Teléfono',
-    'Equipos',
-    'Fecha Solicitud',
-    'Fecha Préstamo Esperada',
-    'Fecha Devolución Esperada',
-  ];
-  estadoSeleccionado: string = '';
-  readonly estadoFiltroOpciones = ESTADO_PRESTAMO_FILTRO_OPCIONES;
-  rolSeleccionado: string = '';
-  readonly rolesFiltroOpciones: OpcionSelect[] = [
-    { value: '', label: 'Todos los roles' },
-    ...ROL_OPCIONES,
-  ];
-  fechaPrestamoDesde = '';
-  fechaPrestamoHasta = '';
-  private busquedaActual?: [string, string];
-  abrirVista: boolean = false;
-  observacionEditar = '';
-  editandoObservacion: number | null = null;
-
   editarObservacion(id: number): void {
     this.editandoObservacion = id;
     this.observacionEditar =
@@ -210,100 +189,83 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
           this.auditRefresh++;
           this.cargarPrestamos();
         },
-        error: (e) => {
-          this.mensajeerror = extractErrorMessage(e);
-          this.error.set(true);
-        },
+        error: (e) => this.mostrarError(extractErrorMessage(e)),
       });
   }
-  prestamosVista: PrestamoDto[] = [];
-  constructor(
-    private readonly prestamosapi: PrestamosAPIService,
-    private readonly usuarioapi: UsuarioServiceAPI,
-  ) {
-    super();
-  }
-  ngOnInit() {
-    this.cargarPrestamos();
-  }
+
   limpiarPrestamoSeleccionado() {
     this.prestamoSeleccionado = new PrestamoDto();
   }
+
   cargarPrestamos() {
     this.prestamosapi.obtenerPrestamos().subscribe({
       next: (data: PrestamoDto[]) => {
         this.agruparPrestamos(data);
         this.seleccionarEstado(this.estadoSeleccionado);
       },
-      error: (error) => {
-        const errorMsg = extractErrorMessage(
-          error,
-          'Error al cargar los préstamos. Por favor, inténtelo de nuevo más tarde.',
-        );
-        this.mensajeerror = errorMsg;
-        this.error.set(true);
-      },
+      error: (error) =>
+        this.mostrarError(
+          extractErrorMessage(
+            error,
+            'Error al cargar los préstamos. Por favor, inténtelo de nuevo más tarde.',
+          ),
+        ),
     });
   }
+
   agruparPrestamos(datos: PrestamoDto[]) {
     this.prestamos.clear();
-    if (datos.length === 0) {
-      this.prestamoscopia = new Map(this.prestamos);
-      return;
-    }
     for (const prestamo of [...datos].sort(compararPrestamos)) {
       if (prestamo.Id == null) continue;
-      if (!this.prestamos.has(prestamo.Id)) {
-        this.prestamos.set(prestamo.Id, new PrestamoAgrupados([prestamo]));
-      } else {
-        this.prestamos.get(prestamo.Id)!.insertarEquipo(prestamo);
-      }
+      const grupo = this.prestamos.get(prestamo.Id);
+      if (grupo) grupo.insertarEquipo(prestamo);
+      else this.prestamos.set(prestamo.Id, new PrestamoAgrupados([prestamo]));
     }
     this.prestamoscopia = new Map(this.prestamos);
   }
+
   eliminarPrestamo(prestamo: PrestamoDto) {
     this.prestamoSeleccionado = prestamo;
     this.alertaeliminar = true;
   }
+
   confirmarEliminacion() {
     this.cargando = true;
     this.prestamosapi
       .eliminarPrestamo(this.prestamoSeleccionado.Id)
       .pipe(finalize(() => (this.cargando = false)))
-      .subscribe({
-        next: (_response) => {
-          this.toast.success('Préstamo eliminado con éxito.');
-          this.auditRefresh++;
-          this.cargarPrestamos();
-        },
-        error: (error) => {
-          const errorMsg = extractErrorMessage(
+      .subscribe(
+        this.tras('Préstamo eliminado con éxito.', (error) =>
+          extractErrorMessage(
             error,
             'Error al eliminar el préstamo. Por favor, inténtelo de nuevo más tarde.',
-          );
-          this.mensajeerror = errorMsg;
-          this.error.set(true);
-        },
-      });
+          ),
+        ),
+      );
     this.limpiarPrestamoSeleccionado();
     this.alertaeliminar = false;
   }
+
   cancelarEliminacion() {
     this.alertaeliminar = false;
     this.limpiarPrestamoSeleccionado();
   }
+
   seleccionarEstado(estado: string) {
     this.estadoSeleccionado = estado;
     this.aplicarFiltros();
   }
+
   onFechaPrestamoDesde(dates: Date[]): void {
     this.fechaPrestamoDesde = dates[0]?.toISOString().slice(0, 10) ?? '';
     this.aplicarFiltros();
   }
+
   onFechaPrestamoHasta(dates: Date[]): void {
     this.fechaPrestamoHasta = dates[0]?.toISOString().slice(0, 10) ?? '';
     this.aplicarFiltros();
   }
+
   seleccionarRol(rol: string) {
     this.rolSeleccionado = rol;
     this.aplicarFiltros();
@@ -311,129 +273,22 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
 
   aplicarFiltros(event?: [string, string]) {
     if (event) this.busquedaActual = event;
-    let prestamosFiltrados = Array.from(this.prestamoscopia.entries());
-    const busqueda = this.busquedaActual;
-    if (busqueda && busqueda[0].trim() !== '') {
-      const busquedaNormalizada = this.normalizeText(busqueda[0]);
-      prestamosFiltrados = prestamosFiltrados.filter(([_, prestamo]) => {
-        switch (busqueda[1]) {
-          case 'Usuario':
-            return (
-              this.normalizeText(
-                prestamo.datosgrupo.NombreUsuario || '',
-              ).includes(busquedaNormalizada) ||
-              this.normalizeText(
-                prestamo.datosgrupo.ApellidoPaternoUsuario || '',
-              ).includes(busquedaNormalizada)
-            );
-          case 'Carnet':
-            return this.normalizeText(
-              prestamo.datosgrupo.CarnetUsuario || '',
-            ).includes(busquedaNormalizada);
-          case 'Teléfono':
-            return this.normalizeText(
-              prestamo.datosgrupo.TelefonoUsuario || '',
-            ).includes(busquedaNormalizada);
-          case 'Equipos':
-            return this.normalizeText(
-              prestamo.datosgrupo.NombreGrupoEquipo || '',
-            ).includes(busquedaNormalizada);
-          case 'Fecha Solicitud':
-            return this.normalizeText(
-              this.formatDate(prestamo.datosgrupo.FechaSolicitud),
-            ).includes(busquedaNormalizada);
-          case 'Fecha Préstamo Esperada':
-            return this.normalizeText(
-              this.formatDate(prestamo.datosgrupo.FechaPrestamoEsperada),
-            ).includes(busquedaNormalizada);
-          case 'Fecha Devolución Esperada':
-            return this.normalizeText(
-              this.formatDate(prestamo.datosgrupo.FechaDevolucionEsperada),
-            ).includes(busquedaNormalizada);
-          default:
-            return (
-              this.normalizeText(
-                prestamo.datosgrupo.NombreUsuario || '',
-              ).includes(busquedaNormalizada) ||
-              this.normalizeText(
-                prestamo.datosgrupo.ApellidoPaternoUsuario || '',
-              ).includes(busquedaNormalizada) ||
-              this.normalizeText(
-                prestamo.datosgrupo.CarnetUsuario || '',
-              ).includes(busquedaNormalizada) ||
-              this.normalizeText(
-                prestamo.datosgrupo.NombreGrupoEquipo || '',
-              ).includes(busquedaNormalizada) ||
-              this.normalizeText(prestamo.datosgrupo.CodigoImt || '').includes(
-                busquedaNormalizada,
-              ) ||
-              this.normalizeText(
-                this.formatDate(prestamo.datosgrupo.FechaSolicitud),
-              ).includes(busquedaNormalizada) ||
-              this.normalizeText(
-                this.formatDate(prestamo.datosgrupo.FechaPrestamoEsperada),
-              ).includes(busquedaNormalizada) ||
-              this.normalizeText(
-                this.formatDate(prestamo.datosgrupo.FechaDevolucionEsperada),
-              ).includes(busquedaNormalizada)
-            );
-        }
-      });
-    }
-    if (this.estadoSeleccionado !== '') {
-      const buscado = this.estadoSeleccionado.toLowerCase();
-      prestamosFiltrados = prestamosFiltrados.filter(
-        ([_, prestamo]) =>
-          this.getEstadoCalculado(prestamo).toLowerCase() === buscado,
-      );
-    }
-    if (this.rolSeleccionado !== '') {
-      const rol = this.rolSeleccionado.toLowerCase();
-      prestamosFiltrados = prestamosFiltrados.filter(
-        ([_, prestamo]) =>
-          prestamo.datosgrupo.TipoUsuario?.toLowerCase() === rol,
-      );
-    }
-    if (this.fechaPrestamoDesde || this.fechaPrestamoHasta) {
-      const desde = this.fechaPrestamoDesde
-        ? new Date(`${this.fechaPrestamoDesde}T00:00:00`)
-        : null;
-      const hasta = this.fechaPrestamoHasta
-        ? new Date(`${this.fechaPrestamoHasta}T23:59:59.999`)
-        : null;
-      prestamosFiltrados = prestamosFiltrados.filter(([, prestamo]) => {
-        const fecha = prestamo.datosgrupo.FechaPrestamoEsperada;
-        return (
-          !!fecha && (!desde || fecha >= desde) && (!hasta || fecha <= hasta)
-        );
-      });
-    }
-    this.prestamos = new Map<number, PrestamoAgrupados>(prestamosFiltrados);
+    const filtrados = Array.from(this.prestamoscopia.entries()).filter(
+      ([, prestamo]) => this.cumpleFiltros(prestamo),
+    );
+    this.prestamos = new Map<number, PrestamoAgrupados>(filtrados);
     this.reiniciarPaginacion();
     this.aplicarOrdenActualSiExiste();
   }
 
   override sortTable(e: { col: string; dir: 'asc' | 'desc' }): void {
-    const prestamosOrdenados = this.sortByColumn(
-      Array.from(this.prestamos.entries()),
-      e,
-      {
-        Usuario: ([, prestamo]) =>
-          `${prestamo.datosgrupo.NombreUsuario ?? ''} ${prestamo.datosgrupo.ApellidoPaternoUsuario ?? ''}`,
-        Carnet: ([, prestamo]) => prestamo.datosgrupo.CarnetUsuario,
-        Rol: ([, prestamo]) => nombreRol(prestamo.datosgrupo.TipoUsuario),
-        Teléfono: ([, prestamo]) => prestamo.datosgrupo.TelefonoUsuario,
-        Equipos: ([, prestamo]) => prestamo.equipos[0]?.NombreGrupoEquipo,
-        'Fecha Solicitud': ([, prestamo]) => prestamo.datosgrupo.FechaSolicitud,
-        'Fecha Préstamo Esperada': ([, prestamo]) =>
-          prestamo.datosgrupo.FechaPrestamoEsperada,
-        'Fecha Devolución Esperada': ([, prestamo]) =>
-          prestamo.datosgrupo.FechaDevolucionEsperada,
-        Estado: ([, prestamo]) => this.getEstadoCalculado(prestamo),
-      },
+    this.prestamos = new Map<number, PrestamoAgrupados>(
+      this.sortByColumn(
+        Array.from(this.prestamos.entries()),
+        e,
+        ORDEN_PRESTAMOS,
+      ),
     );
-
-    this.prestamos = new Map<number, PrestamoAgrupados>(prestamosOrdenados);
   }
 
   limpiarFiltros() {
@@ -444,29 +299,9 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     this.busquedaActual = undefined;
     this.aplicarOrdenActualSiExiste();
   }
-  getEstadoCalculado(prestamo: PrestamoAgrupados): string {
-    const estadoOrig = (
-      prestamo?.datosgrupo?.EstadoPrestamo || ''
-    ).toLowerCase();
-    if (!prestamo?.datosgrupo) return estadoOrig;
-    const fechaDev = prestamo.datosgrupo.FechaDevolucionEsperada;
-    if (!fechaDev) return estadoOrig;
-    const ahora = new Date();
-    if (
-      (estadoOrig === 'activo' || estadoOrig === 'aprobado') &&
-      fechaDev < ahora
-    ) {
-      return 'atrasado';
-    }
-    return estadoOrig;
-  }
-  validaraprobacion(key: number) {
-    const prestamo = this.prestamos.get(key);
-    if (!prestamo || !this.puedeAprobar(prestamo)) return;
 
-    this.prestamoKeySeleccionado = key;
-    this.detalleDecision = '';
-    this.decisionPrestamo = 'aprobado';
+  getEstadoCalculado(prestamo: PrestamoAgrupados): string {
+    return estadoCalculado(prestamo);
   }
 
   puedeAprobar(prestamo: PrestamoAgrupados): boolean {
@@ -474,67 +309,26 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
 
     return !!inicio && inicio.getTime() > Date.now();
   }
-  aprobarprestamo(key: number) {
-    if (this.procesandoDecision) return;
-    this.procesandoDecision = true;
-    this.prestamosapi
-      .cambiarEstadoPrestamo(
-        this.prestamos.get(key)!.datosgrupo.Id,
-        'aprobado',
-        this.detalleDecision.trim() || undefined,
-      )
-      .pipe(finalize(() => (this.procesandoDecision = false)))
-      .subscribe({
-        next: (_response) => {
-          this.procesandoDecision = false;
-          this.cerrarDecision();
-          this.toast.success('Préstamo aprobado con éxito.');
-          this.auditRefresh++;
-          this.cargarPrestamos();
-        },
-        error: (error) => {
-          const errorMsg = extractErrorMessage(error);
-          this.mensajeerror = `Error al aprobar el préstamo: ${errorMsg}`;
-          this.error.set(true);
-        },
-      });
+
+  validaraprobacion(key: number) {
+    const prestamo = this.prestamos.get(key);
+    if (!prestamo || !this.puedeAprobar(prestamo)) return;
+
+    this.abrirDecision(key, 'aprobado');
   }
+
   validarrechazo(key: number) {
-    this.detalleDecision = '';
-    this.prestamoKeySeleccionado = key;
-    this.decisionPrestamo = 'rechazado';
-  }
-  rechazarprestamo(key: number) {
-    if (!this.detalleDecision.trim() || this.procesandoDecision) return;
-    this.procesandoDecision = true;
-    this.prestamosapi
-      .cambiarEstadoPrestamo(
-        this.prestamos.get(key)!.datosgrupo.Id,
-        'rechazado',
-        this.detalleDecision.trim(),
-      )
-      .pipe(finalize(() => (this.procesandoDecision = false)))
-      .subscribe({
-        next: (_response) => {
-          this.procesandoDecision = false;
-          this.cerrarDecision();
-          this.toast.success('Préstamo rechazado con éxito.');
-          this.auditRefresh++;
-          this.cargarPrestamos();
-        },
-        error: (error) => {
-          const errorMsg = extractErrorMessage(error);
-          this.mensajeerror = `Error al rechazar el préstamo: ${errorMsg}`;
-          this.error.set(true);
-        },
-      });
+    this.abrirDecision(key, 'rechazado');
   }
 
   cerrarDecision(): void {
-    if (this.procesandoDecision) return;
     this.decisionPrestamo = null;
-    this.detalleDecision = '';
     this.prestamoKeySeleccionado = 0;
+  }
+
+  alDecidir(mensaje: string): void {
+    this.cerrarDecision();
+    this.alExito(mensaje);
   }
 
   validarcancelacion(key: number) {
@@ -545,23 +339,13 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
   }
 
   cancelarprestamo(key: number) {
-    this.prestamosapi
-      .cambiarEstadoPrestamo(
-        this.prestamos.get(key)!.datosgrupo.Id,
-        'cancelado',
-      )
-      .subscribe({
-        next: (_response) => {
-          this.toast.success('Préstamo cancelado con éxito.');
-          this.auditRefresh++;
-          this.cargarPrestamos();
-        },
-        error: (error) => {
-          const errorMsg = extractErrorMessage(error);
-          this.mensajeerror = `Error al cancelar el préstamo: ${errorMsg}`;
-          this.error.set(true);
-        },
-      });
+    this.cambiarEstado(key, 'cancelado').subscribe(
+      this.tras(
+        'Préstamo cancelado con éxito.',
+        (error) =>
+          `Error al cancelar el préstamo: ${extractErrorMessage(error)}`,
+      ),
+    );
     this.prestamoKeySeleccionado = 0;
     this.avisocancelar.set(false);
   }
@@ -571,18 +355,11 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     this.vercontrato.set(!this.vercontrato());
   }
 
-  avisorecogido: WritableSignal<boolean> = signal(false);
-  avisodevuelto: WritableSignal<boolean> = signal(false);
-  observacionDevolucion: string = '';
-  readonly estadoEquipoOpciones = ESTADO_EQUIPO_OPCIONES;
-
-  estadosRetorno: { [codigoImt: string]: string } = {};
-  equiposDevolucion: PrestamoDto[] = [];
-
   abrirVistaPrestamos(prestamos: PrestamoDto[]) {
     this.prestamosVista = prestamos;
     this.abrirVista = true;
   }
+
   cerrarVistaPrestamos() {
     this.abrirVista = false;
     this.prestamosVista = [];
@@ -593,79 +370,122 @@ export class PrestamosTablaComponent extends Tabla implements OnInit {
     this.avisorecogido.set(true);
   }
 
-  bloquearAlDevolver = false;
-
   validarDevuelto(key: number) {
-    this.observacionDevolucion = '';
-    this.bloquearAlDevolver = false;
     this.prestamoKeySeleccionado = key;
     this.equiposDevolucion = this.prestamos.get(key)?.equipos ?? [];
-    this.estadosRetorno = {};
-    for (const eq of this.equiposDevolucion) {
-      if (eq.CodigoImt) this.estadosRetorno[eq.CodigoImt] = 'operativo';
-    }
     this.avisodevuelto.set(true);
   }
 
   recogerprestamo(key: number) {
-    this.prestamosapi
-      .cambiarEstadoPrestamo(this.prestamos.get(key)!.datosgrupo.Id, 'activo')
-      .subscribe({
-        next: (_response) => {
-          this.toast.success('Préstamo marcado como recogido con éxito.');
-          this.auditRefresh++;
-          this.cargarPrestamos();
-        },
-        error: (error) => {
-          const errorMsg = extractErrorMessage(error);
-          this.mensajeerror = `Error al actualizar el préstamo: ${errorMsg}`;
-          this.error.set(true);
-        },
-      });
+    this.cambiarEstado(key, 'activo').subscribe(
+      this.tras(
+        'Préstamo marcado como recogido con éxito.',
+        (error) =>
+          `Error al actualizar el préstamo: ${extractErrorMessage(error)}`,
+      ),
+    );
     this.prestamoKeySeleccionado = 0;
     this.avisorecogido.set(false);
   }
 
-  devolverprestamo(key: number) {
-    const equiposRetorno = this.equiposDevolucion
-      .filter((eq) => !!eq.CodigoImt)
-      .map((eq) => ({
-        CodigoImt: eq.CodigoImt!,
-        EstadoEquipo: this.estadosRetorno[eq.CodigoImt!] ?? 'operativo',
-      }));
-    this.prestamosapi
-      .cambiarEstadoPrestamo(
-        this.prestamos.get(key)!.datosgrupo.Id,
-        'finalizado',
-        this.observacionDevolucion,
-        equiposRetorno,
-      )
-      .subscribe({
-        next: (_response) => {
-          this.toast.success('Préstamo marcado como devuelto con éxito.');
-          this.auditRefresh++;
-          if (this.bloquearAlDevolver) {
-            this.bloquearUsuarioDevolucion(
-              this.prestamos.get(key)!.datosgrupo.CarnetUsuario || '',
-            );
-          }
-          this.cargarPrestamos();
+  devolverprestamo(key: number, devolucion: DevolucionPrestamo) {
+    const carnet = this.prestamos.get(key)!.datosgrupo.CarnetUsuario || '';
+    this.cambiarEstado(
+      key,
+      'finalizado',
+      devolucion.observacion,
+      devolucion.equipos,
+    ).subscribe(
+      this.tras(
+        'Préstamo marcado como devuelto con éxito.',
+        (error) =>
+          `Error al devolver el préstamo: ${extractErrorMessage(error)}`,
+        () => {
+          if (devolucion.bloquearUsuario)
+            this.bloquearUsuario(carnet, devolucion.observacion);
         },
-        error: (error) => {
-          const errorMsg = extractErrorMessage(error);
-          this.mensajeerror = `Error al devolver el préstamo: ${errorMsg}`;
-          this.error.set(true);
-        },
-      });
+      ),
+    );
     this.prestamoKeySeleccionado = 0;
     this.avisodevuelto.set(false);
   }
 
-  private bloquearUsuarioDevolucion(carnet: string) {
+  private cumpleFiltros(prestamo: PrestamoAgrupados): boolean {
+    const busqueda = this.busquedaActual;
+    const texto = busqueda?.[0].trim() ? this.normalizeText(busqueda[0]) : '';
+    const coincide =
+      !texto ||
+      camposBusqueda(prestamo, busqueda![1], (fecha) =>
+        this.formatDate(fecha),
+      ).some((valor) => this.normalizeText(valor).includes(texto));
+
+    return (
+      coincide &&
+      (this.estadoSeleccionado === '' ||
+        this.getEstadoCalculado(prestamo).toLowerCase() ===
+          this.estadoSeleccionado.toLowerCase()) &&
+      (this.rolSeleccionado === '' ||
+        prestamo.datosgrupo.TipoUsuario?.toLowerCase() ===
+          this.rolSeleccionado.toLowerCase()) &&
+      enRangoDeFechas(
+        prestamo,
+        this.fechaPrestamoDesde,
+        this.fechaPrestamoHasta,
+      )
+    );
+  }
+
+  private filasExportacion() {
+    return this.prestamosTabla.map(({ value }) => filaExportacion(value));
+  }
+
+  private abrirDecision(key: number, decision: DecisionPrestamo) {
+    this.prestamoKeySeleccionado = key;
+    this.decisionPrestamo = decision;
+  }
+
+  private cambiarEstado(
+    key: number,
+    ...cambio: [
+      estado: string,
+      observacion?: string,
+      equipos?: DevolucionPrestamo['equipos'],
+    ]
+  ): Observable<unknown> {
+    return this.prestamosapi.cambiarEstadoPrestamo(
+      this.prestamos.get(key)!.datosgrupo.Id,
+      ...cambio,
+    );
+  }
+
+  private tras(
+    mensajeExito: string,
+    mensajeError: (error: unknown) => string,
+    antes?: () => void,
+  ) {
+    return {
+      next: () => this.alExito(mensajeExito, antes),
+      error: (error: unknown) => this.mostrarError(mensajeError(error)),
+    };
+  }
+
+  private alExito(mensaje: string, antes?: () => void) {
+    antes?.();
+    this.toast.success(mensaje);
+    this.auditRefresh++;
+    this.cargarPrestamos();
+  }
+
+  mostrarError(mensaje: string) {
+    this.mensajeerror = mensaje;
+    this.error.set(true);
+  }
+
+  private bloquearUsuario(carnet: string, motivo: string) {
     if (!carnet) return;
 
     this.usuarioapi
-      .bloquearUsuario(carnet, true, this.observacionDevolucion || null)
+      .bloquearUsuario(carnet, true, motivo || null)
       .subscribe({ next: () => {}, error: () => {} });
   }
 }

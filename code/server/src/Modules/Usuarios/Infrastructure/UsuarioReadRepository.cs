@@ -5,6 +5,7 @@ using UCB_Hold.Server.Modules.Auditoria.Application;
 using UCB_Hold.Server.Modules.Notificaciones.Application;
 using UCB_Hold.Server.Modules.Usuarios.Application;
 using UCB_Hold.Server.Modules.Usuarios.Domain;
+using UCB_Hold.Server.Shared.Kernel;
 using UCB_Hold.Server.Shared.Persistence;
 
 namespace UCB_Hold.Server.Modules.Usuarios.Infrastructure;
@@ -14,7 +15,7 @@ public sealed class UsuarioReadRepository
         IAuditActorDirectory,
         IDestinatariosAdministradores
 {
-    public const int MaxPageSize = 500;
+    public const int MaxPageSize = Paginacion.MaxPageSize;
     private readonly ApplicationDbContext _dbContext;
 
     public UsuarioReadRepository(ApplicationDbContext dbContext) => _dbContext = dbContext;
@@ -29,13 +30,12 @@ public sealed class UsuarioReadRepository
         CancellationToken cancellationToken = default
     )
     {
-        var safePageSize = Math.Clamp(pageSize, 1, MaxPageSize);
-        var safePage = Math.Clamp(page, 1, int.MaxValue / safePageSize);
+        var (skip, take) = Paginacion.Rango(page, pageSize);
         var users = _dbContext
             .Usuarios.AsNoTracking()
             .OrderBy(user => user.Carnet)
-            .Skip((safePage - 1) * safePageSize)
-            .Take(safePageSize);
+            .Skip(skip)
+            .Take(take);
         var dtos = await users
             .Join(
                 _dbContext.Carreras,

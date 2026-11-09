@@ -66,71 +66,17 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
 
         try
         {
-            var durationViolation = await GetLoanDurationViolation(
-                groupIds,
-                entity.FechaPrestamoEsperada,
-                entity.FechaDevolucionEsperada,
-                cancellationToken
-            );
+            var rejection = await RejectReservation(entity, groupIds, cancellationToken);
 
-            if (durationViolation != null)
+            if (rejection != null)
             {
                 if (transaction != null)
                     await transaction.RollbackAsync(cancellationToken);
 
-                return Result<PrestamoEntity>.Error(durationViolation);
+                return Result<PrestamoEntity>.Error(rejection);
             }
 
-            var requiredByGroup = groupIds
-                .GroupBy(id => id)
-                .ToDictionary(group => group.Key, group => group.Count());
-            if (
-                !await _availability.HasAvailableEquipos(
-                    requiredByGroup,
-                    entity.FechaPrestamoEsperada,
-                    entity.FechaDevolucionEsperada,
-                    cancellationToken
-                )
-            )
-            {
-                if (transaction != null)
-                    await transaction.RollbackAsync(cancellationToken);
-
-                return Result<PrestamoEntity>.Error(
-                    "No hay suficientes unidades disponibles en el horario seleccionado"
-                );
-            }
-
-            DbContext.Prestamos.Add(entity);
-            await DbContext.SaveChangesAsync(cancellationToken);
-
-            DbContext.DetallesPrestamos.AddRange(
-                groupIds.Select(groupId => new DetallePrestamo
-                {
-                    IdPrestamo = entity.Id,
-                    IdGrupoEquipo = groupId,
-                    EstadoEliminado = false,
-                })
-            );
-            await DbContext.SaveChangesAsync(cancellationToken);
-
-            if (!string.IsNullOrWhiteSpace(contractHtml))
-            {
-                var equipment = await _queries.GetContractEquipment(
-                    entity.Id,
-                    cancellationToken
-                );
-                var contract = new Contrato
-                {
-                    ContratoHtml = _sensitiveData.Protect(
-                        _contractHtml.RenderEquipment(contractHtml, equipment)
-                    ),
-                };
-
-                await SaveContractAsSystem(contract, cancellationToken);
-                entity.IdContrato = contract.Id;
-                await DbContext.SaveChangesAsync(cancellationToken);
-            }
+            await PersistReservation(entity, groupIds, contractHtml, cancellationToken);
 
             if (transaction != null)
                 await transaction.CommitAsync(cancellationToken);
@@ -157,6 +103,72 @@ public class PrestamoRepository : Repository<PrestamoEntity, PrestamoDto>
                 "Otra reserva modificó la disponibilidad. Intente nuevamente."
             );
         }
+    }
+
+    private async Task<string?> RejectReservation(
+        PrestamoEntity entity,
+        IReadOnlyCollection<int> groupIds,
+        CancellationToken cancellationToken
+    )
+    {
+        var durationViolation = await GetLoanDurationViolation(
+            groupIds,
+            entity.FechaPrestamoEsperada,
+            entity.FechaDevolucionEsperada,
+            cancellationToken
+        );
+
+        if (durationViolation != null)
+            return durationViolation;
+
+        var requiredByGroup = groupIds
+            .GroupBy(id => id)
+            .ToDictionary(group => group.Key, group => group.Count());
+
+        return await _availability.HasAvailableEquipos(
+            requiredByGroup,
+            entity.FechaPrestamoEsperada,
+            entity.FechaDevolucionEsperada,
+            cancellationToken
+        )
+            ? null
+            : "No hay suficientes unidades disponibles en el horario seleccionado";
+    }
+
+    private async Task PersistReservation(
+        PrestamoEntity entity,
+        IReadOnlyCollection<int> groupIds,
+        string? contractHtml,
+        CancellationToken cancellationToken
+    )
+    {
+        DbContext.Prestamos.Add(entity);
+        await DbContext.SaveChangesAsync(cancellationToken);
+
+        DbContext.DetallesPrestamos.AddRange(
+            groupIds.Select(groupId => new DetallePrestamo
+            {
+                IdPrestamo = entity.Id,
+                IdGrupoEquipo = groupId,
+                EstadoEliminado = false,
+            })
+        );
+        await DbContext.SaveChangesAsync(cancellationToken);
+
+        if (string.IsNullOrWhiteSpace(contractHtml))
+            return;
+
+        var equipment = await _queries.GetContractEquipment(entity.Id, cancellationToken);
+        var contract = new Contrato
+        {
+            ContratoHtml = _sensitiveData.Protect(
+                _contractHtml.RenderEquipment(contractHtml, equipment)
+            ),
+        };
+
+        await SaveContractAsSystem(contract, cancellationToken);
+        entity.IdContrato = contract.Id;
+        await DbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task UpdateTracked(

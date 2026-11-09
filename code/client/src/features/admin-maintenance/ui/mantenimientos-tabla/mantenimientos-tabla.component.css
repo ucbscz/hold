@@ -45,28 +45,9 @@
   background: var(--interactive-subtle);
 }
 
-.table-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1.5rem;
-}
-
-.table-responsive {
-  overflow-x: auto;
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-  background-color: var(--surface);
-  border-radius: 12px;
-  box-shadow: var(--shadow-sm);
-  margin-bottom: 1.5rem;
-  border: 1px solid var(--border);
-}
-
 .actions-column {
   width: 80px;
   min-width: 80px;
-  text-align: right;
 }
 
 @media (max-width: 768px) {
@@ -77,11 +58,4 @@
     flex: 1 1 10rem;
     width: auto;
   }
-}
-
-td.actions-column {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.25rem;
 }

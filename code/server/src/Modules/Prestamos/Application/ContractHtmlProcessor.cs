@@ -3,6 +3,7 @@ using System.Text.RegularExpressions;
 using AngleSharp.Dom;
 using AngleSharp.Html.Parser;
 using Ganss.Xss;
+using UCB_Hold.Server.Modules.Configuracion.Application;
 
 namespace UCB_Hold.Server.Modules.Prestamos.Application;
 
@@ -113,6 +114,14 @@ public sealed partial class ContractHtmlProcessor
 
         return document.Body?.InnerHtml ?? string.Empty;
     }
+
+    public string RenderInstitutionalSigner(string html, ConfiguracionDto config) =>
+        RenderInstitutionalSigner(
+            html,
+            config.NombreJefeCarrera,
+            config.CarnetJefeCarrera ?? "No registrado",
+            config.FirmaJefeCarreraBase64
+        );
 
     public string RenderInstitutionalSigner(
         string html,

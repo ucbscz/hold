@@ -31,22 +31,22 @@ public class GrupoEquipoValidator : AbstractValidator<GrupoEquipoDto>
             )
             .WithMessage("Categoría no existe");
 
+        AddUniqueGroupRule(dbContext);
+    }
+
+    private void AddUniqueGroupRule(ApplicationDbContext dbContext) =>
         RuleFor(g => g)
             .MustAsync(
                 async (dto, cancellationToken) =>
-                {
-                    var existing = await dbContext
-                        .GruposEquipos.AsNoTracking()
-                        .FirstOrDefaultAsync(
-                            g =>
-                                g.Nombre == dto.Nombre
-                                && g.Modelo == dto.Modelo
-                                && g.Marca == dto.Marca
-                                && !g.EstadoEliminado,
-                            cancellationToken
-                        );
-                    return existing == null || existing.Id == dto.Id;
-                }
+                    !await dbContext.GruposEquipos.AnyAsync(
+                        g =>
+                            g.Nombre == dto.Nombre
+                            && g.Modelo == dto.Modelo
+                            && g.Marca == dto.Marca
+                            && !g.EstadoEliminado
+                            && g.Id != dto.Id,
+                        cancellationToken
+                    )
             )
             .When(g =>
                 !string.IsNullOrEmpty(g.Nombre)
@@ -54,5 +54,4 @@ public class GrupoEquipoValidator : AbstractValidator<GrupoEquipoDto>
                 && !string.IsNullOrEmpty(g.Marca)
             )
             .WithMessage("Ya existe un grupo con ese nombre, modelo y marca");
-    }
 }

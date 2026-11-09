@@ -78,12 +78,9 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
 
         try
         {
-            var config = await _configuracion.GetConfiguracion(cancellationToken);
             sanitizedHtml = _contractHtml.RenderInstitutionalSigner(
                 htmlContent,
-                config.NombreJefeCarrera,
-                config.CarnetJefeCarrera ?? "No registrado",
-                config.FirmaJefeCarreraBase64
+                await _configuracion.GetConfiguracion(cancellationToken)
             );
         }
         catch (ArgumentException exception)
@@ -115,17 +112,21 @@ public class ContratoService : Service<ContratoEntity, ContratoRepository, Contr
                 result.Errors.FirstOrDefault() ?? "Error al crear contrato"
             );
 
-        loan.IdContrato = result.Value.Id;
+        await LinkToLoan(loan, result.Value.Id, cancellationToken);
+        result.Value.ContratoHtml = sanitizedHtml;
+        return result;
+    }
+
+    private async Task LinkToLoan(Domain.Prestamo loan, int? contractId, CancellationToken cancellationToken)
+    {
+        loan.IdContrato = contractId;
         await Repository.SavePrestamo(loan, cancellationToken);
         await _audit.Log(
             AuditAccion.RegistrarContrato,
             "Prestamo",
-            prestamoId.ToString(System.Globalization.CultureInfo.InvariantCulture),
+            loan.Id.ToString(System.Globalization.CultureInfo.InvariantCulture),
             "Contrato registrado para el préstamo"
         );
-
-        result.Value.ContratoHtml = sanitizedHtml;
-        return result;
     }
 
     public override async Task<Result<object>> Delete(int prestamoId)

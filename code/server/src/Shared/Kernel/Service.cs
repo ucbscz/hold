@@ -96,6 +96,9 @@ public class Service<TEntity, TRepository, TDto>
 
     public virtual async Task<Result<List<TDto>>> GetAll() => await Repository.GetAll();
 
+    public virtual Task<Result<List<TDto>>> GetPage(int page, int pageSize) =>
+        Repository.GetPage(page, pageSize);
+
     private async Task<Result<TDto>> ValidateAndCreate(TDto dto)
     {
         var validation = await Validator.ValidateAsync(dto);
