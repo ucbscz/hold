@@ -115,6 +115,7 @@ logs/
 *.tar.gz.age
 code/database/backups/
 !code/database/schema.sql
+!code/database/migrations/*.sql
 
 # Secrets
 .env
