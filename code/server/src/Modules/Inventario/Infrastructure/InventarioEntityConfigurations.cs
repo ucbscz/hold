@@ -92,6 +92,8 @@ internal sealed class GrupoEquipoConfiguration : IEntityTypeConfiguration<GrupoE
         entity.Property(e => e.IdCategoria).HasColumnName("id_categoria");
         entity.Property(e => e.EstadoEliminado).HasColumnName(DatabaseColumns.EstadoEliminado);
         entity.HasOne(e => e.Categoria).WithMany().HasForeignKey(e => e.IdCategoria).IsRequired();
+        entity.Property(e => e.IdCarrera).HasColumnName("id_carrera");
+        entity.HasOne(e => e.Carrera).WithMany().HasForeignKey(e => e.IdCarrera).OnDelete(DeleteBehavior.Restrict);
         entity.HasIndex(e => new { e.IdCategoria, e.Nombre, e.Modelo, e.Marca, e.EstadoEliminado });
         entity.HasIndex(e => new { e.Nombre, e.Modelo, e.Marca }).IsUnique();
         entity.HasQueryFilter(e => !e.EstadoEliminado);
@@ -160,8 +162,6 @@ internal sealed class EquipoConfiguration : IEntityTypeConfiguration<Equipo>
         entity.Property(e => e.CostoReferencia).HasColumnName("costo_referencia");
         entity.Property(e => e.IdProcedencia).HasColumnName("id_procedencia");
         entity.HasOne(e => e.Procedencia).WithMany().HasForeignKey(e => e.IdProcedencia).OnDelete(DeleteBehavior.Restrict);
-        entity.Property(e => e.IdCarrera).HasColumnName("id_carrera");
-        entity.HasOne(e => e.Carrera).WithMany().HasForeignKey(e => e.IdCarrera).OnDelete(DeleteBehavior.Restrict);
         entity.Property(e => e.FechaIngresoEquipo).HasDefaultValueSql("CURRENT_DATE").HasColumnName("fecha_ingreso_equipo");
         entity.Property(e => e.EstadoEquipo).HasColumnType(DatabaseColumns.EstadoEquipo).HasDefaultValue(EstadoEquipo.Operativo).HasColumnName(DatabaseColumns.EstadoEquipo);
         entity.Property(e => e.IdGrupoEquipo).HasColumnName("id_grupo_equipo");

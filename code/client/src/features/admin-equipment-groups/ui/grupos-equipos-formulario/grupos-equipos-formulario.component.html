@@ -91,6 +91,15 @@
       ></app-custom-select>
     </div>
     <div class="form-group">
+      <label for="carrera">Carrera (opcional)</label>
+      <app-custom-select
+        name="carrera"
+        [(ngModel)]="modelo.IdCarrera"
+        [opciones]="carrerasOpciones"
+        placeholder="Sin carrera"
+      ></app-custom-select>
+    </div>
+    <div class="form-group">
       <label for="tiempoMaximoPrestamoDias">Préstamo máximo (días)</label>
       <input
         type="number"

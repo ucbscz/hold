@@ -3898,8 +3898,7 @@ CREATE TABLE public.equipos (
     fecha_ingreso_equipo date DEFAULT CURRENT_DATE NOT NULL,
     codigo_ucb character varying,
     id_ambiente integer,
-    id_procedencia integer,
-    id_carrera integer
+    id_procedencia integer
 );
 
 
@@ -3964,6 +3963,7 @@ CREATE TABLE public.grupos_equipos (
     descripcion text NOT NULL,
     costo_promedio numeric(10,2) DEFAULT 0,
     tiempo_max_prestamo_dias integer DEFAULT 7 NOT NULL,
+    id_carrera integer,
     CONSTRAINT ck_grupos_equipos_tiempo_max_prestamo CHECK (((tiempo_max_prestamo_dias >= 1) AND (tiempo_max_prestamo_dias <= 365)))
 );
 
@@ -5187,10 +5187,10 @@ CREATE UNIQUE INDEX unique_carreras_codigo ON public.carreras USING btree (codig
 
 
 --
--- Name: idx_equipos_id_carrera; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_grupos_equipos_id_carrera; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_equipos_id_carrera ON public.equipos USING btree (id_carrera);
+CREATE INDEX idx_grupos_equipos_id_carrera ON public.grupos_equipos USING btree (id_carrera);
 
 
 --
@@ -5634,11 +5634,11 @@ ALTER TABLE ONLY public.equipos
 
 
 --
--- Name: equipos equipos_id_carrera_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+-- Name: grupos_equipos grupos_equipos_id_carrera_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.equipos
-    ADD CONSTRAINT equipos_id_carrera_fkey FOREIGN KEY (id_carrera) REFERENCES public.carreras(id_carrera) ON DELETE RESTRICT;
+ALTER TABLE ONLY public.grupos_equipos
+    ADD CONSTRAINT grupos_equipos_id_carrera_fkey FOREIGN KEY (id_carrera) REFERENCES public.carreras(id_carrera) ON DELETE RESTRICT;
 
 
 --

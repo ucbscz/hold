@@ -31,6 +31,9 @@ public class GrupoEquipoValidator : AbstractValidator<GrupoEquipoDto>
             )
             .WithMessage("Categoría no existe");
 
+        RuleFor(g => g.IdCarrera).MustAsync((id, token) => dbContext.Carreras.AnyAsync(c => c.Id == id, token))
+            .When(g => g.IdCarrera.HasValue).WithMessage("La carrera no existe");
+
         AddUniqueGroupRule(dbContext);
     }
 

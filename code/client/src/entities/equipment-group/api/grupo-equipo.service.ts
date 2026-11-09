@@ -87,7 +87,8 @@ export class GrupoequipoService {
       Cantidad: item.Cantidad || 0,
       CostoPromedio: item.CostoPromedio || 0,
       TiempoMaximoPrestamoDias: item.TiempoMaximoPrestamoDias ?? 7,
-      codigosCarrera: item.CodigosCarrera ?? [],
+      IdCarrera: item.IdCarrera ?? null,
+      codigoCarrera: item.CodigoCarrera ?? null,
     };
   }
 
@@ -119,6 +120,7 @@ export class GrupoequipoService {
       UrlDataSheet: grupoEquipo.url_data_sheet,
       UrlImagen: grupoEquipo.link,
       TiempoMaximoPrestamoDias: grupoEquipo.TiempoMaximoPrestamoDias,
+      IdCarrera: grupoEquipo.IdCarrera ?? null,
     };
   }
 

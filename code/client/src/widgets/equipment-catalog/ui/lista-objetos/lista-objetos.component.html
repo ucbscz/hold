@@ -41,9 +41,9 @@
                 {{ item.nombre + " " + item.modelo + " " + item.marca }}
               </h3>
               <div class="product-card__meta">
-                @if (item.codigosCarrera?.length) {
+                @if (item.codigoCarrera) {
                   <span class="product-card__carrera">{{
-                    item.codigosCarrera!.join(" · ")
+                    item.codigoCarrera
                   }}</span>
                 }
               </div>

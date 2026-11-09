@@ -70,6 +70,7 @@ const cases: SortCase[] = [
       modelo: name,
       marca: name,
       nombreCategoria: name,
+      codigoCarrera: name,
       TiempoMaximoPrestamoDias: n,
       descripcion: name,
     }),

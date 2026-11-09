@@ -13,8 +13,6 @@ public class EquipoDto
     public double? CostoReferencia { get; set; }
     public string? Descripcion { get; set; }
     public string? Procedencia { get; set; }
-    public int? IdCarrera { get; set; }
-    public string? CodigoCarrera { get; set; }
     public string? NombreGrupoEquipo { get; set; }
     public int? IdGrupoEquipo { get; set; }
     public string? NombreGavetero { get; set; }

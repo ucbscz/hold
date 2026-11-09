@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Ardalis.Result;
 using Microsoft.EntityFrameworkCore;
 using GrupoEquipoEntity = UCB_Hold.Server.Modules.Inventario.Domain.GrupoEquipo;
 using UCB_Hold.Server.Modules.Inventario.Application;
@@ -51,40 +50,7 @@ public class GrupoEquipoRepository : Repository<GrupoEquipoEntity, GrupoEquipoDt
         if (!string.IsNullOrWhiteSpace(categoria))
             query = query.Where(g => g.Categoria != null && g.Categoria.Nombre == categoria);
 
-        return await ConCodigosCarrera(await ProjectTo(query).ToListAsync());
-    }
-
-    public override async Task<Result<List<GrupoEquipoDto>>> GetAll()
-    {
-        var result = await base.GetAll();
-        return result.IsSuccess ? Result<List<GrupoEquipoDto>>.Success(await ConCodigosCarrera(result.Value)) : result;
-    }
-
-    public override async Task<Result<GrupoEquipoDto>> Get(int id)
-    {
-        var result = await base.Get(id);
-        if (result.IsSuccess)
-            await ConCodigosCarrera([result.Value]);
-        return result;
-    }
-
-    private async Task<List<GrupoEquipoDto>> ConCodigosCarrera(List<GrupoEquipoDto> grupos)
-    {
-        var ids = grupos.Select(g => g.Id).OfType<int>().ToList();
-        if (ids.Count == 0)
-            return grupos;
-
-        var codigos = await (from equipo in DbContext.Equipos.AsNoTracking()
-                             join carrera in DbContext.Carreras.AsNoTracking() on equipo.IdCarrera equals carrera.Id
-                             where ids.Contains(equipo.IdGrupoEquipo)
-                             select new { equipo.IdGrupoEquipo, carrera.Codigo })
-            .Distinct()
-            .ToListAsync();
-
-        var porGrupo = codigos.ToLookup(c => c.IdGrupoEquipo, c => c.Codigo);
-        foreach (var grupo in grupos)
-            grupo.CodigosCarrera = porGrupo[grupo.Id ?? 0].Order(StringComparer.Ordinal).ToList();
-        return grupos;
+        return await ProjectTo(query).ToListAsync();
     }
 
     public async Task<List<GrupoEquipoDto>> GetByIds(
@@ -100,8 +66,7 @@ public class GrupoEquipoRepository : Repository<GrupoEquipoEntity, GrupoEquipoDt
         if (!string.IsNullOrWhiteSpace(categoria))
             query = query.Where(g => g.Categoria != null && g.Categoria.Nombre == categoria);
 
-        var encontrados = (await ConCodigosCarrera(await ProjectTo(query).ToListAsync()))
-            .ToDictionary(g => g.Id!.Value);
+        var encontrados = await ProjectTo(query).ToDictionaryAsync(g => g.Id!.Value);
 
         return ids.Select(id => encontrados.GetValueOrDefault(id))
             .OfType<GrupoEquipoDto>()

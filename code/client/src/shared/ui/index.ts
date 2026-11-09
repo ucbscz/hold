@@ -11,3 +11,4 @@ export * from './feedback/toast/toast.service';
 export * from './buscador/buscador.component';
 export * from './firma/firma.component';
 export * from './inline-list';
+export * from './texto-expandible/texto-expandible.component';

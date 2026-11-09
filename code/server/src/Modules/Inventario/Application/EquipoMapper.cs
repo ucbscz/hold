@@ -12,17 +12,14 @@ public partial class EquipoMapper : IMapper<EquipoEntity, EquipoDto>
     [MapProperty("Gavetero.Nombre", nameof(EquipoDto.NombreGavetero))]
     [MapPropertyFromSource(nameof(EquipoDto.Ubicacion), Use = nameof(UbicacionEquipo))]
     [MapProperty("Procedencia.Nombre", nameof(EquipoDto.Procedencia))]
-    [MapProperty("Carrera.Codigo", nameof(EquipoDto.CodigoCarrera))]
     public partial EquipoDto ToDto(EquipoEntity entity);
 
     [MapperIgnoreTarget("Gavetero")]
     [MapperIgnoreTarget("GrupoEquipo")]
     [MapperIgnoreTarget("Ambiente")]
     [MapperIgnoreTarget("Procedencia")]
-    [MapperIgnoreTarget("Carrera")]
     [MapperIgnoreSource(nameof(EquipoDto.Ubicacion))]
     [MapperIgnoreSource(nameof(EquipoDto.Procedencia))]
-    [MapperIgnoreSource(nameof(EquipoDto.CodigoCarrera))]
     [MapperIgnoreSource(nameof(EquipoDto.NombreGavetero))]
     [MapperIgnoreSource(nameof(EquipoDto.NombreGrupoEquipo))]
     public partial EquipoEntity ToEntity(EquipoDto dto);

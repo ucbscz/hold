@@ -11,5 +11,6 @@ export class GrupoEquipo {
   Cantidad?: number | null = null;
   CostoPromedio?: number | null = null;
   TiempoMaximoPrestamoDias: number = 7;
-  codigosCarrera?: string[] = [];
+  IdCarrera?: number | null = null;
+  codigoCarrera?: string | null = null;
 }

@@ -1,4 +1,5 @@
-import { Component, inject, Input } from '@angular/core';
+import { Component, inject, Input, OnInit } from '@angular/core';
+import { CarreraService } from '@entities/career';
 import { GrupoEquipo, GrupoequipoService } from '@entities/equipment-group';
 import {
   FormularioAdminComponent,
@@ -7,7 +8,7 @@ import {
 } from '@shared/lib/admin-form';
 import { extractErrorMessage } from '@shared/lib/error';
 import { ValidatedFormsModule } from '@shared/lib/forms';
-import { CustomSelectComponent } from '@shared/ui';
+import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
 import { finalize } from 'rxjs';
 
 @Component({
@@ -24,13 +25,33 @@ import { finalize } from 'rxjs';
     './grupos-equipos-formulario.component.css',
   ],
 })
-export class GruposEquiposFormularioComponent extends FormularioAdminComponent<GrupoEquipo> {
+export class GruposEquiposFormularioComponent
+  extends FormularioAdminComponent<GrupoEquipo>
+  implements OnInit
+{
   private readonly grupoEquipoService = inject(GrupoequipoService);
+  private readonly carreraService = inject(CarreraService);
   protected readonly entidad = { nombre: 'grupo de equipo' };
   @Input() categorias: string[] = [];
   urlImportacion = '';
   importando = false;
   importacionCompleta = false;
+  carrerasOpciones: OpcionSelect[] = [{ value: null, label: 'Sin carrera' }];
+
+  ngOnInit(): void {
+    this.cargarOpciones(
+      this.carreraService.obtenerCarreras(),
+      (carreras) =>
+        (this.carrerasOpciones = [
+          { value: null, label: 'Sin carrera' },
+          ...carreras.map((c) => ({
+            value: c.Id,
+            label: `${c.Codigo} · ${c.Nombre}`,
+          })),
+        ]),
+      'No se pudieron cargar las carreras.',
+    );
+  }
 
   importar(): void {
     const url = this.urlImportacion.trim();

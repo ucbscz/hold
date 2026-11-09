@@ -80,32 +80,21 @@ public class GrupoEquipoRepositoryTests
     }
 
     [Test]
-    public async Task GetAll_ReturnsDistinctCareerCodesOfActiveCareers()
+    public async Task GetAll_ReturnsCareerCodeOfEachGroup()
     {
         var categoria = new Categoria { Id = 30, Nombre = "Cat3" };
         _dbContext.Categorias.Add(categoria);
-        _dbContext.Carreras.AddRange(
-            new Carrera { Id = 1, Nombre = "Ingeniería Mecatrónica", Codigo = "IMT" },
-            new Carrera { Id = 2, Nombre = "Ingeniería Industrial", Codigo = "IND" },
-            new Carrera { Id = 3, Nombre = "Eliminada", Codigo = "ELI", EstadoEliminado = true }
-        );
+        _dbContext.Carreras.Add(new Carrera { Id = 1, Nombre = "Ingeniería Mecatrónica", Codigo = "IMT" });
         _dbContext.GruposEquipos.AddRange(
-            new GrupoEquipo { Id = 1, Nombre = "G1", Modelo = "", Marca = "", Categoria = categoria },
+            new GrupoEquipo { Id = 1, Nombre = "G1", Modelo = "", Marca = "", Categoria = categoria, IdCarrera = 1 },
             new GrupoEquipo { Id = 2, Nombre = "G2", Modelo = "", Marca = "", Categoria = categoria }
-        );
-        _dbContext.Equipos.AddRange(
-            new Equipo { Id = 1, IdGrupoEquipo = 1, CodigoImt = 1, IdCarrera = 2 },
-            new Equipo { Id = 2, IdGrupoEquipo = 1, CodigoImt = 2, IdCarrera = 1 },
-            new Equipo { Id = 3, IdGrupoEquipo = 1, CodigoImt = 3, IdCarrera = 1 },
-            new Equipo { Id = 4, IdGrupoEquipo = 1, CodigoImt = 4, IdCarrera = 3 },
-            new Equipo { Id = 5, IdGrupoEquipo = 2, CodigoImt = 5 }
         );
         await _dbContext.SaveChangesAsync();
 
         var result = await _repository.GetAll();
 
-        result.Value.Single(g => g.Id == 1).CodigosCarrera.Should().Equal("IMT", "IND");
-        result.Value.Single(g => g.Id == 2).CodigosCarrera.Should().BeEmpty();
+        result.Value.Single(g => g.Id == 1).CodigoCarrera.Should().Be("IMT");
+        result.Value.Single(g => g.Id == 2).CodigoCarrera.Should().BeNull();
     }
 
     [Test]

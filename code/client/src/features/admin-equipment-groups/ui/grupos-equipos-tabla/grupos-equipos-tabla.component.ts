@@ -7,6 +7,7 @@ import {
   AvisoEliminarComponent,
   BuscadorComponent,
   MostrarerrorComponent,
+  TextoExpandibleComponent,
 } from '@shared/ui';
 import {
   AdminTabsComponent,
@@ -34,6 +35,7 @@ import { GruposEquiposFormularioComponent } from '../grupos-equipos-formulario/g
     BuscadorComponent,
     EquiposInlineComponent,
     AuditPanelComponent,
+    TextoExpandibleComponent,
   ],
   templateUrl: './grupos-equipos-tabla.component.html',
   styleUrls: [
@@ -55,6 +57,7 @@ export class GruposEquiposTablaComponent
     'Modelo',
     'Marca',
     'Categoría',
+    'Carrera',
     'Préstamo máximo',
     'Descripción',
   ];
@@ -143,6 +146,10 @@ export class GruposEquiposTablaComponent
             return this.normalizeText(
               grupoequipo.nombreCategoria || '',
             ).includes(busquedaNormalizada);
+          case 'Carrera':
+            return this.normalizeText(grupoequipo.codigoCarrera || '').includes(
+              busquedaNormalizada,
+            );
           case 'Préstamo máximo':
             return this.normalizeText(
               String(grupoequipo.TiempoMaximoPrestamoDias),
@@ -166,6 +173,9 @@ export class GruposEquiposTablaComponent
                 busquedaNormalizada,
               ) ||
               this.normalizeText(grupoequipo.nombreCategoria || '').includes(
+                busquedaNormalizada,
+              ) ||
+              this.normalizeText(grupoequipo.codigoCarrera || '').includes(
                 busquedaNormalizada,
               ) ||
               this.normalizeText(
@@ -198,6 +208,7 @@ export class GruposEquiposTablaComponent
         Modelo: (grupoEquipo) => grupoEquipo.modelo,
         Marca: (grupoEquipo) => grupoEquipo.marca,
         Categoría: (grupoEquipo) => grupoEquipo.nombreCategoria,
+        Carrera: (grupoEquipo) => grupoEquipo.codigoCarrera,
         'Préstamo máximo': (grupoEquipo) =>
           grupoEquipo.TiempoMaximoPrestamoDias,
         Descripción: (grupoEquipo) => grupoEquipo.descripcion,

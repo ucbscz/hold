@@ -10,8 +10,6 @@ export class Equipos extends BaseModel {
   CostoReferencia: number | null = null;
   Descripcion: string | null = null;
   Procedencia: string | null = null;
-  IdCarrera?: number | null = null;
-  CodigoCarrera?: string | null = null;
   NombreGrupoEquipo: string | null = null;
   IdGrupoEquipo: number | null = null;
   Modelo?: string | null = null;

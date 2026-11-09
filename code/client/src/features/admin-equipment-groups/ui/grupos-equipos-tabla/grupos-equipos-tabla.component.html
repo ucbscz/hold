@@ -39,8 +39,14 @@
               <td>{{ grupoequipo.modelo }}</td>
               <td>{{ grupoequipo.marca }}</td>
               <td>{{ grupoequipo.nombreCategoria || "" }}</td>
+              <td>{{ grupoequipo.codigoCarrera || "" }}</td>
               <td>{{ grupoequipo.TiempoMaximoPrestamoDias }} días</td>
-              <td>{{ grupoequipo.descripcion }}</td>
+              <td>
+                <app-texto-expandible
+                  [texto]="grupoequipo.descripcion"
+                  [titulo]="grupoequipo.nombre"
+                />
+              </td>
               <td class="actions-column">
                 <button
                   class="expand-btn"
@@ -75,7 +81,7 @@
           }
           @if (gruposEquiposFiltrados.length === 0) {
             <tr>
-              <td colspan="8" class="empty-table">
+              <td colspan="9" class="empty-table">
                 <div class="empty-state">
                   <i class="fas fa-search fa-3x"></i>
                   <p>No se encontraron grupos de equipos</p>

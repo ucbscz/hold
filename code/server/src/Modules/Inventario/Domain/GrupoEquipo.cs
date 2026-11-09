@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations.Schema;
+using UCB_Hold.Server.Modules.Usuarios.Domain;
 using UCB_Hold.Server.Shared.Kernel;
 
 namespace UCB_Hold.Server.Modules.Inventario.Domain;
@@ -15,6 +16,8 @@ public class GrupoEquipo : Entity
     public int Cantidad { get; set; }
     public decimal? CostoPromedio { get; set; }
     public int TiempoMaximoPrestamoDias { get; set; } = 7;
+    public int? IdCarrera { get; set; }
+    public Carrera? Carrera { get; set; }
 
     [ForeignKey("IdCategoria")]
     public Categoria? Categoria { get; set; }

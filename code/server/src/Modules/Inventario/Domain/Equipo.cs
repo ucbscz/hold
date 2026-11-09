@@ -1,4 +1,3 @@
-using UCB_Hold.Server.Modules.Usuarios.Domain;
 using UCB_Hold.Server.Shared.Kernel;
 
 namespace UCB_Hold.Server.Modules.Inventario.Domain;
@@ -19,7 +18,5 @@ public class Equipo : Entity
     public string? Descripcion { get; set; }
     public int? IdProcedencia { get; set; }
     public Procedencia? Procedencia { get; set; }
-    public int? IdCarrera { get; set; }
-    public Carrera? Carrera { get; set; }
     public DateOnly FechaIngresoEquipo { get; set; }
 }

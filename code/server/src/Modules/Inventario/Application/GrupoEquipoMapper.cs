@@ -8,12 +8,13 @@ namespace UCB_Hold.Server.Modules.Inventario.Application;
 public partial class GrupoEquipoMapper : IMapper<GrupoEquipoEntity, GrupoEquipoDto>
 {
     [MapProperty("Categoria.Nombre", nameof(GrupoEquipoDto.NombreCategoria))]
-    [MapperIgnoreTarget(nameof(GrupoEquipoDto.CodigosCarrera))]
+    [MapProperty("Carrera.Codigo", nameof(GrupoEquipoDto.CodigoCarrera))]
     public partial GrupoEquipoDto ToDto(GrupoEquipoEntity entity);
 
     [MapperIgnoreTarget("Categoria")]
     [MapperIgnoreSource(nameof(GrupoEquipoDto.NombreCategoria))]
-    [MapperIgnoreSource(nameof(GrupoEquipoDto.CodigosCarrera))]
+    [MapperIgnoreTarget("Carrera")]
+    [MapperIgnoreSource(nameof(GrupoEquipoDto.CodigoCarrera))]
     public partial GrupoEquipoEntity ToEntity(GrupoEquipoDto dto);
 
     public partial IQueryable<GrupoEquipoDto> ProjectTo(IQueryable<GrupoEquipoEntity> source);
