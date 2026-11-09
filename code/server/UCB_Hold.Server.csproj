@@ -13,10 +13,10 @@
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="FluentValidation" Version="11.9.0" />
     <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
-    <PackageReference Include="HtmlSanitizer" Version="10.0.1120" />
+    <PackageReference Include="HtmlSanitizer" Version="11.0.26" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.33" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Relational" Version="8.0.33" />
-    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.11" />
     <PackageReference Include="Npgsql" Version="8.0.9" />
     <PackageReference Include="Riok.Mapperly" Version="4.3.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.9.0" />
@@ -27,7 +27,7 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="8.0.33" />
     <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="8.0.33" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
     <PackageReference Include="System.Text.Json" Version="8.0.6" />
     <PackageReference Include="Hangfire.AspNetCore" Version="1.8.24" />
     <PackageReference Include="Hangfire.PostgreSql" Version="1.20.13" />
