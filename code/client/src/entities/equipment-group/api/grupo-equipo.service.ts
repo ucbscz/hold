@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { environment } from '@shared/config';
-import { ApiResponse, extractApiValue } from '@shared/api';
+import { ApiResponse, CacheHttpStore, extractApiValue } from '@shared/api';
 import { finalize, map, Observable, of, shareReplay, tap } from 'rxjs';
 import {
   ComentarioEquipo,
@@ -56,9 +56,13 @@ export class GrupoequipoService {
     number,
     Observable<GrupoEquipo>
   >();
+  private versionCache = -1;
   paginaGuardada: number = 0;
   cantidadObjetosGuardada: number = 21;
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly cacheHttp: CacheHttpStore,
+  ) {}
 
   obtenerComponentes(id: number, pagina = 1) {
     return this.http
@@ -72,6 +76,15 @@ export class GrupoequipoService {
     this.cache.clear();
     this.cachePorId.clear();
     this.solicitudesPorId.clear();
+  }
+
+  private cacheVigente(): number {
+    if (this.versionCache !== this.cacheHttp.version) {
+      this.invalidarCache();
+      this.versionCache = this.cacheHttp.version;
+    }
+
+    return this.versionCache;
   }
 
   private mapearGrupoEquipo(item: GrupoEquipoApiItem): GrupoEquipo {
@@ -177,6 +190,7 @@ export class GrupoequipoService {
     const categoriaNormalizada = categoria.trim();
     const productoNormalizado = producto.trim();
     const cacheKey = `${productoNormalizado}|${categoriaNormalizada}`;
+    const version = this.cacheVigente();
     const cached = this.cache.get(cacheKey);
 
     if (cached) return of(cached);
@@ -195,6 +209,7 @@ export class GrupoequipoService {
         extractApiValue(data, []).map((item) => this.mapearGrupoEquipo(item)),
       ),
       tap((result) => {
+        if (version !== this.cacheHttp.version) return;
         this.cache.set(cacheKey, result);
         this.guardarGruposPorId(result);
       }),
@@ -203,6 +218,7 @@ export class GrupoequipoService {
 
   getproducto(id: string): Observable<GrupoEquipo> {
     const idNumerico = Number(id);
+    const version = this.cacheVigente();
     const cached = this.cachePorId.get(idNumerico);
     if (cached) return of({ ...cached });
 
@@ -215,6 +231,7 @@ export class GrupoequipoService {
         this.mapearGrupoEquipo(extractApiValue(data, this.grupoEquipoApiVacio)),
       ),
       tap((grupo) => {
+        if (version !== this.cacheHttp.version) return;
         if (grupo.id) this.cachePorId.set(grupo.id, { ...grupo });
       }),
       finalize(() => this.solicitudesPorId.delete(idNumerico)),

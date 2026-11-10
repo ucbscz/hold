@@ -1,5 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpContext } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { CONSULTA_SIN_CAMBIOS } from '@shared/api';
 import { environment } from '@shared/config';
 import { finalize, forkJoin, map, Observable, of, shareReplay } from 'rxjs';
 import { Disponibilidad } from '../model/disponibilidad';
@@ -82,16 +83,20 @@ export class DisponibilidadService {
             data?: DisponibilidadDiaApiItem[];
           }
         | DisponibilidadDiaApiItem[]
-      >(`${this.url}/calendario`, {
-        FechaInicio: fechaInicio.toISOString(),
-        FechaFin: fechaFin.toISOString(),
-        FechaDesde: fechaDesde.toISOString(),
-        FechaHasta: fechaHasta.toISOString(),
-        Grupos: grupos.map((grupo) => ({
-          IdGrupoEquipo: grupo.idGrupoEquipo,
-          Cantidad: grupo.cantidad,
-        })),
-      })
+      >(
+        `${this.url}/calendario`,
+        {
+          FechaInicio: fechaInicio.toISOString(),
+          FechaFin: fechaFin.toISOString(),
+          FechaDesde: fechaDesde.toISOString(),
+          FechaHasta: fechaHasta.toISOString(),
+          Grupos: grupos.map((grupo) => ({
+            IdGrupoEquipo: grupo.idGrupoEquipo,
+            Cantidad: grupo.cantidad,
+          })),
+        },
+        { context: this.consulta() },
+      )
       .pipe(
         map((response) => {
           const data = Array.isArray(response)
@@ -105,6 +110,10 @@ export class DisponibilidadService {
       );
   }
 
+  private consulta(): HttpContext {
+    return new HttpContext().set(CONSULTA_SIN_CAMBIOS, true);
+  }
+
   private fechaLocal(fecha: string): Date {
     const [year, month, day] = fecha.slice(0, 10).split('-').map(Number);
     return new Date(year, month - 1, day);
@@ -116,11 +125,15 @@ export class DisponibilidadService {
     ids: number[],
   ): Observable<Disponibilidad[]> {
     return this.http
-      .post<DisponibilidadApiResponse | DisponibilidadApiItem[]>(this.url, {
-        FechaInicio: fechaInicio,
-        FechaFin: fechaFin,
-        ArrayIds: ids,
-      })
+      .post<DisponibilidadApiResponse | DisponibilidadApiItem[]>(
+        this.url,
+        {
+          FechaInicio: fechaInicio,
+          FechaFin: fechaFin,
+          ArrayIds: ids,
+        },
+        { context: this.consulta() },
+      )
       .pipe(
         map((response) => {
           const data = Array.isArray(response)
