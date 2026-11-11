@@ -24,7 +24,7 @@
     "logo": "brand/logo.png",
     "favicon": "brand/favicon.ico",
     "socialCover": "brand/social-cover.jpg",
-    "socialCoverVersion": "3",
+    "socialCoverVersion": "4",
     "contractTemplate": "brand/contrato.html"
   },
   "fonts": {
