@@ -1,8 +1,10 @@
 {
   "productName": "UCB Hold",
   "tagline": "Préstamo de equipos institucionales",
-  "description": "Plataforma para consultar, reservar y gestionar equipos institucionales de UCB Santa Cruz.",
-  "socialDescription": "Consulta, reserva y gestiona equipos institucionales de UCB Santa Cruz.",
+  "description": "Consulta, reserva y gestiona préstamos de equipos y laboratorios institucionales de forma rápida en la Universidad Católica Boliviana Sede Santa Cruz.",
+  "socialDescription": "Consulta, reserva y gestiona préstamos de equipos y laboratorios institucionales de forma rápida en la Universidad Católica Boliviana Sede Santa Cruz.",
+  "author": "Josue Balbontin, Alejandro Ramirez, Fernando Terrazas",
+  "publishedTime": "2026-11-11T00:00:00Z",
   "siteUrl": "https://ucbhold.dev",
   "themeColor": "#ffffff",
   "organization": {
@@ -21,7 +23,8 @@
   "assets": {
     "logo": "brand/logo.png",
     "favicon": "brand/favicon.ico",
-    "socialCover": "brand/portada.jpg",
+    "socialCover": "brand/social-cover.jpg",
+    "socialCoverVersion": "3",
     "contractTemplate": "brand/contrato.html"
   },
   "fonts": {
