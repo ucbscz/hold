@@ -53,10 +53,24 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <link rel="icon" type="image/x-icon" href="{{ assets.favicon }}" />
-    <link rel="apple-touch-icon" href="{{ assets.logo }}" />
+    <link
+      rel="icon"
+      type="image/png"
+      sizes="192x192"
+      href="{{ assets.icon }}"
+    />
+    <link rel="apple-touch-icon" href="{{ assets.appleTouchIcon }}" />
     <link rel="preconnect" href="{{ fonts.styleOrigin }}" />
     <link rel="preconnect" href="{{ fonts.fileOrigin }}" crossorigin />
     <link href="{{ fonts.stylesheet }}" rel="stylesheet" />
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "{{ productName }}",
+        "url": "{{ siteUrl }}/"
+      }
+    </script>
   </head>
   <body>
     <app-root></app-root>

@@ -23,6 +23,8 @@
   "assets": {
     "logo": "brand/logo.png",
     "favicon": "brand/favicon.ico",
+    "icon": "brand/icon-192.png",
+    "appleTouchIcon": "brand/apple-touch-icon.png",
     "socialCover": "brand/social-cover.jpg",
     "socialCoverVersion": "4",
     "contractTemplate": "brand/contrato.html"
