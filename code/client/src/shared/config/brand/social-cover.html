@@ -3,18 +3,57 @@
   <head>
     <meta charset="utf-8" />
     <title>Tarjeta institucional</title>
-    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@800&display=swap" rel="stylesheet" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@800&display=swap"
+      rel="stylesheet"
+    />
     <style>
-      body { position: relative; margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #00457b; font-family: "Manrope", sans-serif; }
-      svg { position: absolute; inset: 0; }
-      h1 { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding-bottom: 8px; color: #fff; font-size: 136px; font-weight: 800; letter-spacing: -0.045em; text-shadow: 0 2px 24px rgba(2, 27, 54, 0.35); }
+      body {
+        position: relative;
+        margin: 0;
+        width: 1200px;
+        height: 630px;
+        overflow: hidden;
+        background: #00457b;
+        font-family: "Manrope", sans-serif;
+      }
+      svg {
+        position: absolute;
+        inset: 0;
+      }
+      h1 {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+        margin: 0;
+        padding-bottom: 8px;
+        color: #fff;
+        font-size: 136px;
+        font-weight: 800;
+        letter-spacing: -0.045em;
+        text-shadow: 0 2px 24px rgba(2, 27, 54, 0.35);
+      }
     </style>
   </head>
   <body>
     <svg viewBox="0 0 1200 630" aria-hidden="true">
       <defs>
-        <filter id="b" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="75" /><feColorMatrix type="saturate" values="1.6" /></filter>
-        <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" /><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0" /></filter>
+        <filter id="b" x="-100%" y="-100%" width="300%" height="300%">
+          <feGaussianBlur stdDeviation="75" />
+          <feColorMatrix type="saturate" values="1.6" />
+        </filter>
+        <filter id="grain">
+          <feTurbulence
+            type="fractalNoise"
+            baseFrequency="0.85"
+            numOctaves="2"
+            stitchTiles="stitch"
+          />
+          <feColorMatrix
+            values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0"
+          />
+        </filter>
       </defs>
       <g filter="url(#b)">
         <rect x="-300" y="-300" width="1800" height="1230" fill="#00457b" />
