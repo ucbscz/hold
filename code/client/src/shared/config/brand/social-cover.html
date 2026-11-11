@@ -3,113 +3,38 @@
   <head>
     <meta charset="utf-8" />
     <title>Tarjeta institucional</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@800&display=swap"
-      rel="stylesheet"
-    />
+    <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@800&display=swap" rel="stylesheet" />
     <style>
-      body {
-        position: relative;
-        margin: 0;
-        width: 1200px;
-        height: 630px;
-        overflow: hidden;
-        background: #00457b;
-        font-family: "Manrope", sans-serif;
-      }
-      svg {
-        position: absolute;
-        inset: 0;
-      }
-      h1 {
-        position: absolute;
-        inset: 0;
-        display: grid;
-        place-items: center;
-        margin: 0;
-        padding-bottom: 8px;
-        color: #fff;
-        font-size: 136px;
-        font-weight: 800;
-        letter-spacing: -0.045em;
-        font-feature-settings: "ss01";
-      }
+      body { position: relative; margin: 0; width: 1200px; height: 630px; overflow: hidden; background: #00457b; font-family: "Manrope", sans-serif; }
+      svg { position: absolute; inset: 0; }
+      h1 { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding-bottom: 8px; color: #fff; font-size: 136px; font-weight: 800; letter-spacing: -0.045em; text-shadow: 0 2px 24px rgba(2, 27, 54, 0.35); }
     </style>
   </head>
   <body>
     <svg viewBox="0 0 1200 630" aria-hidden="true">
       <defs>
-        <filter id="b0" x="-60%" y="-90%" width="220%" height="280%">
-          <feGaussianBlur stdDeviation="110" />
-        </filter>
-        <filter id="b1" x="-40%" y="-60%" width="180%" height="220%">
-          <feGaussianBlur stdDeviation="70" />
-        </filter>
-        <filter id="b2" x="-40%" y="-60%" width="180%" height="220%">
-          <feGaussianBlur stdDeviation="26" />
-        </filter>
-        <filter id="b3" x="-40%" y="-60%" width="180%" height="220%">
-          <feGaussianBlur stdDeviation="10" />
-        </filter>
-        <filter id="grain">
-          <feTurbulence
-            type="fractalNoise"
-            baseFrequency="0.85"
-            numOctaves="2"
-            stitchTiles="stitch"
-          />
-          <feColorMatrix
-            values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0"
-          />
-        </filter>
+        <filter id="b" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="75" /><feColorMatrix type="saturate" values="1.6" /></filter>
+        <filter id="grain"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch" /><feColorMatrix values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.55 0" /></filter>
       </defs>
-      <g filter="url(#b1)">
-        <ellipse cx="1000" cy="520" rx="560" ry="260" fill="#04203f" />
-        <ellipse cx="760" cy="40" rx="460" ry="200" fill="#2f7fd6" />
-        <ellipse cx="1150" cy="80" rx="300" ry="200" fill="#8fc3ef" />
+      <g filter="url(#b)">
+        <rect x="-300" y="-300" width="1800" height="1230" fill="#00457b" />
+        <ellipse cx="300" cy="120" rx="250" ry="200" fill="#ffffff" />
+        <ellipse cx="60" cy="30" rx="320" ry="200" fill="#ffd700" />
+        <ellipse cx="300" cy="-40" rx="200" ry="150" fill="#fff4b8" />
+        <ellipse cx="430" cy="40" rx="160" ry="130" fill="#cfe6ff" />
+        <ellipse cx="620" cy="-30" rx="260" ry="150" fill="#1a73e8" />
+        <ellipse cx="1050" cy="60" rx="300" ry="180" fill="#5cb8ff" />
+        <ellipse cx="1180" cy="-20" rx="160" ry="120" fill="#fff4b8" />
+        <ellipse cx="960" cy="480" rx="230" ry="170" fill="#ffffff" />
+        <ellipse cx="1190" cy="570" rx="340" ry="190" fill="#ffd700" />
+        <ellipse cx="1000" cy="660" rx="200" ry="120" fill="#ffd700" />
+        <ellipse cx="880" cy="520" rx="170" ry="120" fill="#cfe6ff" />
+        <ellipse cx="720" cy="600" rx="220" ry="120" fill="#1a73e8" />
+        <ellipse cx="160" cy="560" rx="380" ry="200" fill="#04203f" />
+        <ellipse cx="590" cy="320" rx="430" ry="150" fill="#0a4c9a" />
+        <ellipse cx="-40" cy="300" rx="160" ry="160" fill="#1766d6" />
       </g>
-      <g filter="url(#b0)">
-        <ellipse cx="220" cy="580" rx="460" ry="240" fill="#0a3466" />
-      </g>
-      <g filter="url(#b2)">
-        <path
-          d="M480 -160 C 380 20, 200 170, -180 330"
-          fill="none"
-          stroke="#ffffff"
-          stroke-width="120"
-          stroke-opacity="0.92"
-          stroke-linecap="round"
-        />
-        <path
-          d="M430 -160 C 335 10, 170 150, -190 300"
-          fill="none"
-          stroke="#fff4b8"
-          stroke-width="70"
-          stroke-linecap="round"
-        />
-        <path
-          d="M-200 -200 L 380 -200 C 300 -30, 140 110, -200 250 Z"
-          fill="#ffd700"
-        />
-        <ellipse cx="40" cy="20" rx="200" ry="120" fill="#ffe766" />
-      </g>
-      <g filter="url(#b3)" fill="none" stroke-linecap="round">
-        <path
-          d="M505 -160 C 405 25, 225 180, -170 345"
-          stroke="#ffffff"
-          stroke-width="6"
-          stroke-opacity="0.7"
-        />
-      </g>
-      <g filter="url(#b2)" fill="none" stroke-linecap="round">
-        <path
-          d="M1400 -40 C 1100 140, 800 160, 520 -60"
-          stroke="#cfe6ff"
-          stroke-width="40"
-          stroke-opacity="0.5"
-        />
-      </g>
-      <rect width="1200" height="630" filter="url(#grain)" opacity="0.045" />
+      <rect width="1200" height="630" filter="url(#grain)" opacity="0.07" />
     </svg>
     <h1>UCB Hold</h1>
   </body>
