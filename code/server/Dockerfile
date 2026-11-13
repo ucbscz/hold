@@ -6,7 +6,7 @@ COPY src/ ./src/
 COPY appsettings.json ./
 RUN dotnet publish "UCB_Hold.Server.csproj" -c Release -o /app/publish --no-restore /p:UseAppHost=false
 
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:11.0
 ENV ASPNETCORE_HTTP_PORTS=8080
 WORKDIR /app
 COPY --from=build /app/publish .
