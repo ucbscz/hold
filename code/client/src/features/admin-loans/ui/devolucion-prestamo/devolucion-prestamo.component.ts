@@ -2,6 +2,7 @@ import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PrestamoDto } from '@entities/loan';
 import { ESTADO_EQUIPO_OPCIONES } from '@entities/equipment';
+import { INVENTORY_LABELS } from '@shared/config';
 import { CustomSelectComponent } from '@shared/ui';
 
 export interface DevolucionPrestamo {
@@ -19,6 +20,7 @@ export interface DevolucionPrestamo {
 })
 export class DevolucionPrestamoComponent implements OnInit {
   @Input() equipos: PrestamoDto[] = [];
+  protected readonly etiquetas = INVENTORY_LABELS;
   @Output() cancelar = new EventEmitter<void>();
   @Output() devolver = new EventEmitter<DevolucionPrestamo>();
 

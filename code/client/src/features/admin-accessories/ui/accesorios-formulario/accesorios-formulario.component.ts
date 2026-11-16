@@ -6,6 +6,7 @@ import {
   FormularioAdminEnvioComponent,
   FormularioAdminMarcoComponent,
 } from '@shared/lib/admin-form';
+import { INVENTORY_LABELS } from '@shared/config';
 import { ValidatedFormsModule } from '@shared/lib/forms';
 import { CustomSelectComponent, OpcionSelect } from '@shared/ui';
 
@@ -26,6 +27,7 @@ export class AccesoriosFormularioComponent
 {
   private readonly servicio = inject(AccesoriosService);
   private readonly equipoService = inject(EquipoService);
+  protected readonly etiquetas = INVENTORY_LABELS;
   protected readonly entidad = { nombre: 'accesorio' };
   equipos: Equipos[] = [];
 

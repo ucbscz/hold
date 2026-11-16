@@ -57,7 +57,12 @@ import {
                         {{ p.CodigoImt || 'No asignado' }}</span
                       >
                       @if (p.CodigoUcb) {
-                        <span><strong>UCB</strong> {{ p.CodigoUcb }}</span>
+                        <span
+                          ><strong>{{
+                            inventario.organizationCodeLabel
+                          }}</strong>
+                          {{ p.CodigoUcb }}</span
+                        >
                       }
                       @if (p.NumeroSerial) {
                         <span><strong>Serie</strong> {{ p.NumeroSerial }}</span>

@@ -67,7 +67,10 @@
                     {{ prestamo.CodigoImt || "No asignado" }}</span
                   >
                   @if (prestamo.CodigoUcb) {
-                    <span><strong>UCB</strong> {{ prestamo.CodigoUcb }}</span>
+                    <span
+                      ><strong>{{ inventario.organizationCodeLabel }}</strong>
+                      {{ prestamo.CodigoUcb }}</span
+                    >
                   }
                   @if (prestamo.NumeroSerial) {
                     <span

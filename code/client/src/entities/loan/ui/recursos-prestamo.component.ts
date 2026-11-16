@@ -2,6 +2,7 @@ import { Component, Input, signal } from '@angular/core';
 import { PrestamoDto } from '../model/prestamo';
 import { VercontratoComponent } from './contrato/vercontrato.component';
 import { PrestamosAPIService } from '../api/prestamos-api.service';
+import { BRAND } from '@shared/config';
 import { ToastService } from '@shared/ui';
 
 @Component({
@@ -64,10 +65,16 @@ import { ToastService } from '@shared/ui';
             <h3>
               {{ equipo.NombreGrupoEquipo }}
               @if (equipo.CodigoImt) {
-                <span>IMT {{ equipo.CodigoImt }}</span>
+                <span
+                  >{{ inventario.internalCodeLabel }}
+                  {{ equipo.CodigoImt }}</span
+                >
               }
               @if (equipo.CodigoUcb) {
-                <span>UCB {{ equipo.CodigoUcb }}</span>
+                <span
+                  >{{ inventario.organizationCodeLabel }}
+                  {{ equipo.CodigoUcb }}</span
+                >
               }
               @if (equipo.NumeroSerial) {
                 <span>Serie {{ equipo.NumeroSerial }}</span>
@@ -194,6 +201,7 @@ import { ToastService } from '@shared/ui';
 })
 export class RecursosPrestamoComponent {
   @Input() prestamos: PrestamoDto[] = [];
+  protected readonly inventario = BRAND.inventory;
   readonly contratoVisible = signal(false);
   readonly actualizandoGuardado = signal(false);
 

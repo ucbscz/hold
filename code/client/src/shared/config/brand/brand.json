@@ -17,7 +17,8 @@
   "inventory": {
     "internalCodeLabel": "IMT",
     "organizationCodeLabel": "UCB",
-    "ownerName": "IMT"
+    "ownerName": "IMT",
+    "equipmentScope": "equipos de mecatrónica"
   },
   "institutionalEmailDomain": "ucb.edu.bo",
   "assets": {

@@ -144,7 +144,9 @@ Additional catalog routes:
 
 `GET /api/usuarios`, `GET /api/prestamos` and `GET /api/equipos` accept `pagina` (from 1) and `tamanoPagina` (1 to 500, default 500). Clients request the next page while the current one is full; loan pages count distinct loans, so a page can contain more rows than loans.
 
-Equipment group payloads expose `TiempoMaximoPrestamoDias` (1 to 365). This group-level value applies to every physical unit in the group and is required for create and update operations.
+Equipment group payloads expose `TiempoMaximoPrestamoDias` (1 to 365). This group-level value applies to every physical unit in the group and is required for create and update operations. Groups accept an optional `IdCarrera` that must reference an existing career, and read payloads return its `CodigoCarrera`.
+
+Career payloads are `{ "Id": 1, "Nombre": "...", "Codigo": "IMT" }`. `Codigo` is required, has 2 to 10 uppercase letters or digits, and is unique among active careers. `GET /api/carreras` is public so registration can list careers.
 
 `POST /api/grupos/importar` accepts `{ "Url": "https://..." }` and never persists data. It extracts JSON-LD Product or OpenGraph metadata into a preview that the administrator must review and submit through the regular group endpoint. Requests reject credentials, non-HTTPS URLs, nonstandard ports, local/private/reserved addresses and unsafe redirects; DNS is revalidated at connection time, redirects are limited to three, the timeout is eight seconds, and the response is limited to one megabyte of HTML.
 

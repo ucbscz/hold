@@ -5,6 +5,7 @@ import {
   FormularioAdminEnvioComponent,
   FormularioAdminMarcoComponent,
 } from '@shared/lib/admin-form';
+import { INVENTORY_LABELS } from '@shared/config';
 import { ValidatedFormsModule } from '@shared/lib/forms';
 
 @Component({
@@ -19,6 +20,7 @@ import { ValidatedFormsModule } from '@shared/lib/forms';
 })
 export class CarrerasFormularioComponent extends FormularioAdminComponent<Carrera> {
   private readonly servicio = inject(CarreraService);
+  protected readonly etiquetas = INVENTORY_LABELS;
   protected readonly entidad = { nombre: 'carrera', femenino: true };
 
   protected crearModelo(): Carrera {

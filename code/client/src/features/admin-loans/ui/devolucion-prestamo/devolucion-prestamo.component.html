@@ -21,7 +21,9 @@
               <span class="devuelto-equipo-nombre">{{
                 eq.NombreGrupoEquipo
               }}</span>
-              <span class="devuelto-equipo-codigo">IMT {{ eq.CodigoImt }}</span>
+              <span class="devuelto-equipo-codigo">{{
+                etiquetas.internalCodeOf(eq.CodigoImt ?? "")
+              }}</span>
             </div>
             <app-custom-select
               class="devuelto-equipo-select"

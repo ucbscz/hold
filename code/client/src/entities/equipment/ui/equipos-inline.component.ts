@@ -54,7 +54,11 @@ import {
               @for (e of itemsFiltrados; track e.Id || e.CodigoImt || $index) {
                 <tr>
                   <td>
-                    <strong>IMT-{{ e.CodigoImt }}</strong>
+                    <strong
+                      >{{ etiquetas.internalCodeLabel }}-{{
+                        e.CodigoImt
+                      }}</strong
+                    >
                   </td>
                   <td>
                     <span

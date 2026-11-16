@@ -18,6 +18,7 @@ import {
 } from '@entities/equipment-group';
 import { Subscription, finalize } from 'rxjs';
 import { ImageCacheService } from '@shared/lib/image/image-cache.service';
+import { INVENTORY_LABELS } from '@shared/config';
 import { EquipmentImagePlaceholderComponent } from '@shared/ui';
 
 @Component({
@@ -87,7 +88,9 @@ import { EquipmentImagePlaceholderComponent } from '@shared/ui';
             <summary>
               {{ c.Nombre }}
               <span>{{
-                c.CodigoImtEquipo ? 'IMT ' + c.CodigoImtEquipo : ''
+                c.CodigoImtEquipo
+                  ? etiquetas.internalCodeOf(c.CodigoImtEquipo)
+                  : ''
               }}</span>
             </summary>
             <p>{{ c.Modelo }} · {{ c.Tipo }}</p>
@@ -254,6 +257,7 @@ export class InspeccionEquipoComponent
   implements OnInit, AfterViewInit, OnDestroy
 {
   @Input({ required: true }) grupoId!: number;
+  protected readonly etiquetas = INVENTORY_LABELS;
   @Output() cerrar = new EventEmitter<void>();
   @ViewChild('modal') modal!: ElementRef<HTMLDialogElement>;
   private readonly api = inject(GrupoequipoService);

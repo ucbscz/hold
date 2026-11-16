@@ -42,6 +42,7 @@ import {
   FlatpickrDirective,
   StickyScrollDirective,
 } from '@shared/lib/directives';
+import { INVENTORY_LABELS } from '@shared/config';
 import { extractErrorMessage } from '@shared/lib/error';
 import { AuditPanelComponent } from '@entities/audit-log';
 import { finalize, Observable } from 'rxjs';
@@ -98,6 +99,7 @@ import {
   ],
 })
 export class PrestamosTablaComponent extends Tabla implements OnInit {
+  protected readonly etiquetas = INVENTORY_LABELS;
   private readonly toast = inject(ToastService);
   private readonly prestamosapi = inject(PrestamosAPIService);
   private readonly usuarioapi = inject(UsuarioServiceAPI);

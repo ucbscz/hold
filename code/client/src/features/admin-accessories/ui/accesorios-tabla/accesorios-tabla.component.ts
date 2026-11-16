@@ -42,6 +42,7 @@ import { AccesoriosFormularioComponent } from '../accesorios-formulario/accesori
   ],
 })
 export class AccesoriosTablaComponent extends TablaGestion {
+  protected readonly etiquetas = INVENTORY_LABELS;
   accesorios: Accesorio[] = [];
   accesorioscopia: Accesorio[] = [];
   accesorioSeleccionado: Accesorio = new Accesorio();
