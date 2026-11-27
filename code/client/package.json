@@ -26,7 +26,7 @@
     "@fortawesome/fontawesome-free": "^7.2.0",
     "flatpickr": "^4.6.13",
     "rxjs": "~7.8.0",
-    "signature_pad": "^5.0.7",
+    "signature_pad": "^5.1.7",
     "ts-results-es": "^7.0.0",
     "tslib": "^2.9.1",
     "zone.js": "~0.15.0"
