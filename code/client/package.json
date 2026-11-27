@@ -32,8 +32,8 @@
     "zone.js": "~0.15.0"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "21.2.30",
-    "@angular/cli": "21.2.30",
+    "@angular-devkit/build-angular": "21.2.31",
+    "@angular/cli": "21.2.31",
     "@angular/compiler-cli": "21.2.26",
     "@emnapi/core": "1.11.3",
     "@emnapi/runtime": "1.11.3",
